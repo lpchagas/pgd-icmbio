@@ -1,6 +1,6 @@
 # AT-01 — Análise da estrutura de dados do PETRVS e proposta de esquema MySQL para o modelo comum de dados
 
-**Versão:** 1.0 (para aprovação) | **Data:** 26.07.2026
+**Versão:** 1.0 — **APROVADO em 26.07.2026** (decisões D1–D4 conforme recomendado; ver ADR-006) | **Data:** 26.07.2026
 **Série:** AT (Tecnologia) — governança de artefatos da proposta v3, §5.1
 **Insumo para:** `proposta-projeto-v4.md` (revisão das decisões de persistência da v3, §3.2–3.3)
 **Fontes:** introspecção JDBC do banco `petrvs_icmbio` via Denodo (documentada em
@@ -565,7 +565,7 @@ consegue sobrescrever histórico.
 | --- | --- |
 | §3.2 — "persistência em SQLite local" | MySQL 8 Community local (sem Docker); `schema.sql` v1 = §5 deste documento |
 | §3.3 — tabela de stack, linha "Persistência" | Atualizar recomendação + justificativa (paridade com PETRVS); registrar ADR de reversão da decisão SQLite |
-| §6.2 — I0, entregável T | "`schema.sql` v1 do modelo comum **em MySQL** (18 tabelas: 6 entidades do `03` §5 + versões + governança + espelhos `ref_*`); serviço de IDs/versões com triggers de imutabilidade; rotina `sincronizar_ref.py`" |
+| §6.2 — I0, entregável T | "`schema.sql` v1 do modelo comum **em MySQL** (21 tabelas: 6 entidades do `03` §5 + versões + governança + espelhos `ref_*`); serviço de IDs/versões com triggers de imutabilidade; rotina `sincronizar_ref.py`" |
 | §7 — estrutura do repositório | `data/pgd_agente.db` → instância MySQL local; `.gitignore` cobre dumps (`*.sql` de dados) e `.env` com credenciais do MySQL |
 | §10 — riscos | RP13 (perda de IDs/histórico) ganha mitigação mais forte (trigger §6.3); acrescentar risco novo: indisponibilidade do serviço MySQL local (mitigação: `mysqldump` diário + script de reinstalação documentado) |
 | §11 — governança de dados | Explicitar política do espelho `ref_usuarios` (campos mínimos, sem CPF) |
