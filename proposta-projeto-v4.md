@@ -132,7 +132,7 @@ questões D1–D4 levantadas pelo AT-01 foram **respondidas e encerradas** em 26
 | Q5 | Quais documentos oficiais do ICMBio alimentarão o S01 (portarias, INs, regimento, cadeia de valor)? | Conteúdo do perfil institucional; viabilidade do S02 | Antes do Incremento I2 |
 | Q6 | O projeto terá dimensão acadêmica formal (padrão-ouro com 2 especialistas, condições experimentais A/B/C)? | Profundidade do plano de avaliação (Seção 9.4) | Antes do Incremento I6 |
 | Q7 | Haverá reforço de equipe técnica (bolsista UFRN, TI, consultoria) em algum incremento? | Recalibragem dos prazos da Seção 6 | Revisão a cada checkpoint |
-| Q8 *(nova)* | Qual é a unidade-piloto? | Escopo do espelho `ref_usuarios` (D2) e dados de capacidade do I5 | Antes do Incremento I0 concluir a sincronização |
+| Q8 *(nova)* | Qual é a unidade-piloto? | Escopo do espelho `ref_usuarios` (D2) e dados de capacidade do I5 | **Respondida em 26.07.2026: CGOV e COCAGE** são as unidades-piloto |
 
 ---
 
