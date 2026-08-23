@@ -4,9 +4,13 @@ Agente de apoio ao Plano de Gestão de Desempenho (PGD) do ICMBio: conhecimento
 institucional (RAG), consulta de indicadores reais do PETRVS via Denodo e skills
 executáveis (S01–S10) para montagem e auditoria de portfólio, capacidade e estratégia.
 
-Documento normativo do projeto: [`proposta-projeto-v4.md`](proposta-projeto-v4.md).
+Documento normativo do projeto: [`proposta-projeto-v5.md`](proposta-projeto-v5.md) — substitui
+a [`proposta-projeto-v4.md`](proposta-projeto-v4.md) (histórico) e amplia o escopo com a Fase 2
+(skills S21–S24 de execução e avaliação; anexo [`skills/05_plano-skills-execucao-avaliacao_v1.md`](skills/05_plano-skills-execucao-avaliacao_v1.md)),
+que só inicia após o Incremento I2. O MVP corrente (S01–S10, I0–I7) não muda.
 Análise técnica do esquema de dados: [`docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md`](docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md).
-Decisões arquiteturais: [`docs/gestao/decisoes/`](docs/gestao/decisoes/) (ADR-001 a ADR-006).
+Decisões arquiteturais: [`docs/gestao/decisoes/`](docs/gestao/decisoes/) (ADR-001 a ADR-006;
+ADR-007, que formaliza as decisões da v5, ainda não foi registrado).
 
 ## Pré-requisitos
 
@@ -26,7 +30,9 @@ mysql -u <usuario> -p < src\dados\schema.sql
 
 O `schema.sql` cria o banco `pgd_agente` (21 tabelas + 6 triggers de imutabilidade —
 UPDATE/DELETE em versões históricas e em `execucoes_skill` são rejeitados pelo próprio
-banco).
+banco). **Este é o estado atual do banco** (migração `001`); a migração `002` (12 tabelas
+novas, 33 no total, e 8 triggers adicionais, 14 no total), necessária para a Fase 2
+(S21–S24), é estado-alvo da v5 e ainda não foi aplicada.
 
 ## Estrutura do repositório
 
@@ -44,8 +50,8 @@ skills/             Metodologia PGD/OCDE (B01-B04) e specs das skills (S01-S10)
 data/backups/       Dumps mysqldump (ignorado pelo Git)
 ```
 
-Estrutura completa alvo (todos os incrementos I0–I7): ver Seção 7 de
-[`proposta-projeto-v4.md`](proposta-projeto-v4.md).
+Estrutura completa alvo (todos os incrementos I0–I7, mais a Fase 2 E0–E7): ver Seção 3 de
+[`proposta-projeto-v5.md`](proposta-projeto-v5.md).
 
 ## Verificação do ambiente (smoke test)
 

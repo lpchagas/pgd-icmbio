@@ -6,6 +6,7 @@ __pycache__/
 data/vectorstore/
 data/backups/
 data/config-institucional/
+testes_cgov/
 *.dump.sql
 *.ipynb_checkpoints/
 .pytest_cache/
