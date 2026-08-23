@@ -1,5 +1,9 @@
 # Referência técnica — projeto `pgd-ocde-icmbio`
 
+**Última revisão de escopo:** 23.08.2026
+**Classificação:** referência técnica de integração; não integra a decisão Q5 sobre fontes
+institucionais do PGD
+
 Este documento sintetiza, para uso no `pgd-agente-icmbio`, os padrões relevantes já validados no
 projeto de indicadores `pgd-ocde-icmbio` (`C:\Projetos\pgd-ocde-icmbio`, tratado como referência
 somente leitura). Cada informação abaixo cita o arquivo de origem. **Nenhuma credencial, senha,
@@ -7,6 +11,10 @@ host real ou string de conexão foi copiada** — apenas nomes de variáveis de 
 código. As credenciais reais do projeto antigo residem exclusivamente no seu `CLAUDE.md` (arquivo
 gitignored, não replicado aqui); o `pgd-agente-icmbio` deve configurar as suas próprias via `.env`
 local, seguindo o mesmo padrão de nomes.
+
+Para normas, guias e orientações de negócio, use o catálogo em
+[`referencias-pgd/README.md`](../referencias-pgd/README.md). Para a decisão de cadastro e RAG,
+use [`gestao/fontes-institucionais.md`](../gestao/fontes-institucionais.md).
 
 ---
 
