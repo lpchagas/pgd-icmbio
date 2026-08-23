@@ -406,7 +406,7 @@ mensagem:
 Documento gerado a partir do projeto `pgd-agente-icmbio` (ICMBio), com base em: `skills/00_*.md`
 (B01–B04), `skills/02_matriz-desenvolvimento-skills_v2.md`, `skills/03_especificacao-funcional-
 skills_v2.md`, `skills/04_backlog-mvp-skills_v2.md`, `skills/05_plano-skills-execucao-
-avaliacao_v1.md`, `proposta-projeto-v4.md`, `docs/referencia-pgd-ocde-icmbio.md` e
+avaliacao_v1.md`, `proposta-projeto-v4.md`, `docs/tecnologia/referencia-pgd-ocde-icmbio.md` e
 `docs/gestao/decisoes/ADR-002` e `ADR-006`.
 
 Para atualizar: revisar esta versão sempre que a metodologia do PGD, a IN nº 24/2023 ou os

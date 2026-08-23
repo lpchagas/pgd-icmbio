@@ -39,3 +39,12 @@ para reduzir alucinação e permitir citação de fonte nas respostas do agente.
 - A v3 confirma que a stack "permanece válida" — apenas amplia o escopo do que é indexado
   (perfil institucional do S01), sem trocar a tecnologia.
 - Implementação prevista em `src/rag/rag.py` (Incremento I2).
+
+## Nota operacional — auditoria do acervo em 23.08.2026
+
+A stack permanece vigente, mas “documentos oficiais” não significa indexar toda a pasta.
+O acervo passou a ter 55 conteúdos únicos, incluindo duplicatas físicas, normas alteradas,
+manuais dependentes de versão, transcrições com nomes e evidências individuais. A allowlist,
+as camadas de autoridade, o saneamento e as exclusões obrigatórias estão definidos em
+[`../fontes-institucionais.md`](../fontes-institucionais.md). I03 bruto, P01–P08,
+R01–R09 e C02 ficam fora do RAG; normas em PDF de imagem exigem OCR revisado.

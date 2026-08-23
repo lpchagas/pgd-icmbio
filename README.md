@@ -1,6 +1,6 @@
 # pgd-agente-icmbio
 
-Agente de apoio ao Plano de Gestão de Desempenho (PGD) do ICMBio: conhecimento
+Agente de apoio ao Programa de Gestão e Desempenho (PGD) do ICMBio: conhecimento
 institucional (RAG), consulta de indicadores reais do PETRVS via Denodo e skills
 executáveis (S01–S10) para montagem e auditoria de portfólio, capacidade e estratégia.
 
@@ -44,7 +44,9 @@ src/dados/       Camada de dados do modelo comum (Incremento I0)
   sincronizar_ref.py Espelhos ref_unidades/ref_usuarios (Denodo → MySQL local)
   backup.ps1        mysqldump diário (agendado via Tarefas do Windows)
 docs/
-  gestao/           ADRs, matriz de riscos (riscos.md), atas
+  README.md         Índice e estado dos artefatos documentais
+  gestao/           ADRs, fontes institucionais, glossário, validação, riscos e atas
+  referencias-pgd/  Acervo local; somente o índice é versionado
   tecnologia/       Análises técnicas (AT-xx)
 skills/             Metodologia PGD/OCDE (B01-B04) e specs das skills (S01-S10)
 data/backups/       Dumps mysqldump (ignorado pelo Git)
@@ -52,6 +54,18 @@ data/backups/       Dumps mysqldump (ignorado pelo Git)
 
 Estrutura completa alvo (todos os incrementos I0–I7, mais a Fase 2 E0–E7): ver Seção 3 de
 [`proposta-projeto-v5.md`](proposta-projeto-v5.md).
+
+## Documentação e fontes do PGD
+
+O ponto de entrada da documentação é [`docs/README.md`](docs/README.md). A auditoria do
+acervo em 23.08.2026 identificou 60 artefatos físicos e 55 conteúdos únicos. O inventário,
+as duplicidades e as restrições de acesso estão em
+[`docs/referencias-pgd/README.md`](docs/referencias-pgd/README.md); a proposta de cadastro,
+camadas do RAG e condições para a decisão Q5 estão em
+[`docs/gestao/fontes-institucionais.md`](docs/gestao/fontes-institucionais.md).
+
+A revisão documental **não encerra a Q5**. A aprovação fonte a fonte, a validação do
+glossário e do modelo comum e a ata real dos analistas continuam pendentes no I0.
 
 ## Verificação do ambiente (smoke test)
 

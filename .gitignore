@@ -10,3 +10,5 @@ testes_cgov/
 *.dump.sql
 *.ipynb_checkpoints/
 .pytest_cache/
+docs/referencias-pgd/**
+!docs/referencias-pgd/README.md

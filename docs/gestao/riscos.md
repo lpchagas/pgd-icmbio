@@ -1,5 +1,7 @@
 # Matriz de riscos — pgd-agente-icmbio
 
+**Última revisão de status:** 23.08.2026
+
 > Extraída da Seção 10 ("Matriz de riscos consolidada") de `proposta-projeto-v5.md` (que
 > substitui a `proposta-projeto-v4.md` como documento de planejamento vigente e formaliza
 > RP16 e o bloco RP17–RP24; RP01–RP15 permanecem como identificados na v4 §10, apenas
@@ -12,11 +14,11 @@
 | ID | Risco | Probabilidade | Impacto | Mitigação | Responsável | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | RP01 | Provisionamento Azure/Connector atrasar e travar I7 | Alta | Alto | Processo com TI iniciado em I6; Streamlit como plano B | Coordenador | Aberto |
-| RP02 | Agente alucinar números ou regras | Média | Alto | Indicadores só via tool calling; toda regra com fonte; confiança explícita; validação humana em baixa confiança | Coordenador | Aberto |
-| RP03 | Confusão entre norma e recomendação (PA3) | Alta | Alto | Natureza da regra é campo obrigatório (`ENUM` no banco); teste S01-T04 | Analistas | Mitigado (schema) |
+| RP02 | Agente alucinar números ou regras | Média | Alto | Indicadores só via tool calling; toda regra com fonte/localização; RAG em camadas; allowlist aprovada na Q5; OCR normativo revisado; confiança explícita; validação humana em baixa confiança | Coordenador | Mitigado parcial (arquitetura e classificação documentadas; corpus e Q5 pendentes) |
+| RP03 | Confusão entre norma e recomendação (PA3) | Alta | Alto | Natureza da regra é campo obrigatório (`ENUM` no banco); precedência e matriz fonte a fonte em `fontes-institucionais.md`; teste S01-T04 | Analistas | Mitigado parcial (schema e proposta; aprovação Q5 pendente) |
 | RP04 | Meta confundir esforço com resultado; meta × progresso (PA1) | Alta | Alto | Campos distintos `meta`/`meta_final` no esquema + validador; teste S05-T04 | Analistas | Mitigado (schema) |
 | RP05 | Cálculos de capacidade com falsa precisão | Alta | Médio | Faixas e cenários; incerteza sempre visível | Coordenador | Aberto |
-| RP06 | Dados individuais de disponibilidade expostos | Média | Alto | Espelho mínimo D2 (sem CPF/e-mail); pseudônimos; agregação; checklist da Seção 11 | Coordenador | Mitigado (schema) |
+| RP06 | Dados individuais de disponibilidade expostos | Média | Alto | Espelho mínimo D2 (sem CPF/e-mail); pseudônimos; agregação; exclusão de I03/P01–P08/R01–R09 do RAG bruto; checklist da Seção 11 | Coordenador | Mitigado parcial (schema; saneamento físico do acervo restrito pendente) |
 | RP07 | OKR-D afirmar causalidade indevida | Alta | Alto | Justificativa obrigatória (`NOT NULL` no banco); linguagem de contribuição plausível | Analistas | Mitigado (schema) |
 | RP08 | Excesso de alertas tornar o agente irritante | Média | Alto | Gravidade + confiança + limiar configurável; revisão com usuários no I4 | Analistas | Aberto |
 | RP09 | Escopo crescer ("já que estamos fazendo…") | Alta | Alto | S11–S20 fora do MVP; inclusão exige v5 | Coordenador | Materializado uma vez, pelo rito previsto (v5 incorporou S21–S24 como Fase 2, sem alterar o MVP S01–S10) |
