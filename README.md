@@ -5,7 +5,7 @@ institucional (RAG), consulta de indicadores reais do PETRVS via Denodo e skills
 executáveis (S01–S10) para montagem e auditoria de portfólio, capacidade e estratégia.
 
 Documento normativo do projeto: [`proposta-projeto-v5.md`](proposta-projeto-v5.md) — substitui
-a [`proposta-projeto-v4.md`](proposta-projeto-v4.md) (histórico) e amplia o escopo com a Fase 2
+a [`proposta-projeto-v4.md`](docs/gestao/historico/proposta-projeto-v4.md) (histórico) e amplia o escopo com a Fase 2
 (skills S21–S24 de execução e avaliação; anexo [`skills/05_plano-skills-execucao-avaliacao_v1.md`](skills/05_plano-skills-execucao-avaliacao_v1.md)),
 que só inicia após o Incremento I2. O MVP corrente (S01–S10, I0–I7) não muda.
 Análise técnica do esquema de dados: [`docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md`](docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md).
