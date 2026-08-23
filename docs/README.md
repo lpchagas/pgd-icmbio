@@ -17,6 +17,13 @@ ordem:
 4. **Validação do modelo comum** ([`gestao/validacao-modelo-comum.md`](gestao/validacao-modelo-comum.md)) — veja como os nomes do sistema se conectam ao vocabulário que você já aprendeu no passo 1.
 5. **Riscos** ([`gestao/riscos.md`](gestao/riscos.md)) — veja o que pode dar errado e o que já foi mitigado.
 
+Depois desses cinco, se quiser entender **como o projeto chegou até aqui** — por que a
+proposta já vai na versão 5, o que mudou em cada revisão e onde ficaram os tutoriais
+passo a passo de configuração do ambiente —, leia
+[`gestao/historico-evolucao-projeto.md`](gestao/historico-evolucao-projeto.md). Esse
+documento é uma narrativa de apoio, não normativa; a proposta vigente continua sendo a
+v5.
+
 Quem precisa de vocabulário de tecnologia (IA, RAG, infraestrutura) usa o
 [`gestao/glossario-tecnico.md`](gestao/glossario-tecnico.md); quem vai mexer no código ou no
 banco de dados segue para a linha de tecnologia da tabela abaixo.
@@ -25,6 +32,7 @@ banco de dados segue para a linha de tecnologia da tabela abaixo.
 
 | Necessidade | Documento |
 | --- | --- |
+| Entender como o projeto evoluiu de v1 a v5 (tutoriais, linha do tempo) | [`gestao/historico-evolucao-projeto.md`](gestao/historico-evolucao-projeto.md) |
 | Entender o acervo PGD e localizar uma fonte | [`referencias-pgd/README.md`](referencias-pgd/README.md) |
 | Decidir quais fontes entram no cadastro ou no RAG | [`gestao/fontes-institucionais.md`](gestao/fontes-institucionais.md) |
 | Consultar termos de negócio do PGD | [`gestao/glossario-institucional.md`](gestao/glossario-institucional.md) |
