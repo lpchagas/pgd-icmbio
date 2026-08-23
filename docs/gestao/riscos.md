@@ -31,7 +31,7 @@
 
 | ID | Risco | Probabilidade | Impacto | Mitigação | Responsável | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| RP16 | Máquina de desenvolvimento sem rota de rede para o Denodo institucional impede `sincronizar_ref.py` de popular `ref_unidades`/`ref_usuarios` | Alta (confirmada) | Alto (bloqueia D2, aceite do I0, o Incremento I5 e a etapa E6 da Fase 2) | Executar a sincronização de uma máquina com VPN/rede institucional ativa; documentar o procedimento de rede exigido; acionar TI/Dataprev (Q16); contingência sintética para E6 | Coordenador | **Aberto — bloqueia aceite do I0** |
+| RP16 | Máquina de desenvolvimento sem rota de rede para o Denodo institucional impede `sincronizar_ref.py` de popular `ref_unidades`/`ref_usuarios` | Alta (confirmada) | Alto (bloqueia D2, aceite do I0, o Incremento I5 e a etapa E6 da Fase 2) | Executar a sincronização de uma máquina com VPN/rede institucional ativa; documentar o procedimento de rede exigido; acionar TI/Dataprev (Q16); contingência sintética para E6 | Coordenador | **Mitigado — rota de rede restabelecida e `sincronizar_ref.py` executado com sucesso em 22.08.2026 (816 `ref_unidades`, 19 `ref_usuarios` via `unidades_integrantes`, sem fallback); ver CLAUDE.md §10** |
 
 ## Riscos incorporados na v5 (Fase 2 — S21–S24), 18.08.2026
 
