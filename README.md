@@ -46,6 +46,10 @@ src/dados/       Camada de dados do modelo comum (Incremento I0)
 docs/
   README.md         Índice e estado dos artefatos documentais
   gestao/           ADRs, fontes institucionais, glossário, validação, riscos e atas
+  gestao/historico/           proposta-projeto-v1..v4.md e prompt-planejamento-inicial-v1.md
+                               (arquivados; v5 continua vigente na raiz)
+  gestao/historico-evolucao-projeto.md  Onboarding: como o plano evoluiu de v1 a v5,
+                               com tutoriais T1–T6 (não normativo — ver Seção abaixo)
   referencias-pgd/  Acervo local; somente o índice é versionado
   tecnologia/       Análises técnicas (AT-xx)
 skills/             Metodologia PGD/OCDE (B01-B04) e specs das skills (S01-S10)
@@ -66,6 +70,13 @@ camadas do RAG e condições para a decisão Q5 estão em
 
 A revisão documental **não encerra a Q5**. A aprovação fonte a fonte, a validação do
 glossário e do modelo comum e a ata real dos analistas continuam pendentes no I0.
+
+Para quem quer entender **como o projeto chegou até a proposta v5** — por que ela é a
+quinta versão, o que mudou em cada revisão e onde ficam os tutoriais completos de
+configuração do ambiente (Git, chave de API, Denodo, Langflow) —, leia
+[`docs/gestao/historico-evolucao-projeto.md`](docs/gestao/historico-evolucao-projeto.md).
+As versões anteriores (v1–v4) e o `prompt-planejamento-inicial-v1.md` foram arquivados em
+[`docs/gestao/historico/`](docs/gestao/historico/); nada foi apagado.
 
 ## Verificação do ambiente (smoke test)
 
