@@ -126,6 +126,6 @@ Relevante caso o agente do `pgd-agente-icmbio` venha a gerar ou validar SQL dina
 - Nenhum código-fonte copiado literalmente — apenas padrões descritos em prosa/pseudocódigo.
 
 Para reconfigurar o acesso ao Denodo no `pgd-agente-icmbio`, preencha o `.env` local (ver
-`.env.example` em `proposta-projeto-v1.md`, Seção 5.4) com as credenciais fornecidas pelo Dataprev
+`.env.example` e o capítulo v6 de operação) com as credenciais fornecidas pelo Dataprev
 para este projeto — não reutilize as do `pgd-ocde-icmbio` sem confirmar com quem administra o
 acesso se isso é permitido.

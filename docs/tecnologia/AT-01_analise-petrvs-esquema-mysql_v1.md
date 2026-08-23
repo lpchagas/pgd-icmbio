@@ -2,10 +2,10 @@
 
 **Versão:** 1.0 — **APROVADO em 26.07.2026** (decisões D1–D4 conforme recomendado; ver ADR-006) | **Data:** 26.07.2026
 **Série:** AT (Tecnologia) — governança de artefatos da proposta v3, §5.1
-**Insumo para:** `proposta-projeto-v4.md` (revisão das decisões de persistência da v3, §3.2–3.3)
+**Insumo histórico incorporado em:** `proposta-projeto-v6.md` e ADR-006
 **Fontes:** introspecção JDBC do banco `petrvs_icmbio` via Denodo (documentada em
 `pgd-ocde-icmbio/docs/07-estrutura-banco-dados.md`, 24.05.2026); artefato
-`03_especificacao-funcional-skills_v2.md`, §5 e §16.2; `proposta-projeto-v3.md`, §3.2.
+`03_especificacao-funcional-skills_v2.md`, §5 e §16.2; síntese vigente na proposta v6.
 
 ---
 
@@ -559,7 +559,7 @@ consegue sobrescrever histórico.
 
 ---
 
-## 8. Impactos na proposta v4 (itens a revisar quando aprovado)
+## 8. Impactos incorporados à proposta vigente
 
 | Item da v3 | Mudança na v4 |
 | --- | --- |
@@ -583,6 +583,5 @@ consegue sobrescrever histórico.
 
 ---
 
-*Após aprovação deste AT-01, gerar `proposta-projeto-v4.md` incorporando as mudanças da
-Seção 8, registrar o ADR correspondente em `docs/gestao/decisoes/` e materializar o §5 em
-`src/dados/schema.sql`.*
+*O conteúdo aprovado deste AT-01 foi incorporado à proposta v6, ao ADR-006 e ao
+`src/dados/schema.sql`. Mudanças futuras exigem revisão conjunta desses artefatos.*

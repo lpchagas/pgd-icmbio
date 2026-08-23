@@ -2,9 +2,8 @@
 
 **Data:** registrada na proposta v2, reafirmada em v3 e v4 | **Estado:** aprovada, vigente
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos:** `proposta-projeto-v2.md` §2.3 "Escopo" e §10.2 "Governança de dados e uso
-responsável de IA"; `proposta-projeto-v3.md` §2.3 e §11; `proposta-projeto-v4.md` (herda
-integralmente a Seção 10.2–10.3 da v2)
+**Documentos vigentes:** [Proposta v6](../../../proposta-projeto-v6.md) e
+[arquitetura](../../projeto-v6/02-arquitetura-tecnologia-dados.md)
 
 > **Nota de reconstrução:** este ADR formaliza uma restrição de governança já registrada
 > como decisão explícita nas propostas v2/v3, sem conteúdo novo.

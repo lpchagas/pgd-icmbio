@@ -4,6 +4,7 @@
 **Situação:** preparação técnica ampliada — **Q5 ainda não aprovada**
 **Responsável pela decisão:** coordenação e analistas da CGGE/ICMBio
 **Inventário do acervo:** [`docs/referencias-pgd/README.md`](../referencias-pgd/README.md)
+**Vínculo v6:** [Segurança, privacidade e fontes](../projeto-v6/06-seguranca-privacidade-fontes.md)
 
 > [!NOTE]
 > **Termos técnicos usados neste documento**

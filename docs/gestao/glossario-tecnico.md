@@ -1,8 +1,9 @@
 # Glossário técnico de termos de TI e IA
 
 **Última revisão:** 23.08.2026
-**Extraído de:** `proposta-projeto-v2.md` §4, em 23.08.2026, para ficar em arquivo próprio,
+**Origem histórica:** glossário da segunda revisão, extraído em 23.08.2026 para ficar em arquivo próprio,
 ao lado do glossário institucional, e ser mais fácil de encontrar.
+**Vínculo v6:** [Portal documental](../projeto-v6/README.md)
 
 > [!NOTE]
 > **Distinto do glossário institucional** em

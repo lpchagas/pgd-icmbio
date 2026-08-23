@@ -2,6 +2,7 @@
 
 **Última revisão:** 23.08.2026
 **Situação:** quadro atualizado após auditoria de 55 conteúdos únicos; ata ainda pendente
+**Vínculo v6:** [Arquitetura, tecnologia e dados](../projeto-v6/02-arquitetura-tecnologia-dados.md)
 
 > **Status:** quadro de trabalho para a reunião de validação formal do modelo comum pelos
 > analistas — terceiro item da pendência de **Trilha N** do Incremento I0. Este documento

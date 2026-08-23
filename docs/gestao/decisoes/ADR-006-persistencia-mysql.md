@@ -3,7 +3,7 @@
 **Data:** 26.07.2026 | **Estado:** aprovada
 **Decisor:** Coordenador do projeto (Leandro) | **Consultoria:** análise AT-01
 **Documentos:** `docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md`;
-`proposta-projeto-v4.md` (motivada por esta decisão, conforme nota final da v3)
+proposta v6 (que consolidou a decisão e seu histórico)
 
 ## Contexto
 

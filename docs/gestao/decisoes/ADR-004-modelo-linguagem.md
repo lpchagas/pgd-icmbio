@@ -1,13 +1,16 @@
-# ADR-004 — Modelo de linguagem: API direta nas fases iniciais, migração para Azure OpenAI condicionada à Q2
+# ADR-004 — Modelo de linguagem substituível
 
-**Data:** registrada em v1/v2 | **Estado:** aprovada, vigente (fase atual: API direta)
+**Data:** registrada nas revisões iniciais | **Estado:** princípio vigente; estratégia de custo revisada pelo ADR-008
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos:** `proposta-projeto-v1.md` §3; `proposta-projeto-v2.md` §6 e §3.2 (questão
-Q2); `proposta-projeto-v3.md` — Incremento I7 ("migração do modelo para Azure OpenAI se Q2
-confirmada")
+**Documentos vigentes:** [Proposta v6](../../../proposta-projeto-v6.md),
+[AT-02](../../tecnologia/AT-02_recursos-arquitetura-local-first_v1.md) e ADR-008
 
 > **Nota de reconstrução:** este ADR formaliza uma decisão já registrada em v1/v2, sem
-> conteúdo novo. A condição de disparo (Q2) segue em aberto — ver Seção 2.4 da proposta v4.
+> conteúdo novo. A seleção futura continua condicionada à classificação dos dados e à governança institucional.
+
+> [!NOTE]
+> A v6 não adota API paga obrigatória. Modelos locais são a base para conteúdo
+> institucional; serviços externos opcionais recebem somente conteúdo público/sintético.
 
 ## Contexto
 

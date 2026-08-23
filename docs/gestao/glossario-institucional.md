@@ -2,6 +2,7 @@
 
 **Última revisão:** 23.08.2026
 **Status:** proposta revisada com fontes primárias; validação formal pelos analistas ainda pendente
+**Vínculo v6:** [Visão do produto e governança](../projeto-v6/01-visao-produto-governanca.md)
 
 > [!NOTE]
 > **Distinto do glossário técnico**, agora em [`glossario-tecnico.md`](glossario-tecnico.md)

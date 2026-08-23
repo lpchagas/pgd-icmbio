@@ -1,13 +1,17 @@
-# ADR-003 — Arquitetura do agente: capacidades A/B/C, Agno como orquestrador, Copilot Studio com Streamlit como plano B
+# ADR-003 — Arquitetura do agente em capacidades A/B/C
 
-**Data:** registrada em v1/v2, ampliada em v3 | **Estado:** aprovada, vigente
+**Data:** registrada nas revisões iniciais | **Estado:** aprovada; escolhas de orquestrador/interface revisadas pelo ADR-008
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos:** `proposta-projeto-v1.md` §3 e "Fase 4"; `proposta-projeto-v2.md` §5
-"Arquitetura" e §6; `proposta-projeto-v3.md` §3 "Visão do produto — as três capacidades do
-agente" e §3.1
+**Documentos vigentes:** [Proposta v6](../../../proposta-projeto-v6.md) e
+[arquitetura](../../projeto-v6/02-arquitetura-tecnologia-dados.md)
 
 > **Nota de reconstrução:** este ADR formaliza decisões já tomadas e documentadas em v1–v3,
 > sem conteúdo novo.
+
+> [!NOTE]
+> A separação A/B/C permanece vigente. Agno, Copilot Studio e Streamlit não são
+> dependências do protótipo v6; FastAPI local é a base e a interface institucional será
+> decidida futuramente, conforme ADR-008.
 
 ## Contexto
 

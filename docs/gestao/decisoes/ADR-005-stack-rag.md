@@ -1,12 +1,16 @@
-# ADR-005 — RAG com LlamaIndex + ChromaDB; Langflow como prototipagem descartável
+# ADR-005 — RAG local com componentes substituíveis
 
-**Data:** registrada em v1/v2, mantida sem alteração em v3 | **Estado:** aprovada, vigente
+**Data:** registrada nas revisões iniciais | **Estado:** princípio vigente; ferramentas específicas revisadas pelo ADR-008
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos:** `proposta-projeto-v1.md` §3 e "Fase 3"; `proposta-projeto-v2.md` §6;
-`proposta-projeto-v3.md` §3 e §1.2‑c (RAG ampliado para o perfil institucional do S01)
+**Documentos vigentes:** [Proposta v6](../../../proposta-projeto-v6.md),
+[segurança e fontes](../../projeto-v6/06-seguranca-privacidade-fontes.md) e ADR-008
 
 > **Nota de reconstrução:** este ADR formaliza uma decisão já registrada em v1/v2 e
 > reafirmada em v3, sem conteúdo novo.
+
+> [!NOTE]
+> Recuperação local, metadados e citações permanecem obrigatórios. LlamaIndex, ChromaDB e
+> Langflow são opções substituíveis, não dependências normativas da v6.
 
 ## Contexto
 

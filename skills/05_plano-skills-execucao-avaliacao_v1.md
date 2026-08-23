@@ -14,10 +14,10 @@ ciclo do PGD:
 | **S24** | Avaliação do Plano de Trabalho do Participante           | Chefia da unidade de execução |
 
 **Relação com os documentos de governo:** este documento é **subordinado** à
-`proposta-projeto-v4.md` e ao `AT-01`, e **complementar** aos documentos `02_matriz`,
+à arquitetura consolidada na proposta v6 e ao `AT-01`, e **complementar** aos documentos `02_matriz`,
 `03_especificacao-funcional` e `04_backlog` (que definem S01–S20). Ele **não** altera o
 escopo do MVP (S01–S10). Propõe um bloco novo — S21–S24 — a ser integrado ao catálogo na
-**proposta v5**, e reposiciona S13, S16 e S17 conforme a Seção 4.3.
+proposta então vigente; a proposta v6 incorporou o conteúdo e reposiciona S13, S16 e S17.
 
 ---
 
@@ -97,11 +97,16 @@ derivação de regras, no mesmo critério de `natureza` usado pelo S01
 | D9 | *Acórdão TCU 2082/2022* (pasta ENAP) | TCU | Norma (controle externo) | Fundamenta a exigência de rastreabilidade e evidência dos registros |
 | D10 | Exercícios do curso de Avaliação (`exercio-m1.pdf`, `exercio-m2.pdf`) | Enap | Exemplo | **Não processáveis:** PDFs sem camada de texto (digitalizados). Ver Q4 na Seção 12 |
 
-Documentos internos do projeto usados como referência de conformidade: `proposta-projeto-v4.md`,
+Documentos internos do projeto usados como referência de conformidade: `proposta-projeto-v6.md`,
 `AT-01`, `ADR-006`, `src/dados/schema.sql`, `skills/01`–`skills/04`, e as skills Cowork
 sincronizadas `cgov-registro-execucao` e `cgov-avaliar-entrega`.
 
 ---
+
+> [!IMPORTANT]
+> Este arquivo é insumo histórico. A fonte vigente é o catálogo v6 e as fichas S21–S24.
+> As questões Q1–Q8 deste documento pertencem ao namespace antigo; a consolidação vigente
+> preserva Q5 para fontes institucionais e usa Q17–Q25 para execução, avaliação e adoção.
 
 ## 3. Regras normativas extraídas
 
@@ -222,7 +227,7 @@ tabelas atuais.
 Para não duplicar regras (princípio herdado de `01_analise-skills` §1) o bloco S21–S24
 absorve parte do escopo previsto para S13 e S16:
 
-| Skill | Situação proposta na v5 |
+| Skill | Situação histórica incorporada na v6 |
 | ----- | ----------------------- |
 | **S13** — Check-in de Execução | **Mantida, com escopo reduzido** a *check-in intermediário informal* (acompanhamento semanal, quadro de status), sem valor normativo. O registro formal migra para S21 (PE) e S23 (PT) |
 | **S16** — Avaliador de Entregas | **Mantida, subordinada a S22.** Passa a ser o *avaliador de entrega individual*, chamado por S22 como sub-rotina: S22 avalia o **plano**, agregando as avaliações de entrega produzidas por S16 |
@@ -668,7 +673,7 @@ antes de qualquer linha de código — o passo 2 do ciclo de vida de skill (v4 �
 - **Aceite (B4):** ao menos 2 chefias e 4 participantes usam as skills ao vivo; um caso
   completo percorre S21→S24 (incluindo um recurso simulado) sem perda de identificadores;
   todos os prazos regulamentares calculados corretamente no ciclo real; feedback registrado;
-  proposta v5 atualizada com o bloco integrado ao catálogo.
+  proposta vigente atualizada com o bloco integrado ao catálogo.
 
 ### 9.3. Dependências e caminho crítico
 
@@ -760,7 +765,7 @@ Uma skill do bloco S21–S24 só é considerada pronta quando:
 - [ ] Conciliação com o Petrvs executada (ou contingência sintética documentada, se RP16 persistir)
 - [ ] Piloto real em CGOV e COCAGE com feedback registrado
 - [ ] Nenhum dado sensível de saúde persistido no banco (auditoria com `rg` sobre dump anonimizado)
-- [ ] Proposta v5 atualizada integrando S21–S24 e reposicionando S13/S16/S17
+- [x] Proposta v6 integra S21–S24 e reposiciona S13/S16/S17
 
 ---
 

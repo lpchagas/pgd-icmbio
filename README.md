@@ -1,100 +1,90 @@
 # pgd-agente-icmbio
 
-Agente de apoio ao Programa de Gestão e Desempenho (PGD) do ICMBio: conhecimento
-institucional (RAG), consulta de indicadores reais do PETRVS via Denodo e skills
-executáveis (S01–S10) para montagem e auditoria de portfólio, capacidade e estratégia.
+Agente de apoio ao Programa de Gestão e Desempenho do ICMBio. Combina conhecimento com
+fonte (RAG), consulta aos 12 indicadores OCDE/PGD via Denodo e 24 skills executáveis para
+planejamento, pactuação, execução, avaliação e aprendizagem.
 
-Documento normativo do projeto: [`proposta-projeto-v5.md`](proposta-projeto-v5.md) — substitui
-a [`proposta-projeto-v4.md`](docs/gestao/historico/proposta-projeto-v4.md) (histórico) e amplia o escopo com a Fase 2
-(skills S21–S24 de execução e avaliação; anexo [`skills/05_plano-skills-execucao-avaliacao_v1.md`](skills/05_plano-skills-execucao-avaliacao_v1.md)),
-que só inicia após o Incremento I2. O MVP corrente (S01–S10, I0–I7) não muda.
-Análise técnica do esquema de dados: [`docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md`](docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md).
-Decisões arquiteturais: [`docs/gestao/decisoes/`](docs/gestao/decisoes/) (ADR-001 a ADR-006;
-ADR-007, que formaliza as decisões da v5, ainda não foi registrado).
+## Documentação vigente
+
+- [Proposta de projeto v6](proposta-projeto-v6.md) — visão completa e normativa.
+- [Portal da v6](docs/projeto-v6/README.md) — capítulos por público e assunto.
+- [Catálogo S01–S24](docs/projeto-v6/03-catalogo-skills-s01-s24.md).
+- [Especificações das skills](skills/specs/README.md).
+- [AT-01 — PETRVS/MySQL](docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md).
+- [AT-02 — recursos e local-first](docs/tecnologia/AT-02_recursos-arquitetura-local-first_v1.md).
+- [ADRs](docs/gestao/decisoes/) e [riscos](docs/gestao/riscos.md).
+
+As propostas anteriores foram consolidadas na v6 e removidas da árvore ativa. A evolução
+está resumida em [Memória e evolução](docs/projeto-v6/09-memoria-evolucao.md) e permanece
+recuperável no histórico do Git.
+
+## Estado atual
+
+**Incremento I0 — Fundação, em andamento.**
+
+| Item | Estado |
+| --- | --- |
+| MySQL 8.4.9 / serviço `MySQL84` | operacional |
+| Migração `001` | aplicada |
+| Banco atual | 21 tabelas e 6 triggers |
+| Migração `002` | planejada, não aplicada; alvo 33 tabelas/14 triggers |
+| Serviço de versões | smoke test aprovado |
+| Backup | diário às 19h, retenção 14 dias |
+| Espelhos Denodo | 816 unidades e 19 usuários CGOV/COCAGE |
+| Q5 | pendente de validação humana e ata |
+| Motor/API/RAG/S01–S24 | planejados no cronograma de 104 semanas |
 
 ## Pré-requisitos
 
-- Python 3.14 (`.venv` local do repositório)
-- MySQL 8 Community, instalado como serviço Windows local (porta 3306) — ver
-  [ADR-006](docs/gestao/decisoes/ADR-006-persistencia-mysql.md) e D4
-- Acesso ao Denodo institucional (JDBC) apenas para `sincronizar_ref.py` — requer rede/VPN
-  do ICMBio; driver `denodo-vdp-jdbcdriver.jar` e `jvm.dll` configurados no `.env`
+- Windows;
+- Python 3.14 e `.venv` local;
+- MySQL 8 Community na porta local configurada;
+- variáveis `MYSQL_*` no `.env` ignorado;
+- rede/credenciais Denodo somente para consultas autorizadas.
 
-## Setup local
-
-```powershell
-.venv\Scripts\pip install -r requirements.txt
-copy .env.example .env   # preencher com as credenciais reais (nunca commitar)
-mysql -u <usuario> -p < src\dados\schema.sql
-```
-
-O `schema.sql` cria o banco `pgd_agente` (21 tabelas + 6 triggers de imutabilidade —
-UPDATE/DELETE em versões históricas e em `execucoes_skill` são rejeitados pelo próprio
-banco). **Este é o estado atual do banco** (migração `001`); a migração `002` (12 tabelas
-novas, 33 no total, e 8 triggers adicionais, 14 no total), necessária para a Fase 2
-(S21–S24), é estado-alvo da v5 e ainda não foi aplicada.
-
-## Estrutura do repositório
-
-```text
-src/dados/       Camada de dados do modelo comum (Incremento I0)
-  schema.sql        Esquema (21 tabelas), aplicado uma vez por ambiente
-  db.py             Conexão PyMySQL (lê MYSQL_* do .env)
-  versoes.py        Única via de escrita para entidades versionáveis (IDs + versões)
-  sincronizar_ref.py Espelhos ref_unidades/ref_usuarios (Denodo → MySQL local)
-  backup.ps1        mysqldump diário (agendado via Tarefas do Windows)
-docs/
-  README.md         Índice e estado dos artefatos documentais
-  gestao/           ADRs, fontes institucionais, glossário, validação, riscos e atas
-  gestao/historico/           proposta-projeto-v1..v4.md e prompt-planejamento-inicial-v1.md
-                               (arquivados; v5 continua vigente na raiz)
-  gestao/historico-evolucao-projeto.md  Onboarding: como o plano evoluiu de v1 a v5,
-                               com tutoriais T1–T6 (não normativo — ver Seção abaixo)
-  referencias-pgd/  Acervo local; somente o índice é versionado
-  tecnologia/       Análises técnicas (AT-xx)
-skills/             Metodologia PGD/OCDE (B01-B04) e specs das skills (S01-S10)
-data/backups/       Dumps mysqldump (ignorado pelo Git)
-```
-
-Estrutura completa alvo (todos os incrementos I0–I7, mais a Fase 2 E0–E7): ver Seção 3 de
-[`proposta-projeto-v5.md`](proposta-projeto-v5.md).
-
-## Documentação e fontes do PGD
-
-O ponto de entrada da documentação é [`docs/README.md`](docs/README.md). A auditoria do
-acervo em 23.08.2026 identificou 60 artefatos físicos e 55 conteúdos únicos. O inventário,
-as duplicidades e as restrições de acesso estão em
-[`docs/referencias-pgd/README.md`](docs/referencias-pgd/README.md); a proposta de cadastro,
-camadas do RAG e condições para a decisão Q5 estão em
-[`docs/gestao/fontes-institucionais.md`](docs/gestao/fontes-institucionais.md).
-
-A revisão documental **não encerra a Q5**. A aprovação fonte a fonte, a validação do
-glossário e do modelo comum e a ata real dos analistas continuam pendentes no I0.
-
-Para quem quer entender **como o projeto chegou até a proposta v5** — por que ela é a
-quinta versão, o que mudou em cada revisão e onde ficam os tutoriais completos de
-configuração do ambiente (Git, chave de API, Denodo, Langflow) —, leia
-[`docs/gestao/historico-evolucao-projeto.md`](docs/gestao/historico-evolucao-projeto.md).
-As versões anteriores (v1–v4) e o `prompt-planejamento-inicial-v1.md` foram arquivados em
-[`docs/gestao/historico/`](docs/gestao/historico/); nada foi apagado.
-
-## Verificação do ambiente (smoke test)
+## Verificação rápida
 
 ```powershell
 .venv\Scripts\python src\dados\versoes.py --teste
 ```
 
-Cria uma entrega, versiona, confirma que o histórico é preservado e desfaz tudo com
-`ROLLBACK` — não grava dados permanentes. Usado para validar que a conexão MySQL e o
-esquema estão corretos sem exigir acesso ao Denodo.
+O teste usa rollback: cria e versiona uma entrega, confirma histórico e não deixa registro.
 
-## Sincronização com o PETRVS
+Sincronização Denodo, quando a rede estiver disponível:
 
 ```powershell
 .venv\Scripts\python src\dados\sincronizar_ref.py
 ```
 
-Requer rede institucional (VPN) até o Denodo — falha com
-`Connection error: Check the host name and port number are correct` fora dela. Populate
-`ref_unidades` (todas as unidades) e `ref_usuarios` (apenas as unidades-piloto CGOV e
-COCAGE, sem CPF/e-mail — ver [ADR-006](docs/gestao/decisoes/ADR-006-persistencia-mysql.md), D2).
+Backup manual:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File src\dados\backup.ps1
+```
+
+## Estrutura
+
+```text
+proposta-projeto-v6.md       Documento normativo principal
+docs/projeto-v6/             Nove capítulos vinculantes
+docs/gestao/                 Fontes, glossários, riscos, decisões e validações
+docs/tecnologia/             AT-01, AT-02 e referências técnicas
+docs/referencias-pgd/        Acervo local; somente README é versionado
+skills/specs/                Fichas S01–S24
+skills/                      Insumos metodológicos/históricos
+src/dados/                   Banco, versões, sincronização e backup
+src/agente|rag|skills_engine|api/  Componentes futuros
+data/                        Artefatos locais ignorados
+```
+
+## Regras essenciais
+
+- Denodo/PETRVS somente leitura.
+- Escrita versionável somente por `src/dados/versoes.py`.
+- Cálculo determinístico em Python, não no LLM.
+- Fonte, regra, confiança, decisão e pergunta ficam rastreáveis.
+- `99_restrito` nunca entra no Git, RAG ou serviço externo.
+- Não criar commit ou push sem revisão do estado e dos commits de saída.
+
+Para instalação, Git, API, Denodo, RAG, backup e diagnóstico, consulte
+[Operação e capacitação](docs/projeto-v6/07-operacao-capacitacao.md).
