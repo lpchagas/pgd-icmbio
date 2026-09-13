@@ -36,7 +36,7 @@
     {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "horas_planejadas_entrega": 20.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 16.67}
   ],
   "I09": [
-    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "total_planos_com_avaliacao": 3, "media_nota_pt": 3.0}
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "total_planos_com_avaliacao": 3, "media_nota_pt": 3.67, "media_nota_pt_eventos": 3.0}
   ],
   "I10": [
     {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "qtd_inadequado": 1, "perc_inadequado": 20.0}

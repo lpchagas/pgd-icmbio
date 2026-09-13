@@ -320,12 +320,15 @@ TARGETS.update({
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "total_avaliacoes_pt",
             "total_planos_com_avaliacao", "total_servidores_avaliados", "media_nota_pt",
+            "media_nota_pt_eventos",
             "nota_minima", "nota_maxima", "qtd_nota_1", "qtd_nota_2", "qtd_nota_3",
             "qtd_nota_4", "qtd_nota_5", "faixa_desempenho",
         ),
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "total_planos_com_avaliacao", "media_nota_pt"),
         period="pt",
+        # D11: média das médias por plano de trabalho.
+        formula_version="3.0.0",
     ),
     "I10": _indicator(
         "10", "Percentual de avaliações inadequadas", "avaliacoes_pt",

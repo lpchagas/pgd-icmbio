@@ -140,7 +140,10 @@ def main() -> None:
     print(f"Arquivo salvo: {output}")
 
     # Aviso de qualidade: servidores com 0 entregas (PT ativo mas sem vinculos)
-    offset_qtd = len(meta_cols) + 4  # posicao de qtd_entregas_por_servidor
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas
+    # deslocava as posicoes e quebrava os avisos (ver CGOV D09/D11).
+    cols = all_cols or []
+    offset_qtd = cols.index("qtd_entregas_por_servidor")
     sem_entregas = sum(1 for r in all_rows if str(r[offset_qtd]) == "0")
     if sem_entregas:
         print(f"  AVISO: {sem_entregas} servidor(es) com 0 entregas vinculadas — verificar preenchimento do PT.")

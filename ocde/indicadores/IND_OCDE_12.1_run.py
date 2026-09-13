@@ -198,11 +198,14 @@ def main() -> None:
     # Colunas apos meta_cols (6):
     # sigla(0) nome(1) total_pt(2) total_servidores(3) media_pt(4) total_pe(5) media_pe(6)
     # dif_abs(7) dif_dir(8) classif(9) direcao(10)
-    n = len(meta_cols)
-    offset_dif_abs = n + 7   # diferenca_absoluta
-    offset_classif = n + 9   # classificacao_coerencia
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas
+    # deslocava as posicoes e quebrava os avisos (ver CGOV D09/D11).
+    cols = all_cols or []
+    offset_dif_abs = cols.index("diferenca_absoluta")
+    offset_classif = cols.index("classificacao_coerencia")
+    offset_status = cols.index("periodo_status")
 
-    encerrados = [r for r in all_rows if r[5] == "encerrado"]
+    encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
 
     # Unidades com Alta divergencia (dif_abs > 2.0) — sinal de disfuncao avaliativa
     alta_div = [r for r in encerrados if _to_float(r[offset_dif_abs]) > 2.0]
@@ -221,7 +224,7 @@ def main() -> None:
     print("  NOTA: unidades sem avaliacao de PE no periodo sao excluidas do resultado (JOIN interno PT x PE).")
     print("        Para listar essas unidades, executar o diagnostico A4 (IND_OCDE_12.4).")
 
-    parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
+    parciais = sum(1 for r in all_rows if r[offset_status] == "parcial_no_corte")
     if parciais:
         print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores de coerencia preliminares.")
 

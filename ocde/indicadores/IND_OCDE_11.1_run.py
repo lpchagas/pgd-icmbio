@@ -149,12 +149,15 @@ def main() -> None:
     print(f"Arquivo salvo: {output}")
 
     # Colunas apos meta_cols: sigla(0) nome(1) total_av(2) total_servidores(3) qtd_exc(4) perc_exc(5) nivel(6)
-    n = len(meta_cols)
-    offset_total = n + 2   # total_avaliacoes_pt
-    offset_perc  = n + 5   # perc_excepcional
-    offset_nivel = n + 6   # nivel_reconhecimento
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas
+    # deslocava as posicoes e quebrava os avisos (ver CGOV D09/D11).
+    cols = all_cols or []
+    offset_total = cols.index("total_avaliacoes_pt")
+    offset_perc = cols.index("perc_excepcional")
+    offset_nivel = cols.index("nivel_reconhecimento")
+    offset_status = cols.index("periodo_status")
 
-    encerrados = [r for r in all_rows if r[5] == "encerrado"]
+    encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
 
     # Alerta de possivel leniencia avaliativa (perc >= 40% requer cruzamento com I12)
     leniencia = [r for r in encerrados if _to_float(r[offset_perc]) >= 40]
@@ -174,7 +177,7 @@ def main() -> None:
     if low_count:
         print(f"  NOTA: {low_count} linha(s) com < 5 avaliacoes em periodos encerrados — percentuais frageis.")
 
-    parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
+    parciais = sum(1 for r in all_rows if r[offset_status] == "parcial_no_corte")
     if parciais:
         print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores preliminares.")
 

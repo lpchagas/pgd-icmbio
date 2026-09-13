@@ -56,13 +56,34 @@ class TestEscalaEixo4:
             flags=re.IGNORECASE,
         )
 
-    def test_offsets_de_diagnostico_refletem_nova_coluna(self):
-        assert "offset_media = n + 5" in _source("09")
-        assert "offset_perc  = n + 5" in _source("10")
-        assert "offset_perc  = n + 5" in _source("11")
-        assert "offset_nivel = n + 6" in _source("11")
-        assert "offset_dif_abs = n + 7" in _source("12")
-        assert "offset_classif = n + 9" in _source("12")
+    @pytest.mark.parametrize("indicador,colunas", [
+        ("09", ("media_nota_pt", "total_avaliacoes_pt")),
+        ("10", ("perc_inadequado", "total_avaliacoes_pt")),
+        ("11", ("perc_excepcional", "nivel_reconhecimento")),
+        ("12", ("diferenca_absoluta", "classificacao_coerencia")),
+    ])
+    def test_diagnostico_localiza_colunas_por_nome(self, indicador, colunas):
+        """Os avisos pós-CSV devem achar a coluna pelo nome, nunca por offset fixo.
+
+        Offsets do tipo ``n + 5`` já quebraram duas vezes: com a inserção da
+        coluna mesogrupo (05.08.2026) e com media_nota_pt_eventos (D11). A busca
+        por nome é imune à inserção de colunas.
+        """
+        source = _source(indicador)
+        for coluna in colunas:
+            assert f'cols.index("{coluna}")' in source, (
+                f"I{indicador} deve localizar {coluna} por nome."
+            )
+        assert not re.search(r"offset_\w+\s*=\s*n\s*\+\s*\d", source), (
+            f"I{indicador} não pode voltar a usar offset posicional fixo."
+        )
+
+    @pytest.mark.parametrize("indicador", TODOS_OS_INDICADORES)
+    def test_nenhum_a1_usa_offset_posicional_fixo(self, indicador):
+        source = _source(indicador)
+        assert not re.search(r"len\(meta_cols\)\s*\+\s*\d", source), (
+            f"I{indicador} deve localizar colunas por nome, não por len(meta_cols) + N."
+        )
 
     @pytest.mark.parametrize("indicador,var_name", [("09", "SQL_I09"), ("10", "SQL_I10"), ("11", "SQL_I11"), ("12", "SQL_I12")])
     def test_avaliacao_usa_data_de_negocio(self, indicador, var_name):
@@ -185,15 +206,9 @@ class TestPadraoCanonico:
 
     @pytest.mark.parametrize("indicador", ["07", "08", "09", "10", "11", "12"])
     def test_aviso_de_ciclo_parcial_usa_novo_offset_e_status(self, indicador):
-        """O status do ciclo vem da coluna periodo_status, por offset ou por nome.
-
-        Scripts já migrados para busca por nome (``all_cols.index(...)``) são
-        preferíveis ao offset fixo ``r[5]``: a inserção de colunas novas não os
-        quebra. Os dois formatos são aceitos aqui; o que não pode reaparecer é
-        o offset anterior à correção (``r[4]``).
-        """
+        """O status do ciclo vem da coluna periodo_status, localizada pelo nome."""
         source = _source(indicador)
-        assert "r[5]" in source or 'all_cols.index("periodo_status")' in source
+        assert 'cols.index("periodo_status")' in source
         assert "\"parcial_no_corte\"" in source
         assert "r[4] == \"em_andamento\"" not in source
         assert "r[4] == \"encerrado\"" not in source

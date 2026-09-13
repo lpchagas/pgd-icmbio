@@ -146,7 +146,10 @@ def main() -> None:
     print(f"Arquivo salvo: {output}")
 
     # Aviso de qualidade: proporcao de entregas com responsavel unico (ponto de falha)
-    offset_grupo = len(meta_cols) + 2  # posicao de tamanho_grupo_responsavel
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas
+    # deslocava as posicoes e quebrava os avisos (ver CGOV D09/D11).
+    cols = all_cols or []
+    offset_grupo = cols.index("tamanho_grupo_responsavel")
     total = len(all_rows)
     ponto_unico = sum(1 for r in all_rows if str(r[offset_grupo]) == "1 servidor")
     if total > 0:

@@ -18,6 +18,20 @@ A coluna total_planos_com_avaliacao (COUNT DISTINCT plano_trabalho_id) é a refe
 correta para comparar com o PETRVS — o PETRVS exibe planos distintos (7.421), enquanto
 total_avaliacoes_pt conta eventos de avaliação (20.664, ratio ~2,78×) por planos com
 múltiplas consolidações mensais em 2026.
+
+Decisão CGOV D11 (13.09.2026) — média por Plano de Trabalho:
+  A métrica primária passou a ser calculada em dois passos — primeiro a média das
+  notas de cada plano, depois a média dessas médias por unidade. Sem isso, um
+  plano longo com muitas consolidações mensais pesava mais na média da unidade do
+  que um plano curto, distorcendo a comparação entre unidades.
+
+  media_nota_pt      = média das médias dos planos (métrica primária, D11)
+  media_nota_pt_eventos = média simples sobre os eventos (fórmula anterior a
+                          13.09.2026, preservada para a COCAGE comparar as duas
+                          leituras durante a transição)
+
+  nota_minima, nota_maxima e qtd_nota_1..5 continuam sobre o universo de eventos:
+  são distribuições, não médias, e mudá-las esconderia a dispersão real.
 """
 from __future__ import annotations
 
@@ -63,6 +77,26 @@ avaliacoes_pt AS (
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
 ),
+media_por_plano AS (
+    -- D11: cada plano de trabalho entra na media da unidade com peso 1,
+    -- independentemente de quantas consolidacoes mensais ele acumulou.
+    SELECT
+        COALESCE(un.sigla, 'N.I.') AS unidade_sigla,
+        COALESCE(un.nome,  'N.I.') AS unidade_nome,
+        avpt.plano_trabalho_id,
+        AVG(avpt.valor_nota * 1.0) AS media_do_plano
+    FROM avaliacoes_pt avpt
+    LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
+    GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.'), avpt.plano_trabalho_id
+),
+media_de_planos_por_unidade AS (
+    SELECT
+        unidade_sigla,
+        unidade_nome,
+        ROUND(AVG(media_do_plano), 2) AS media_nota_pt
+    FROM media_por_plano
+    GROUP BY unidade_sigla, unidade_nome
+),
 media_por_unidade AS (
     SELECT
         COALESCE(un.sigla, 'N.I.')                               AS unidade_sigla,
@@ -70,7 +104,7 @@ media_por_unidade AS (
         COUNT(avpt.id_avaliacao)                                 AS total_avaliacoes_pt,
         COUNT(DISTINCT avpt.plano_trabalho_id)                   AS total_planos_com_avaliacao,
         COUNT(DISTINCT avpt.id_servidor)                         AS total_servidores_avaliados,
-        ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt,
+        ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt_eventos,
         MIN(avpt.valor_nota)                                     AS nota_minima,
         MAX(avpt.valor_nota)                                     AS nota_maxima,
         SUM(CASE WHEN avpt.valor_nota = 1 THEN 1 ELSE 0 END)    AS qtd_nota_1,
@@ -83,28 +117,32 @@ media_por_unidade AS (
     GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.')
 )
 SELECT
-    unidade_sigla,
-    unidade_nome,
-    total_avaliacoes_pt,
-    total_planos_com_avaliacao,
-    total_servidores_avaliados,
-    media_nota_pt,
-    nota_minima,
-    nota_maxima,
-    qtd_nota_1,
-    qtd_nota_2,
-    qtd_nota_3,
-    qtd_nota_4,
-    qtd_nota_5,
+    mu.unidade_sigla,
+    mu.unidade_nome,
+    mu.total_avaliacoes_pt,
+    mu.total_planos_com_avaliacao,
+    mu.total_servidores_avaliados,
+    mp.media_nota_pt,
+    mu.media_nota_pt_eventos,
+    mu.nota_minima,
+    mu.nota_maxima,
+    mu.qtd_nota_1,
+    mu.qtd_nota_2,
+    mu.qtd_nota_3,
+    mu.qtd_nota_4,
+    mu.qtd_nota_5,
     CASE
-        WHEN media_nota_pt >= 4.5 THEN 'Excepcional'
-        WHEN media_nota_pt >= 3.5 THEN 'Alto desempenho'
-        WHEN media_nota_pt >= 2.5 THEN 'Adequado'
-        WHEN media_nota_pt >= 1.5 THEN 'Inadequado'
+        WHEN mp.media_nota_pt >= 4.5 THEN 'Excepcional'
+        WHEN mp.media_nota_pt >= 3.5 THEN 'Alto desempenho'
+        WHEN mp.media_nota_pt >= 2.5 THEN 'Adequado'
+        WHEN mp.media_nota_pt >= 1.5 THEN 'Inadequado'
         ELSE 'Nao executado'
     END AS faixa_desempenho
-FROM media_por_unidade
-ORDER BY media_nota_pt DESC, unidade_sigla
+FROM media_por_unidade mu
+JOIN media_de_planos_por_unidade mp
+    ON mp.unidade_sigla = mu.unidade_sigla
+   AND mp.unidade_nome  = mu.unidade_nome
+ORDER BY mp.media_nota_pt DESC, mu.unidade_sigla
 """
 
 
@@ -151,19 +189,22 @@ def main() -> None:
         return
 
     # mesogrupo so entra no CSV escrito — all_cols/all_rows seguem com as
-    # posicoes originais para nao quebrar os offsets fixos usados abaixo.
+    # posicoes originais para nao afetar as buscas por nome usadas abaixo.
     lookup = load_mesogrupo_lookup()
     csv_cols, csv_rows = insert_mesogrupo_column(all_cols or [], all_rows, lookup)
 
     write_pipe_csv(output, csv_cols, csv_rows)
     print(f"Arquivo salvo: {output}")
 
-    # Colunas apos meta_cols: sigla(0) nome(1) total_av(2) total_planos(3) total_servidores(4) media(5) ...
-    n = len(meta_cols)
-    offset_total = n + 2   # total_avaliacoes_pt
-    offset_media = n + 5   # media_nota_pt
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas (como
+    # media_nota_pt_eventos na D11) deslocava as posicoes e quebrava os avisos.
+    cols = all_cols or []
+    offset_total = cols.index("total_avaliacoes_pt")
+    offset_media = cols.index("media_nota_pt")
+    offset_status = cols.index("periodo_status")
+    offset_unidade = cols.index("unidade_sigla")
 
-    encerrados = [r for r in all_rows if r[5] == "encerrado"]
+    encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
 
     # Unidades com < 5 avaliacoes (resultado estatisticamente fragil)
     low_count = sum(1 for r in encerrados if int(r[offset_total] or 0) < 5)
@@ -173,10 +214,10 @@ def main() -> None:
     # Unidades com media abaixo de 2.5 (Inadequado ou pior)
     criticas = [r for r in encerrados if _to_float(r[offset_media]) < 2.5 and r[offset_media] != ""]
     if criticas:
-        unids = set(r[n] for r in criticas)
+        unids = set(r[offset_unidade] for r in criticas)
         print(f"  AVISO: {len(unids)} unidade(s) com media < 2.5 (Inadequado) em periodos encerrados.")
 
-    parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
+    parciais = sum(1 for r in all_rows if r[offset_status] == "parcial_no_corte")
     if parciais:
         print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores preliminares.")
 

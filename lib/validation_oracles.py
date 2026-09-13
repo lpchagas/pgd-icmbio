@@ -359,11 +359,20 @@ def oracle_i09(records: list[Row]) -> list[Row]:
     unique = _unique(_active(records), "periodo", "id_avaliacao")
     for (period, unit), rows in _group(unique, "periodo", "unidade_sigla").items():
         values = [_score(row) for row in rows]
+        # D11: a métrica primária é a média das médias por plano de trabalho —
+        # cada plano pesa 1, independentemente de quantas consolidações mensais
+        # acumulou. A média sobre eventos fica como coluna de comparação.
+        por_plano = [
+            mean(_score(row) for row in plano_rows)
+            for _, plano_rows in _group(rows, "plano_trabalho_id").items()
+        ]
         result: Row = {
             "periodo": period, "unidade_sigla": unit, "total_avaliacoes_pt": len(values),
             "total_planos_com_avaliacao": len({str(row.get("plano_trabalho_id")) for row in rows}),
             "total_servidores_avaliados": len({str(row.get("id_servidor")) for row in rows}),
-            "media_nota_pt": round(mean(values), 2), "nota_minima": min(values), "nota_maxima": max(values),
+            "media_nota_pt": round(mean(por_plano), 2),
+            "media_nota_pt_eventos": round(mean(values), 2),
+            "nota_minima": min(values), "nota_maxima": max(values),
         }
         for note in range(1, 6):
             result[f"qtd_nota_{note}"] = values.count(note)

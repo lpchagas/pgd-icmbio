@@ -191,13 +191,17 @@ def main() -> None:
     print(f"Arquivo salvo: {output}")
 
     # Aviso de qualidade: proporcao > 100% indica forca_trabalho inconsistente
-    offset_perc = len(meta_cols) + 6  # posicao de proporcao_horas_perc
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas
+    # deslocava as posicoes e quebrava os avisos (ver CGOV D09/D11).
+    cols = all_cols or []
+    offset_perc = cols.index("proporcao_horas_perc")
+    offset_status = cols.index("periodo_status")
     acima_100 = sum(1 for r in all_rows if _to_float(r[offset_perc]) > 100.0)
     if acima_100:
         print(f"  ALERTA: {acima_100} entrega(s) com proporcao_horas_perc > 100% — verificar forca_trabalho no PETRVS.")
 
     # Aviso de ciclo parcial no corte
-    parciais = sum(1 for r in all_rows if str(r[5]) == "parcial_no_corte")
+    parciais = sum(1 for r in all_rows if str(r[offset_status]) == "parcial_no_corte")
     if parciais:
         print(f"  AVISO: {parciais} linha(s) de ciclos parciais no corte — resultados preliminares.")
 
