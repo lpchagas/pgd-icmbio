@@ -1,4 +1,4 @@
-"""Regressão estática dos 12 scripts A1 (ocde/indicadores/IND_XX.1_run.py).
+"""Regressão estática dos 12 scripts A1 (ocde/indicadores/IND_OCDE_XX.1_run.py).
 
 Não executa nenhum script — lê o texto-fonte e aplica asserções regex.
 Cada caso aqui corresponde a um bug histórico real, documentado em
@@ -28,7 +28,7 @@ TODOS_OS_INDICADORES = [f"{i:02d}" for i in range(1, 13)]
 
 
 def _source(indicador: str) -> str:
-    path = INDICADORES_DIR / f"IND_{indicador}.1_run.py"
+    path = INDICADORES_DIR / f"IND_OCDE_{indicador}.1_run.py"
     assert path.exists(), f"Script A1 não encontrado: {path}"
     return path.read_text(encoding="utf-8")
 
@@ -176,12 +176,12 @@ class TestPadraoCanonico:
     def test_conexao_e_fechada_no_finally(self, indicador):
         """I01 é a exceção documentada (query única + agregação em Python)."""
         source = _source(indicador)
-        assert "conn.close()" in source, f"IND_{indicador}.1_run.py deve fechar a conexão JDBC."
+        assert "conn.close()" in source, f"IND_OCDE_{indicador}.1_run.py deve fechar a conexão JDBC."
 
     @pytest.mark.parametrize("indicador", [i for i in TODOS_OS_INDICADORES if i != "01"])
     def test_loop_de_periodos_tem_try_except(self, indicador):
         """Falha de uma query em um período não deve abortar os demais períodos."""
         source = _source(indicador)
         assert "try:" in source and "except" in source, (
-            f"IND_{indicador}.1_run.py deve isolar erros por período com try/except."
+            f"IND_OCDE_{indicador}.1_run.py deve isolar erros por período com try/except."
         )

@@ -105,7 +105,7 @@ Abra o arquivo `consultas_denodo_template.ipynb` no VS Code e execute as célula
 
 Guia completo para quem nunca usou Python: [docs/10-jupyter-guia-iniciantes.md](docs/10-jupyter-guia-iniciantes.md)
 
-Guia passo a passo por indicador (qual query colar, quais parâmetros ajustar, como exportar): [ocde/indicadores/guia-jupyter/](ocde/indicadores/guia-jupyter/) — um arquivo `IND_XX_guia_jupyter.md` para cada um dos 12 indicadores.
+Guia passo a passo por indicador (qual query colar, quais parâmetros ajustar, como exportar): [ocde/indicadores/guia-jupyter/](ocde/indicadores/guia-jupyter/) — um arquivo `IND_OCDE_XX_guia_jupyter.md` para cada um dos 12 indicadores.
 
 ---
 
@@ -116,7 +116,7 @@ Os scripts em `ocde/indicadores/` geram os CSVs mensais dos indicadores sem arma
 Exemplo:
 
 ```powershell
-python ocde/indicadores/IND_02.1_run.py --data-execucao 2026-09-13
+python ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao 2026-09-13
 ```
 
 Fluxo completo, calendário mensal e checklist: [docs/11-guia-extracao-mensal.md](docs/11-guia-extracao-mensal.md)
@@ -192,8 +192,8 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 
 | Subpasta | Conteúdo |
 | --- | --- |
-| `indicadores/` | Um script por indicador (`IND_01.1_run.py` a `IND_12.1_run.py`). Cada um se conecta ao Denodo, roda a query oficial e salva o CSV do período. |
-| `indicadores/guia-jupyter/` | Guias `IND_XX_guia_jupyter.md` (um por indicador) com o passo a passo para rodar a mesma query manualmente pelo Notebook Jupyter (Opção B), sem precisar executar o script Python. |
+| `indicadores/` | Um script por indicador (`IND_OCDE_01.1_run.py` a `IND_OCDE_12.1_run.py`). Cada um se conecta ao Denodo, roda a query oficial e salva o CSV do período. |
+| `indicadores/guia-jupyter/` | Guias `IND_OCDE_XX_guia_jupyter.md` (um por indicador) com o passo a passo para rodar a mesma query manualmente pelo Notebook Jupyter (Opção B), sem precisar executar o script Python. |
 | `relatorios/` | Módulos que leem os CSVs já extraídos e montam análises gerenciais (classificação de desempenho, métricas agregadas, geração de relatório). |
 | `diagnosticos/` | Modelo (template) usado para investigar achados inesperados de um indicador antes de fechar a validação. |
 

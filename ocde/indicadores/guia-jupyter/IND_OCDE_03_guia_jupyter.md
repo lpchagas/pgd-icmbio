@@ -1,6 +1,6 @@
 # I03 — Taxa de Cumprimento de Metas por Entrega — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_03.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_03.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -134,7 +134,7 @@ ORDER BY unidade_sigla, taxa_atingimento_perc DESC
 6. (Opcional, replicando o `.py`) calcular a abordagem alternativa "meta
    integral" a partir de `meta_json`/`realizado_json` (campos JSON com chaves
    `quantitativo` ou `porcentagem`) — ver `parse_meta_integral()` em
-   `IND_03.1_run.py` linhas 147-177 se precisar dessa segunda perspectiva.
+   `IND_OCDE_03.1_run.py` linhas 147-177 se precisar dessa segunda perspectiva.
 
 ## 6. Exportação em CSV (padrão pipe-delimited)
 
@@ -142,7 +142,7 @@ ORDER BY unidade_sigla, taxa_atingimento_perc DESC
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_03.2_taxa_cumprimento_entrega_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_03.2_taxa_cumprimento_entrega_{stamp}.csv"
 df_i03.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
@@ -162,5 +162,5 @@ print(f"Exportado: {output_path}")
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_03.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_03.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.2.2-i03.md`

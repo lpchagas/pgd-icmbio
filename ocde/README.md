@@ -36,7 +36,7 @@ prontos para envio à COCAGE ou importação no Power BI.
 
 ```text
 ocde/
-  indicadores/          Um script por indicador (IND_01 a IND_12)
+  indicadores/          Um script por indicador (IND_OCDE_01 a IND_OCDE_12)
   relatorios/           Módulos para análise e geração de relatórios gerenciais
   diagnosticos/         Template de diagnóstico para investigações pontuais
 
@@ -53,23 +53,23 @@ lib/                    Módulos compartilhados (raiz do repositório)
 
 ## Scripts de indicadores (`indicadores/`)
 
-Cada arquivo `IND_XX.1_run.py` extrai um indicador específico e gera um CSV mensal.
+Cada arquivo `IND_OCDE_XX.1_run.py` extrai um indicador específico e gera um CSV mensal.
 São executados uma vez por mês, seguindo o calendário em `docs/11-guia-extracao-mensal.md`.
 
 | Script | Indicador | O que mede | Periodicidade 2026 |
 | --- | --- | --- | --- |
-| `IND_01.1_run.py` | I01 — Regime de Trabalho | Proporção de servidores presencial / híbrido / remoto por unidade | Mensal |
-| `IND_02.1_run.py` | I02 — Cumprimento de Entregas | % de entregas concluídas em relação às planejadas por unidade | Quadrimestral |
-| `IND_03.1_run.py` | I03 — Atingimento por Entrega | % de atingimento da meta para cada entrega individualmente | Quadrimestral |
-| `IND_04.1_run.py` | I04 — Score de Atingimento | Score médio de cumprimento de metas por unidade | Quadrimestral |
-| `IND_05.1_run.py` | I05 — Distribuição de Entregas | Quantas entregas cada servidor acumula em média por unidade | Mensal |
-| `IND_06.1_run.py` | I06 — Concentração de Responsabilidade | % de entregas que dependem de um único servidor (risco operacional) | Mensal |
-| `IND_07.1_run.py` | I07 — Horas por Entrega | Total de horas planejadas para cada entrega | Quadrimestral |
-| `IND_08.1_run.py` | I08 — Proporção de Horas | % da capacidade horária da unidade consumida por cada entrega | Quadrimestral |
-| `IND_09.1_run.py` | I09 — Média das Avaliações PT | Nota média do Plano de Trabalho por unidade (escala 1–5) | Mensal |
-| `IND_10.1_run.py` | I10 — Avaliações Inadequadas | % de servidores com avaliação abaixo do esperado por unidade | Mensal |
-| `IND_11.1_run.py` | I11 — Avaliações Excepcionais | % de servidores com avaliação excepcional por unidade | Mensal |
-| `IND_12.1_run.py` | I12 — Coerência PT × PE | % de unidades onde a avaliação individual e a do plano de entrega são coerentes | Quadrimestral |
+| `IND_OCDE_01.1_run.py` | I01 — Regime de Trabalho | Proporção de servidores presencial / híbrido / remoto por unidade | Mensal |
+| `IND_OCDE_02.1_run.py` | I02 — Cumprimento de Entregas | % de entregas concluídas em relação às planejadas por unidade | Quadrimestral |
+| `IND_OCDE_03.1_run.py` | I03 — Atingimento por Entrega | % de atingimento da meta para cada entrega individualmente | Quadrimestral |
+| `IND_OCDE_04.1_run.py` | I04 — Score de Atingimento | Score médio de cumprimento de metas por unidade | Quadrimestral |
+| `IND_OCDE_05.1_run.py` | I05 — Distribuição de Entregas | Quantas entregas cada servidor acumula em média por unidade | Mensal |
+| `IND_OCDE_06.1_run.py` | I06 — Concentração de Responsabilidade | % de entregas que dependem de um único servidor (risco operacional) | Mensal |
+| `IND_OCDE_07.1_run.py` | I07 — Horas por Entrega | Total de horas planejadas para cada entrega | Quadrimestral |
+| `IND_OCDE_08.1_run.py` | I08 — Proporção de Horas | % da capacidade horária da unidade consumida por cada entrega | Quadrimestral |
+| `IND_OCDE_09.1_run.py` | I09 — Média das Avaliações PT | Nota média do Plano de Trabalho por unidade (escala 1–5) | Mensal |
+| `IND_OCDE_10.1_run.py` | I10 — Avaliações Inadequadas | % de servidores com avaliação abaixo do esperado por unidade | Mensal |
+| `IND_OCDE_11.1_run.py` | I11 — Avaliações Excepcionais | % de servidores com avaliação excepcional por unidade | Mensal |
+| `IND_OCDE_12.1_run.py` | I12 — Coerência PT × PE | % de unidades onde a avaliação individual e a do plano de entrega são coerentes | Quadrimestral |
 
 **Por que dois tipos de periodicidade?**
 A partir de 2026, o ICMBio adotou ciclos distintos para os dois instrumentos do PGD:
@@ -126,7 +126,7 @@ de o arquivo ser enviado à COCAGE.
 
 Contém a lógica comum a todos os scripts de indicadores: conexão com Denodo,
 execução por período, adição das colunas de metadado de período, salvamento do CSV
-e chamada à auditoria. Os scripts `IND_XX.1_run.py` delegam toda essa mecânica
+e chamada à auditoria. Os scripts `IND_OCDE_XX.1_run.py` delegam toda essa mecânica
 ao `monthly_runner`, mantendo-se enxutos e focados apenas na SQL do indicador.
 
 ### `docs_sql.py` — Extração da SQL canônica dos documentos
@@ -201,7 +201,7 @@ pronto para leitura pelos gestores ou exportação para PDF.
 
 ## Template de diagnóstico (`diagnosticos/`)
 
-O arquivo `IND_XX.4_diagnostico_template.py` é um modelo de script para investigações
+O arquivo `IND_OCDE_XX.4_diagnostico_template.py` é um modelo de script para investigações
 pontuais, usado quando a equipe CGOV retorna observações após a validação manual no
 PETRVS (artefato A4 do protocolo de validação).
 
@@ -229,7 +229,7 @@ Guia detalhado: `docs/10-jupyter-guia-iniciantes.md`
 ### Executar um indicador
 
 ```powershell
-python ocde/indicadores/IND_02.1_run.py
+python ocde/indicadores/IND_OCDE_02.1_run.py
 ```
 
 O script conecta ao Denodo, executa a consulta para cada período histórico,
@@ -239,7 +239,7 @@ e salva o CSV em `artefatos_local/ocde/entregas/AAAA-MM/`.
 ### Especificar a pasta de destino
 
 ```powershell
-python ocde/indicadores/IND_02.1_run.py --month 2026-06
+python ocde/indicadores/IND_OCDE_02.1_run.py --month 2026-06
 ```
 
 Por padrão, o script usa o mês atual. Use `--month` para gerar em uma pasta específica.

@@ -9,6 +9,7 @@ from zoneinfo import ZoneInfo
 
 from lib.csv_utils import PROJECT_ROOT
 from lib.periodos import ANALYSIS_TIMEZONE
+from lib.validation_contracts import normalize_target
 
 
 DEFAULT_BASELINE = PROJECT_ROOT / "artefatos_local" / "validacao" / "baselines.json"
@@ -29,7 +30,7 @@ def build_parser() -> argparse.ArgumentParser:
 def approve(argv: list[str] | None = None) -> dict:
     args = build_parser().parse_args(argv)
     manifest = json.loads(args.manifesto.read_text(encoding="utf-8"))
-    code = args.alvo.upper().replace("IND_", "I")
+    code = normalize_target(args.alvo)
     result = next((item for item in manifest.get("resultados", []) if item.get("alvo") == code), None)
     if not result:
         raise ValueError(f"Alvo {code} ausente do manifesto.")

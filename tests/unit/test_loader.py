@@ -126,11 +126,11 @@ class TestLoadInd:
         assert load_ind(tmp_path, "99") is None
 
     def test_carrega_csv_mais_recente_e_converte_colunas_numericas(self, tmp_path):
-        (tmp_path / "IND_02.2_taxa_20260601_1000.csv").write_text(
+        (tmp_path / "IND_OCDE_02.2_taxa_20260601_1000.csv").write_text(
             "unidade_sigla|taxa_cumprimento_perc\nICMBio-SEDE|80.5\n",
             encoding="utf-8-sig",
         )
-        (tmp_path / "IND_02.2_taxa_20260701_1000.csv").write_text(
+        (tmp_path / "IND_OCDE_02.2_taxa_20260701_1000.csv").write_text(
             "unidade_sigla|taxa_cumprimento_perc\nICMBio-SEDE|85.0\n",
             encoding="utf-8-sig",
         )

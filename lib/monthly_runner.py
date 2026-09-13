@@ -12,6 +12,7 @@ from .csv_utils import clean, indicator_csv_dir, write_pipe_csv
 from .denodo_config import connect, get_config
 from .docs_sql import adapt_for_jdbc, extract_indicator_sql, set_period
 from .periodos import analysis_window, build_periods_pe, build_periods_pt, configure_execution_context, period_metadata
+from .validation_contracts import ocde_artifact
 
 
 def query_rows(conn, sql: str) -> tuple[list[str], list[list[str]]]:
@@ -68,7 +69,7 @@ def run_sql_indicator(
     sql_template = adapt_for_jdbc(extract_indicator_sql(doc_path, indicator))
     out_dir = indicator_csv_dir(args.month)
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_{indicator}.2_{output_slug}_{stamp}.csv"
+    output = out_dir / ocde_artifact(indicator, f"2_{output_slug}_{stamp}.csv")
 
     periods = _select_periods(period_type, window.fim)
 
@@ -141,8 +142,8 @@ def run_i01(doc_path: str = "docs/ocde/06.1.1-i01.md") -> None:
     sql = adapt_for_jdbc(extract_indicator_sql(doc_path, "01"))
     out_dir = indicator_csv_dir(args.month)
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output_total = out_dir / f"IND_01.2_v1_proporcao_mensal_{stamp}.csv"
-    output_unit = out_dir / f"IND_01.2_v2_proporcao_unidade_mensal_{stamp}.csv"
+    output_total = out_dir / ocde_artifact("01", f"2_v1_proporcao_mensal_{stamp}.csv")
+    output_unit = out_dir / ocde_artifact("01", f"2_v2_proporcao_unidade_mensal_{stamp}.csv")
 
     if args.dry_run:
         get_config(require_credentials=False)

@@ -1,6 +1,6 @@
 # I07 — Horas por Entrega — Planejadas (Absolutas) — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_07.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_07.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -148,7 +148,7 @@ ORDER BY unidade_sigla, total_horas_planejadas_entrega DESC
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_07.2_horas_por_entrega_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_07.2_horas_por_entrega_{stamp}.csv"
 df_i07.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
@@ -169,5 +169,5 @@ print(f"Exportado: {output_path}")
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_07.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_07.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.3.3-i07.md`

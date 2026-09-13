@@ -40,7 +40,7 @@ def main():
     try:
         for number, slug, sql in QUERIES:
             columns, rows = run_query(conn, sql)
-            output = diagnostic_csv_dir() / f"IND_XX.4_{number}_{slug}.csv"
+            output = diagnostic_csv_dir() / f"IND_OCDE_XX.4_{number}_{slug}.csv"
             write_pipe_csv(output, columns, rows)
             print(f"Arquivo salvo: {output}")
     finally:

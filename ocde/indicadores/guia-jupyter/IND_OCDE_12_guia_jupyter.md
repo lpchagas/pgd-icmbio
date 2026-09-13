@@ -1,6 +1,6 @@
 # I12 — Coerência entre Avaliação do PT e do PE — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_12.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_12.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -148,7 +148,7 @@ ORDER BY diferenca_absoluta DESC, unidade_sigla
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_12.2_coerencia_pt_pe_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_12.2_coerencia_pt_pe_{stamp}.csv"
 df_i12.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
@@ -171,5 +171,5 @@ print(f"Exportado: {output_path}")
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_12.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_12.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.4.4-i12.md`

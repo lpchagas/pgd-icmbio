@@ -38,9 +38,9 @@ C:\Projetos\pgd-ocde-icmbio\
 │   ├── monthly_runner.py         Loop mensal para execução em lote
 │   └── docs_sql.py               Extração da SQL canônica dos docs
 ├── ocde/                         Iniciativa OCDE/PGD ICMBio
-│   ├── indicadores/              Scripts IND_XX.1_run.py sanitizados (I01–I12)
+│   ├── indicadores/              Scripts IND_OCDE_XX.1_run.py sanitizados (I01–I12)
 │   ├── relatorios/               Módulos de análise e relatório gerencial
-│   └── diagnosticos/             Template público de diagnóstico (IND_XX.4_template)
+│   └── diagnosticos/             Template público de diagnóstico (IND_OCDE_XX.4_template)
 ├── mgi/                          Placeholder — indicadores MGI (em construção)
 │   └── indicadores/
 ├── .env.example                  Modelo do .env — sem senhas reais
@@ -151,7 +151,7 @@ pip install jpype1 pandas matplotlib seaborn python-dotenv
 ### Passo 6 — Testar a conexão
 
 ```powershell
-python ocde/indicadores/IND_02.1_run.py
+python ocde/indicadores/IND_OCDE_02.1_run.py
 ```
 
 Se retornar dados, o ambiente está configurado corretamente.
@@ -279,7 +279,7 @@ O script `setup\backup_privado.ps1` copia incrementalmente as partes não regene
 
 | Pasta | Por que excluir |
 | --- | --- |
-| `artefatos_local\ocde\entregas\` | CSVs mensais dos 12 indicadores — regeneráveis em minutos via `python IND_XX.1_run.py` |
+| `artefatos_local\ocde\entregas\` | CSVs mensais dos 12 indicadores — regeneráveis em minutos via `python IND_OCDE_XX.1_run.py` |
 | `artefatos_local\ocde\analises\` | Gráficos PNG — regeneráveis via `/graficos-indicadores` |
 | `artefatos_local\ocde\relatorios\` | Relatórios Markdown — regeneráveis via `/relatorio-gerencial` |
 
@@ -306,7 +306,7 @@ Se a pasta `projetos\` for deletada do OneDrive:
 2. **Copiar de volta para o OneDrive**: restaurar manualmente para `OneDrive - ICMBio\projetos\pgd-ocde-icmbio-privado\`.
 3. **Aguardar sincronização** do OneDrive.
 4. **Recriar as junctions**: `.\setup\criar_links_privados.ps1`
-5. **Restaurar os CSVs de entregas** (se necessário): reexecutar os scripts `IND_XX.1_run.py` para cada indicador — os dados vêm do Denodo em tempo real.
+5. **Restaurar os CSVs de entregas** (se necessário): reexecutar os scripts `IND_OCDE_XX.1_run.py` para cada indicador — os dados vêm do Denodo em tempo real.
 
 ---
 

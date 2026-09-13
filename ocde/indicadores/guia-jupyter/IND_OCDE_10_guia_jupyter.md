@@ -1,13 +1,14 @@
-# I09 — Média da Avaliação do Plano de Trabalho por Unidade — Guia de Execução via Jupyter Notebook
+# I10 — Percentual de Avaliações Inadequadas por Unidade — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_09.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_10.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
 
-Calcula a média das notas de avaliação do Plano de Trabalho (PT) por unidade,
-usando a escala corrigida `(6 - tan.sequencia)`.
+Calcula o percentual de avaliações do PT classificadas como "Inadequado"
+(`tan.sequencia = 4`) por unidade — sinaliza baixa prevalência ou atenção
+crítica de desempenho.
 
 ## 2. Pré-requisitos
 
@@ -37,7 +38,7 @@ Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pt()`
 | M06-2026 | mensal | 2026-06-01 | 2026-06-30 | encerrado |
 | M08-2026 | mensal | 2026-08-01 | 2026-08-31 | encerrado |
 
-## 4. Query SQL_I09
+## 4. Query SQL_I10
 
 Exemplo com o primeiro período (T3-2025) preenchido — troque as datas de
 `parametros` a cada rodada.
@@ -51,10 +52,9 @@ WITH parametros AS (
 ),
 avaliacoes_pt AS (
     SELECT
-        av.id                    AS id_avaliacao,
+        av.id          AS id_avaliacao,
         pt.unidade_id,
-        ptc.plano_trabalho_id,
-        (6 - tan.sequencia)      AS valor_nota
+        tan.sequencia  AS sequencia_nota
     FROM petrvs_icmbio_avaliacoes av
     JOIN petrvs_icmbio_planos_trabalhos_consolidacoes ptc
         ON ptc.id = av.plano_trabalho_consolidacao_id
@@ -69,20 +69,17 @@ avaliacoes_pt AS (
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
 ),
-media_por_unidade AS (
+proporcao_por_unidade AS (
     SELECT
-        COALESCE(un.sigla, 'N.I.')                               AS unidade_sigla,
-        COALESCE(un.nome,  'N.I.')                               AS unidade_nome,
-        COUNT(avpt.id_avaliacao)                                 AS total_avaliacoes_pt,
-        COUNT(DISTINCT avpt.plano_trabalho_id)                   AS total_planos_com_avaliacao,
-        ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt,
-        MIN(avpt.valor_nota)                                     AS nota_minima,
-        MAX(avpt.valor_nota)                                     AS nota_maxima,
-        SUM(CASE WHEN avpt.valor_nota = 1 THEN 1 ELSE 0 END)    AS qtd_nota_1,
-        SUM(CASE WHEN avpt.valor_nota = 2 THEN 1 ELSE 0 END)    AS qtd_nota_2,
-        SUM(CASE WHEN avpt.valor_nota = 3 THEN 1 ELSE 0 END)    AS qtd_nota_3,
-        SUM(CASE WHEN avpt.valor_nota = 4 THEN 1 ELSE 0 END)    AS qtd_nota_4,
-        SUM(CASE WHEN avpt.valor_nota = 5 THEN 1 ELSE 0 END)    AS qtd_nota_5
+        COALESCE(un.sigla, 'N.I.')                                   AS unidade_sigla,
+        COALESCE(un.nome,  'N.I.')                                   AS unidade_nome,
+        COUNT(avpt.id_avaliacao)                                     AS total_avaliacoes_pt,
+        SUM(CASE WHEN avpt.sequencia_nota = 4 THEN 1 ELSE 0 END)    AS qtd_inadequado,
+        ROUND(
+            SUM(CASE WHEN avpt.sequencia_nota = 4 THEN 1 ELSE 0 END) * 100.0
+                / NULLIF(COUNT(avpt.id_avaliacao), 0),
+            2
+        )                                                            AS perc_inadequado
     FROM avaliacoes_pt avpt
     LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
     GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.')
@@ -91,32 +88,24 @@ SELECT
     unidade_sigla,
     unidade_nome,
     total_avaliacoes_pt,
-    total_planos_com_avaliacao,
-    media_nota_pt,
-    nota_minima,
-    nota_maxima,
-    qtd_nota_1,
-    qtd_nota_2,
-    qtd_nota_3,
-    qtd_nota_4,
-    qtd_nota_5,
+    qtd_inadequado,
+    perc_inadequado,
     CASE
-        WHEN media_nota_pt >= 4.5 THEN 'Excepcional'
-        WHEN media_nota_pt >= 3.5 THEN 'Alto desempenho'
-        WHEN media_nota_pt >= 2.5 THEN 'Adequado'
-        WHEN media_nota_pt >= 1.5 THEN 'Inadequado'
-        ELSE 'Nao executado'
-    END AS faixa_desempenho
-FROM media_por_unidade
-ORDER BY media_nota_pt DESC, unidade_sigla
+        WHEN perc_inadequado >= 30 THEN 'Atencao critica'
+        WHEN perc_inadequado >= 15 THEN 'Atencao moderada'
+        WHEN perc_inadequado >=  5 THEN 'Observacao'
+        ELSE 'Baixa prevalencia'
+    END AS nivel_alerta
+FROM proporcao_por_unidade
+ORDER BY perc_inadequado DESC, unidade_sigla
 ```
 
 ## 5. Passo a passo no notebook
 
 1. Abrir `consultas_denodo.ipynb`.
 2. Rodar a célula 1 (JVM) e a célula 2 (`run_query`) — seção "1. Configuração da conexão".
-3. Colar a query da seção 4 numa nova célula, atribuir a `sql_i09`.
-4. Rodar `df_i09 = run_query(sql_i09)`.
+3. Colar a query da seção 4 numa nova célula, atribuir a `sql_i10`.
+4. Rodar `df_i10 = run_query(sql_i10)`.
 5. Repetir os passos 3–4 trocando `data_inicio`/`data_fim` para cada período da
    tabela da seção 3.
 
@@ -126,28 +115,23 @@ ORDER BY media_nota_pt DESC, unidade_sigla
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_09.2_media_avaliacao_pt_{stamp}.csv"
-df_i09.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_10.2_perc_inadequado_pt_{stamp}.csv"
+df_i10.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
 
 ## 7. Observações e pontos críticos
 
-- **Correção de escala obrigatória (19.06.2026):** `JSON_UNQUOTE(tan.nota)`
-  não funciona no Denodo VQL via JDBC (retorna `NULL`). Usar sempre
-  `(6 - tan.sequencia)`:
-  `sequencia=1→Excepcional(5)`, `2→Alto desempenho(4)`, `3→Adequado(3)`,
-  `4→Inadequado(2)`, `5→Não executado(1)`. **Nunca usar `tan.nota` ou `JSON_UNQUOTE`.**
-- `total_planos_com_avaliacao` (`COUNT DISTINCT plano_trabalho_id`) é a
-  referência correta para comparar com o PETRVS — `total_avaliacoes_pt` conta
-  eventos (múltiplas consolidações mensais inflam a contagem, ratio ~2,78×).
-- Unidades com < 5 avaliações em períodos encerrados têm resultado
-  estatisticamente frágil.
-- Média nacional de referência (jun/2026): ~4,0 ("Alto desempenho").
-- Pendência: CGOV decidir abordagem eventos vs. planos vs. última
-  consolidação (ver a ficha técnica pública do I09).
+- **Correção de escala obrigatória (12.06.2026):** "Inadequado" é
+  `tan.sequencia = 4`, não `sequencia = 2` (que é "Alto desempenho"). O bug
+  original classificava 82–86% das unidades em "Atenção crítica" — incorreto.
+  **Não usar `tan.nota` ou `JSON_UNQUOTE(tan.nota)`.**
+- Resultado após correção: 98,9% das unidades em "Baixa prevalência".
+- Alerta recorrente confirmado: PARNAEMAS (T1–T3/2025).
+- Unidades com < 5 avaliações em períodos encerrados têm percentuais
+  estatisticamente frágeis.
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_09.1_run.py` (Opção A/C — fonte de verdade)
-- Ficha técnica: `docs/ocde/06.4.1-i09.md`
+- Script canônico: `ocde/indicadores/IND_OCDE_10.1_run.py` (Opção A/C — fonte de verdade)
+- Ficha técnica: `docs/ocde/06.4.2-i10.md`

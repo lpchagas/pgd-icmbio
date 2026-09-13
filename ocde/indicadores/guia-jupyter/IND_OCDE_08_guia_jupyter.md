@@ -1,6 +1,6 @@
 # I08 — Proporção de Horas por Entrega (%) — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_08.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_08.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -156,7 +156,7 @@ ORDER BY unidade_sigla, proporcao_horas_perc DESC
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_08.2_proporcao_horas_entrega_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_08.2_proporcao_horas_entrega_{stamp}.csv"
 df_i08.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
@@ -176,5 +176,5 @@ print(f"Exportado: {output_path}")
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_08.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_08.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.3.4-i08.md`

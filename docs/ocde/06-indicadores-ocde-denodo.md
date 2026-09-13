@@ -17,7 +17,7 @@ consulte [05-contexto-ocde-pgd.md](../05-contexto-ocde-pgd.md).
 ### Opção A — scripts Python (recomendado)
 
 1. Configure o `.env` local conforme o README.
-2. Execute `python ocde/indicadores/IND_XX.1_run.py --data-execucao AAAA-MM-DD`.
+2. Execute `python ocde/indicadores/IND_OCDE_XX.1_run.py --data-execucao AAAA-MM-DD`.
 3. O script calcula a janela oficial e salva o CSV pipe-delimited somente em
    `artefatos_local/ocde/entregas/AAAA-MM/`.
 

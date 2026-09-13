@@ -1,6 +1,6 @@
 # I01 — Proporção de Servidores por Regime de Trabalho — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_01.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_01.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -92,7 +92,7 @@ Sem placeholders para trocar — a query roda uma única vez.
    df_i01 = run_query(sql_i01)
    ```
 4. Segmentar por período e agregar por modalidade — célula pandas (traduz a lógica
-   de `IND_01.1_run.py`, função `main()`, para o notebook):
+   de `IND_OCDE_01.1_run.py`, função `main()`, para o notebook):
    ```python
    import pandas as pd
 
@@ -130,7 +130,7 @@ Sem placeholders para trocar — a query roda uma única vez.
    df_i01_v1
    ```
    Para a visão por unidade (V2), repita o agrupamento incluindo `unidade_sigla`,
-   `unidade_nome` antes de `modalidade` — ver `IND_01.1_run.py` linhas 188-202
+   `unidade_nome` antes de `modalidade` — ver `IND_OCDE_01.1_run.py` linhas 188-202
    para a lógica completa (denominador = total de servidores da unidade no período).
 
 ## 6. Exportação em CSV (padrão pipe-delimited)
@@ -139,13 +139,13 @@ Sem placeholders para trocar — a query roda uma única vez.
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_01.2_v1_proporcao_mensal_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_01.2_v1_proporcao_mensal_{stamp}.csv"
 df_i01_v1.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
 
 Ajuste `2026-07` para o mês corrente. Repita para `df_i01_v2` com o nome
-`IND_01.2_v2_proporcao_unidade_mensal_{stamp}.csv`.
+`IND_OCDE_01.2_v2_proporcao_unidade_mensal_{stamp}.csv`.
 
 ## 7. Observações e pontos críticos
 
@@ -162,5 +162,5 @@ Ajuste `2026-07` para o mês corrente. Repita para `df_i01_v2` com o nome
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_01.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_01.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.1.1-i01.md`

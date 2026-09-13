@@ -22,7 +22,7 @@ from zoneinfo import ZoneInfo
 from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
-from .validation_contracts import TARGETS
+from .validation_contracts import TARGETS, ocde_artifact
 
 
 INDICATORS: tuple[tuple[str, str, str, int], ...] = tuple(
@@ -81,7 +81,7 @@ def _sql_hash(path: Path) -> str:
 
 
 def _indicator_files(directory: Path, number: str) -> set[Path]:
-    return {path.resolve() for path in directory.glob(f"IND_{number}.2_*.csv")}
+    return {path.resolve() for path in directory.glob(ocde_artifact(number, "2_*.csv"))}
 
 
 def _normalize_indicator(value: str | None) -> str | None:

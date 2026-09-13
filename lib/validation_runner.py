@@ -19,7 +19,13 @@ from zoneinfo import ZoneInfo
 from .csv_utils import PROJECT_ROOT
 from .estrutura_organizacional import load_organization_structure
 from .periodos import ANALYSIS_TIMEZONE, AnalysisWindow, configure_execution_context
-from .validation_contracts import OutputContract, ValidationTarget, selected_targets, validate_registry
+from .validation_contracts import (
+    OCDE_ARTIFACT_PREFIX,
+    OutputContract,
+    ValidationTarget,
+    selected_targets,
+    validate_registry,
+)
 from .validation_extractors import extract_atomic
 from .validation_diagnostics import diagnose_atomic
 from .validation_drift import assess_drift
@@ -372,10 +378,12 @@ def _validate_target(
                     findings.extend(assess_drift(profile, reference, target.drift_policy))
 
     if requested_stage < STAGE_ORDER["A3"]:
+        # A1/A2 encerram aqui: a classificação precisa considerar apenas os
+        # achados já coletados, sem depender do bloco A3 abaixo.
         return {
             "alvo": target.code,
             "etapa": stage,
-            "status": "sucesso" if not blocking else "falha",
+            "status": "sucesso" if not _has_blocking(findings) else "falha",
             "achados": findings,
             "hash_A1": _sha256(target.production_entrypoint),
             "perfis_A2": profiles,
@@ -405,7 +413,9 @@ def _validate_target(
         "linhas_oracle": len(oracle), "perfis_A2": profiles, "achados": findings,
         "status": "sucesso" if not blocking else "falha",
     }
-    prefix = f"IND_{target.code[1:]}" if target.family == "ocde" else target.code
+    prefix = (
+        f"{OCDE_ARTIFACT_PREFIX}_{target.code[1:]}" if target.family == "ocde" else target.code
+    )
     output_dir.mkdir(parents=True, exist_ok=True)
     a3_json = output_dir / f"{prefix}.3_validacao_independente_{run_id}.json"
     a3_md = output_dir / f"{prefix}.3_validacao_independente_{run_id}.md"

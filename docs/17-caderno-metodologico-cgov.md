@@ -855,9 +855,9 @@ manifesto_validacao_<run_id>.json
 Para I01–I12:
 
 ```text
-IND_XX.3_validacao_independente_<run_id>.{json,md}
-IND_XX.4_diagnostico_<run_id>.{json,md}
-IND_XX.5_relatorio_validacao_<run_id>.md
+IND_OCDE_XX.3_validacao_independente_<run_id>.{json,md}
+IND_OCDE_XX.4_diagnostico_<run_id>.{json,md}
+IND_OCDE_XX.5_relatorio_validacao_<run_id>.md
 ```
 
 Para gestão:

@@ -1,4 +1,4 @@
-"""IND_12.1_run.py — I12: Coerência entre Avaliação do PT e do PE.
+"""IND_OCDE_12.1_run.py — I12: Coerência entre Avaliação do PT e do PE.
 
 Instrumento: misto PT + PE — ciclo alinhado ao Plano de Entregas (PE).
 Periodicidade: 2025 trimestral (T3–T4) | 2026+ quadrimestral (Q1–Q3). Base: 01/07/2025.
@@ -27,7 +27,7 @@ Achados de validação (12.06.2026):
     não participam do JOIN entre PT e PE.
 
 Nota: o JOIN interno entre PT e PE exclui unidades sem as duas perspectivas.
-Para listar essas unidades, executar o diagnóstico A4 (IND_12.4).
+Para listar essas unidades, executar o diagnóstico A4 (IND_OCDE_12.4).
 """
 from __future__ import annotations
 
@@ -157,7 +157,7 @@ def main() -> None:
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_12.2_coerencia_pt_pe_{stamp}.csv"
+    output = out_dir / f"IND_OCDE_12.2_coerencia_pt_pe_{stamp}.csv"
 
     window = analysis_window()
     periods = build_periods_pe(window.fim)
@@ -219,7 +219,7 @@ def main() -> None:
 
     # Nota sobre exclusao do JOIN interno (unidades sem PT ou sem PE)
     print("  NOTA: unidades sem avaliacao de PE no periodo sao excluidas do resultado (JOIN interno PT x PE).")
-    print("        Para listar essas unidades, executar o diagnostico A4 (IND_12.4).")
+    print("        Para listar essas unidades, executar o diagnostico A4 (IND_OCDE_12.4).")
 
     parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
     if parciais:

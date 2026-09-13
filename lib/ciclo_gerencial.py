@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
+from .validation_contracts import TARGETS, artifact_indicator_number
 
 
 STAGES = (
@@ -100,8 +101,8 @@ def _preflight(denodo_python: str, test_python: str) -> dict:
     required = [
         PROJECT_ROOT / ".env",
         PROJECT_ROOT / "lib" / "periodos.py",
-        PROJECT_ROOT / "ocde" / "indicadores" / "IND_01.1_run.py",
-        PROJECT_ROOT / "gestao" / "PT_STATUS.1_run.py",
+        TARGETS["I01"].production_entrypoint,
+        TARGETS["PT_STATUS"].production_entrypoint,
         PROJECT_ROOT / "artefatos_local" / "ocde" / "diagnosticos" / "ICMBIO_estrutura.csv",
     ]
     missing = [str(path.relative_to(PROJECT_ROOT)) for path in required if not path.exists()]
@@ -120,9 +121,11 @@ def _preflight(denodo_python: str, test_python: str) -> dict:
 
 def _extraction_report(window) -> dict:
     directory = indicator_csv_dir(window.mes_execucao)
+    # Aceita o nome atual (IND_OCDE_07.2_*) e o legado (IND_07.2_*), porque as
+    # entregas anteriores a 13.09.2026 permanecem em artefatos_local/.
     codes = {
-        path.name[4:6] for path in directory.glob("IND_??.2_*.csv")
-        if len(path.name) >= 6
+        number for path in directory.glob("IND_*.2_*.csv")
+        for number in [artifact_indicator_number(path.name)] if number
     } if directory.exists() else set()
     missing = [f"I{number:02d}" for number in range(1, 13) if f"{number:02d}" not in codes]
     return {

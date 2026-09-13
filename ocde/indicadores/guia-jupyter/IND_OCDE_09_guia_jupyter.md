@@ -1,14 +1,13 @@
-# I11 — Percentual de Avaliações Excepcionais por Unidade — Guia de Execução via Jupyter Notebook
+# I09 — Média da Avaliação do Plano de Trabalho por Unidade — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_11.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_09.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
 
-Calcula o percentual de avaliações do PT classificadas como "Excepcional"
-(`tan.sequencia = 1`) por unidade — sinaliza reconhecimento elevado ou possível
-leniência avaliativa.
+Calcula a média das notas de avaliação do Plano de Trabalho (PT) por unidade,
+usando a escala corrigida `(6 - tan.sequencia)`.
 
 ## 2. Pré-requisitos
 
@@ -38,7 +37,7 @@ Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pt()`
 | M06-2026 | mensal | 2026-06-01 | 2026-06-30 | encerrado |
 | M08-2026 | mensal | 2026-08-01 | 2026-08-31 | encerrado |
 
-## 4. Query SQL_I11
+## 4. Query SQL_I09
 
 Exemplo com o primeiro período (T3-2025) preenchido — troque as datas de
 `parametros` a cada rodada.
@@ -52,9 +51,10 @@ WITH parametros AS (
 ),
 avaliacoes_pt AS (
     SELECT
-        av.id          AS id_avaliacao,
+        av.id                    AS id_avaliacao,
         pt.unidade_id,
-        tan.sequencia  AS sequencia_nota
+        ptc.plano_trabalho_id,
+        (6 - tan.sequencia)      AS valor_nota
     FROM petrvs_icmbio_avaliacoes av
     JOIN petrvs_icmbio_planos_trabalhos_consolidacoes ptc
         ON ptc.id = av.plano_trabalho_consolidacao_id
@@ -69,17 +69,20 @@ avaliacoes_pt AS (
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
 ),
-proporcao_por_unidade AS (
+media_por_unidade AS (
     SELECT
-        COALESCE(un.sigla, 'N.I.')                                   AS unidade_sigla,
-        COALESCE(un.nome,  'N.I.')                                   AS unidade_nome,
-        COUNT(avpt.id_avaliacao)                                     AS total_avaliacoes_pt,
-        SUM(CASE WHEN avpt.sequencia_nota = 1 THEN 1 ELSE 0 END)    AS qtd_excepcional,
-        ROUND(
-            SUM(CASE WHEN avpt.sequencia_nota = 1 THEN 1 ELSE 0 END) * 100.0
-                / NULLIF(COUNT(avpt.id_avaliacao), 0),
-            2
-        )                                                            AS perc_excepcional
+        COALESCE(un.sigla, 'N.I.')                               AS unidade_sigla,
+        COALESCE(un.nome,  'N.I.')                               AS unidade_nome,
+        COUNT(avpt.id_avaliacao)                                 AS total_avaliacoes_pt,
+        COUNT(DISTINCT avpt.plano_trabalho_id)                   AS total_planos_com_avaliacao,
+        ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt,
+        MIN(avpt.valor_nota)                                     AS nota_minima,
+        MAX(avpt.valor_nota)                                     AS nota_maxima,
+        SUM(CASE WHEN avpt.valor_nota = 1 THEN 1 ELSE 0 END)    AS qtd_nota_1,
+        SUM(CASE WHEN avpt.valor_nota = 2 THEN 1 ELSE 0 END)    AS qtd_nota_2,
+        SUM(CASE WHEN avpt.valor_nota = 3 THEN 1 ELSE 0 END)    AS qtd_nota_3,
+        SUM(CASE WHEN avpt.valor_nota = 4 THEN 1 ELSE 0 END)    AS qtd_nota_4,
+        SUM(CASE WHEN avpt.valor_nota = 5 THEN 1 ELSE 0 END)    AS qtd_nota_5
     FROM avaliacoes_pt avpt
     LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
     GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.')
@@ -88,24 +91,32 @@ SELECT
     unidade_sigla,
     unidade_nome,
     total_avaliacoes_pt,
-    qtd_excepcional,
-    perc_excepcional,
+    total_planos_com_avaliacao,
+    media_nota_pt,
+    nota_minima,
+    nota_maxima,
+    qtd_nota_1,
+    qtd_nota_2,
+    qtd_nota_3,
+    qtd_nota_4,
+    qtd_nota_5,
     CASE
-        WHEN perc_excepcional >= 40 THEN 'Reconhecimento elevado'
-        WHEN perc_excepcional >= 20 THEN 'Desempenho diferenciado'
-        WHEN perc_excepcional >=  5 THEN 'Destaque pontual'
-        ELSE 'Escala subutilizada'
-    END AS nivel_reconhecimento
-FROM proporcao_por_unidade
-ORDER BY perc_excepcional DESC, unidade_sigla
+        WHEN media_nota_pt >= 4.5 THEN 'Excepcional'
+        WHEN media_nota_pt >= 3.5 THEN 'Alto desempenho'
+        WHEN media_nota_pt >= 2.5 THEN 'Adequado'
+        WHEN media_nota_pt >= 1.5 THEN 'Inadequado'
+        ELSE 'Nao executado'
+    END AS faixa_desempenho
+FROM media_por_unidade
+ORDER BY media_nota_pt DESC, unidade_sigla
 ```
 
 ## 5. Passo a passo no notebook
 
 1. Abrir `consultas_denodo.ipynb`.
 2. Rodar a célula 1 (JVM) e a célula 2 (`run_query`) — seção "1. Configuração da conexão".
-3. Colar a query da seção 4 numa nova célula, atribuir a `sql_i11`.
-4. Rodar `df_i11 = run_query(sql_i11)`.
+3. Colar a query da seção 4 numa nova célula, atribuir a `sql_i09`.
+4. Rodar `df_i09 = run_query(sql_i09)`.
 5. Repetir os passos 3–4 trocando `data_inicio`/`data_fim` para cada período da
    tabela da seção 3.
 
@@ -115,27 +126,28 @@ ORDER BY perc_excepcional DESC, unidade_sigla
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_11.2_perc_excepcional_pt_{stamp}.csv"
-df_i11.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_09.2_media_avaliacao_pt_{stamp}.csv"
+df_i09.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
 
 ## 7. Observações e pontos críticos
 
-- **Correção de escala obrigatória (12.06.2026):** "Excepcional" é
-  `tan.sequencia = 1`, não `sequencia = 5` (que é "Não executado"). O bug
-  original produzia ~0,02% de Excepcionais (4–9 registros em 35.000+) —
-  claramente incorreto.
-- Resultado após correção: 9,23% de Excepcionais (1.922/20.812 em 2025).
-  Perfil ICMBio: 9% Excepcional + 71% Alto desempenho + 20% Adequado + 0,2%
-  Inadequado.
-- `perc_excepcional >= 40%` deve ser **cruzado com o I12** para distinguir
-  excelência genuína de leniência avaliativa (PT >> PE).
-- Unidades com `nivel_reconhecimento = 'Escala subutilizada'` indicam nota
-  Excepcional quase ausente.
-- Unidades com < 5 avaliações em períodos encerrados têm percentuais frágeis.
+- **Correção de escala obrigatória (19.06.2026):** `JSON_UNQUOTE(tan.nota)`
+  não funciona no Denodo VQL via JDBC (retorna `NULL`). Usar sempre
+  `(6 - tan.sequencia)`:
+  `sequencia=1→Excepcional(5)`, `2→Alto desempenho(4)`, `3→Adequado(3)`,
+  `4→Inadequado(2)`, `5→Não executado(1)`. **Nunca usar `tan.nota` ou `JSON_UNQUOTE`.**
+- `total_planos_com_avaliacao` (`COUNT DISTINCT plano_trabalho_id`) é a
+  referência correta para comparar com o PETRVS — `total_avaliacoes_pt` conta
+  eventos (múltiplas consolidações mensais inflam a contagem, ratio ~2,78×).
+- Unidades com < 5 avaliações em períodos encerrados têm resultado
+  estatisticamente frágil.
+- Média nacional de referência (jun/2026): ~4,0 ("Alto desempenho").
+- Pendência: CGOV decidir abordagem eventos vs. planos vs. última
+  consolidação (ver a ficha técnica pública do I09).
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_11.1_run.py` (Opção A/C — fonte de verdade)
-- Ficha técnica: `docs/ocde/06.4.3-i11.md`
+- Script canônico: `ocde/indicadores/IND_OCDE_09.1_run.py` (Opção A/C — fonte de verdade)
+- Ficha técnica: `docs/ocde/06.4.1-i09.md`

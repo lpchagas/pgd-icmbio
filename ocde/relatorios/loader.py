@@ -70,7 +70,12 @@ def find_mes_dir(mes: Optional[str] = None) -> Path:
 
 def load_ind(mes_dir: Path, ind: str, variant: str = "") -> Optional[pd.DataFrame]:
     """Carrega o CSV mais recente do indicador `ind`. `variant`: 'v1' ou 'v2' para I01."""
-    files = sorted(mes_dir.glob(f"IND_{ind}.*.csv"))
+    # Aceita IND_OCDE_XX (atual) e IND_XX (entregas anteriores a 13.09.2026).
+    # A ordenação por nome coloca o prefixo legado antes do atual, de modo que
+    # o último elemento é sempre a geração mais nova disponível.
+    files = sorted(
+        set(mes_dir.glob(f"IND_{ind}.*.csv")) | set(mes_dir.glob(f"IND_OCDE_{ind}.*.csv"))
+    )
     if variant:
         files = [f for f in files if variant in f.name]
     if not files:

@@ -1,4 +1,4 @@
-"""IND_03.1_run.py — I03: Taxa de Cumprimento de Metas por Entrega.
+"""IND_OCDE_03.1_run.py — I03: Taxa de Cumprimento de Metas por Entrega.
 
 Instrumento: Plano de Entregas (PE).
 Periodicidade: 2025 trimestral (T3–T4) | 2026+ quadrimestral (Q1–Q3). Base: 01/07/2025.
@@ -190,7 +190,7 @@ def main() -> None:
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_03.2_taxa_cumprimento_entrega_{stamp}.csv"
+    output = out_dir / f"IND_OCDE_03.2_taxa_cumprimento_entrega_{stamp}.csv"
 
     window = analysis_window()
     periods = build_periods_pe(window.fim)

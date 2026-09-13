@@ -41,7 +41,11 @@ def latest_indicator_files(month_dir: Path) -> dict[str, Path]:
     files: dict[str, Path] = {}
     for indicator in range(1, 13):
         code = f"{indicator:02d}"
-        candidates = sorted(month_dir.glob(f"IND_{code}.2_*.csv"))
+        # Prefixo atual (IND_OCDE_) e legado (IND_) — ver ocde/relatorios/loader.py.
+        candidates = sorted(
+            set(month_dir.glob(f"IND_{code}.2_*.csv"))
+            | set(month_dir.glob(f"IND_OCDE_{code}.2_*.csv"))
+        )
         if code == "01":
             scoped = [path for path in candidates if "_v2_" in path.name]
             candidates = scoped or candidates

@@ -1,6 +1,6 @@
 # I04 — Score Médio de Atingimento de Metas por Unidade — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_04.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_04.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -135,7 +135,7 @@ ORDER BY r.score_atingimento_perc DESC, r.unidade_sigla
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_04.2_score_atingimento_metas_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_04.2_score_atingimento_metas_{stamp}.csv"
 df_i04.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
@@ -153,5 +153,5 @@ print(f"Exportado: {output_path}")
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_04.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_04.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.2.3-i04.md`

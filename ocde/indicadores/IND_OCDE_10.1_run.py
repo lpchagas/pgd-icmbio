@@ -1,4 +1,4 @@
-"""IND_10.1_run.py — I10: Percentual de Avaliações Inadequadas por Unidade.
+"""IND_OCDE_10.1_run.py — I10: Percentual de Avaliações Inadequadas por Unidade.
 
 Instrumento: Plano de Trabalho (PT).
 Periodicidade: 2025 trimestral (T3–T4) | 2026+ mensal (M01–M12). Base: 01/07/2025.
@@ -109,7 +109,7 @@ def main() -> None:
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_10.2_perc_inadequado_pt_{stamp}.csv"
+    output = out_dir / f"IND_OCDE_10.2_perc_inadequado_pt_{stamp}.csv"
 
     window = analysis_window()
     periods = build_periods_pt(window.fim)

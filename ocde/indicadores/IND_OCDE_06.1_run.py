@@ -1,4 +1,4 @@
-"""IND_06.1_run.py — I06: Grau de Responsabilidade pelas Entregas.
+"""IND_OCDE_06.1_run.py — I06: Grau de Responsabilidade pelas Entregas.
 
 Instrumento: Plano de Trabalho (PT).
 Periodicidade: 2025 trimestral (T3–T4) | 2026+ mensal (M01–M12). Base: 01/07/2025.
@@ -107,7 +107,7 @@ def main() -> None:
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_06.2_grau_responsabilidade_entregas_{stamp}.csv"
+    output = out_dir / f"IND_OCDE_06.2_grau_responsabilidade_entregas_{stamp}.csv"
 
     window = analysis_window()
     periods = build_periods_pt(window.fim)

@@ -95,7 +95,7 @@ class TestSetPeriod:
 
     def test_substitui_literal_data_inicio_data_fim(self):
         """set_period patcha o primeiro par CAST(...) AS data_inicio/data_fim
-        do bloco `parametros` — o padrão real usado nos scripts IND_XX.1_run.py."""
+        do bloco `parametros` — o padrão real usado nos scripts IND_OCDE_XX.1_run.py."""
         sql = read_doc(DOC_COM_VARIAVEL)
         result = set_period(sql, "2026-05-01", "2026-08-31")
         assert "CAST('2026-05-01' AS DATE) AS data_inicio" in result

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+import re
 from typing import Any
 
 from .csv_utils import PROJECT_ROOT
@@ -22,6 +23,40 @@ APPROVAL_STATES = (
     "REPROVADO",
     "HOMOLOGADO",
 )
+
+# Prefixo de artefato da família OCDE (decisão CGOV D01, 13.09.2026). Os
+# indicadores do MGI usarão IND_MGI_ na pasta mgi/indicadores/. O código lógico
+# de cada alvo continua sendo I01..I12: só o nome de arquivo carrega o namespace.
+OCDE_ARTIFACT_PREFIX = "IND_OCDE"
+LEGACY_OCDE_ARTIFACT_PREFIX = "IND"
+
+# Aceita I07, IND_07 (legado, anterior a 13.09.2026) e IND_OCDE_07.
+_TARGET_ALIAS = re.compile(r"^IND(?:_OCDE)?_(?=\d)")
+
+# Reconhece o número do indicador em nomes de artefato das duas gerações. Usado
+# por quem *lê* artefatos: os CSVs já entregues entre 2025-07 e 2026-08 seguem
+# com o nome antigo e precisam continuar carregando.
+OCDE_ARTIFACT_RE = re.compile(r"^IND_(?:OCDE_)?(\d{2})\.")
+
+
+def ocde_artifact(number: str, suffix: str) -> str:
+    """Nome de artefato OCDE: ``ocde_artifact("07", "2_*.csv")``."""
+
+    return f"{OCDE_ARTIFACT_PREFIX}_{number}.{suffix}"
+
+
+def normalize_target(value: str) -> str:
+    """Normaliza um alvo informado na CLI para o código lógico (I07, PT_STATUS)."""
+
+    return _TARGET_ALIAS.sub("I", value.strip().upper())
+
+
+def artifact_indicator_number(name: str) -> str | None:
+    """Extrai o número do indicador de um nome de artefato, ou ``None``."""
+
+    match = OCDE_ARTIFACT_RE.match(name)
+    return match.group(1) if match else None
+
 
 COMMON_PERIOD_COLUMNS = (
     "ciclo_tipo",
@@ -142,10 +177,12 @@ def _indicator(
         code=f"I{number}",
         family="ocde",
         name=name,
-        production_entrypoint=PROJECT_ROOT / "ocde" / "indicadores" / f"IND_{number}.1_run.py",
+        production_entrypoint=(
+            PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact(number, "1_run.py")
+        ),
         oracle_name=f"oracle_i{number}",
         atomic_extractors=extractors,
-        outputs=(OutputContract(f"IND_{number}.2_*.csv", columns, keys, metrics),),
+        outputs=(OutputContract(ocde_artifact(number, "2_*.csv"), columns, keys, metrics),),
         formula_version="2.0.0",
         temporal_lenses=(period,),
         supported_scopes=SCOPE_ALL,
@@ -168,19 +205,21 @@ TARGETS["I01"] = ValidationTarget(
     code="I01",
     family="ocde",
     name="Proporção por regime de trabalho",
-    production_entrypoint=PROJECT_ROOT / "ocde" / "indicadores" / "IND_01.1_run.py",
+    production_entrypoint=(
+        PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact("01", "1_run.py")
+    ),
     oracle_name="oracle_i01",
     atomic_extractors=("pt_modalidade",),
     outputs=(
         OutputContract(
-            "IND_01.2_v1_*.csv",
+            ocde_artifact("01", "2_v1_*.csv"),
             _periodic("modalidade", "total_servidores", "proporcao_perc"),
             ("periodo", "modalidade"),
             ("total_servidores", "proporcao_perc"),
             view="institucional",
         ),
         OutputContract(
-            "IND_01.2_v2_*.csv",
+            ocde_artifact("01", "2_v2_*.csv"),
             _periodic(
                 "unidade_sigla", "unidade_nome", "mesogrupo", "modalidade",
                 "total_servidores", "proporcao_na_unidade_perc",
@@ -344,7 +383,7 @@ TARGETS["PT_STATUS"] = ValidationTarget(
 
 
 def selected_targets(family: str = "todas", target: str = "todos") -> list[ValidationTarget]:
-    normalized = target.strip().upper().replace("IND_", "I")
+    normalized = normalize_target(target)
     if normalized not in {"TODOS", *TARGETS}:
         raise ValueError(f"Alvo de validação desconhecido: {target}")
     values = list(TARGETS.values()) if normalized == "TODOS" else [TARGETS[normalized]]

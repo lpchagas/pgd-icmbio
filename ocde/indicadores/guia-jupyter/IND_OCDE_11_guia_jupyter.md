@@ -1,14 +1,14 @@
-# I10 — Percentual de Avaliações Inadequadas por Unidade — Guia de Execução via Jupyter Notebook
+# I11 — Percentual de Avaliações Excepcionais por Unidade — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_10.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_11.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
 
-Calcula o percentual de avaliações do PT classificadas como "Inadequado"
-(`tan.sequencia = 4`) por unidade — sinaliza baixa prevalência ou atenção
-crítica de desempenho.
+Calcula o percentual de avaliações do PT classificadas como "Excepcional"
+(`tan.sequencia = 1`) por unidade — sinaliza reconhecimento elevado ou possível
+leniência avaliativa.
 
 ## 2. Pré-requisitos
 
@@ -38,7 +38,7 @@ Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pt()`
 | M06-2026 | mensal | 2026-06-01 | 2026-06-30 | encerrado |
 | M08-2026 | mensal | 2026-08-01 | 2026-08-31 | encerrado |
 
-## 4. Query SQL_I10
+## 4. Query SQL_I11
 
 Exemplo com o primeiro período (T3-2025) preenchido — troque as datas de
 `parametros` a cada rodada.
@@ -74,12 +74,12 @@ proporcao_por_unidade AS (
         COALESCE(un.sigla, 'N.I.')                                   AS unidade_sigla,
         COALESCE(un.nome,  'N.I.')                                   AS unidade_nome,
         COUNT(avpt.id_avaliacao)                                     AS total_avaliacoes_pt,
-        SUM(CASE WHEN avpt.sequencia_nota = 4 THEN 1 ELSE 0 END)    AS qtd_inadequado,
+        SUM(CASE WHEN avpt.sequencia_nota = 1 THEN 1 ELSE 0 END)    AS qtd_excepcional,
         ROUND(
-            SUM(CASE WHEN avpt.sequencia_nota = 4 THEN 1 ELSE 0 END) * 100.0
+            SUM(CASE WHEN avpt.sequencia_nota = 1 THEN 1 ELSE 0 END) * 100.0
                 / NULLIF(COUNT(avpt.id_avaliacao), 0),
             2
-        )                                                            AS perc_inadequado
+        )                                                            AS perc_excepcional
     FROM avaliacoes_pt avpt
     LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
     GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.')
@@ -88,24 +88,24 @@ SELECT
     unidade_sigla,
     unidade_nome,
     total_avaliacoes_pt,
-    qtd_inadequado,
-    perc_inadequado,
+    qtd_excepcional,
+    perc_excepcional,
     CASE
-        WHEN perc_inadequado >= 30 THEN 'Atencao critica'
-        WHEN perc_inadequado >= 15 THEN 'Atencao moderada'
-        WHEN perc_inadequado >=  5 THEN 'Observacao'
-        ELSE 'Baixa prevalencia'
-    END AS nivel_alerta
+        WHEN perc_excepcional >= 40 THEN 'Reconhecimento elevado'
+        WHEN perc_excepcional >= 20 THEN 'Desempenho diferenciado'
+        WHEN perc_excepcional >=  5 THEN 'Destaque pontual'
+        ELSE 'Escala subutilizada'
+    END AS nivel_reconhecimento
 FROM proporcao_por_unidade
-ORDER BY perc_inadequado DESC, unidade_sigla
+ORDER BY perc_excepcional DESC, unidade_sigla
 ```
 
 ## 5. Passo a passo no notebook
 
 1. Abrir `consultas_denodo.ipynb`.
 2. Rodar a célula 1 (JVM) e a célula 2 (`run_query`) — seção "1. Configuração da conexão".
-3. Colar a query da seção 4 numa nova célula, atribuir a `sql_i10`.
-4. Rodar `df_i10 = run_query(sql_i10)`.
+3. Colar a query da seção 4 numa nova célula, atribuir a `sql_i11`.
+4. Rodar `df_i11 = run_query(sql_i11)`.
 5. Repetir os passos 3–4 trocando `data_inicio`/`data_fim` para cada período da
    tabela da seção 3.
 
@@ -115,23 +115,27 @@ ORDER BY perc_inadequado DESC, unidade_sigla
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_10.2_perc_inadequado_pt_{stamp}.csv"
-df_i10.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_11.2_perc_excepcional_pt_{stamp}.csv"
+df_i11.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
 
 ## 7. Observações e pontos críticos
 
-- **Correção de escala obrigatória (12.06.2026):** "Inadequado" é
-  `tan.sequencia = 4`, não `sequencia = 2` (que é "Alto desempenho"). O bug
-  original classificava 82–86% das unidades em "Atenção crítica" — incorreto.
-  **Não usar `tan.nota` ou `JSON_UNQUOTE(tan.nota)`.**
-- Resultado após correção: 98,9% das unidades em "Baixa prevalência".
-- Alerta recorrente confirmado: PARNAEMAS (T1–T3/2025).
-- Unidades com < 5 avaliações em períodos encerrados têm percentuais
-  estatisticamente frágeis.
+- **Correção de escala obrigatória (12.06.2026):** "Excepcional" é
+  `tan.sequencia = 1`, não `sequencia = 5` (que é "Não executado"). O bug
+  original produzia ~0,02% de Excepcionais (4–9 registros em 35.000+) —
+  claramente incorreto.
+- Resultado após correção: 9,23% de Excepcionais (1.922/20.812 em 2025).
+  Perfil ICMBio: 9% Excepcional + 71% Alto desempenho + 20% Adequado + 0,2%
+  Inadequado.
+- `perc_excepcional >= 40%` deve ser **cruzado com o I12** para distinguir
+  excelência genuína de leniência avaliativa (PT >> PE).
+- Unidades com `nivel_reconhecimento = 'Escala subutilizada'` indicam nota
+  Excepcional quase ausente.
+- Unidades com < 5 avaliações em períodos encerrados têm percentuais frágeis.
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_10.1_run.py` (Opção A/C — fonte de verdade)
-- Ficha técnica: `docs/ocde/06.4.2-i10.md`
+- Script canônico: `ocde/indicadores/IND_OCDE_11.1_run.py` (Opção A/C — fonte de verdade)
+- Ficha técnica: `docs/ocde/06.4.3-i11.md`

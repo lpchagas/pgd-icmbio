@@ -1,6 +1,6 @@
 # I05 — Distribuição das Entregas entre os Servidores — Guia de Execução via Jupyter Notebook
 
-> Guia derivado de `ocde/indicadores/IND_05.1_run.py` (fonte canônica — Opção A/C).
+> Guia derivado de `ocde/indicadores/IND_OCDE_05.1_run.py` (fonte canônica — Opção A/C).
 > Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
@@ -124,7 +124,7 @@ ORDER BY e.unidade_sigla, e.qtd_entregas_por_servidor DESC, e.nome_servidor
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y%m%d_%H%M")
-output_path = f"artefatos_local/ocde/entregas/2026-07/IND_05.2_distribuicao_entregas_servidores_{stamp}.csv"
+output_path = f"artefatos_local/ocde/entregas/2026-07/IND_OCDE_05.2_distribuicao_entregas_servidores_{stamp}.csv"
 df_i05.to_csv(output_path, index=False, sep="|", encoding="utf-8-sig")
 print(f"Exportado: {output_path}")
 ```
@@ -141,5 +141,5 @@ print(f"Exportado: {output_path}")
 
 ## 8. Ver também
 
-- Script canônico: `ocde/indicadores/IND_05.1_run.py` (Opção A/C — fonte de verdade)
+- Script canônico: `ocde/indicadores/IND_OCDE_05.1_run.py` (Opção A/C — fonte de verdade)
 - Ficha técnica: `docs/ocde/06.3.1-i05.md`

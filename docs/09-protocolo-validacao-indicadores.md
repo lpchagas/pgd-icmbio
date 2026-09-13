@@ -72,7 +72,7 @@ Requisitos:
 Padrões existentes são preservados:
 
 ```text
-IND_XX.2_<nome>_AAAAMMDD_HHMM.csv
+IND_OCDE_XX.2_<nome>_AAAAMMDD_HHMM.csv
 PT_STATUS.2_<visao>_<produto>_<escopo>_AAAAMMDD_HHMM.csv
 ```
 
@@ -89,8 +89,8 @@ manifesto inconsistente.
 Artefatos:
 
 ```text
-IND_XX.3_validacao_independente_<run_id>.json
-IND_XX.3_validacao_independente_<run_id>.md
+IND_OCDE_XX.3_validacao_independente_<run_id>.json
+IND_OCDE_XX.3_validacao_independente_<run_id>.md
 PT_STATUS.3_validacao_independente_<run_id>.json
 PT_STATUS.3_validacao_independente_<run_id>.md
 ```
@@ -124,9 +124,9 @@ Exceções precisam de justificativa no contrato.
 Artefatos:
 
 ```text
-IND_XX.4_diagnostico_<run_id>.json
-IND_XX.4_diagnostico_<run_id>.md
-IND_XX.4_qN_<descricao>_<run_id>.csv
+IND_OCDE_XX.4_diagnostico_<run_id>.json
+IND_OCDE_XX.4_diagnostico_<run_id>.md
+IND_OCDE_XX.4_qN_<descricao>_<run_id>.csv
 ```
 
 A4 resumido é sempre gerado. Evidências detalhadas surgem apenas para regras
@@ -152,7 +152,7 @@ SEM_DIVERGENCIA
 Artefatos:
 
 ```text
-IND_XX.5_relatorio_validacao_<run_id>.md
+IND_OCDE_XX.5_relatorio_validacao_<run_id>.md
 PT_STATUS.5_relatorio_validacao_<run_id>.md
 ```
 

@@ -1,4 +1,4 @@
-"""IND_01.1_run.py — I01: Proporcao de Servidores por Regime de Trabalho.
+"""IND_OCDE_01.1_run.py — I01: Proporcao de Servidores por Regime de Trabalho.
 
 Instrumento: Plano de Trabalho (PT).
 Periodicidade: 2025 trimestral (T3-T4) | 2026+ mensal (M01-M12). Base: 01/07/2025.
@@ -20,8 +20,8 @@ Alertas de qualidade:
   - Periodo parcial no corte: usar o fim efetivo e as limitações registradas.
 
 Saidas (em artefatos_local/ocde/entregas/YYYY-MM/):
-  IND_01.2_v1_proporcao_mensal_AAAAMMDD_HHMM.csv      -- visao institucional
-  IND_01.2_v2_proporcao_unidade_mensal_AAAAMMDD_HHMM.csv -- visao por unidade
+  IND_OCDE_01.2_v1_proporcao_mensal_AAAAMMDD_HHMM.csv      -- visao institucional
+  IND_OCDE_01.2_v2_proporcao_unidade_mensal_AAAAMMDD_HHMM.csv -- visao por unidade
 
 Colunas-meta padrao (7) presentes em ambos os CSVs:
   ciclo_tipo | periodo | periodo_inicio | periodo_fim | periodo_fim_efetivo | periodo_status | duracao_dias
@@ -101,8 +101,8 @@ def main() -> None:
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output_v1 = out_dir / f"IND_01.2_v1_proporcao_mensal_{stamp}.csv"
-    output_v2 = out_dir / f"IND_01.2_v2_proporcao_unidade_mensal_{stamp}.csv"
+    output_v1 = out_dir / f"IND_OCDE_01.2_v1_proporcao_mensal_{stamp}.csv"
+    output_v2 = out_dir / f"IND_OCDE_01.2_v2_proporcao_unidade_mensal_{stamp}.csv"
 
     print("Carregando planos de trabalho do Denodo...")
     try:

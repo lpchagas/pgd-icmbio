@@ -1,4 +1,4 @@
-"""IND_09.1_run.py — I09: Média da Avaliação do Plano de Trabalho por Unidade.
+"""IND_OCDE_09.1_run.py — I09: Média da Avaliação do Plano de Trabalho por Unidade.
 
 Instrumento: Plano de Trabalho (PT).
 Periodicidade: 2025 trimestral (T3–T4) | 2026+ mensal (M01–M12). Base: 01/07/2025.
@@ -120,7 +120,7 @@ def main() -> None:
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_09.2_media_avaliacao_pt_{stamp}.csv"
+    output = out_dir / f"IND_OCDE_09.2_media_avaliacao_pt_{stamp}.csv"
 
     window = analysis_window()
     periods = build_periods_pt(window.fim)
