@@ -380,7 +380,8 @@ TARGETS["PT_STATUS"] = ValidationTarget(
             view="painel",
         ),
     ),
-    formula_version="2.0.0",
+    # D14: identificação nominal nos produtos internos da unidade.
+    formula_version="3.0.0",
     temporal_lenses=("operacional",),
     supported_scopes=SCOPE_ALL,
     invariants=("precedencia_consolidacao", "fallback_data_status", "total_subtotais"),

@@ -24,6 +24,24 @@ Os 237 sem trilha são todos INCLUIDO (rascunhos que nunca transitaram) — para
 esses, e para transições automáticas do sistema, cai no fallback `pt.updated_at`
 (a coluna `origem_data_status` diz qual das duas fontes foi usada).
 
+Identificação nominal — decisão CGOV D14 (13.09.2026):
+
+  Este é um produto tático da chefia da unidade, não um indicador. Dizer a um
+  gestor que ele tem "3 servidores aguardando assinatura" é inútil sem os nomes:
+  a finalidade é permitir a cobrança e o destravamento, rotina ordinária do
+  serviço público. Por isso os produtos `operacional` e `restrito` trazem
+  `id_servidor` e `servidor_nome`.
+
+  O produto `compartilhavel` continua **sem** detalhe nominal: só o painel
+  agregado, com supressão de células de contagem inferior a 5 (`SUPRIMIDO_K`).
+  Esse é o único produto que sai da unidade, e o gate de PII do A2
+  (lib/validation_runner.py) segue valendo sobre ele.
+
+  Dado pessoal é coletado no mínimo necessário para a finalidade: nome e
+  identificador do servidor. CPF, e-mail e matrícula não são lidos nem
+  persistidos — antes da D14 o `servidor_email` era selecionado sem uso claro e
+  foi retirado da consulta.
+
 Uso:
     python gestao/PT_STATUS.1_run.py --unidade CGGP
     python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-subordinadas
@@ -63,6 +81,10 @@ ROTULO_PT = {
 # Status abertos = exigem ação de alguém. CONCLUIDO/CANCELADO são histórico.
 STATUS_ABERTOS = ("INCLUIDO", "AGUARDANDO_ASSINATURA", "ATIVO", "SUSPENSO")
 
+# D14: produtos de uso interno da unidade, que trazem identificação nominal.
+# "compartilhavel" fica de fora — é o único que circula fora da unidade.
+PRODUTOS_NOMINAIS = ("operacional", "restrito")
+
 SQL_PT_STATUS = """
 WITH trilha AS (
     SELECT sj.plano_trabalho_id AS pid,
@@ -88,8 +110,8 @@ SELECT
     u.sigla                                        AS unidade_sigla,
     u.nome                                         AS unidade_nome,
     up.sigla                                       AS unidade_pai_sigla,
+    pt.usuario_id                                  AS id_servidor,
     us.nome                                        AS servidor_nome,
-    us.email                                       AS servidor_email,
     pt.numero                                      AS plano_numero,
     CAST(pt.data_inicio AS DATE)                   AS plano_inicio,
     CAST(pt.data_fim AS DATE)                      AS plano_fim,
@@ -286,9 +308,12 @@ def main() -> None:
     idx = {name: i for i, name in enumerate(cols)}
     derivadas = ["status_negocio", "data_ultima_mudanca_status", "origem_data_status",
                  "dias_no_status_atual", "acao_sugerida"]
-    personal_columns = {"servidor_nome", "servidor_email", "status_alterado_por"}
+    personal_columns = {"id_servidor", "servidor_nome", "status_alterado_por"}
+    # D14: a chefia precisa dos nomes para agir; só o produto que sai da
+    # unidade (compartilhavel) é despersonalizado.
+    nominal = args.produto in PRODUTOS_NOMINAIS
     persisted_columns = (
-        cols if args.produto == "operacional"
+        cols if nominal
         else [column for column in cols if column not in personal_columns]
     )
     out_cols = persisted_columns + derivadas
@@ -298,10 +323,10 @@ def main() -> None:
     for row in rows:
         registro = {name: row[i] for name, i in idx.items()}
         status, data_status, origem, acao = derivar_status_negocio(
-            registro, incluir_nome=args.produto == "operacional"
+            registro, incluir_nome=nominal
         )
         persisted_row = (
-            row if args.produto == "operacional"
+            row if nominal
             else [row[idx[column]] for column in persisted_columns]
         )
         out_rows.append(persisted_row + [status, data_status, origem,

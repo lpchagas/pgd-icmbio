@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from lib.csv_utils import PROJECT_ROOT
+from lib.validation_contracts import TARGETS
 
 
 @dataclass(frozen=True)
@@ -67,7 +68,9 @@ REGISTRY: dict[str, ManagementExtraction] = {
         atomic_extractors=("pt_status_planos", "pt_status_consolidacoes", "pt_status_transicoes"),
         business_keys=("unidade_sigla", "status_negocio"),
         validation_schema="PT_STATUS.validation.v1",
-        formula_version="2.0.0",
+        # Derivada do contrato de validação para que as duas declarações não
+        # divirjam a cada mudança de fórmula (D14 elevou o PT_STATUS a 3.0.0).
+        formula_version=TARGETS["PT_STATUS"].formula_version,
         invariants=("precedencia_consolidacao", "fallback_data_status", "total_subtotais"),
         tolerances={"counts": 0.0, "percentages": 0.05},
         baseline="HOMOLOGACAO_INICIAL_PENDENTE",

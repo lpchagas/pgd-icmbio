@@ -157,12 +157,14 @@ baseline fixo. Não requer datamart nem ETL — consulta direta ao Denodo.
 Dois CSVs pipe-delimited, `utf-8-sig`, em
 `artefatos_local/gestao/YYYY-MM/`:
 
-**`PT_STATUS.2_detalhe_<escopo>_AAAAMMDD_HHMM.csv`** — uma linha por plano:
+**`PT_STATUS.2_detalhe_<produto>_<escopo>_AAAAMMDD_HHMM.csv`** — uma linha por plano.
+Gerado apenas nos produtos `operacional` e `restrito`; o produto `compartilhavel`
+não produz detalhe:
 
 | Coluna | Conteúdo |
 | --- | --- |
 | `unidade_sigla`, `unidade_nome`, `mesogrupo`, `unidade_pai_sigla` | localização organizacional |
-| `servidor_nome`, `servidor_email` | **quem procurar** |
+| `id_servidor`, `servidor_nome` | **quem procurar** |
 | `plano_numero`, `plano_inicio`, `plano_fim` | identificação do PT |
 | `status_codigo` | código bruto do banco (camada 1) |
 | `status_negocio` | rótulo derivado das duas camadas |
@@ -175,8 +177,30 @@ Dois CSVs pipe-delimited, `utf-8-sig`, em
 | `periodo_pendente_fim` | fim do período mais recente pendente de avaliação |
 | `acao_sugerida` | frase pronta dizendo o que fazer e com quem |
 
-**`PT_STATUS.2_painel_<escopo>_AAAAMMDD_HHMM.csv`** — contagem por unidade × status,
-para Power BI ou visão rápida da chefia.
+**`PT_STATUS.2_painel_<produto>_<escopo>_AAAAMMDD_HHMM.csv`** — contagem por unidade × status,
+para Power BI ou visão rápida da chefia. No produto `compartilhavel`, contagens
+inferiores a 5 saem como `SUPRIMIDO_K`.
+
+### Dados pessoais e finalidade (decisão CGOV D14 — 13.09.2026)
+
+Este é um produto **tático da chefia**, não um indicador. Informar que há "3
+servidores aguardando assinatura" não permite agir; o nome permite. A exposição
+nominal está amparada na finalidade de execução das rotinas ordinárias do
+serviço público e limitada aos produtos de uso interno da unidade:
+
+| Produto | Detalhe nominal | Circulação |
+| --- | --- | --- |
+| `operacional` | sim (`id_servidor`, `servidor_nome`, `status_alterado_por`) | uso imediato da chefia |
+| `restrito` | sim | interno da unidade |
+| `compartilhavel` | **não** — só o painel agregado, com supressão k≥5 | único que sai da unidade |
+
+Coleta-se o mínimo necessário para a finalidade: nome e identificador. CPF,
+e-mail e matrícula não são lidos nem persistidos — o `servidor_email`, que a
+consulta selecionava sem uso definido, foi retirado na D14.
+
+O gate de PII do protocolo A2 (`lib/validation_runner.py`) continua incidindo
+sobre o produto `compartilhavel`, e o contrato de validação do `PT_STATUS`
+declara apenas a visão `painel`.
 
 ---
 

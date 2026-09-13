@@ -1,3 +1,6 @@
+import ast
+from pathlib import Path
+
 import pytest
 
 from ocde.relatorios.privacidade import (
@@ -42,3 +45,57 @@ def test_supressao_complementar_oculta_segundo_subtotal():
     result = apply_complementary_suppression(rows, parent_keys=["pai"], count_key="qtd")
     assert [row["suprimido"] for row in result] == [True, True, False]
     assert result[1]["motivo_supressao"] == "complementar"
+
+
+# ---------------------------------------------------------------------------
+# D14 — identificação nominal no PT_STATUS: permitida nos produtos internos da
+# unidade, proibida no produto que circula fora dela.
+# ---------------------------------------------------------------------------
+
+PT_STATUS = Path(__file__).resolve().parents[2] / "gestao" / "PT_STATUS.1_run.py"
+
+
+def _modulo_pt_status() -> ast.Module:
+    return ast.parse(PT_STATUS.read_text(encoding="utf-8"))
+
+
+def _constante(nome: str):
+    for node in _modulo_pt_status().body:
+        if isinstance(node, ast.Assign) and any(
+            isinstance(alvo, ast.Name) and alvo.id == nome for alvo in node.targets
+        ):
+            return ast.literal_eval(node.value)
+    raise AssertionError(f"Constante {nome} ausente em PT_STATUS.1_run.py")
+
+
+def test_produtos_nominais_excluem_o_compartilhavel():
+    nominais = _constante("PRODUTOS_NOMINAIS")
+    assert "operacional" in nominais and "restrito" in nominais
+    assert "compartilhavel" not in nominais, (
+        "O produto que circula fora da unidade não pode trazer identificação nominal."
+    )
+
+
+def test_detalhe_nunca_e_gerado_para_o_produto_compartilhavel():
+    fonte = PT_STATUS.read_text(encoding="utf-8")
+    assert 'if args.produto != "compartilhavel":' in fonte
+    assert 'PT_STATUS.2_detalhe_{args.produto}' in fonte
+
+
+def test_painel_compartilhavel_mantem_supressao_k():
+    fonte = PT_STATUS.read_text(encoding="utf-8")
+    assert 'n >= 5 else "SUPRIMIDO_K"' in fonte
+
+
+def test_pt_status_coleta_o_minimo_necessario():
+    """D14: nome e id bastam para a chefia agir; e-mail, CPF e matrícula não."""
+    fonte = PT_STATUS.read_text(encoding="utf-8")
+    sql = next(
+        node.value for node in ast.walk(_modulo_pt_status())
+        if isinstance(node, ast.Constant) and isinstance(node.value, str)
+        and "petrvs_icmbio_planos_trabalhos" in node.value
+    )
+    assert "us.nome" in sql and "pt.usuario_id" in sql
+    assert "us.email" not in sql
+    assert "cpf" not in sql.lower()
+    assert 'personal_columns = {"id_servidor", "servidor_nome", "status_alterado_por"}' in fonte
