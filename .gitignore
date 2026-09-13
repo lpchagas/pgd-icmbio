@@ -32,9 +32,17 @@ PROJECT.md
 
 # -----------------------------------------------------------------------------
 # Skills locais (desenvolvimento interno — não sincronizar com GitHub)
+# ATENÇÃO: ignora-se apenas .github/skills/. O restante de .github/ é público e
+# versionado — .github/workflows/quality.yml é o CI que roda pytest e
+# tools/security_audit.py nas PRs. Não acrescentar ".github/" a este arquivo.
 # -----------------------------------------------------------------------------
 .github/skills/
 instalar_skill_*.ps1
+
+# -----------------------------------------------------------------------------
+# Backups locais de skills gerados por tools/skills_manager.py
+# -----------------------------------------------------------------------------
+.skills-backups/
 
 # -----------------------------------------------------------------------------
 # Dumps do banco PETRVS (nunca versionar — arquivo > 4 GB com dados pessoais)
@@ -102,6 +110,14 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+
+# -----------------------------------------------------------------------------
+# Caches das ferramentas de teste (regeneráveis — nunca versionar)
+# Observação: config/ NÃO é ignorado; config/validation-baselines.example.json é
+# o template público do protocolo de homologação e deve permanecer versionado.
+# -----------------------------------------------------------------------------
+.pytest_cache/
+.hypothesis/
 
 # -----------------------------------------------------------------------------
 # Logs de execução
