@@ -35,6 +35,11 @@ from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo
 from lib.monthly_runner import query_rows
 from lib.periodos import analysis_window, build_periods_pt, period_metadata
 
+# D12 (CGOV, 13.09.2026): abaixo deste volume de avaliacoes o percentual e
+# estatisticamente fragil. O indicador nao suprime a linha — exporta a
+# volumetria para que o BI da COCAGE decida ocultar ou cinzentar a unidade.
+VOLUME_MINIMO_AVALIACOES = 5
+
 SQL_I10 = """
 WITH parametros AS (
     SELECT
@@ -91,7 +96,8 @@ SELECT
         WHEN perc_inadequado >= 15 THEN 'Atencao moderada'
         WHEN perc_inadequado >=  5 THEN 'Observacao'
         ELSE 'Baixa prevalencia'
-    END AS nivel_alerta
+    END AS nivel_alerta,
+    CASE WHEN total_avaliacoes_pt >= {volume_minimo} THEN 1 ELSE 0 END AS volume_suficiente
 FROM proporcao_por_unidade
 ORDER BY perc_inadequado DESC, unidade_sigla
 """
@@ -119,7 +125,9 @@ def main() -> None:
 
     try:
         for label, kind, start, scheduled_end, end, status in periods:
-            sql = SQL_I10.replace("{ini}", str(start)).replace("{fim}", str(end))
+            sql = SQL_I10.replace("{ini}", str(start)).replace("{fim}", str(end)).replace(
+                "{volume_minimo}", str(VOLUME_MINIMO_AVALIACOES)
+            )
             print(f"Executando I10 {label} ({start} a {end})...")
             try:
                 columns, rows = query_rows(conn, sql)
@@ -164,7 +172,10 @@ def main() -> None:
         print(f"  AVISO: {len(unids)} unidade(s) com perc_inadequado >= 30% em periodos encerrados — requer acompanhamento.")
 
     # Unidades com < 5 avaliacoes (resultado fragil)
-    low_count = sum(1 for r in encerrados if int(r[offset_total] or 0) < 5)
+    low_count = sum(
+        1 for r in encerrados
+        if int(r[offset_total] or 0) < VOLUME_MINIMO_AVALIACOES
+    )
     if low_count:
         print(f"  NOTA: {low_count} linha(s) com < 5 avaliacoes em periodos encerrados — percentuais estatisticamente frageis.")
 

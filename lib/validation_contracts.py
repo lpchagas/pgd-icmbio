@@ -271,16 +271,51 @@ TARGETS.update({
         ("periodo", "unidade_sigla"),
         ("total_no_ciclo", "score_atingimento_perc"),
     ),
-    "I05": _indicator(
-        "05", "Distribuição de entregas por servidor", "pt_entregas_executor",
-        _periodic(
-            "unidade_sigla", "unidade_nome", "mesogrupo", "id_servidor", "nome_servidor",
-            "qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade",
-            "posicao_relativa_media",
+    # I05 tem duas visões desde a decisão CGOV D07: a nominal (restrita) e a
+    # estatística agregada, sem identificação de servidor.
+    "I05": ValidationTarget(
+        code="I05",
+        family="ocde",
+        name="Distribuição de entregas por servidor",
+        production_entrypoint=(
+            PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact("05", "1_run.py")
         ),
-        ("periodo", "unidade_sigla", "id_servidor"),
-        ("qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade"),
-        period="pt",
+        oracle_name="oracle_i05",
+        atomic_extractors=("pt_entregas_executor",),
+        outputs=(
+            OutputContract(
+                ocde_artifact("05", "2_v1_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "id_servidor", "nome_servidor",
+                    "qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade",
+                    "posicao_relativa_media",
+                ),
+                ("periodo", "unidade_sigla", "id_servidor"),
+                ("qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade"),
+                view="nominal",
+            ),
+            OutputContract(
+                ocde_artifact("05", "2_v2_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "total_servidores",
+                    "media_entregas_por_servidor", "mediana_entregas_por_servidor",
+                    "p25_entregas_por_servidor", "p75_entregas_por_servidor",
+                    "pct_servidores_sem_entrega",
+                ),
+                ("periodo", "unidade_sigla"),
+                ("total_servidores", "media_entregas_por_servidor",
+                 "mediana_entregas_por_servidor", "pct_servidores_sem_entrega"),
+                view="estatistica",
+            ),
+        ),
+        # D07: pacote de estatísticas descritivas por unidade.
+        formula_version="3.0.0",
+        temporal_lenses=("pt",),
+        supported_scopes=SCOPE_ALL,
+        invariants=(
+            "ordem_invariante", "idempotencia", "fora_da_janela_sem_efeito",
+            "soft_delete_sem_efeito", "chave_unica", "total_subtotais",
+        ),
     ),
     "I06": _indicator(
         "06", "Grau de responsabilidade por entrega", "pt_entregas_executor",
@@ -304,16 +339,49 @@ TARGETS.update({
         # D09: rateio por dias úteis institucionais e renomeação do contador.
         formula_version="3.0.0",
     ),
-    "I08": _indicator(
-        "08", "Proporção de horas por entrega",
-        ("pt_entregas_dono", "pt_capacidade_unidade"),
-        _periodic(
-            "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
-            "horas_planejadas_entrega", "total_horas_disponiveis_unidade",
-            "proporcao_horas_perc",
+    # I08 tem duas visões desde a decisão CGOV D10 e, por isso, não usa o
+    # atalho _indicator (que declara um único contrato de saída).
+    "I08": ValidationTarget(
+        code="I08",
+        family="ocde",
+        name="Proporção de horas por entrega",
+        production_entrypoint=(
+            PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact("08", "1_run.py")
         ),
-        ("periodo", "unidade_sigla", "id_entrega"),
-        ("horas_planejadas_entrega", "total_horas_disponiveis_unidade", "proporcao_horas_perc"),
+        oracle_name="oracle_i08",
+        atomic_extractors=("pt_entregas_dono", "pt_capacidade_unidade"),
+        outputs=(
+            OutputContract(
+                ocde_artifact("08", "2_v1_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
+                    "horas_planejadas_entrega", "total_horas_disponiveis_unidade",
+                    "proporcao_horas_perc",
+                ),
+                ("periodo", "unidade_sigla", "id_entrega"),
+                ("horas_planejadas_entrega", "total_horas_disponiveis_unidade",
+                 "proporcao_horas_perc"),
+                view="dona",
+            ),
+            OutputContract(
+                ocde_artifact("08", "2_v2_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
+                    "horas_executora", "capacidade_executora", "proporcao_executora_perc",
+                ),
+                ("periodo", "unidade_sigla", "id_entrega"),
+                ("horas_executora", "capacidade_executora", "proporcao_executora_perc"),
+                view="executora",
+            ),
+        ),
+        # D09 (dias úteis) + D10 (dupla perspectiva).
+        formula_version="3.0.0",
+        temporal_lenses=("pe",),
+        supported_scopes=SCOPE_ALL,
+        invariants=(
+            "ordem_invariante", "idempotencia", "fora_da_janela_sem_efeito",
+            "soft_delete_sem_efeito", "chave_unica", "total_subtotais",
+        ),
     ),
     "I09": _indicator(
         "09", "Média da avaliação do PT", "avaliacoes_pt",
@@ -335,21 +403,26 @@ TARGETS.update({
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "total_avaliacoes_pt",
             "total_servidores_avaliados", "qtd_inadequado", "perc_inadequado", "nivel_alerta",
+            "volume_suficiente",
         ),
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "qtd_inadequado", "perc_inadequado"),
         period="pt",
+        # D12: volumetria exportada como limitador analítico.
+        formula_version="3.0.0",
     ),
     "I11": _indicator(
         "11", "Percentual de avaliações excepcionais", "avaliacoes_pt",
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "total_avaliacoes_pt",
             "total_servidores_avaliados", "qtd_excepcional", "perc_excepcional",
-            "nivel_reconhecimento",
+            "nivel_reconhecimento", "volume_suficiente",
         ),
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "qtd_excepcional", "perc_excepcional"),
         period="pt",
+        # D12: volumetria exportada como limitador analítico.
+        formula_version="3.0.0",
     ),
     "I12": _indicator(
         "12", "Coerência entre avaliação PT e PE", ("avaliacoes_pt", "avaliacoes_pe"),

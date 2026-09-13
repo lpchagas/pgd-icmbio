@@ -96,12 +96,79 @@ ORDER BY e.unidade_sigla, e.qtd_entregas_por_servidor DESC, e.nome_servidor
 """
 
 
+COLUNAS_V2 = [
+    "unidade_sigla", "unidade_nome", "total_servidores",
+    "media_entregas_por_servidor", "mediana_entregas_por_servidor",
+    "p25_entregas_por_servidor", "p75_entregas_por_servidor",
+    "pct_servidores_sem_entrega",
+]
+
+
+def _quantil(ordenados: list[float], fracao: float) -> float:
+    """Quantil por interpolação linear, igual ao método padrão do pandas."""
+
+    if not ordenados:
+        return 0.0
+    posicao = (len(ordenados) - 1) * fracao
+    inferior = int(posicao)
+    superior = min(inferior + 1, len(ordenados) - 1)
+    peso = posicao - inferior
+    return ordenados[inferior] * (1 - peso) + ordenados[superior] * peso
+
+
+def distribuicao_estatistica(
+    all_cols: list[str], all_rows: list[list], meta_cols: list[str]
+) -> tuple[list[str], list[list]]:
+    """Visão agregada por unidade, sem identificação nominal (decisão CGOV D07).
+
+    A média sozinha esconde concentração: uma unidade com um servidor carregando
+    vinte entregas e cinco sem nenhuma tem a mesma média de outra em que todos
+    carregam quatro. Mediana e quartis separam os dois casos.
+    """
+
+    idx_unidade = all_cols.index("unidade_sigla")
+    idx_nome = all_cols.index("unidade_nome")
+    idx_qtd = all_cols.index("qtd_entregas_por_servidor")
+    n_meta = len(meta_cols)
+
+    grupos: dict[tuple, list[float]] = {}
+    for row in all_rows:
+        chave = tuple(row[:n_meta]) + (row[idx_unidade], row[idx_nome])
+        try:
+            valor = float(str(row[idx_qtd]).replace(",", "."))
+        except (TypeError, ValueError):
+            valor = 0.0
+        grupos.setdefault(chave, []).append(valor)
+
+    linhas: list[list] = []
+    for chave, valores in grupos.items():
+        ordenados = sorted(valores)
+        total = len(ordenados)
+        zerados = sum(1 for valor in ordenados if valor == 0)
+        meio = total // 2
+        mediana = (
+            ordenados[meio] if total % 2
+            else (ordenados[meio - 1] + ordenados[meio]) / 2
+        )
+        linhas.append(list(chave) + [
+            total,
+            round(sum(ordenados) / total, 2),
+            round(mediana, 2),
+            round(_quantil(ordenados, 0.25), 2),
+            round(_quantil(ordenados, 0.75), 2),
+            round(100.0 * zerados / total, 2),
+        ])
+    linhas.sort(key=lambda linha: (linha[1], linha[n_meta]))
+    return meta_cols + COLUNAS_V2, linhas
+
+
 def main() -> None:
     config = get_config(require_credentials=True)
     conn = connect(config)
     out_dir = indicator_csv_dir()
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    output = out_dir / f"IND_OCDE_05.2_distribuicao_entregas_servidores_{stamp}.csv"
+    output = out_dir / f"IND_OCDE_05.2_v1_distribuicao_entregas_servidores_{stamp}.csv"
+    output_v2 = out_dir / f"IND_OCDE_05.2_v2_distribuicao_estatistica_{stamp}.csv"
 
     window = analysis_window()
     periods = build_periods_pt(window.fim)
@@ -137,7 +204,13 @@ def main() -> None:
     csv_cols, csv_rows = insert_mesogrupo_column(all_cols or [], all_rows, lookup)
 
     write_pipe_csv(output, csv_cols, csv_rows)
-    print(f"Arquivo salvo: {output}")
+    print(f"Arquivo salvo (v1, nominal — uso restrito): {output}")
+
+    # D07: visao estatistica agregada, sem identificacao de servidor.
+    cols_v2, rows_v2 = distribuicao_estatistica(all_cols or [], all_rows, meta_cols)
+    csv_cols_v2, csv_rows_v2 = insert_mesogrupo_column(cols_v2, rows_v2, lookup)
+    write_pipe_csv(output_v2, csv_cols_v2, csv_rows_v2)
+    print(f"Arquivo salvo (v2, estatistica agregada): {output_v2}")
 
     # Aviso de qualidade: servidores com 0 entregas (PT ativo mas sem vinculos)
     # Busca por nome, nao por offset fixo: a insercao de colunas novas

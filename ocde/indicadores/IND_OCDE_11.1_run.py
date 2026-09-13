@@ -36,6 +36,11 @@ from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo
 from lib.monthly_runner import query_rows
 from lib.periodos import analysis_window, build_periods_pt, period_metadata
 
+# D12 (CGOV, 13.09.2026): abaixo deste volume de avaliacoes o percentual e
+# estatisticamente fragil. O indicador nao suprime a linha — exporta a
+# volumetria para que o BI da COCAGE decida ocultar ou cinzentar a unidade.
+VOLUME_MINIMO_AVALIACOES = 5
+
 SQL_I11 = """
 WITH parametros AS (
     SELECT
@@ -92,7 +97,8 @@ SELECT
         WHEN perc_excepcional >= 20 THEN 'Desempenho diferenciado'
         WHEN perc_excepcional >=  5 THEN 'Destaque pontual'
         ELSE 'Escala subutilizada'
-    END AS nivel_reconhecimento
+    END AS nivel_reconhecimento,
+    CASE WHEN total_avaliacoes_pt >= {volume_minimo} THEN 1 ELSE 0 END AS volume_suficiente
 FROM proporcao_por_unidade
 ORDER BY perc_excepcional DESC, unidade_sigla
 """
@@ -120,7 +126,9 @@ def main() -> None:
 
     try:
         for label, kind, start, scheduled_end, end, status in periods:
-            sql = SQL_I11.replace("{ini}", str(start)).replace("{fim}", str(end))
+            sql = SQL_I11.replace("{ini}", str(start)).replace("{fim}", str(end)).replace(
+                "{volume_minimo}", str(VOLUME_MINIMO_AVALIACOES)
+            )
             print(f"Executando I11 {label} ({start} a {end})...")
             try:
                 columns, rows = query_rows(conn, sql)
@@ -173,7 +181,10 @@ def main() -> None:
         print(f"  NOTA: {len(unids)} unidade(s) com 'Escala subutilizada' — nota Excepcional quase ausente.")
 
     # Unidades com < 5 avaliacoes (resultado fragil)
-    low_count = sum(1 for r in encerrados if int(r[offset_total] or 0) < 5)
+    low_count = sum(
+        1 for r in encerrados
+        if int(r[offset_total] or 0) < VOLUME_MINIMO_AVALIACOES
+    )
     if low_count:
         print(f"  NOTA: {low_count} linha(s) com < 5 avaliacoes em periodos encerrados — percentuais frageis.")
 

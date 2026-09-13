@@ -143,21 +143,28 @@ class TestUnidadeI07I08:
             f"{var_name} não pode atribuir a entrega à unidade do executor."
         )
 
-    def test_i08_rateia_horas_pela_sobreposicao(self):
-        sql = _sql_constant(_source("08"), "SQL_I08")
-        assert "AS horas_proporcionais" in sql
-        assert "ELSE p.data_fim END" in sql
-        assert "ELSE p.data_inicio END" in sql
-
-    def test_i07_rateia_horas_por_dias_uteis(self):
-        """D09: o rateio do I07 saiu da SQL e usa o calendário institucional."""
-        source = _source("07")
-        sql = _sql_constant(source, "SQL_I07")
+    @pytest.mark.parametrize("indicador,var_name", [("07", "SQL_I07"), ("08", "SQL_I08")])
+    def test_rateio_de_horas_usa_dias_uteis(self, indicador, var_name):
+        """D09: o rateio saiu da SQL e usa o calendário institucional."""
+        source = _source(indicador)
+        sql = _sql_constant(source, var_name)
         # A SQL devolve as datas brutas; quem divide é o Python.
         assert "AS sobreposicao_inicio" in sql and "AS sobreposicao_fim" in sql
         assert "from lib.calendario import dias_uteis" in source
         assert "dias_uteis(sobre_ini, sobre_fim)" in source
         assert "dias_uteis(inicio, fim)" in source
+
+    def test_i08_emite_as_duas_perspectivas(self):
+        """D10: numerador e denominador sempre da mesma unidade."""
+        source = _source("08")
+        sql = _sql_constant(source, "SQL_I08")
+        assert "AS unidade_dona_sigla" in sql and "AS unidade_executora_sigla" in sql
+        # Denominador vem de consulta própria: a capacidade inclui PTs sem
+        # entrega vinculada, que não aparecem no universo de vínculos.
+        assert "SQL_I08_CAPACIDADE" in source
+        for coluna in ("proporcao_horas_perc", "proporcao_executora_perc",
+                       "horas_executora", "capacidade_executora"):
+            assert coluna in source, f"I08 deve exportar {coluna}."
 
     def test_i07_conta_planos_de_trabalho_nao_pessoas(self):
         """D09: num_servidores_alocados era um nome errado para o COUNT DISTINCT."""

@@ -197,7 +197,26 @@ def oracle_i04(records: list[Row]) -> list[Row]:
     return _sorted(output, ("periodo", "unidade_sigla"))
 
 
+def _quantile(ordered: list[float], fraction: float) -> float:
+    """Quantil por interpolação linear — reimplementado para manter independência."""
+
+    if not ordered:
+        return 0.0
+    position = (len(ordered) - 1) * fraction
+    lower = int(position)
+    upper = min(lower + 1, len(ordered) - 1)
+    weight = position - lower
+    return ordered[lower] * (1 - weight) + ordered[upper] * weight
+
+
 def oracle_i05(records: list[Row]) -> list[Row]:
+    """Distribuição de entregas por servidor em duas visões (decisão CGOV D07).
+
+    A visão nominal permanece como produto restrito; a visão estatística
+    descreve a dispersão dentro da unidade sem identificar ninguém — a média
+    sozinha não distingue uma equipe equilibrada de outra concentrada.
+    """
+
     output: list[Row] = []
     for (period, unit), unit_rows in _group(_active(records), "periodo", "unidade_sigla").items():
         counts: dict[str, int] = {}
@@ -206,6 +225,7 @@ def oracle_i05(records: list[Row]) -> list[Row]:
         average = round(mean(counts.values()), 2) if counts else 0.0
         for user, count in counts.items():
             output.append({
+                "visao": "nominal",
                 "periodo": period, "unidade_sigla": unit, "id_servidor": user,
                 "qtd_entregas_por_servidor": count,
                 "media_entregas_por_servidor_unidade": average,
@@ -213,7 +233,27 @@ def oracle_i05(records: list[Row]) -> list[Row]:
                     "Acima da media" if count > average else "Abaixo da media" if count < average else "Na media"
                 ),
             })
-    return _sorted(output, ("periodo", "unidade_sigla", "id_servidor"))
+        ordered = sorted(float(value) for value in counts.values())
+        total = len(ordered)
+        middle = total // 2
+        median = (
+            ordered[middle] if total % 2
+            else (ordered[middle - 1] + ordered[middle]) / 2
+        ) if total else 0.0
+        output.append({
+            "visao": "estatistica",
+            "periodo": period, "unidade_sigla": unit,
+            "total_servidores": total,
+            "media_entregas_por_servidor": average,
+            "mediana_entregas_por_servidor": round(median, 2),
+            "p25_entregas_por_servidor": round(_quantile(ordered, 0.25), 2),
+            "p75_entregas_por_servidor": round(_quantile(ordered, 0.75), 2),
+            "pct_servidores_sem_entrega": (
+                round(100 * sum(1 for value in ordered if value == 0) / total, 2)
+                if total else 0.0
+            ),
+        })
+    return _sorted(output, ("visao", "periodo", "unidade_sigla", "id_servidor"))
 
 
 def oracle_i06(records: list[Row]) -> list[Row]:
@@ -320,6 +360,14 @@ def oracle_i07(records: list[Row]) -> list[Row]:
 
 
 def oracle_i08(records: list[Row]) -> list[Row]:
+    """Duas visões coerentes da proporção de horas (decisão CGOV D10).
+
+    Numerador e denominador sempre da mesma unidade: a visão ``dona`` mede o
+    quanto as entregas planejadas por uma unidade consomem da capacidade dela,
+    e a visão ``executora`` mede o quanto da capacidade de uma unidade está
+    comprometido com cada entrega, de quem quer que seja a entrega.
+    """
+
     output: list[Row] = []
     source_rows = _active(records)
     active = _unique(
@@ -338,16 +386,31 @@ def oracle_i08(records: list[Row]) -> list[Row]:
         if key not in seen_plans:
             seen_plans.add(key)
             capacity[key[:2]] += _allocated_hours(row)[0]
-    for (period, unit, delivery), rows in _group(active, "periodo", "unidade_sigla", "id_entrega").items():
-        hours = sum(_allocated_hours(row)[1] for row in rows)
-        available = capacity[(period, unit)]
-        output.append({
-            "periodo": period, "unidade_sigla": unit, "id_entrega": delivery,
-            "horas_planejadas_entrega": round(hours, 2),
-            "total_horas_disponiveis_unidade": round(available, 2),
-            "proporcao_horas_perc": round(100 * hours / available, 2) if available else 0.0,
-        })
-    return _sorted(output, ("periodo", "unidade_sigla", "id_entrega"))
+
+    visoes = (
+        ("dona", "unidade_dona_sigla",
+         ("horas_planejadas_entrega", "total_horas_disponiveis_unidade", "proporcao_horas_perc")),
+        ("executora", "unidade_executora_sigla",
+         ("horas_executora", "capacidade_executora", "proporcao_executora_perc")),
+    )
+    for visao, sigla_key, (nome_horas, nome_capacidade, nome_perc) in visoes:
+        grupos: dict[tuple[Any, Any, Any], list[Row]] = defaultdict(list)
+        for row in active:
+            # Fixtures antigas trazem só unidade_sigla; nesse caso as duas
+            # visões coincidem, que é o comportamento anterior à D10.
+            unit = row.get(sigla_key, row.get("unidade_sigla", "N.I."))
+            grupos[(row.get("periodo"), unit, row.get("id_entrega"))].append(row)
+        for (period, unit, delivery), rows in grupos.items():
+            hours = sum(_allocated_hours(row)[1] for row in rows)
+            available = capacity[(period, unit)]
+            output.append({
+                "visao": visao, "periodo": period, "unidade_sigla": unit,
+                "id_entrega": delivery,
+                nome_horas: round(hours, 2),
+                nome_capacidade: round(available, 2),
+                nome_perc: round(100 * hours / available, 2) if available else 0.0,
+            })
+    return _sorted(output, ("visao", "periodo", "unidade_sigla", "id_entrega"))
 
 
 def _score(row: Row) -> int:
@@ -380,6 +443,12 @@ def oracle_i09(records: list[Row]) -> list[Row]:
     return _sorted(output, ("periodo", "unidade_sigla"))
 
 
+# D12 (CGOV, 13.09.2026): abaixo deste volume o percentual é estatisticamente
+# frágil. A linha não é suprimida — a volumetria é exportada para que o BI
+# decida ocultar ou cinzentar a unidade.
+VOLUME_MINIMO_AVALIACOES = 5
+
+
 def _category_oracle(records: list[Row], sequence: int, count_name: str, percent_name: str) -> list[Row]:
     output: list[Row] = []
     unique = _unique(_active(records), "periodo", "id_avaliacao")
@@ -389,6 +458,7 @@ def _category_oracle(records: list[Row], sequence: int, count_name: str, percent
             "periodo": period, "unidade_sigla": unit, "total_avaliacoes_pt": len(rows),
             "total_servidores_avaliados": len({str(row.get("id_servidor")) for row in rows}),
             count_name: count, percent_name: round(100 * count / len(rows), 2) if rows else 0.0,
+            "volume_suficiente": 1 if len(rows) >= VOLUME_MINIMO_AVALIACOES else 0,
         })
     return _sorted(output, ("periodo", "unidade_sigla"))
 
