@@ -27,8 +27,9 @@
     {"periodo": "M01-2026", "unidade_sigla": "U1", "tamanho_grupo_responsavel": "2 servidores", "total_entregas_na_categoria": 1, "total_entregas_unidade": 2, "pct_categoria": 50.0}
   ],
   "I07": [
-    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "total_horas_planejadas_entrega": 80.0, "num_servidores_alocados": 2},
-    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "total_horas_planejadas_entrega": 20.0, "num_servidores_alocados": 1}
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "total_horas_planejadas_entrega": 80.0, "num_planos_trabalho_alocados": 2},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "total_horas_planejadas_entrega": 20.0, "num_planos_trabalho_alocados": 1},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E3", "total_horas_planejadas_entrega": 28.57, "num_planos_trabalho_alocados": 1}
   ],
   "I08": [
     {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "horas_planejadas_entrega": 80.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 66.67},

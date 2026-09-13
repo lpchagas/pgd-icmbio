@@ -171,6 +171,7 @@ def _indicator(
     *,
     period: str = "pe",
     baseline: str = "HOMOLOGACAO_INICIAL_PENDENTE",
+    formula_version: str = "2.0.0",
 ) -> ValidationTarget:
     extractors = (extractor,) if isinstance(extractor, str) else extractor
     return ValidationTarget(
@@ -183,7 +184,7 @@ def _indicator(
         oracle_name=f"oracle_i{number}",
         atomic_extractors=extractors,
         outputs=(OutputContract(ocde_artifact(number, "2_*.csv"), columns, keys, metrics),),
-        formula_version="2.0.0",
+        formula_version=formula_version,
         temporal_lenses=(period,),
         supported_scopes=SCOPE_ALL,
         invariants=(
@@ -296,10 +297,12 @@ TARGETS.update({
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
             "id_plano_entrega", "inicio_vigencia_plano_entrega", "fim_vigencia_plano_entrega",
-            "total_horas_planejadas_entrega", "num_servidores_alocados",
+            "total_horas_planejadas_entrega", "num_planos_trabalho_alocados",
         ),
         ("periodo", "unidade_sigla", "id_entrega"),
-        ("total_horas_planejadas_entrega", "num_servidores_alocados"),
+        ("total_horas_planejadas_entrega", "num_planos_trabalho_alocados"),
+        # D09: rateio por dias úteis institucionais e renomeação do contador.
+        formula_version="3.0.0",
     ),
     "I08": _indicator(
         "08", "Proporção de horas por entrega",

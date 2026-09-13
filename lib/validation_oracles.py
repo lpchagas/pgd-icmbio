@@ -237,6 +237,52 @@ def oracle_i06(records: list[Row]) -> list[Row]:
     return _sorted(output, ("periodo", "unidade_sigla", "tamanho_grupo_responsavel"))
 
 
+def _pascoa_independente(ano: int) -> date:
+    """Meeus/Butcher reimplementado — ver ``_dias_uteis_independente``."""
+
+    a = ano % 19
+    b, c = divmod(ano, 100)
+    d, e = divmod(b, 4)
+    f = (b + 8) // 25
+    g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = divmod(c, 4)
+    j = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * j) // 451
+    mes, dia = divmod(h + j - 7 * m + 114, 31)
+    return date(ano, mes, dia + 1)
+
+
+def _feriados_independentes(ano: int) -> set[date]:
+    domingo = _pascoa_independente(ano)
+    fixos = [(1, 1), (4, 21), (5, 1), (9, 7), (10, 12), (11, 2), (11, 15), (12, 25)]
+    return {date(ano, mes, dia) for mes, dia in fixos} | {
+        domingo - timedelta(days=48), domingo - timedelta(days=47),
+        domingo - timedelta(days=2), domingo + timedelta(days=60),
+    }
+
+
+def _dias_uteis_independente(inicio: date, fim: date) -> int:
+    """Contagem de dias úteis própria do oracle (decisão CGOV D09).
+
+    Duplica deliberadamente :mod:`lib.calendario`: importar o módulo de produção
+    quebraria a independência exigida por
+    ``tests/regression/test_validation_independence.py``. A equivalência entre as
+    duas implementações é provada em ``tests/unit/test_calendario.py``.
+    """
+
+    if fim < inicio:
+        return 0
+    total = 0
+    dia = inicio
+    feriados = _feriados_independentes(inicio.year) | _feriados_independentes(fim.year)
+    while dia <= fim:
+        if dia.weekday() < 5 and dia not in feriados:
+            total += 1
+        dia += timedelta(days=1)
+    return total
+
+
 def _allocated_hours(row: Row) -> tuple[float, float]:
     start, end = _date(row.get("plano_inicio")), _date(row.get("plano_fim"))
     overlap_start, overlap_end = _date(row.get("sobreposicao_inicio")), _date(row.get("sobreposicao_fim"))
@@ -245,7 +291,11 @@ def _allocated_hours(row: Row) -> tuple[float, float]:
     base = _float(row.get("carga_horaria"))
     if row.get("forma_contagem_carga_horaria") == "DIAS":
         base *= 8.0
-    proportional = base * ((overlap_end - overlap_start).days + 1) / ((end - start).days + 1)
+    # D09: rateio por dias úteis institucionais, não por dias corridos.
+    denominador = _dias_uteis_independente(start, end)
+    if not denominador:
+        return 0.0, 0.0
+    proportional = base * _dias_uteis_independente(overlap_start, overlap_end) / denominador
     allocated = proportional * _float(row.get("forca_trabalho")) / 100.0
     return proportional, allocated
 
@@ -261,7 +311,10 @@ def oracle_i07(records: list[Row]) -> list[Row]:
         output.append({
             "periodo": period, "unidade_sigla": unit, "id_entrega": delivery,
             "total_horas_planejadas_entrega": round(hours, 2),
-            "num_servidores_alocados": len(plans),
+            # D09: a contagem é de planos de trabalho, não de pessoas — um
+            # servidor com dois PTs na mesma entrega contava duas vezes sob o
+            # nome antigo (num_servidores_alocados).
+            "num_planos_trabalho_alocados": len(plans),
         })
     return _sorted(output, ("periodo", "unidade_sigla", "id_entrega"))
 

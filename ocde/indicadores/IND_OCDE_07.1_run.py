@@ -7,132 +7,178 @@ Calcula o total de horas planejadas alocadas a cada entrega do PE, somando
 a contribuição proporcional de todos os servidores cujos PTs se sobrepõem
 ao período e que têm a entrega vinculada.
 
-Abordagem técnica Denodo/JDBC (sem WITH RECURSIVE):
   horas_alocadas = carga_horaria_horas
-                   × (overlap_dias / total_dias_plano)
+                   × (dias_uteis_sobrepostos / dias_uteis_do_plano)
                    × (forca_trabalho / 100)
 
-  onde overlap_dias = dias de sobreposição entre o PT e o período consultado.
   Quando forma_contagem_carga_horaria = 'DIAS', multiplica por 8 para converter.
+
+Decisão CGOV D09 (13.09.2026) — dias úteis institucionais:
+  O rateio era feito em dias corridos, o que superestimava a capacidade em meses
+  curtos ou com feriados prolongados. Como o Denodo/VQL não calcula dias úteis
+  (sem DATEDIFF, sem CTE recursiva, sem calendário), a SQL passou a devolver
+  linhas atômicas por (entrega × plano de trabalho) e a agregação migrou para
+  Python, usando lib.calendario.dias_uteis. O shape da consulta espelha
+  lib/validation_extractors.py::SQL["pt_entregas_dono"], que alimenta o oracle
+  A3 — as duas devem permanecer alinhadas.
+
+  A coluna num_servidores_alocados foi renomeada para num_planos_trabalho_alocados:
+  o COUNT DISTINCT sempre foi sobre plano_trabalho_id, e um servidor com dois PTs
+  na mesma entrega era contado duas vezes sob o nome antigo.
 
 Correções aplicadas em 14.06.2026 (documentadas no CLAUDE.md):
   1. Unidade: era pt.unidade_id (servidor). Corrigido para pe.unidade_id (dono
-     da entrega via COALESCE com fallback para ph.unidade_id). Isso atribui cada
+     da entrega via COALESCE com fallback para pt.unidade_id). Isso atribui cada
      entrega à unidade que planejou o PE, não à unidade do executor.
   2. Filtro temporal do PE: faltava no CTE linhas. Sem ele, entregas de PEs de
      ciclos anteriores reapareciam em cada período (1.700 duplicatas detectadas).
-     Corrigido com CROSS JOIN parametros + WHERE pe.data_inicio/fim no CTE linhas.
+     Corrigido com CROSS JOIN parametros + WHERE pe.data_inicio/fim.
 
 Resultado do run corrigido (14.06.2026): 18.461 linhas, zero duplicatas.
 """
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 import sys
 
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.calendario import dias_uteis
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
 from lib.periodos import analysis_window, build_periods_pe, period_metadata
 
+# Linhas atômicas: uma por (entrega × plano de trabalho). O rateio por dias
+# úteis e a agregação acontecem em Python — ver docstring (decisão CGOV D09).
 SQL_I07 = """
 WITH parametros AS (
     SELECT
         CAST('{ini}' AS DATE) AS data_inicio,
         CAST('{fim}' AS DATE) AS data_fim,
         0                     AS incluir_excluidos
-),
-planos_horas AS (
-    SELECT
-        pt.id        AS plano_trabalho_id,
-        pt.unidade_id,
-        CASE pt.forma_contagem_carga_horaria
-            WHEN 'DIAS' THEN pt.carga_horaria * 8.0
-            ELSE             pt.carga_horaria
-        END
-        * (
-            (CASE WHEN CAST(pt.data_fim   AS DATE) < p.data_fim
-                  THEN CAST(pt.data_fim   AS DATE)
-                  ELSE p.data_fim END)
-            - (CASE WHEN CAST(pt.data_inicio AS DATE) > p.data_inicio
-                    THEN CAST(pt.data_inicio AS DATE)
-                    ELSE p.data_inicio END)
-            + 1
-          )
-        / NULLIF(
-              (CAST(pt.data_fim AS DATE) - CAST(pt.data_inicio AS DATE)) + 1,
-              0
-          )
-        AS horas_proporcionais
-    FROM petrvs_icmbio_planos_trabalhos pt
-    CROSS JOIN parametros p
-    WHERE CAST(pt.data_inicio AS DATE) <= p.data_fim
-      AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
-      AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
-      AND pt.carga_horaria IS NOT NULL
-      AND pt.carga_horaria > 0
-),
-vinculos_ativos AS (
-    SELECT
-        pte.plano_trabalho_id,
-        pte.plano_entrega_entrega_id    AS id_entrega,
-        COALESCE(pte.forca_trabalho, 0) AS forca_trabalho
-    FROM petrvs_icmbio_planos_trabalhos_entregas pte
-    WHERE pte.plano_entrega_entrega_id IS NOT NULL
-      AND pte.deleted_at IS NULL
-),
-linhas AS (
-    SELECT
-        COALESCE(un.sigla, 'N.I.') AS unidade_sigla,
-        COALESCE(un.nome,  'N.I.') AS unidade_nome,
-        va.id_entrega,
-        COALESCE(
-            NULLIF(TRIM(COALESCE(pee.descricao,         '')), ''),
-            NULLIF(TRIM(COALESCE(pee.descricao_entrega, '')), ''),
-            'N.I.'
-        )                          AS nome_entrega,
-        pe.id                      AS id_plano_entrega,
-        CAST(pe.data_inicio AS DATE) AS inicio_vigencia_plano_entrega,
-        CAST(pe.data_fim    AS DATE) AS fim_vigencia_plano_entrega,
-        ph.plano_trabalho_id,
-        ph.horas_proporcionais * (va.forca_trabalho / 100.0) AS horas_servidor
-    FROM vinculos_ativos va
-    JOIN planos_horas ph
-        ON ph.plano_trabalho_id = va.plano_trabalho_id
-    LEFT JOIN petrvs_icmbio_planos_entregas_entregas pee
-        ON pee.id = va.id_entrega
-       AND pee.deleted_at IS NULL
-    LEFT JOIN petrvs_icmbio_planos_entregas pe
-        ON pe.id = pee.plano_entrega_id
-       AND pe.deleted_at IS NULL
-    LEFT JOIN petrvs_icmbio_unidades un
-        ON un.id = COALESCE(pe.unidade_id, ph.unidade_id)
-    CROSS JOIN parametros p
-    WHERE pe.id IS NOT NULL
-      AND CAST(pe.data_inicio AS DATE) <= p.data_fim
-      AND CAST(pe.data_fim   AS DATE) >= p.data_inicio
 )
 SELECT
-    unidade_sigla,
-    unidade_nome,
-    id_entrega,
-    nome_entrega,
-    id_plano_entrega,
-    inicio_vigencia_plano_entrega,
-    fim_vigencia_plano_entrega,
-    ROUND(SUM(horas_servidor), 2)     AS total_horas_planejadas_entrega,
-    COUNT(DISTINCT plano_trabalho_id) AS num_servidores_alocados
-FROM linhas
-GROUP BY
-    unidade_sigla, unidade_nome, id_entrega, nome_entrega,
-    id_plano_entrega, inicio_vigencia_plano_entrega, fim_vigencia_plano_entrega
-ORDER BY unidade_sigla, total_horas_planejadas_entrega DESC
+    COALESCE(un.sigla, 'N.I.') AS unidade_sigla,
+    COALESCE(un.nome,  'N.I.') AS unidade_nome,
+    pte.plano_entrega_entrega_id AS id_entrega,
+    COALESCE(
+        NULLIF(TRIM(COALESCE(pee.descricao,         '')), ''),
+        NULLIF(TRIM(COALESCE(pee.descricao_entrega, '')), ''),
+        'N.I.'
+    )                          AS nome_entrega,
+    pe.id                      AS id_plano_entrega,
+    CAST(pe.data_inicio AS DATE) AS inicio_vigencia_plano_entrega,
+    CAST(pe.data_fim    AS DATE) AS fim_vigencia_plano_entrega,
+    pt.id                      AS plano_trabalho_id,
+    pt.carga_horaria,
+    pt.forma_contagem_carga_horaria,
+    CAST(pt.data_inicio AS DATE) AS plano_inicio,
+    CAST(pt.data_fim    AS DATE) AS plano_fim,
+    CAST(CASE WHEN CAST(pt.data_inicio AS DATE) > p.data_inicio
+              THEN pt.data_inicio ELSE p.data_inicio END AS DATE) AS sobreposicao_inicio,
+    CAST(CASE WHEN CAST(pt.data_fim AS DATE) < p.data_fim
+              THEN pt.data_fim ELSE p.data_fim END AS DATE)       AS sobreposicao_fim,
+    COALESCE(pte.forca_trabalho, 0) AS forca_trabalho
+FROM petrvs_icmbio_planos_trabalhos pt
+JOIN petrvs_icmbio_planos_trabalhos_entregas pte
+    ON pte.plano_trabalho_id = pt.id
+   AND pte.deleted_at IS NULL
+   AND pte.plano_entrega_entrega_id IS NOT NULL
+LEFT JOIN petrvs_icmbio_planos_entregas_entregas pee
+    ON pee.id = pte.plano_entrega_entrega_id
+   AND pee.deleted_at IS NULL
+LEFT JOIN petrvs_icmbio_planos_entregas pe
+    ON pe.id = pee.plano_entrega_id
+   AND pe.deleted_at IS NULL
+LEFT JOIN petrvs_icmbio_unidades un
+    ON un.id = COALESCE(pe.unidade_id, pt.unidade_id)
+CROSS JOIN parametros p
+WHERE (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
+  AND pt.carga_horaria IS NOT NULL
+  AND pt.carga_horaria > 0
+  AND CAST(pt.data_inicio AS DATE) <= p.data_fim
+  AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
+  AND pe.id IS NOT NULL
+  AND CAST(pe.data_inicio AS DATE) <= p.data_fim
+  AND CAST(pe.data_fim   AS DATE) >= p.data_inicio
 """
+
+# Colunas agregadas escritas no CSV, após as colunas de período.
+COLUNAS_SAIDA = [
+    "unidade_sigla",
+    "unidade_nome",
+    "id_entrega",
+    "nome_entrega",
+    "id_plano_entrega",
+    "inicio_vigencia_plano_entrega",
+    "fim_vigencia_plano_entrega",
+    "total_horas_planejadas_entrega",
+    "num_planos_trabalho_alocados",
+]
+
+CHAVE = (
+    "unidade_sigla", "unidade_nome", "id_entrega", "nome_entrega",
+    "id_plano_entrega", "inicio_vigencia_plano_entrega", "fim_vigencia_plano_entrega",
+)
+
+
+def _para_data(valor: object) -> date | None:
+    if isinstance(valor, date):
+        return valor
+    if valor in (None, ""):
+        return None
+    try:
+        return date.fromisoformat(str(valor)[:10])
+    except ValueError:
+        return None
+
+
+def _para_float(valor: object) -> float:
+    try:
+        return float(str(valor).replace(",", "."))
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def horas_alocadas(registro: dict) -> float:
+    """Horas do plano de trabalho atribuíveis à entrega, rateadas por dias úteis."""
+
+    inicio, fim = _para_data(registro.get("plano_inicio")), _para_data(registro.get("plano_fim"))
+    sobre_ini = _para_data(registro.get("sobreposicao_inicio"))
+    sobre_fim = _para_data(registro.get("sobreposicao_fim"))
+    if not inicio or not fim or not sobre_ini or not sobre_fim:
+        return 0.0
+    base = _para_float(registro.get("carga_horaria"))
+    if str(registro.get("forma_contagem_carga_horaria") or "").upper() == "DIAS":
+        base *= 8.0
+    denominador = dias_uteis(inicio, fim)
+    if not denominador:
+        return 0.0
+    proporcional = base * dias_uteis(sobre_ini, sobre_fim) / denominador
+    return proporcional * _para_float(registro.get("forca_trabalho")) / 100.0
+
+
+def agregar(columns: list[str], rows: list[list]) -> list[list]:
+    """Agrega as linhas atômicas por entrega, somando horas e contando planos."""
+
+    acumulado: dict[tuple, dict] = {}
+    for row in rows:
+        registro = dict(zip(columns, row))
+        chave = tuple(str(registro.get(nome, "")) for nome in CHAVE)
+        item = acumulado.setdefault(chave, {"horas": 0.0, "planos": set()})
+        item["horas"] += horas_alocadas(registro)
+        item["planos"].add(str(registro.get("plano_trabalho_id")))
+    agregadas = [
+        [*chave, round(item["horas"], 2), len(item["planos"])]
+        for chave, item in acumulado.items()
+    ]
+    # Mesma ordenação da versão SQL: unidade, depois horas decrescentes.
+    agregadas.sort(key=lambda linha: (linha[0], -linha[7]))
+    return agregadas
 
 
 def main() -> None:
@@ -145,7 +191,7 @@ def main() -> None:
     window = analysis_window()
     periods = build_periods_pe(window.fim)
     meta_cols = period_metadata()
-    all_cols: list[str] | None = None
+    all_cols = meta_cols + COLUNAS_SAIDA
     all_rows: list[list] = []
 
     try:
@@ -157,12 +203,11 @@ def main() -> None:
             except Exception as exc:
                 print(f"  ERRO: {exc}")
                 continue
-            if all_cols is None:
-                all_cols = meta_cols + columns
+            agregadas = agregar(columns, rows)
             duration = (end - start).days + 1
-            for row in rows:
+            for row in agregadas:
                 all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
-            print(f"  {len(rows)} linhas retornadas.")
+            print(f"  {len(rows)} vinculos -> {len(agregadas)} entregas agregadas.")
     finally:
         conn.close()
 
@@ -171,15 +216,15 @@ def main() -> None:
         return
 
     # mesogrupo so entra no CSV escrito — all_cols/all_rows seguem com as
-    # posicoes originais para nao quebrar os offsets fixos usados abaixo.
+    # posicoes originais para nao quebrar as buscas por nome abaixo.
     lookup = load_mesogrupo_lookup()
-    csv_cols, csv_rows = insert_mesogrupo_column(all_cols or [], all_rows, lookup)
+    csv_cols, csv_rows = insert_mesogrupo_column(all_cols, all_rows, lookup)
 
     write_pipe_csv(output, csv_cols, csv_rows)
     print(f"Arquivo salvo: {output}")
 
     # Aviso de qualidade: entregas com total_horas_planejadas_entrega = 0
-    offset_horas = len(meta_cols) + 7  # posicao de total_horas_planejadas_entrega
+    offset_horas = all_cols.index("total_horas_planejadas_entrega")
     zeros = sum(1 for r in all_rows if str(r[offset_horas]) in ("0", "0.0", "0.00"))
     if zeros:
         pct = round(zeros * 100.0 / len(all_rows), 1)
@@ -189,7 +234,8 @@ def main() -> None:
             print(f"  Info: {zeros} entrega(s) com total_horas = 0 ({pct}%).")
 
     # Aviso de ciclo parcial no corte
-    parciais = sum(1 for r in all_rows if str(r[5]) == "parcial_no_corte")
+    offset_status = all_cols.index("periodo_status")
+    parciais = sum(1 for r in all_rows if str(r[offset_status]) == "parcial_no_corte")
     if parciais:
         print(f"  AVISO: {parciais} linha(s) de ciclos parciais no corte — resultados preliminares.")
 

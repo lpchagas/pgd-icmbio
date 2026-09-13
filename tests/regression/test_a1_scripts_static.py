@@ -107,25 +107,44 @@ class TestEscalaEixo4:
 
 class TestUnidadeI07I08:
     @pytest.mark.parametrize("indicador,var_name", [("07", "SQL_I07"), ("08", "SQL_I08")])
-    def test_join_de_unidade_usa_coalesce_pe_ph(self, indicador, var_name):
+    def test_join_de_unidade_usa_o_dono_da_entrega(self, indicador, var_name):
+        """A unidade é a dona do PE, nunca a do executor do PT.
+
+        O fallback muda de nome conforme o script: I08 ainda tem o CTE
+        planos_horas (``ph``), enquanto o I07 passou a ler ``pt`` diretamente
+        depois que o rateio migrou para Python (decisão CGOV D09).
+        """
         sql = _sql_constant(_source(indicador), var_name)
         assert re.search(
-            r"COALESCE\(\s*pe\.unidade_id\s*,\s*ph\.unidade_id\s*\)", sql
-        ), (
-            f"SQL_{var_name} deve atribuir a unidade via "
-            "COALESCE(pe.unidade_id, ph.unidade_id)."
+            r"COALESCE\(\s*pe\.unidade_id\s*,\s*(?:ph|pt)\.unidade_id\s*\)", sql
+        ), f"{var_name} deve atribuir a unidade via COALESCE(pe.unidade_id, ...)."
+        assert not re.search(r"un\.id\s*=\s*pt\.unidade_id\b", sql), (
+            f"{var_name} não pode atribuir a entrega à unidade do executor."
         )
 
-    @pytest.mark.parametrize("indicador,var_name", [("07", "SQL_I07"), ("08", "SQL_I08")])
-    def test_horas_usam_somente_sobreposicao_proporcional(self, indicador, var_name):
-        sql = _sql_constant(_source(indicador), var_name)
+    def test_i08_rateia_horas_pela_sobreposicao(self):
+        sql = _sql_constant(_source("08"), "SQL_I08")
         assert "AS horas_proporcionais" in sql
         assert "ELSE p.data_fim END" in sql
         assert "ELSE p.data_inicio END" in sql
-        assert re.search(
-            r"CAST\(pt\.data_fim AS DATE\)\s*-\s*CAST\(pt\.data_inicio AS DATE\)",
-            sql,
-        )
+
+    def test_i07_rateia_horas_por_dias_uteis(self):
+        """D09: o rateio do I07 saiu da SQL e usa o calendário institucional."""
+        source = _source("07")
+        sql = _sql_constant(source, "SQL_I07")
+        # A SQL devolve as datas brutas; quem divide é o Python.
+        assert "AS sobreposicao_inicio" in sql and "AS sobreposicao_fim" in sql
+        assert "from lib.calendario import dias_uteis" in source
+        assert "dias_uteis(sobre_ini, sobre_fim)" in source
+        assert "dias_uteis(inicio, fim)" in source
+
+    def test_i07_conta_planos_de_trabalho_nao_pessoas(self):
+        """D09: num_servidores_alocados era um nome errado para o COUNT DISTINCT."""
+        source = _source("07")
+        assert "num_planos_trabalho_alocados" in source
+        # O nome antigo só pode sobreviver na docstring que registra a mudança,
+        # nunca como coluna de saída.
+        assert '"num_servidores_alocados"' not in source
 
 
 # ---------------------------------------------------------------------------
@@ -166,8 +185,15 @@ class TestPadraoCanonico:
 
     @pytest.mark.parametrize("indicador", ["07", "08", "09", "10", "11", "12"])
     def test_aviso_de_ciclo_parcial_usa_novo_offset_e_status(self, indicador):
+        """O status do ciclo vem da coluna periodo_status, por offset ou por nome.
+
+        Scripts já migrados para busca por nome (``all_cols.index(...)``) são
+        preferíveis ao offset fixo ``r[5]``: a inserção de colunas novas não os
+        quebra. Os dois formatos são aceitos aqui; o que não pode reaparecer é
+        o offset anterior à correção (``r[4]``).
+        """
         source = _source(indicador)
-        assert "r[5]" in source
+        assert "r[5]" in source or 'all_cols.index("periodo_status")' in source
         assert "\"parcial_no_corte\"" in source
         assert "r[4] == \"em_andamento\"" not in source
         assert "r[4] == \"encerrado\"" not in source
