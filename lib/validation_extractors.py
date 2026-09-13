@@ -129,11 +129,13 @@ WHERE av.deleted_at IS NULL
 """,
     "pt_status_planos": """
 SELECT pt.id AS plano_trabalho_id,
-       COALESCE(un.sigla, 'N.I.') AS unidade_sigla,
+       un.sigla AS unidade_sigla,
        pt.status AS status_codigo,
        pt.updated_at AS plano_updated_at
 FROM petrvs_icmbio_planos_trabalhos pt
-LEFT JOIN petrvs_icmbio_unidades un ON un.id = pt.unidade_id AND un.deleted_at IS NULL
+-- D17/F5: mesmo universo do A1 — plano de unidade ou servidor ativos.
+JOIN petrvs_icmbio_unidades un ON un.id = pt.unidade_id AND un.deleted_at IS NULL
+JOIN petrvs_icmbio_usuarios us ON us.id = pt.usuario_id AND us.deleted_at IS NULL
 WHERE pt.deleted_at IS NULL
 """,
     "pt_status_consolidacoes": """

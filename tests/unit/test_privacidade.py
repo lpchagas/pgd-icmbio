@@ -1,4 +1,5 @@
 import ast
+import importlib.util
 from pathlib import Path
 
 import pytest
@@ -82,9 +83,37 @@ def test_detalhe_nunca_e_gerado_para_o_produto_compartilhavel():
     assert 'gest_artifact("01", f"2_detalhe_{args.produto}' in fonte
 
 
+def _script_ind_gest_01():
+    spec = importlib.util.spec_from_file_location("ind_gest_01_run", IND_GEST_01)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def test_painel_compartilhavel_mantem_supressao_k():
-    fonte = IND_GEST_01.read_text(encoding="utf-8")
-    assert 'n >= 5 else "SUPRIMIDO_K"' in fonte
+    painel = _script_ind_gest_01().montar_painel(
+        {("U1", "Em execução"): 30, ("U2", "Rascunho"): 4, ("U2", "Em execução"): 3},
+        "compartilhavel",
+    )
+    assert ["U1", "Em execução", 30] in painel
+    assert all(linha[2] == "SUPRIMIDO_K" for linha in painel if linha[0] == "U2")
+
+
+def test_painel_compartilhavel_aplica_supressao_complementar():
+    """D17/F11: uma única célula oculta seria deduzível pelo total da unidade."""
+    painel = _script_ind_gest_01().montar_painel(
+        {("U1", "Em execução"): 40, ("U1", "Aguardando avaliação"): 8, ("U1", "Rascunho"): 2},
+        "compartilhavel",
+    )
+    valores = {linha[1]: linha[2] for linha in painel}
+    assert valores == {
+        "Em execução": 40, "Aguardando avaliação": "SUPRIMIDO_K", "Rascunho": "SUPRIMIDO_K",
+    }
+
+
+def test_painel_restrito_nao_suprime():
+    painel = _script_ind_gest_01().montar_painel({("U1", "Rascunho"): 2}, "restrito")
+    assert painel == [["U1", "Rascunho", 2]]
 
 
 def test_ind_gest_01_coleta_o_minimo_necessario():

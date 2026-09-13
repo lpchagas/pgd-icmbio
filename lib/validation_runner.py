@@ -38,6 +38,8 @@ PERSONAL_COLUMN = re.compile(r"(?i)(cpf|email|telefone|endereco|nome_servidor|se
 PROFILE_CATEGORY = re.compile(r"(?i)(status|modalidade|grupo|faixa|categoria|classificacao|direcao|alerta|tipo_meta)")
 UUID_VALUE = re.compile(r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", re.I)
 STAGE_ORDER = {"A1": 1, "A2": 2, "A3": 3, "A4": 4, "A5": 5, "todas": 5}
+# Marcador de célula ocultada por k-anonimato nos painéis compartilháveis de gestão.
+SUPPRESSED_CELL = "SUPRIMIDO_K"
 
 
 def _sha256(path: Path) -> str:
@@ -90,6 +92,20 @@ def _read_csv(path: Path) -> tuple[list[str], list[dict[str, str]], list[str]]:
 def _latest(pattern: str, directory: Path) -> Path | None:
     files = sorted(directory.glob(pattern), key=lambda path: (path.stat().st_mtime_ns, path.name))
     return files[-1] if files else None
+
+
+def _a2_pattern(target: ValidationTarget, contract: OutputContract, product: str) -> str:
+    """Padrão do A2 a validar, restrito ao produto na família de gestão.
+
+    Os CSVs de gestão levam o produto no nome (``IND_GEST_01.2_painel_restrito_…``).
+    Sem esse filtro, o arquivo mais recente vencia: validar ``restrito`` logo
+    depois de gerar o ``compartilhavel`` comparava o oracle com células
+    suprimidas. ``ambos`` compara com o restrito, que traz os valores.
+    """
+    if target.family != "gestao" or not contract.pattern.endswith("_*.csv"):
+        return contract.pattern
+    file_product = "compartilhavel" if product == "compartilhavel" else "restrito"
+    return f"{contract.pattern[:-len('*.csv')]}{file_product}_*.csv"
 
 
 def _contract_check(
@@ -198,6 +214,9 @@ def _compare(
     incompatible: dict[str, int] = {}
     for key in set(actual) & set(expected):
         for metric in contract.metrics:
+            if str(actual[key].get(metric, "")) == SUPPRESSED_CELL:
+                # Célula ocultada por controle de divulgação: não há valor a comparar.
+                continue
             left, right = _number(actual[key].get(metric)), _number(expected[key].get(metric))
             if left is None or right is None:
                 if str(actual[key].get(metric, "")) != str(expected[key].get(metric, "")):
@@ -356,7 +375,7 @@ def _validate_target(
             if not (units is not None and target.code == "I01" and contract.view == "institucional")
         ]
         for contract in contracts:
-            path = _latest(contract.pattern, a2_dir)
+            path = _latest(_a2_pattern(target, contract, product), a2_dir)
             rows, contract_findings, profile = _contract_check(
                 target, contract, path, window, units, product
             )
@@ -521,7 +540,7 @@ def _request_fingerprint(
                 "ocde/entregas" if target.family == "ocde" else "gestao"
             ) / window.mes_execucao
             for contract in target.outputs:
-                path = _latest(contract.pattern, directory)
+                path = _latest(_a2_pattern(target, contract, args.produto), directory)
                 if path:
                     files[str(path.relative_to(PROJECT_ROOT))] = _sha256(path)
     return _json_hash({

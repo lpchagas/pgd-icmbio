@@ -14,7 +14,7 @@ A validação usa o mesmo protocolo automatizado A1–A5, com oracle independent
 (`lib/validation_oracles.py`), e cada indicador tem contrato próprio em
 `lib/validation_contracts.py`.
 
-## Namespace (decisão CGOV D17 — 13.09.2026)
+## Namespace (D17 — 13.09.2026, pendente de ratificação CGOV)
 
 Mesmo modelo do D01 da família OCDE:
 

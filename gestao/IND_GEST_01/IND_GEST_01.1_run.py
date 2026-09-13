@@ -57,20 +57,27 @@ import argparse
 import sys
 from datetime import date, datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from lib.csv_utils import PROJECT_ROOT as _ROOT, clean, write_pipe_csv  # noqa: E402
 from lib.denodo_config import connect, get_config  # noqa: E402
-from lib.periodos import analysis_window, configure_execution_context  # noqa: E402
+from lib.periodos import (  # noqa: E402
+    ANALYSIS_TIMEZONE,
+    analysis_window,
+    configure_execution_context,
+)
 from lib.validation_contracts import gest_artifact  # noqa: E402
 from lib.estrutura_organizacional import (  # noqa: E402
     insert_mesogrupo_column,
     load_mesogrupo_lookup,
 )
+from ocde.relatorios.privacidade import K_MIN, apply_complementary_suppression  # noqa: E402
 
-sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Rótulos de negócio (Portaria/PETRVS) para os códigos brutos do banco.
 ROTULO_PT = {
@@ -84,6 +91,15 @@ ROTULO_PT = {
 
 # Status abertos = exigem ação de alguém. CONCLUIDO/CANCELADO são histórico.
 STATUS_ABERTOS = ("INCLUIDO", "AGUARDANDO_ASSINATURA", "ATIVO", "SUSPENSO")
+
+# D17/F1: universo padrão = planos abertos + planos CONCLUIDO que ainda têm período
+# entregue e não avaliado. O encerramento automático por data não esvazia a fila
+# da chefia; sem essa condição, esses planos sumiam do painel embora a derivação
+# os classifique como "Aguardando avaliação".
+FILTRO_UNIVERSO_PADRAO = (
+    "AND (pt.status IN ({abertos}) "
+    "OR (pt.status = 'CONCLUIDO' AND c.qtd_aguardando_avaliacao > 0))"
+)
 
 # D14: produtos de uso interno da unidade, que trazem identificação nominal.
 # "compartilhavel" fica de fora — é o único que circula fora da unidade.
@@ -99,6 +115,20 @@ WITH trilha AS (
       AND sj.plano_trabalho_id IS NOT NULL
     GROUP BY sj.plano_trabalho_id, sj.codigo
 ),
+-- D17/F3: a trilha tem transições com o mesmo (plano, código, created_at)
+-- (140 grupos em 13.09.2026). Juntar a trilha bruta por created_at = MAX
+-- duplicava o plano no painel; o responsável é resolvido aqui, uma linha por
+-- (plano, código, data).
+responsavel AS (
+    SELECT sj.plano_trabalho_id AS pid,
+           sj.codigo            AS cod,
+           sj.created_at        AS dt,
+           MAX(sj.usuario_id)   AS usuario_id
+    FROM petrvs_icmbio_status_justificativas sj
+    WHERE sj.deleted_at IS NULL
+      AND sj.plano_trabalho_id IS NOT NULL
+    GROUP BY sj.plano_trabalho_id, sj.codigo, sj.created_at
+),
 consolidacao AS (
     SELECT c.plano_trabalho_id AS pid,
            SUM(CASE WHEN c.status = 'CONCLUIDO' THEN 1 ELSE 0 END) AS qtd_aguardando_avaliacao,
@@ -111,6 +141,7 @@ consolidacao AS (
     GROUP BY c.plano_trabalho_id
 )
 SELECT
+    pt.id                                          AS plano_trabalho_id,
     u.sigla                                        AS unidade_sigla,
     u.nome                                         AS unidade_nome,
     up.sigla                                       AS unidade_pai_sigla,
@@ -134,12 +165,10 @@ JOIN petrvs_icmbio_unidades  u  ON u.id  = pt.unidade_id AND u.deleted_at IS NUL
 JOIN petrvs_icmbio_usuarios  us ON us.id = pt.usuario_id AND us.deleted_at IS NULL
 LEFT JOIN petrvs_icmbio_unidades up ON up.id = u.unidade_pai_id AND up.deleted_at IS NULL
 LEFT JOIN trilha t ON t.pid = pt.id AND t.cod = pt.status
-LEFT JOIN petrvs_icmbio_status_justificativas sjr
-       ON sjr.plano_trabalho_id = pt.id
-      AND sjr.codigo = pt.status
-      AND sjr.created_at = t.dt
-      AND sjr.deleted_at IS NULL
-LEFT JOIN petrvs_icmbio_usuarios resp ON resp.id = sjr.usuario_id
+LEFT JOIN responsavel r ON r.pid = t.pid AND r.cod = t.cod AND r.dt = t.dt
+-- D17/F4: exceção declarada à regra de soft-delete. Quem executou a transição
+-- é fato de auditoria e continua valendo se o usuário foi desativado depois.
+LEFT JOIN petrvs_icmbio_usuarios resp ON resp.id = r.usuario_id
 LEFT JOIN consolidacao c ON c.pid = pt.id
 WHERE pt.deleted_at IS NULL
   {filtro_status}
@@ -191,7 +220,40 @@ def expandir_subordinadas(conn, siglas: list[str], niveis: int = 3) -> list[str]
         filhas = {r[0].upper() for r in rows if r[0]}
         fronteira = filhas - acumulado
         acumulado |= filhas
+    if fronteira:
+        # D17/F10: há unidades 4 níveis abaixo de CGGP/DIPLAN; o corte não pode
+        # ser silencioso.
+        sql = SQL_UNIDADES_FILHAS.format(siglas=quote_list(sorted(fronteira)))
+        _, rows = run_query(conn, sql)
+        restantes = {r[0].upper() for r in rows if r[0]} - acumulado
+        if restantes:
+            print(f"AVISO: hierarquia cortada em {niveis} níveis; {len(restantes)} "
+                  "unidade(s) mais profunda(s) ficaram fora. Use --niveis para ampliar.")
     return sorted(acumulado)
+
+
+def montar_painel(resumo: dict[tuple[str, str], int], produto: str) -> list[list]:
+    """Painel unidade × status. No compartilhável: k<5 e supressão complementar.
+
+    D17/F11: suprimir só a célula pequena não basta. Se numa unidade uma única
+    célula foi ocultada, qualquer total da unidade divulgado em outro produto
+    permite deduzi-la; por isso a menor célula visível da mesma unidade também
+    é ocultada.
+    """
+    linhas = [
+        {"unidade_sigla": u, "status_negocio": s, "qtd_planos": n,
+         "suprimido": produto == "compartilhavel" and n < K_MIN}
+        for (u, s), n in sorted(resumo.items(), key=lambda kv: (kv[0][0], -kv[1]))
+    ]
+    if produto == "compartilhavel":
+        apply_complementary_suppression(
+            linhas, parent_keys=["unidade_sigla"], count_key="qtd_planos"
+        )
+    return [
+        [linha["unidade_sigla"], linha["status_negocio"],
+         "SUPRIMIDO_K" if linha["suprimido"] else linha["qtd_planos"]]
+        for linha in linhas
+    ]
 
 
 def derivar_status_negocio(
@@ -220,7 +282,7 @@ def derivar_status_negocio(
             else:
                 acao = "Em execução — sem pendência de período no momento."
         elif codigo == "CONCLUIDO":
-            acao = "Encerrado e avaliado — nenhuma ação."
+            acao = "Encerrado, sem período pendente de avaliação — nenhuma ação."
         elif codigo == "SUSPENSO":
             acao = f"Plano suspenso — verificar com {servidor} o motivo e a retomada."
         else:
@@ -239,6 +301,10 @@ def dias_parado(data_status: str, hoje: date) -> str:
         base = datetime.strptime(data_status[:10], "%Y-%m-%d").date()
     except ValueError:
         return ""
+    # D17/F7: o Denodo é ao vivo. Com --data-execucao retroativa, uma transição
+    # posterior à fotografia daria dias negativos; sai vazio em vez de um número falso.
+    if base > hoje:
+        return ""
     return str((hoje - base).days)
 
 
@@ -247,11 +313,14 @@ def main() -> None:
     parser.add_argument("--unidade", action="append", default=[],
                         help="Sigla da unidade (repetível ou separada por vírgula).")
     parser.add_argument("--incluir-subordinadas", action="store_true",
-                        help="Inclui as unidades filhas na hierarquia (até 3 níveis).")
+                        help="Inclui as unidades filhas na hierarquia.")
+    parser.add_argument("--niveis", type=int, default=3,
+                        help="Profundidade de --incluir-subordinadas (padrão: 3).")
     parser.add_argument("--todas", action="store_true",
                         help="Todas as unidades do ICMBio.")
     parser.add_argument("--incluir-encerrados", action="store_true",
-                        help="Inclui PTs CONCLUIDO/CANCELADO (padrão: só os abertos).")
+                        help="Inclui todos os PTs CONCLUIDO/CANCELADO (padrão: abertos "
+                             "e concluídos com período aguardando avaliação).")
     parser.add_argument("--out", default=None, help="Diretório de saída.")
     parser.add_argument("--data-execucao", help="Data reprodutível da fotografia (AAAA-MM-DD).")
     parser.add_argument(
@@ -286,7 +355,7 @@ def main() -> None:
     print("Conexao Denodo OK.")
     try:
         if siglas and args.incluir_subordinadas:
-            siglas = expandir_subordinadas(conn, siglas)
+            siglas = expandir_subordinadas(conn, siglas, args.niveis)
             print(f"Hierarquia expandida: {len(siglas)} unidades.")
 
         filtro_unidade = ""
@@ -295,7 +364,7 @@ def main() -> None:
 
         filtro_status = ""
         if not args.incluir_encerrados:
-            filtro_status = f"AND pt.status IN ({quote_list(STATUS_ABERTOS)})"
+            filtro_status = FILTRO_UNIVERSO_PADRAO.format(abertos=quote_list(STATUS_ABERTOS))
 
         sql = SQL_IND_GEST_01.format(filtro_status=filtro_status,
                                    filtro_unidade=filtro_unidade)
@@ -308,6 +377,13 @@ def main() -> None:
     if not rows:
         print("Nenhum plano encontrado para o filtro informado.")
         return
+
+    # D17/F3: uma linha por plano é invariante do painel. A chave interna só serve
+    # a esta verificação e não é persistida.
+    duplicados = len(rows) - len({row[0] for row in rows})
+    if duplicados:
+        raise RuntimeError(f"{duplicados} plano(s) duplicado(s) na consulta; painel abortado.")
+    cols, rows = cols[1:], [row[1:] for row in rows]
 
     idx = {name: i for i, name in enumerate(cols)}
     derivadas = ["status_negocio", "data_ultima_mudanca_status", "origem_data_status",
@@ -341,7 +417,7 @@ def main() -> None:
     lookup = load_mesogrupo_lookup()
     out_cols, out_rows = insert_mesogrupo_column(out_cols, out_rows, lookup)
 
-    stamp = datetime.now().strftime("%Y%m%d_%H%M")
+    stamp = datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)).strftime("%Y%m%d_%H%M")
     if args.todas:
         escopo = "TODAS"
     else:
@@ -355,10 +431,7 @@ def main() -> None:
         print(f"  Salvo: {detalhe}")
 
     painel_cols = ["unidade_sigla", "status_negocio", "qtd_planos"]
-    painel_rows = [
-        [u, s, n if args.produto != "compartilhavel" or n >= 5 else "SUPRIMIDO_K"]
-        for (u, s), n in sorted(resumo.items(), key=lambda kv: (kv[0][0], -kv[1]))
-    ]
+    painel_rows = montar_painel(resumo, args.produto)
     painel = destino / gest_artifact("01", f"2_painel_{args.produto}_{escopo}_{stamp}.csv")
     write_pipe_csv(painel, painel_cols, painel_rows)
     print(f"  Salvo: {painel}")

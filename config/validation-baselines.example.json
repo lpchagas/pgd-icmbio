@@ -99,7 +99,7 @@
   },
   "G01": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
-    "formula_version": "3.0.0",
+    "formula_version": "4.0.0",
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,

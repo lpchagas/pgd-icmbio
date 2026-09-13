@@ -38,9 +38,10 @@ _TARGET_ALIAS = re.compile(r"^IND(?:_OCDE)?_(?=\d)")
 # com o nome antigo e precisam continuar carregando.
 OCDE_ARTIFACT_RE = re.compile(r"^IND_(?:OCDE_)?(\d{2})\.")
 
-# Prefixo de artefato da família de gestão (decisão CGOV D17, 13.09.2026). Mesmo
-# modelo do D01: o arquivo carrega o namespace IND_GEST_XX e o código lógico é
-# curto (G01). PT_STATUS era o código de G01 até 13.09.2026 e segue aceito na CLI.
+# Prefixo de artefato da família de gestão (D17, 13.09.2026, pendente de
+# ratificação CGOV). Mesmo modelo do D01: o arquivo carrega o namespace
+# IND_GEST_XX e o código lógico é curto (G01). PT_STATUS era o código de G01 até
+# 13.09.2026 e segue aceito na CLI.
 GEST_ARTIFACT_PREFIX = "IND_GEST"
 _GEST_TARGET_ALIAS = re.compile(r"^IND_GEST_(?=\d)")
 _LEGACY_TARGET_CODES = {"PT_STATUS": "G01"}
@@ -479,11 +480,15 @@ TARGETS["G01"] = ValidationTarget(
             view="painel",
         ),
     ),
-    # D14: identificação nominal nos produtos internos da unidade.
-    formula_version="3.0.0",
+    # D14 (3.0.0): identificação nominal nos produtos internos da unidade.
+    # D17 (4.0.0): universo inclui concluídos com período aguardando avaliação.
+    formula_version="4.0.0",
     temporal_lenses=("operacional",),
     supported_scopes=SCOPE_ALL,
-    invariants=("precedencia_consolidacao", "fallback_data_status", "total_subtotais"),
+    invariants=(
+        "precedencia_consolidacao", "fallback_data_status", "total_subtotais",
+        "uma_linha_por_plano",
+    ),
     privacy_class="ambos",
 )
 

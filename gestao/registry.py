@@ -76,9 +76,9 @@ REGISTRY: dict[str, ManagementExtraction] = {
         business_keys=("unidade_sigla", "status_negocio"),
         validation_schema="IND_GEST_01.validation.v1",
         # Derivada do contrato de validação para que as duas declarações não
-        # divirjam a cada mudança de fórmula (D14 elevou o G01 a 3.0.0).
+        # divirjam a cada mudança de fórmula (D14 elevou o G01 a 3.0.0; D17, a 4.0.0).
         formula_version=TARGETS["G01"].formula_version,
-        invariants=("precedencia_consolidacao", "fallback_data_status", "total_subtotais"),
+        invariants=TARGETS["G01"].invariants,
         tolerances={"counts": 0.0, "percentages": 0.05},
         baseline="HOMOLOGACAO_INICIAL_PENDENTE",
     )

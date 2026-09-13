@@ -35,8 +35,13 @@ confirmação deliberada é tão vinculante quanto uma mudança.
 | D11 | I09 | **Média por Plano de Trabalho** | 3.0.0 |
 | D12 | I10, I11 | **Coluna `volume_suficiente`** | 3.0.0 |
 | D13 | I12 | Cálculo mantido; uso delimitado a triagem | 2.0.0 |
-| D14 | `PT_STATUS` | **Identificação nominal nos produtos internos** | 3.0.0 |
+| D14 | `PT_STATUS` (hoje G01) | **Identificação nominal nos produtos internos** | 3.0.0 |
 | D15–D16 | ciclo | Baseline V2 após reexecução na GR2 | — |
+| D17 ⏳ | G01 (ex-`PT_STATUS`) | **Namespace `IND_GEST_` e correções de método** | 4.0.0 |
+
+⏳ A D17 foi adotada pelo responsável técnico em 13.09.2026, depois da ata, e
+está **pendente de ratificação pela CGOV**. Até lá, o G01 permanece em
+`HOMOLOGACAO_INICIAL_PENDENTE`.
 
 Os alvos que subiram para `3.0.0` retornam automaticamente a
 `HOMOLOGACAO_INICIAL_PENDENTE`: `lib/validation_runner.py::_baseline_status`
@@ -254,11 +259,67 @@ entre unidades, que a fórmula anterior comprimia numa única linha com
 denominador incompatível. As entregas com proporção acima de 100% — sinal de
 `forca_trabalho` inválida no PETRVS — caíram de 19 para 6.
 
-## 5. Próximos passos (D15–D16)
+### G01 — efeito da D17
+
+Painel nacional de planos, fotografia de 13.09.2026, mesmo universo padrão:
+
+| Status de negócio | 3.0.0 | 4.0.0 | Causa |
+| --- | ---: | ---: | --- |
+| Em execução | 1.288 | 1.287 | F3: um plano contado duas vezes |
+| Aguardando avaliação | 606 | **613** | F1: +7 planos concluídos com período pendente |
+| Aguardando assinatura | 490 | 490 | — |
+| Rascunho | 297 | 297 | — |
+| Suspenso | 3 | 3 | — |
+| **Total** | 2.684 linhas / 2.683 planos | **2.690 planos** | |
+
+## 5. D17 — Família de gestão: namespace `IND_GEST_` e correções do G01
+
+**Estado:** adotada pelo responsável técnico em 13.09.2026; pendente de
+ratificação CGOV. `formula_version` do G01: 3.0.0 → **4.0.0**.
+
+### Namespace
+
+Mesmo modelo do D01. O `PT_STATUS` passa a ser o indicador **G01 — Situação dos
+Planos de Trabalho**, em `gestao/IND_GEST_01/IND_GEST_01.1_run.py`, com
+artefatos `IND_GEST_01.{2,3,4,5}_*`. A CLI continua aceitando `PT_STATUS` e
+`IND_GEST_01` como alias de `G01`. A skill `status-pt` mantém o nome.
+Convenção completa em `gestao/README.md`.
+
+### Correções de método
+
+Cada achado foi medido no Denodo, somente leitura, antes da correção, na
+fotografia de 13.09.2026.
+
+| # | Achado | Medição | Decisão |
+| --- | --- | --- | --- |
+| F1 | O filtro padrão excluía planos `CONCLUIDO` com período entregue e não avaliado, e o encerramento automático por data os tirava da fila da chefia | 7 planos em 6 unidades | **Corrigido** no A1 e no oracle: o universo padrão inclui esses planos |
+| F2 | Risco de a trilha datar o plano com transições de consolidação | 0 de 143.548 linhas de trilha de PT referenciam consolidação, PE ou atividade | Sem mudança; risco registrado |
+| F3 | O join do responsável por `created_at = MAX` duplicava o plano quando havia empate | 140 empates na trilha; 1 plano duplicado no painel padrão, 37 na base inteira | **Corrigido**: responsável agregado por (plano, código, data); A1 aborta se houver plano duplicado; invariante `uma_linha_por_plano` |
+| F4 | O autor da transição não filtra `deleted_at` | — | **Exceção declarada** à regra de soft-delete: autoria histórica é fato de auditoria |
+| F5 | O extrator do oracle usava LEFT JOIN com `N.I.`; o A1 exige unidade e servidor ativos | 0 planos abertos órfãos | **Alinhado** ao universo do A1 (preventivo) |
+| F6 | A documentação dizia "Concluído = todas as consolidações AVALIADO"; o código não exige isso | 16 planos concluídos com período `INCLUIDO` | Vale o código; documentação corrigida |
+| F7 | Com `--data-execucao` retroativa, `dias_no_status_atual` podia ficar negativo; carimbo de hora sem fuso | — | **Corrigido**: dias vazio quando a data é posterior à fotografia; carimbo em `America/Sao_Paulo` |
+| F9 | Plano `SUSPENSO` com período pendente continua "Suspenso" | 0 planos | Regra confirmada |
+| F10 | `--incluir-subordinadas` cortava em 3 níveis sem aviso | 5 unidades no 4º nível abaixo de DIPLAN | **Corrigido**: aviso explícito e parâmetro `--niveis` |
+| F11 | O painel compartilhável suprimia só a célula k<5; uma célula oculta isolada é dedutível por qualquer total da unidade | — | **Corrigido**: supressão complementar por unidade (`ocde.relatorios.privacidade`) |
+
+### Correção no runner de validação
+
+Na família de gestão, o A2 era escolhido pelo arquivo mais recente, sem olhar
+o produto. Validar `restrito` logo depois de gerar o `compartilhavel` comparava
+o oracle com células suprimidas e resultava em `FALHA_TECNICA` falsa. O A2
+passa a ser buscado pelo produto solicitado (`ambos` usa o restrito), e uma
+célula `SUPRIMIDO_K` deixa de contar como divergência.
+
+**Verificação:** `python -m lib.validation_runner --familia gestao --alvo G01
+--modo integrado --regional GR2` resulta em `HOMOLOGACAO_INICIAL_PENDENTE`, sem
+achado bloqueante, nos produtos `restrito` e `compartilhavel`.
+
+## 6. Próximos passos (D15–D17)
 
 1. Reexecutar o ciclo integrado na GR2 e conferir que os 13 alvos ficam em
    `HOMOLOGACAO_INICIAL_PENDENTE`, e não em `FALHA_TECNICA`.
-2. Submeter à CGOV os A5 com os deltas da seção 4.
+2. Submeter à CGOV os A5 com os deltas da seção 4 e a ratificação da D17 (seção 5).
 3. Registrar a aprovação com `python -m tools.approve_validation_baseline`,
    sem editar hashes manualmente.
 4. Reexecutar: sem mudanças e sem divergências, o estado esperado passa a ser

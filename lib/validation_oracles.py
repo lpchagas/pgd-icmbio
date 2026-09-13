@@ -532,7 +532,9 @@ def oracle_ind_gest_01(records: list[Row]) -> list[Row]:
     counts: dict[tuple[str, str], int] = defaultdict(int)
     for plan in plans.values():
         status = plan["status_codigo"]
-        if status not in {"INCLUIDO", "AGUARDANDO_ASSINATURA", "ATIVO", "SUSPENSO"}:
+        # D17/F1: concluído com período entregue e não avaliado continua na fila.
+        pending_closed = status == "CONCLUIDO" and plan["aguardando"] > 0
+        if status not in {"INCLUIDO", "AGUARDANDO_ASSINATURA", "ATIVO", "SUSPENSO"} and not pending_closed:
             continue
         business = (
             "Aguardando avaliação"
