@@ -43,7 +43,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pe, period_metadata
+from lib.periodos import analysis_window, build_periods_pe, period_metadata
 
 SQL_I08 = """
 WITH parametros AS (
@@ -154,13 +154,14 @@ def main() -> None:
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_08.2_proporcao_horas_entrega_{stamp}.csv"
 
-    periods = build_periods_pe()
+    window = analysis_window()
+    periods = build_periods_pe(window.fim)
     meta_cols = period_metadata()
     all_cols: list[str] | None = None
     all_rows: list[list] = []
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = SQL_I08.replace("{ini}", str(start)).replace("{fim}", str(end))
             print(f"Executando I08 {label} ({start} a {end})...")
             try:
@@ -172,7 +173,7 @@ def main() -> None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
             for row in rows:
-                all_rows.append([kind, label, str(start), str(end), status, duration] + row)
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:
         conn.close()
@@ -195,10 +196,10 @@ def main() -> None:
     if acima_100:
         print(f"  ALERTA: {acima_100} entrega(s) com proporcao_horas_perc > 100% — verificar forca_trabalho no PETRVS.")
 
-    # Aviso de periodo em_andamento
-    em_andamento = sum(1 for r in all_rows if str(r[4]) == "em_andamento")
-    if em_andamento:
-        print(f"  AVISO: {em_andamento} linha(s) de periodos em_andamento — resultados preliminares.")
+    # Aviso de ciclo parcial no corte
+    parciais = sum(1 for r in all_rows if str(r[5]) == "parcial_no_corte")
+    if parciais:
+        print(f"  AVISO: {parciais} linha(s) de ciclos parciais no corte — resultados preliminares.")
 
 
 def _to_float(value: object) -> float:

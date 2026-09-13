@@ -1,42 +1,126 @@
-"""ICMBio period rules for monthly indicator exports.
+"""Regras temporais canônicas dos indicadores e relatórios PGD/ICMBio.
 
-Two distinct functions cover the bifurcation confirmed on 14.06.2026:
-  build_periods_pe() — Plano de Entregas: 2025 trimestral (T3–T4), 2026+ quadrimestral (Q1–Q3).
-  build_periods_pt() — Plano de Trabalho: 2025 trimestral (T3–T4), 2026+ mensal (M01–M12).
-
-Período base de análise (estabelecido em 26.06.2026): 01/07/2025 – 30/06/2026.
-Justificativa: dados do 1º semestre de 2025 (T1 e T2) são pouco confiáveis devido a falhas
-no sistema e baixa experiência dos gestores com o novo modelo de gestão por entregas (PGD).
-T1-2025 e T2-2025 são omitidos intencionalmente em ambas as funções.
-
-The legacy alias build_periods() maps to build_periods_pe() for backward compatibility.
-
-Indicator classification:
-  PE (build_periods_pe): I02, I03, I04, I07, I08, I12
-  PT (build_periods_pt): I01, I05, I06, I09, I10, I11
+A análise é sempre cumulativa, com início fixo em 01/07/2025 e fim no último
+dia do mês anterior à execução. A data de execução pode ser injetada pela
+variável PGD_ANALYSIS_EXECUTION_DATE (AAAA-MM-DD), tornando as extrações
+reprodutíveis.
 """
 from __future__ import annotations
 
 import calendar
-from datetime import date
+import os
+import sys
+from dataclasses import dataclass
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 
-def build_periods_pe(today: date | None = None) -> list[tuple[str, str, date, date, str]]:
-    """Return ICMBio Plano de Entregas periods up to today.
+ANALYSIS_START = date(2025, 7, 1)
+ANALYSIS_TIMEZONE = "America/Sao_Paulo"
+EXECUTION_DATE_ENV = "PGD_ANALYSIS_EXECUTION_DATE"
+OUTPUT_MONTH_ENV = "PGD_OUTPUT_MONTH"
 
-    Base period starts 01/07/2025 (T3-2025). T1 and T2 of 2025 are excluded
-    because H1/2025 data is unreliable (system issues and low PGD adoption).
-    2025: quarterly T3–T4. 2026 onward: four-monthly (Q1–Q3).
-    Future periods are omitted. Open periods are marked ``em_andamento``.
-    Used by: I02, I03, I04, I07, I08, I12.
-    """
-    current = today or date.today()
+
+@dataclass(frozen=True)
+class AnalysisWindow:
+    """Janela cumulativa de referência de uma execução mensal."""
+
+    inicio: date
+    fim: date
+    mes_execucao: str
+    data_execucao: date
+
+    def as_dict(self) -> dict[str, str]:
+        return {
+            "periodo_analise_inicio": self.inicio.isoformat(),
+            "periodo_analise_fim": self.fim.isoformat(),
+            "mes_execucao": self.mes_execucao,
+            "data_execucao": self.data_execucao.isoformat(),
+        }
+
+
+def _parse_date(value: date | str) -> date:
+    if isinstance(value, date):
+        return value
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise ValueError(f"Data inválida '{value}'; use AAAA-MM-DD.") from exc
+
+
+def execution_date(value: date | str | None = None) -> date:
+    """Resolve a data explícita, injetada ou local em São Paulo."""
+
+    if value is not None:
+        return _parse_date(value)
+    injected = os.environ.get(EXECUTION_DATE_ENV)
+    if injected:
+        return _parse_date(injected)
+    if "--data-execucao" in sys.argv:
+        position = sys.argv.index("--data-execucao")
+        if position + 1 >= len(sys.argv):
+            raise ValueError("--data-execucao exige AAAA-MM-DD.")
+        return _parse_date(sys.argv[position + 1])
+    return datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)).date()
+
+
+def analysis_window(value: date | str | None = None) -> AnalysisWindow:
+    """Retorna 01/07/2025 até o último dia do mês anterior à execução."""
+
+    executed_at = execution_date(value)
+    first_of_month = date(executed_at.year, executed_at.month, 1)
+    analysis_end = first_of_month - timedelta(days=1)
+    if analysis_end < ANALYSIS_START:
+        raise ValueError(
+            "A data de execução resulta em janela anterior à base oficial "
+            f"{ANALYSIS_START.isoformat()}."
+        )
+    return AnalysisWindow(
+        inicio=ANALYSIS_START,
+        fim=analysis_end,
+        mes_execucao=f"{executed_at.year:04d}-{executed_at.month:02d}",
+        data_execucao=executed_at,
+    )
+
+
+def configure_execution_context(value: date | str, output_month: str | None = None) -> AnalysisWindow:
+    """Injeta o contexto temporal para subprocessos e módulos legados."""
+
+    window = analysis_window(value)
+    os.environ[EXECUTION_DATE_ENV] = window.data_execucao.isoformat()
+    os.environ[OUTPUT_MONTH_ENV] = output_month or window.mes_execucao
+    return window
+
+
+def _periods_until(
+    raw: list[tuple[str, str, date, date]],
+    analysis_end: date | None,
+) -> list[tuple[str, str, date, date, date, str]]:
+    cutoff = analysis_end or analysis_window().fim
+    if cutoff < ANALYSIS_START:
+        raise ValueError("analysis_end não pode ser anterior a 01/07/2025.")
+
+    periods: list[tuple[str, str, date, date, date, str]] = []
+    for label, kind, start, scheduled_end in raw:
+        if start > cutoff:
+            continue
+        effective_end = min(scheduled_end, cutoff)
+        status = "encerrado" if scheduled_end <= cutoff else "parcial_no_corte"
+        periods.append((label, kind, start, scheduled_end, effective_end, status))
+    return periods
+
+
+def build_periods_pe(
+    analysis_end: date | None = None,
+) -> list[tuple[str, str, date, date, date, str]]:
+    """Períodos de PE contidos na janela, truncados na data final."""
+
+    cutoff = analysis_end or analysis_window().fim
     raw: list[tuple[str, str, date, date]] = [
-        # 2025 — trimestral apenas T3 e T4 (T1 e T2 excluídos — baixa qualidade H1/2025)
         ("T3-2025", "trimestral", date(2025, 7, 1), date(2025, 9, 30)),
         ("T4-2025", "trimestral", date(2025, 10, 1), date(2025, 12, 31)),
     ]
-    for year in range(2026, current.year + 1):
+    for year in range(2026, cutoff.year + 1):
         raw.extend(
             [
                 (f"Q1-{year}", "quadrimestral", date(year, 1, 1), date(year, 4, 30)),
@@ -44,48 +128,28 @@ def build_periods_pe(today: date | None = None) -> list[tuple[str, str, date, da
                 (f"Q3-{year}", "quadrimestral", date(year, 9, 1), date(year, 12, 31)),
             ]
         )
-
-    periods: list[tuple[str, str, date, date, str]] = []
-    for label, kind, start, end in raw:
-        if start > current:
-            continue
-        status = "em_andamento" if end >= current else "encerrado"
-        periods.append((label, kind, start, end, status))
-    return periods
+    return _periods_until(raw, cutoff)
 
 
-def build_periods_pt(today: date | None = None) -> list[tuple[str, str, date, date, str]]:
-    """Return ICMBio Plano de Trabalho periods up to today.
+def build_periods_pt(
+    analysis_end: date | None = None,
+) -> list[tuple[str, str, date, date, date, str]]:
+    """Períodos de PT contidos na janela, truncados na data final."""
 
-    Base period starts 01/07/2025 (T3-2025). T1 and T2 of 2025 are excluded
-    because H1/2025 data is unreliable (system issues and low PGD adoption).
-    2025: quarterly T3–T4. 2026 onward: monthly (M01–M12).
-    Future periods are omitted. Open periods are marked ``em_andamento``.
-    Used by: I01, I05, I06, I09, I10, I11.
-    """
-    current = today or date.today()
+    cutoff = analysis_end or analysis_window().fim
     raw: list[tuple[str, str, date, date]] = [
-        # 2025 — trimestral apenas T3 e T4 (T1 e T2 excluídos — baixa qualidade H1/2025)
         ("T3-2025", "trimestral", date(2025, 7, 1), date(2025, 9, 30)),
         ("T4-2025", "trimestral", date(2025, 10, 1), date(2025, 12, 31)),
     ]
-    for year in range(2026, current.year + 1):
+    for year in range(2026, cutoff.year + 1):
         for month in range(1, 13):
             last_day = calendar.monthrange(year, month)[1]
             raw.append(
                 (f"M{month:02d}-{year}", "mensal", date(year, month, 1), date(year, month, last_day))
             )
-
-    periods: list[tuple[str, str, date, date, str]] = []
-    for label, kind, start, end in raw:
-        if start > current:
-            continue
-        status = "em_andamento" if end >= current else "encerrado"
-        periods.append((label, kind, start, end, status))
-    return periods
+    return _periods_until(raw, cutoff)
 
 
-# Backward-compatible alias — PE logic (quadrimestral from 2026).
 build_periods = build_periods_pe
 
 
@@ -95,6 +159,7 @@ def period_metadata() -> list[str]:
         "periodo",
         "periodo_inicio",
         "periodo_fim",
+        "periodo_fim_efetivo",
         "periodo_status",
         "duracao_dias",
     ]

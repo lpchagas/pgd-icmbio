@@ -32,7 +32,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pt, period_metadata
+from lib.periodos import analysis_window, build_periods_pt, period_metadata
 
 SQL_I09 = """
 WITH parametros AS (
@@ -45,6 +45,7 @@ avaliacoes_pt AS (
     SELECT
         av.id                    AS id_avaliacao,
         pt.unidade_id,
+        pt.usuario_id            AS id_servidor,
         ptc.plano_trabalho_id,
         (6 - tan.sequencia)      AS valor_nota
     FROM petrvs_icmbio_avaliacoes av
@@ -57,6 +58,7 @@ avaliacoes_pt AS (
     CROSS JOIN parametros p
     WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
@@ -67,6 +69,7 @@ media_por_unidade AS (
         COALESCE(un.nome,  'N.I.')                               AS unidade_nome,
         COUNT(avpt.id_avaliacao)                                 AS total_avaliacoes_pt,
         COUNT(DISTINCT avpt.plano_trabalho_id)                   AS total_planos_com_avaliacao,
+        COUNT(DISTINCT avpt.id_servidor)                         AS total_servidores_avaliados,
         ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt,
         MIN(avpt.valor_nota)                                     AS nota_minima,
         MAX(avpt.valor_nota)                                     AS nota_maxima,
@@ -84,6 +87,7 @@ SELECT
     unidade_nome,
     total_avaliacoes_pt,
     total_planos_com_avaliacao,
+    total_servidores_avaliados,
     media_nota_pt,
     nota_minima,
     nota_maxima,
@@ -118,13 +122,14 @@ def main() -> None:
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_09.2_media_avaliacao_pt_{stamp}.csv"
 
-    periods = build_periods_pt()
+    window = analysis_window()
+    periods = build_periods_pt(window.fim)
     meta_cols = period_metadata()
     all_cols: list[str] | None = None
     all_rows: list[list] = []
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = SQL_I09.replace("{ini}", str(start)).replace("{fim}", str(end))
             print(f"Executando I09 {label} ({start} a {end})...")
             try:
@@ -136,7 +141,7 @@ def main() -> None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
             for row in rows:
-                all_rows.append([kind, label, str(start), str(end), status, duration] + row)
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:
         conn.close()
@@ -153,12 +158,12 @@ def main() -> None:
     write_pipe_csv(output, csv_cols, csv_rows)
     print(f"Arquivo salvo: {output}")
 
-    # Colunas apos meta_cols (6): sigla(0) nome(1) total_av(2) total_planos(3) media(4) ...
+    # Colunas apos meta_cols: sigla(0) nome(1) total_av(2) total_planos(3) total_servidores(4) media(5) ...
     n = len(meta_cols)
     offset_total = n + 2   # total_avaliacoes_pt
-    offset_media = n + 4   # media_nota_pt
+    offset_media = n + 5   # media_nota_pt
 
-    encerrados = [r for r in all_rows if r[4] == "encerrado"]
+    encerrados = [r for r in all_rows if r[5] == "encerrado"]
 
     # Unidades com < 5 avaliacoes (resultado estatisticamente fragil)
     low_count = sum(1 for r in encerrados if int(r[offset_total] or 0) < 5)
@@ -171,9 +176,9 @@ def main() -> None:
         unids = set(r[n] for r in criticas)
         print(f"  AVISO: {len(unids)} unidade(s) com media < 2.5 (Inadequado) em periodos encerrados.")
 
-    em_andamento = sum(1 for r in all_rows if r[4] == "em_andamento")
-    if em_andamento:
-        print(f"  NOTA: {em_andamento} linha(s) em periodo em_andamento — valores preliminares.")
+    parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
+    if parciais:
+        print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores preliminares.")
 
 
 if __name__ == "__main__":

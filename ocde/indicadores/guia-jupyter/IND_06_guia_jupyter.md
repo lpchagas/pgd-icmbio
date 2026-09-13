@@ -1,7 +1,7 @@
 # I06 — Grau de Responsabilidade pelas Entregas — Guia de Execução via Jupyter Notebook
 
 > Guia derivado de `ocde/indicadores/IND_06.1_run.py` (fonte canônica — Opção A/C).
-> Documenta a Opção B (seção 8 do CLAUDE.md): execução manual via
+> Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
@@ -12,11 +12,11 @@ ou pontos únicos de falha.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver CLAUDE.md seção 2).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
-  **não copie credenciais para este arquivo**; ver CLAUDE.md seção 2
-  (arquivo local, não versionado).
+  **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
+  e a checklist de `docs/12-seguranca-publicacao.md`.
 
 ## 3. Instrumento e periodicidade
 
@@ -26,7 +26,7 @@ ou pontos únicos de falha.
 - A unidade é derivada de `pt.unidade_id` (unidade do **executor**), não de
   `pe.unidade_id` (planejador) — o I06 mede responsabilidade de quem executa.
 
-Períodos vigentes em 24.07.2026 (recalcular com `build_periods_pt()` se datas futuras):
+Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pt()` se datas futuras):
 
 | Período | Tipo | Início | Fim | Status |
 |---|---|---|---|---|
@@ -38,7 +38,7 @@ Períodos vigentes em 24.07.2026 (recalcular com `build_periods_pt()` se datas f
 | M04-2026 | mensal | 2026-04-01 | 2026-04-30 | encerrado |
 | M05-2026 | mensal | 2026-05-01 | 2026-05-31 | encerrado |
 | M06-2026 | mensal | 2026-06-01 | 2026-06-30 | encerrado |
-| M07-2026 | mensal | 2026-07-01 | 2026-07-31 | em_andamento |
+| M08-2026 | mensal | 2026-08-01 | 2026-08-31 | encerrado |
 
 ## 4. Query SQL_I06
 
@@ -144,7 +144,7 @@ print(f"Exportado: {output_path}")
   (163 unidades > 50% de concentração) — sinal de ponto único de falha.
 - Ciclos mistos (2025 trimestral vs. 2026 quadrimestral) afetam
   `total_entregas_unidade` — usar `pct_categoria` para comparar entre períodos.
-- Pendência: CGOV decidir a variante I06-PE (ver CLAUDE.md seção 11).
+- Pendência: CGOV decidir a variante I06-PE (registrada no A5 do ciclo correspondente).
 
 ## 8. Ver também
 

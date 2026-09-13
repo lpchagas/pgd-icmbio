@@ -13,6 +13,15 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
+def platform_path(value: str | Path) -> Path:
+    """Converte caminhos Windows para o ponto de montagem equivalente no WSL."""
+
+    raw = str(value or "")
+    if os.name != "nt" and len(raw) >= 3 and raw[1] == ":" and raw[2] in "\\/":
+        return Path("/mnt") / raw[0].lower() / raw[3:].replace("\\", "/")
+    return Path(raw)
+
+
 def load_dotenv(path: Path | None = None) -> None:
     env_path = path or PROJECT_ROOT / ".env"
     if not env_path.exists():
@@ -45,7 +54,7 @@ def get_config(require_credentials: bool = True) -> DenodoConfig:
     java_home = os.environ.get("JAVA_HOME", "")
     jvm_dll = os.environ.get("DENODO_JVM_DLL")
     if not jvm_dll and java_home:
-        jvm_dll = str(Path(java_home) / "bin" / "server" / "jvm.dll")
+        jvm_dll = str(platform_path(java_home) / "bin" / "server" / "jvm.dll")
     driver_path = os.environ.get("DENODO_DRIVER_PATH", "")
 
     config = DenodoConfig(
@@ -54,8 +63,8 @@ def get_config(require_credentials: bool = True) -> DenodoConfig:
         database=os.environ.get("DENODO_DATABASE", "petrvs_icmbio"),
         user=os.environ.get("DENODO_USER", ""),
         password=os.environ.get("DENODO_PASSWORD", ""),
-        driver_path=Path(driver_path),
-        jvm_dll=Path(jvm_dll or ""),
+        driver_path=platform_path(driver_path),
+        jvm_dll=platform_path(jvm_dll or ""),
     )
     if require_credentials:
         missing = []

@@ -44,7 +44,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pe, period_metadata
+from lib.periodos import analysis_window, build_periods_pe, period_metadata
 
 SQL_I03 = """
 WITH parametros AS (
@@ -192,7 +192,8 @@ def main() -> None:
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_03.2_taxa_cumprimento_entrega_{stamp}.csv"
 
-    periods = build_periods_pe()
+    window = analysis_window()
+    periods = build_periods_pe(window.fim)
     meta_cols = period_metadata()
     all_cols: list[str] | None = None
     all_rows: list[list] = []
@@ -205,7 +206,7 @@ def main() -> None:
     idx_status_sql: int | None = None
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = SQL_I03.replace("{ini}", str(start)).replace("{fim}", str(end))
             print(f"Executando I03 {label} ({start} a {end})...")
             try:
@@ -235,7 +236,7 @@ def main() -> None:
                 if taxa_int:
                     n_integ += 1
                 all_rows.append(
-                    [kind, label, str(start), str(end), status, duration]
+                    [kind, label, str(start), str(scheduled_end), str(end), status, duration]
                     + row
                     + [taxa_int, status_int, tipo_meta]
                 )
@@ -271,7 +272,7 @@ def main() -> None:
         f"{'Status':12s}"
     )
     print("-" * 80)
-    for label, kind, start, end, status in periods:
+    for label, kind, start, scheduled_end, end, status in periods:
         p_rows = [r for r in all_rows if r[idx_per] == label]
         if not p_rows:
             continue

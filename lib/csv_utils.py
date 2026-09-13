@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 import csv
+import os
 import re
+import sys
 from datetime import date
 from pathlib import Path
 from typing import Iterable, Sequence
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+INDICATOR_OUTPUT_BASE_ENV = "PGD_INDICATOR_OUTPUT_BASE"
 
 
 def clean(value: object, default: str = "") -> str:
@@ -19,6 +22,23 @@ def clean(value: object, default: str = "") -> str:
 
 
 def artifact_month(today: date | None = None) -> str:
+    if today is None:
+        injected = os.environ.get("PGD_OUTPUT_MONTH")
+        if injected:
+            if not re.fullmatch(r"\d{4}-\d{2}", injected):
+                raise ValueError("PGD_OUTPUT_MONTH deve usar o formato AAAA-MM.")
+            return injected
+        if "--month" in sys.argv:
+            position = sys.argv.index("--month")
+            if position + 1 >= len(sys.argv) or not re.fullmatch(r"\d{4}-\d{2}", sys.argv[position + 1]):
+                raise ValueError("--month deve usar o formato AAAA-MM.")
+            return sys.argv[position + 1]
+        if "--data-execucao" in sys.argv:
+            position = sys.argv.index("--data-execucao")
+            if position + 1 >= len(sys.argv):
+                raise ValueError("--data-execucao exige AAAA-MM-DD.")
+            executed = date.fromisoformat(sys.argv[position + 1])
+            return f"{executed.year:04d}-{executed.month:02d}"
     current = today or date.today()
     return f"{current.year:04d}-{current.month:02d}"
 
@@ -27,7 +47,9 @@ def indicator_csv_dir(month: str | None = None) -> Path:
     """Pasta de entrega mensal — todos os CSVs de indicadores num único diretório por mês.
     Exemplo: artefatos_local/ocde/entregas/2026-06/
     """
-    return PROJECT_ROOT / "artefatos_local" / "ocde" / "entregas" / (month or artifact_month())
+    override = os.environ.get(INDICATOR_OUTPUT_BASE_ENV)
+    base = Path(override) if override else PROJECT_ROOT / "artefatos_local" / "ocde" / "entregas"
+    return base / (month or artifact_month())
 
 
 def diagnostic_csv_dir(month: str | None = None) -> Path:

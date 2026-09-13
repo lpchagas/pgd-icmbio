@@ -11,7 +11,7 @@ from .auditoria import audit_csv
 from .csv_utils import clean, indicator_csv_dir, write_pipe_csv
 from .denodo_config import connect, get_config
 from .docs_sql import adapt_for_jdbc, extract_indicator_sql, set_period
-from .periodos import build_periods_pe, build_periods_pt, period_metadata
+from .periodos import analysis_window, build_periods_pe, build_periods_pt, configure_execution_context, period_metadata
 
 
 def query_rows(conn, sql: str) -> tuple[list[str], list[list[str]]]:
@@ -32,14 +32,18 @@ def parse_args(description: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--dry-run", action="store_true", help="Valida configuracao e mostra destino sem conectar.")
     parser.add_argument("--month", help="Pasta mensal de destino no formato AAAA-MM. Padrao: mes atual.")
+    parser.add_argument(
+        "--data-execucao",
+        help="Data reprodutível da execução (AAAA-MM-DD); define o corte no mês anterior.",
+    )
     return parser.parse_args()
 
 
-def _select_periods(period_type: str) -> list[tuple[str, str, date, date, str]]:
+def _select_periods(period_type: str, analysis_end: date) -> list[tuple[str, str, date, date, date, str]]:
     """Return the correct period list for the given instrument type (pe or pt)."""
     if period_type == "pt":
-        return build_periods_pt()
-    return build_periods_pe()
+        return build_periods_pt(analysis_end)
+    return build_periods_pe(analysis_end)
 
 
 def run_sql_indicator(
@@ -60,17 +64,18 @@ def run_sql_indicator(
                      PT indicators: I05, I06, I09, I10, I11.
     """
     args = parse_args(f"Executa indicador I{indicator} e gera CSV mensal.")
+    window = configure_execution_context(args.data_execucao or analysis_window().data_execucao, args.month)
     sql_template = adapt_for_jdbc(extract_indicator_sql(doc_path, indicator))
     out_dir = indicator_csv_dir(args.month)
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_{indicator}.2_{output_slug}_{stamp}.csv"
 
-    periods = _select_periods(period_type)
+    periods = _select_periods(period_type, window.fim)
 
     if args.dry_run:
         get_config(require_credentials=False)
         preview_period = periods[0]
-        preview_sql = set_period(sql_template, str(preview_period[2]), str(preview_period[3]))
+        preview_sql = set_period(sql_template, str(preview_period[2]), str(preview_period[4]))
         print(f"Indicador: I{indicator}")
         print(f"Instrumento: {'PT (mensal 2026)' if period_type == 'pt' else 'PE (quadrimestral 2026)'}")
         print(f"Documento fonte: {doc_path}")
@@ -87,7 +92,7 @@ def run_sql_indicator(
     meta_columns = period_metadata()
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = set_period(sql_template, str(start), str(end))
             print(f"Executando I{indicator} {label} ({start} a {end})...")
             columns, rows = query_rows(conn, sql)
@@ -95,7 +100,7 @@ def run_sql_indicator(
                 all_columns = meta_columns + columns
             duration = (end - start).days + 1
             for row in rows:
-                all_rows.append([kind, label, str(start), str(end), status, duration] + row)
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:
         conn.close()
@@ -118,12 +123,12 @@ def parse_date(value: object) -> date | None:
         return None
 
 
-def month_periods(first: date, last: date):
+def month_periods(first: date, last: date, analysis_end: date):
     current = date(first.year, first.month, 1)
-    today = date.today()
-    while current <= last and current <= today:
+    cutoff = min(last, analysis_end)
+    while current <= cutoff:
         end_day = calendar.monthrange(current.year, current.month)[1]
-        end = min(date(current.year, current.month, end_day), today)
+        end = min(date(current.year, current.month, end_day), cutoff)
         yield f"{current.year}-{current.month:02d}", current, end
         month = current.month % 12 + 1
         year = current.year + (1 if current.month == 12 else 0)
@@ -132,6 +137,7 @@ def month_periods(first: date, last: date):
 
 def run_i01(doc_path: str = "docs/ocde/06.1.1-i01.md") -> None:
     args = parse_args("Executa indicador I01 e gera CSVs mensais.")
+    window = configure_execution_context(args.data_execucao or analysis_window().data_execucao, args.month)
     sql = adapt_for_jdbc(extract_indicator_sql(doc_path, "01"))
     out_dir = indicator_csv_dir(args.month)
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
@@ -179,11 +185,11 @@ def run_i01(doc_path: str = "docs/ocde/06.1.1-i01.md") -> None:
         return
 
     first = min(plan["inicio"] for plan in plans)
-    last = min(max(plan["fim"] for plan in plans), date.today())
+    last = min(max(plan["fim"] for plan in plans), window.fim)
     total_rows = []
     unit_rows = []
 
-    for label, start, end in month_periods(first, last):
+    for label, start, end in month_periods(first, last, window.fim):
         active = [plan for plan in plans if plan["inicio"] <= end and plan["fim"] >= start]
         by_mode: dict[str, set[str]] = defaultdict(set)
         by_unit_mode: dict[tuple[str, str, str], set[str]] = defaultdict(set)

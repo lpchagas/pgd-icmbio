@@ -12,19 +12,19 @@ ao banco (~14.000 registros em memoria).
 Nota tecnica (23.05.2026): a view tipos_modalidades esta inacessivel no Denodo.
 O regime de trabalho e obtido via integracao_servidores.modalidade_pgd (campo
 SIAPE/PGD), consolidado por CPF com MIN() para servidores com multiplos
-registros. UUIDs brutos indicam falha de mapeamento no cadastro SIAPE/PGD.
+registros. UUIDs brutos indicam falha de mapeamento no cadastro SIAPE/PGD e são agregados em N.I. antes da persistência.
 
 Alertas de qualidade:
-  - UUIDs sem rotulo de modalidade: cadastro SIAPE/PGD sem mapeamento textual.
+  - UUIDs sem rotulo de modalidade: contabilizados e agregados em N.I.; o valor bruto não é persistido.
   - Planos com datas invalidas: descartados com aviso de contagem.
-  - Periodo em andamento: dados do ultimo periodo sao preliminares.
+  - Periodo parcial no corte: usar o fim efetivo e as limitações registradas.
 
 Saidas (em artefatos_local/ocde/entregas/YYYY-MM/):
   IND_01.2_v1_proporcao_mensal_AAAAMMDD_HHMM.csv      -- visao institucional
   IND_01.2_v2_proporcao_unidade_mensal_AAAAMMDD_HHMM.csv -- visao por unidade
 
-Colunas-meta padrao (6) presentes em ambos os CSVs:
-  ciclo_tipo | periodo | periodo_inicio | periodo_fim | periodo_status | duracao_dias
+Colunas-meta padrao (7) presentes em ambos os CSVs:
+  ciclo_tipo | periodo | periodo_inicio | periodo_fim | periodo_fim_efetivo | periodo_status | duracao_dias
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pt, period_metadata
+from lib.periodos import analysis_window, build_periods_pt, period_metadata
 
 # ── Consulta principal (sem filtro de periodo — agregacao feita em Python) ──────
 SQL_I01_PLANOS = """
@@ -73,7 +73,8 @@ WHERE pt.deleted_at  IS NULL
   AND pt.usuario_id  IS NOT NULL
   AND pt.data_inicio IS NOT NULL
   AND pt.data_fim    IS NOT NULL
-  AND CAST(pt.data_fim AS DATE) >= CAST('2025-01-01' AS DATE)
+  AND CAST(pt.data_fim AS DATE) >= CAST('2025-07-01' AS DATE)
+  AND CAST(pt.data_inicio AS DATE) <= CAST('{analysis_end}' AS DATE)
 """
 
 _UUID_RE = re.compile(
@@ -105,7 +106,7 @@ def main() -> None:
 
     print("Carregando planos de trabalho do Denodo...")
     try:
-        columns, rows = query_rows(conn, SQL_I01_PLANOS)
+        columns, rows = query_rows(conn, SQL_I01_PLANOS.replace("{analysis_end}", str(analysis_window().fim)))
     finally:
         conn.close()
 
@@ -123,6 +124,7 @@ def main() -> None:
         mod = row[pos["modalidade"]] or "N.I."
         if _is_uuid(mod):
             uuid_count += 1
+            mod = "N.I."
         plans.append(
             {
                 "usuario_id":    str(row[pos["usuario_id"]]) if row[pos["usuario_id"]] else "",
@@ -137,14 +139,15 @@ def main() -> None:
     print(f"  {len(plans)} planos carregados | {skipped} descartados (data invalida).")
     if uuid_count:
         print(
-            f"  AVISO: {uuid_count} plano(s) com UUID como modalidade "
-            f"— cadastro SIAPE/PGD sem mapeamento textual."
+            f"  AVISO: {uuid_count} plano(s) com UUID como modalidade; "
+            f"valor técnico agregado em N.I. e não persistido."
         )
 
     # Descartar planos sem usuario_id valido (nao deve ocorrer apos filtro SQL)
     plans = [p for p in plans if p["usuario_id"]]
 
-    periods = build_periods_pt()
+    window = analysis_window()
+    periods = build_periods_pt(window.fim)
     meta_cols = period_metadata()
 
     v1_cols = meta_cols + ["modalidade", "total_servidores", "proporcao_perc"]
@@ -155,7 +158,7 @@ def main() -> None:
     v1_rows: list[list] = []
     v2_rows: list[list] = []
 
-    for label, kind, p_ini, p_fim, status in periods:
+    for label, kind, p_ini, scheduled_end, p_fim, status in periods:
         dur    = (p_fim - p_ini).days + 1
         active = [p for p in plans if p["inicio"] <= p_fim and p["fim"] >= p_ini]
         if not active:
@@ -183,7 +186,7 @@ def main() -> None:
             n   = len(by_mode[mod])
             pct = round(n * 100.0 / total, 2) if total else 0.0
             v1_rows.append(
-                [kind, label, str(p_ini), str(p_fim), status, dur, mod, n, pct]
+                [kind, label, str(p_ini), str(scheduled_end), str(p_fim), status, dur, mod, n, pct]
             )
 
         # V2 — visao por unidade
@@ -198,7 +201,7 @@ def main() -> None:
                 n   = len(unit_modes[mod])
                 pct = round(n * 100.0 / denom, 2) if denom else 0.0
                 v2_rows.append(
-                    [kind, label, str(p_ini), str(p_fim), status, dur,
+                    [kind, label, str(p_ini), str(scheduled_end), str(p_fim), status, dur,
                      sig, nom, mod, n, pct]
                 )
 
@@ -218,10 +221,10 @@ def main() -> None:
     print(f"Periodos cobertos: {len(periods)} | Arquivo destino: {out_dir}")
 
     last = periods[-1] if periods else None
-    if last and last[4] == "em_andamento":
+    if last and last[5] == "parcial_no_corte":
         print(
-            f"  AVISO: Periodo {last[0]} em andamento — "
-            f"dados de {last[2]} a {date.today()} sao preliminares."
+            f"  AVISO: Periodo {last[0]} parcial no corte — "
+            f"dados de {last[2]} a {last[4]} foram considerados."
         )
     print("Concluido.")
 
