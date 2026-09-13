@@ -67,7 +67,7 @@ descoberta/hash equivalentes. Esse controle local não participa dos checks da P
 ## Estado operacional em 13.09.2026
 
 - A extração I01–I12 foi concluída com a janela `01/07/2025–31/08/2026`.
-- O gate integrado GR2 comparou A1 e oracle para os 12 indicadores e `PT_STATUS` sem divergência bloqueante.
+- O gate integrado GR2 comparou A1 e oracle para os 12 indicadores e o `PT_STATUS` (hoje G01) sem divergência bloqueante.
 - Foram gerados 13 dossiês A5; todos estão em `HOMOLOGACAO_INICIAL_PENDENTE`, pois a decisão institucional não é automatizada.
 - A suíte offline registrou 371 testes aprovados e 14 skips esperados de plataforma/homologação.
 - O catálogo local de 33 skills passou pela validação estrutural e pela instalação idempotente; a certificação funcional externa permanece fora do escopo desta publicação.

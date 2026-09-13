@@ -73,7 +73,7 @@ Padrões existentes são preservados:
 
 ```text
 IND_OCDE_XX.2_<nome>_AAAAMMDD_HHMM.csv
-PT_STATUS.2_<visao>_<produto>_<escopo>_AAAAMMDD_HHMM.csv
+IND_GEST_XX.2_<visao>_<produto>_<escopo>_AAAAMMDD_HHMM.csv
 ```
 
 O manifesto inclui `run_id`, janela, escopo, lente, produto, data/hora, versão,
@@ -91,8 +91,8 @@ Artefatos:
 ```text
 IND_OCDE_XX.3_validacao_independente_<run_id>.json
 IND_OCDE_XX.3_validacao_independente_<run_id>.md
-PT_STATUS.3_validacao_independente_<run_id>.json
-PT_STATUS.3_validacao_independente_<run_id>.md
+IND_GEST_XX.3_validacao_independente_<run_id>.json
+IND_GEST_XX.3_validacao_independente_<run_id>.md
 ```
 
 O oracle:
@@ -153,7 +153,7 @@ Artefatos:
 
 ```text
 IND_OCDE_XX.5_relatorio_validacao_<run_id>.md
-PT_STATUS.5_relatorio_validacao_<run_id>.md
+IND_GEST_XX.5_relatorio_validacao_<run_id>.md
 ```
 
 A5 é gerado dos manifestos anteriores. Contém objetivo, versão, janela,
@@ -200,7 +200,7 @@ gate do ciclo automatizado.
 | I10 | categoria inadequada por `sequencia = 4` |
 | I11 | categoria excepcional por `sequencia = 1` |
 | I12 | médias PT/PE e diferença direcional `PT - PE` |
-| PT_STATUS | precedência da consolidação e status do plano |
+| G01 | precedência da consolidação, universo com concluídos pendentes (D17) e uma linha por plano |
 
 ## 6. Testes obrigatórios
 
@@ -250,7 +250,7 @@ incremental, nunca pelo total acumulado bruto.
 ```text
 python -m lib.validation_runner
   --familia ocde|gestao|todas
-  --alvo I01|...|I12|PT_STATUS|todos
+  --alvo I01|...|I12|G01|todos   (aceita IND_OCDE_XX, IND_GEST_XX e PT_STATUS)
   --data-execucao AAAA-MM-DD
   --etapa A1|A2|A3|A4|A5|todas
   --modo fixture|integrado

@@ -12,6 +12,7 @@ Desenvolvido pela Coordenação de Governança (CGOV/ICMBio) no âmbito do pilot
 
 | Data | O que mudou | Onde |
 | --- | --- | --- |
+| 13.09.2026 | Família **`gestao/`** reorganizada no namespace `IND_GEST_XX` (D17): o `PT_STATUS` vira o indicador **G01 — Situação dos Planos de Trabalho**, com ficha própria e `formula_version` 4.0.0 (fila de avaliação passa a incluir planos concluídos com período pendente; fim de duplicidade no painel; supressão complementar no produto compartilhável). | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) · [ficha G01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) |
 | 13.09.2026 | Integração do ciclo gerencial retomável, Relatório V2, gates de segurança e caderno metodológico para deliberação. Os 13 alvos permanecem pendentes de homologação institucional. | [docs/16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) · [docs/17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) |
 | 12.09.2026 | Protocolo A1–A5 automatizado com contratos, extrações atômicas, oráculos independentes, drift, diagnósticos e fixtures sintéticas sem efeito de homologação. | [docs/09-protocolo-validacao-indicadores.md](docs/09-protocolo-validacao-indicadores.md) |
 | 11.09.2026 | Relatório cumulativo e anonimizado com escopos explícitos, proteção `k≥5`, supressão complementar, PDF e expansão controlada da GR2 para o nível nacional. | [docs/15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) |
@@ -181,10 +182,10 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | [11-guia-extracao-mensal.md](docs/11-guia-extracao-mensal.md) | Calendário e comandos da rotina mensal de extração dos indicadores |
 | [12-seguranca-publicacao.md](docs/12-seguranca-publicacao.md) | Checklist para evitar vazamento de credenciais e dados pessoais antes de publicar |
 | [13-organizacao-publico-privado.md](docs/13-organizacao-publico-privado.md) | O que é público (GitHub), privado (OneDrive) e local em cada pasta |
-| [14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) | Método e cuidados do acompanhamento operacional da situação dos Planos de Trabalho |
+| [14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) | Índice da família de indicadores de gestão (G01 e seguintes) e convenção `IND_GEST_XX` |
 | [15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) | Rotina do relatório cumulativo: corte no mês anterior, escopos, anonimização, PDF e expansão GR2 → nacional |
 | [16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) | Arquitetura das skills, extrações automatizadas e Relatório Gerencial V2 |
-| [17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) | Minuta deliberativa: fórmulas, alternativas, scorecards e matriz de homologação I01–I12 + PT_STATUS |
+| [17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) | Minuta deliberativa: fórmulas, alternativas, scorecards e matriz de homologação I01–I12 + PT_STATUS (hoje G01) |
 | `docs/ocde/` | As **fichas técnicas dos 12 indicadores** (uma por indicador) + 4 fichas de eixo + o índice geral [06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md) |
 | `docs/cgov/` e `docs/mgi/` | Páginas públicas de apresentação das iniciativas CGOV e MGI (sem dados sensíveis) |
 
@@ -215,22 +216,28 @@ quadrimestre), `gestao/` responde a uma pergunta diferente e imediata: **o que
 está travado na minha equipe agora e com quem eu falo para destravar.** As duas
 famílias leem o mesmo banco, mas têm público, periodicidade e saída distintos.
 
-| Script | O que responde | Documentação |
-| --- | --- | --- |
-| [`IND_GEST_01.1_run.py`](gestao/IND_GEST_01/IND_GEST_01.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou concluído — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) |
+Cada indicador de gestão tem uma subpasta `gestao/IND_GEST_XX/` e código lógico
+`GXX` (D17). Convenção e roteiro para novos indicadores: [gestao/README.md](gestao/README.md).
+
+| Código | Script | O que responde | Ficha |
+| --- | --- | --- | --- |
+| G01 | [`IND_GEST_01.1_run.py`](gestao/IND_GEST_01/IND_GEST_01.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou suspenso — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [IND_GEST_01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) |
 
 ```powershell
+python -m gestao.runner --analise todas --data-execucao 2026-09-13 --regional GR2 --produto restrito
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
 ```
 
 As saídas vão para `artefatos_local/gestao/AAAA-MM/` (não versionado): um CSV de
-detalhe, um painel unidade × status. **Contêm nome e e-mail de servidores** —
-tratar como dado pessoal.
+detalhe e um painel unidade × status. Nos produtos `operacional` e `restrito`, o
+detalhe **contém nome de servidores** (D14) — tratar como dado pessoal. O produto
+`compartilhavel` só gera o painel, com supressão k<5 e complementar.
 
 > **Por que não é um indicador OCDE:** os 12 indicadores medem resultado com
-> período fechado e passam pelo protocolo de validação A1–A5. As análises de
-> `gestao/` são fotografias do estado atual, para ação imediata, e não entram no
-> pacote enviado à COCAGE.
+> período fechado e vão para a COCAGE. Os indicadores de `gestao/` são fotografias
+> do estado atual, para ação imediata da chefia. Passam pelo mesmo protocolo de
+> validação A1–A5, com oracle independente, mas não entram no pacote da COCAGE.
+> Índice da família: [docs/14](docs/14-status-planos-trabalho-gestores.md).
 
 ---
 

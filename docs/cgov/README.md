@@ -13,4 +13,4 @@ Para entender a separação público/privado, ver [../13-organizacao-publico-pri
 
 O [Caderno Metodológico para Deliberação da CGOV](../17-caderno-metodologico-cgov.md)
 consolida as definições, alternativas e decisões de homologação dos indicadores
-I01–I12 e da análise `PT_STATUS`.
+I01–I12 e do indicador de gestão G01 (ex-`PT_STATUS`).

@@ -491,6 +491,12 @@ o indicador não identifica causalidade nem incoerência individual.
 
 ###### PT_STATUS — Situação operacional dos Planos de Trabalho
 
+> **Nota de 13.09.2026 (D17):** após a deliberação, este alvo passou a ser o
+> indicador **G01 — Situação dos Planos de Trabalho** (`gestao/IND_GEST_01/`),
+> com `formula_version` 4.0.0. O texto abaixo é a minuta deliberada, preservada
+> como registro; a especificação vigente está na
+> [ficha G01](gestao/IND_GEST_01-situacao-planos-trabalho.md).
+
 **Finalidade e relevância.** Produzir fotografia acionável dos PT e consolidações:
 rascunhos, assinaturas, execução, avaliação pendente e encerramento.
 
@@ -703,6 +709,8 @@ avaliam a medida, não o desempenho de qualquer unidade.
 | **Média** | **4,0** | **viável com ressalvas** |
 
 ### 4.14 PT_STATUS
+
+> Hoje G01 — ver nota na seção do PT_STATUS e a [ficha G01](gestao/IND_GEST_01-situacao-planos-trabalho.md).
 
 | Critério | Nota (1–5) | Justificativa |
 |---|---:|---|
