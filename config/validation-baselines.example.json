@@ -1,0 +1,12 @@
+{
+  "_schema": "validation-baselines.v1",
+  "_instructions": "Copiar para artefatos_local/validacao/baselines.json após homologação formal, sem dados pessoais.",
+  "I01": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  }
+}

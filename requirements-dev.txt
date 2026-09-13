@@ -1,3 +1,5 @@
 # Dependências apenas para desenvolvimento/testes (não necessárias em produção).
 # Instalar com: .venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+-r requirements-report.txt
 pytest>=8
+hypothesis>=6
