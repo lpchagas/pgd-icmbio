@@ -217,10 +217,10 @@ famílias leem o mesmo banco, mas têm público, periodicidade e saída distinto
 
 | Script | O que responde | Documentação |
 | --- | --- | --- |
-| [`PT_STATUS.1_run.py`](gestao/PT_STATUS.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou concluído — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) |
+| [`IND_GEST_01.1_run.py`](gestao/IND_GEST_01/IND_GEST_01.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou concluído — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) |
 
 ```powershell
-python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-subordinadas
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
 ```
 
 As saídas vão para `artefatos_local/gestao/AAAA-MM/` (não versionado): um CSV de

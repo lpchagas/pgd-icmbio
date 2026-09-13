@@ -20,10 +20,10 @@ from .csv_utils import PROJECT_ROOT
 from .estrutura_organizacional import load_organization_structure
 from .periodos import ANALYSIS_TIMEZONE, AnalysisWindow, configure_execution_context
 from .validation_contracts import (
-    OCDE_ARTIFACT_PREFIX,
     OutputContract,
     ValidationTarget,
     selected_targets,
+    target_artifact_prefix,
     validate_registry,
 )
 from .validation_extractors import extract_atomic
@@ -413,9 +413,7 @@ def _validate_target(
         "linhas_oracle": len(oracle), "perfis_A2": profiles, "achados": findings,
         "status": "sucesso" if not blocking else "falha",
     }
-    prefix = (
-        f"{OCDE_ARTIFACT_PREFIX}_{target.code[1:]}" if target.family == "ocde" else target.code
-    )
+    prefix = target_artifact_prefix(target.code, target.family)
     output_dir.mkdir(parents=True, exist_ok=True)
     a3_json = output_dir / f"{prefix}.3_validacao_independente_{run_id}.json"
     a3_md = output_dir / f"{prefix}.3_validacao_independente_{run_id}.md"

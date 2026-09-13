@@ -48,24 +48,24 @@ def test_supressao_complementar_oculta_segundo_subtotal():
 
 
 # ---------------------------------------------------------------------------
-# D14 — identificação nominal no PT_STATUS: permitida nos produtos internos da
+# D14 — identificação nominal no G01 (IND_GEST_01, ex-PT_STATUS): permitida nos produtos internos da
 # unidade, proibida no produto que circula fora dela.
 # ---------------------------------------------------------------------------
 
-PT_STATUS = Path(__file__).resolve().parents[2] / "gestao" / "PT_STATUS.1_run.py"
+IND_GEST_01 = Path(__file__).resolve().parents[2] / "gestao" / "IND_GEST_01" / "IND_GEST_01.1_run.py"
 
 
-def _modulo_pt_status() -> ast.Module:
-    return ast.parse(PT_STATUS.read_text(encoding="utf-8"))
+def _modulo_ind_gest_01() -> ast.Module:
+    return ast.parse(IND_GEST_01.read_text(encoding="utf-8"))
 
 
 def _constante(nome: str):
-    for node in _modulo_pt_status().body:
+    for node in _modulo_ind_gest_01().body:
         if isinstance(node, ast.Assign) and any(
             isinstance(alvo, ast.Name) and alvo.id == nome for alvo in node.targets
         ):
             return ast.literal_eval(node.value)
-    raise AssertionError(f"Constante {nome} ausente em PT_STATUS.1_run.py")
+    raise AssertionError(f"Constante {nome} ausente em IND_GEST_01.1_run.py")
 
 
 def test_produtos_nominais_excluem_o_compartilhavel():
@@ -77,21 +77,21 @@ def test_produtos_nominais_excluem_o_compartilhavel():
 
 
 def test_detalhe_nunca_e_gerado_para_o_produto_compartilhavel():
-    fonte = PT_STATUS.read_text(encoding="utf-8")
+    fonte = IND_GEST_01.read_text(encoding="utf-8")
     assert 'if args.produto != "compartilhavel":' in fonte
-    assert 'PT_STATUS.2_detalhe_{args.produto}' in fonte
+    assert 'gest_artifact("01", f"2_detalhe_{args.produto}' in fonte
 
 
 def test_painel_compartilhavel_mantem_supressao_k():
-    fonte = PT_STATUS.read_text(encoding="utf-8")
+    fonte = IND_GEST_01.read_text(encoding="utf-8")
     assert 'n >= 5 else "SUPRIMIDO_K"' in fonte
 
 
-def test_pt_status_coleta_o_minimo_necessario():
+def test_ind_gest_01_coleta_o_minimo_necessario():
     """D14: nome e id bastam para a chefia agir; e-mail, CPF e matrícula não."""
-    fonte = PT_STATUS.read_text(encoding="utf-8")
+    fonte = IND_GEST_01.read_text(encoding="utf-8")
     sql = next(
-        node.value for node in ast.walk(_modulo_pt_status())
+        node.value for node in ast.walk(_modulo_ind_gest_01())
         if isinstance(node, ast.Constant) and isinstance(node.value, str)
         and "petrvs_icmbio_planos_trabalhos" in node.value
     )

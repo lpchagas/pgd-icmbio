@@ -109,7 +109,7 @@ def run(argv: list[str] | None = None) -> dict:
                 "motivo": "A análise não oferece a lente solicitada.",
             })
             continue
-        before = set(output_dir.glob(f"{extraction.code}.2_*.csv")) if output_dir.exists() else set()
+        before = set(output_dir.glob(f"{extraction.artifact_prefix}.2_*.csv")) if output_dir.exists() else set()
         command = [
             sys.executable, str(extraction.entrypoint),
             "--data-execucao", window.data_execucao.isoformat(),
@@ -127,7 +127,7 @@ def run(argv: list[str] | None = None) -> dict:
             command, cwd=PROJECT_ROOT, capture_output=True, text=True,
             encoding="utf-8", errors="replace", env=minimal_subprocess_env(),
         )
-        after = set(output_dir.glob(f"{extraction.code}.2_*.csv")) if output_dir.exists() else set()
+        after = set(output_dir.glob(f"{extraction.artifact_prefix}.2_*.csv")) if output_dir.exists() else set()
         files = [_inspect_csv(path) for path in sorted(after - before)]
         status = "dry-run" if args.dry_run and completed.returncode == 0 else "sucesso"
         if completed.returncode:

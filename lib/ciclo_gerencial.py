@@ -102,7 +102,7 @@ def _preflight(denodo_python: str, test_python: str) -> dict:
         PROJECT_ROOT / ".env",
         PROJECT_ROOT / "lib" / "periodos.py",
         TARGETS["I01"].production_entrypoint,
-        TARGETS["PT_STATUS"].production_entrypoint,
+        TARGETS["G01"].production_entrypoint,
         PROJECT_ROOT / "artefatos_local" / "ocde" / "diagnosticos" / "ICMBIO_estrutura.csv",
     ]
     missing = [str(path.relative_to(PROJECT_ROOT)) for path in required if not path.exists()]

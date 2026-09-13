@@ -52,7 +52,7 @@
   "I12": [
     {"periodo": "Q1-2026", "unidade_sigla": "U1", "media_nota_pt": 4.0, "media_nota_pe": 3.0, "diferenca_absoluta": 1.0, "diferenca_direcional": 1.0}
   ],
-  "PT_STATUS": [
+  "G01": [
     {"unidade_sigla": "U1", "status_negocio": "Aguardando avaliação", "qtd_planos": 1},
     {"unidade_sigla": "U1", "status_negocio": "Rascunho", "qtd_planos": 1}
   ]

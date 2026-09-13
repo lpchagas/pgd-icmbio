@@ -1,4 +1,7 @@
-"""PT_STATUS.1_run.py — Situação dos Planos de Trabalho por unidade organizacional.
+"""IND_GEST_01.1_run.py — G01 · Situação dos Planos de Trabalho por unidade.
+
+Indicador de gestão G01 (até 13.09.2026: PT_STATUS). Ficha:
+docs/gestao/IND_GEST_01-situacao-planos-trabalho.md
 
 Objetivo (gestor de equipe): responder "quais PTs da minha equipe estão em cada
 status e quem devo procurar para destravar cada um".
@@ -43,10 +46,10 @@ Identificação nominal — decisão CGOV D14 (13.09.2026):
   foi retirado da consulta.
 
 Uso:
-    python gestao/PT_STATUS.1_run.py --unidade CGGP
-    python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-subordinadas
-    python gestao/PT_STATUS.1_run.py --todas
-    python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-encerrados
+    python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP
+    python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
+    python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas
+    python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-encerrados
 """
 from __future__ import annotations
 
@@ -55,12 +58,13 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from lib.csv_utils import PROJECT_ROOT as _ROOT, clean, write_pipe_csv  # noqa: E402
 from lib.denodo_config import connect, get_config  # noqa: E402
 from lib.periodos import analysis_window, configure_execution_context  # noqa: E402
+from lib.validation_contracts import gest_artifact  # noqa: E402
 from lib.estrutura_organizacional import (  # noqa: E402
     insert_mesogrupo_column,
     load_mesogrupo_lookup,
@@ -85,7 +89,7 @@ STATUS_ABERTOS = ("INCLUIDO", "AGUARDANDO_ASSINATURA", "ATIVO", "SUSPENSO")
 # "compartilhavel" fica de fora — é o único que circula fora da unidade.
 PRODUTOS_NOMINAIS = ("operacional", "restrito")
 
-SQL_PT_STATUS = """
+SQL_IND_GEST_01 = """
 WITH trilha AS (
     SELECT sj.plano_trabalho_id AS pid,
            sj.codigo            AS cod,
@@ -293,7 +297,7 @@ def main() -> None:
         if not args.incluir_encerrados:
             filtro_status = f"AND pt.status IN ({quote_list(STATUS_ABERTOS)})"
 
-        sql = SQL_PT_STATUS.format(filtro_status=filtro_status,
+        sql = SQL_IND_GEST_01.format(filtro_status=filtro_status,
                                    filtro_unidade=filtro_unidade)
         print("Consultando planos de trabalho...")
         cols, rows = run_query(conn, sql)
@@ -346,7 +350,7 @@ def main() -> None:
             escopo += f"_e_mais_{len(siglas) - 3}"
 
     if args.produto != "compartilhavel":
-        detalhe = destino / f"PT_STATUS.2_detalhe_{args.produto}_{escopo}_{stamp}.csv"
+        detalhe = destino / gest_artifact("01", f"2_detalhe_{args.produto}_{escopo}_{stamp}.csv")
         write_pipe_csv(detalhe, out_cols, out_rows)
         print(f"  Salvo: {detalhe}")
 
@@ -355,7 +359,7 @@ def main() -> None:
         [u, s, n if args.produto != "compartilhavel" or n >= 5 else "SUPRIMIDO_K"]
         for (u, s), n in sorted(resumo.items(), key=lambda kv: (kv[0][0], -kv[1]))
     ]
-    painel = destino / f"PT_STATUS.2_painel_{args.produto}_{escopo}_{stamp}.csv"
+    painel = destino / gest_artifact("01", f"2_painel_{args.produto}_{escopo}_{stamp}.csv")
     write_pipe_csv(painel, painel_cols, painel_rows)
     print(f"  Salvo: {painel}")
 

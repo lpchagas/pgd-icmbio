@@ -21,7 +21,7 @@ def _project(rows, keys):
 
 
 def test_registry_covers_all_indicators_and_management():
-    assert set(TARGETS) == {*(f"I{i:02d}" for i in range(1, 13)), "PT_STATUS"}
+    assert set(TARGETS) == {*(f"I{i:02d}" for i in range(1, 13)), "G01"}
     assert validate_registry() == []
 
 

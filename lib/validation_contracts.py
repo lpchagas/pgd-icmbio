@@ -38,6 +38,13 @@ _TARGET_ALIAS = re.compile(r"^IND(?:_OCDE)?_(?=\d)")
 # com o nome antigo e precisam continuar carregando.
 OCDE_ARTIFACT_RE = re.compile(r"^IND_(?:OCDE_)?(\d{2})\.")
 
+# Prefixo de artefato da família de gestão (decisão CGOV D17, 13.09.2026). Mesmo
+# modelo do D01: o arquivo carrega o namespace IND_GEST_XX e o código lógico é
+# curto (G01). PT_STATUS era o código de G01 até 13.09.2026 e segue aceito na CLI.
+GEST_ARTIFACT_PREFIX = "IND_GEST"
+_GEST_TARGET_ALIAS = re.compile(r"^IND_GEST_(?=\d)")
+_LEGACY_TARGET_CODES = {"PT_STATUS": "G01"}
+
 
 def ocde_artifact(number: str, suffix: str) -> str:
     """Nome de artefato OCDE: ``ocde_artifact("07", "2_*.csv")``."""
@@ -45,10 +52,29 @@ def ocde_artifact(number: str, suffix: str) -> str:
     return f"{OCDE_ARTIFACT_PREFIX}_{number}.{suffix}"
 
 
-def normalize_target(value: str) -> str:
-    """Normaliza um alvo informado na CLI para o código lógico (I07, PT_STATUS)."""
+def gest_artifact(number: str, suffix: str) -> str:
+    """Nome de artefato de gestão: ``gest_artifact("01", "2_painel_*.csv")``."""
 
-    return _TARGET_ALIAS.sub("I", value.strip().upper())
+    return f"{GEST_ARTIFACT_PREFIX}_{number}.{suffix}"
+
+
+def target_artifact_prefix(code: str, family: str) -> str:
+    """Prefixo de arquivo de um alvo lógico: I07 -> IND_OCDE_07, G01 -> IND_GEST_01."""
+
+    prefix = OCDE_ARTIFACT_PREFIX if family == "ocde" else GEST_ARTIFACT_PREFIX
+    return f"{prefix}_{code[1:]}"
+
+
+def normalize_target(value: str) -> str:
+    """Normaliza um alvo informado na CLI para o código lógico (I07, G01)."""
+
+    normalized = value.strip().upper()
+    if normalized in _LEGACY_TARGET_CODES:
+        return _LEGACY_TARGET_CODES[normalized]
+    # A ordem importa: IND_GEST_01 precisa ser tratado antes do alias OCDE, que
+    # o transformaria em IGEST_01.
+    normalized = _GEST_TARGET_ALIAS.sub("G", normalized)
+    return _TARGET_ALIAS.sub("I", normalized)
 
 
 def artifact_indicator_number(name: str) -> str | None:
@@ -437,16 +463,16 @@ TARGETS.update({
     ),
 })
 
-TARGETS["PT_STATUS"] = ValidationTarget(
-    code="PT_STATUS",
+TARGETS["G01"] = ValidationTarget(
+    code="G01",
     family="gestao",
-    name="Situação operacional dos Planos de Trabalho",
-    production_entrypoint=PROJECT_ROOT / "gestao" / "PT_STATUS.1_run.py",
-    oracle_name="oracle_pt_status",
+    name="Situação dos Planos de Trabalho",
+    production_entrypoint=PROJECT_ROOT / "gestao" / "IND_GEST_01" / "IND_GEST_01.1_run.py",
+    oracle_name="oracle_ind_gest_01",
     atomic_extractors=("pt_status_planos", "pt_status_consolidacoes", "pt_status_transicoes"),
     outputs=(
         OutputContract(
-            "PT_STATUS.2_painel_*.csv",
+            gest_artifact("01", "2_painel_*.csv"),
             ("unidade_sigla", "status_negocio", "qtd_planos"),
             ("unidade_sigla", "status_negocio"),
             ("qtd_planos",),

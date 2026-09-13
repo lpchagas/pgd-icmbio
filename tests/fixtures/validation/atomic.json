@@ -70,7 +70,7 @@
     {"periodo": "Q1-2026", "unidade_sigla": "U1", "instrumento": "PE", "sequencia_nota": 2},
     {"periodo": "Q1-2026", "unidade_sigla": "U1", "instrumento": "PE", "sequencia_nota": 4}
   ],
-  "PT_STATUS": [
+  "G01": [
     {"unidade_sigla": "U1", "status_codigo": "ATIVO", "periodos_aguardando_avaliacao": 1},
     {"unidade_sigla": "U1", "status_codigo": "INCLUIDO", "periodos_aguardando_avaliacao": 0}
   ]

@@ -97,7 +97,7 @@
     "approved_by_role": null,
     "profiles": {}
   },
-  "PT_STATUS": {
+  "G01": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
     "formula_version": "3.0.0",
     "approved_run_id": null,

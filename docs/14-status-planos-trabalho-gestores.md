@@ -2,7 +2,7 @@
 
 **Data:** 08 de setembro de 2026
 **Fonte:** banco `petrvs_icmbio` via Denodo (MGI/Dataprev) — introspecção e validação em tempo real
-**Script:** [`gestao/PT_STATUS.1_run.py`](../gestao/PT_STATUS.1_run.py)
+**Script:** [`gestao/IND_GEST_01/IND_GEST_01.1_run.py`](../gestao/IND_GEST_01/IND_GEST_01.1_run.py)
 **Público:** chefias de unidade, CGOV, COCAGE
 
 ---
@@ -122,19 +122,19 @@ para que ninguém trate uma estimativa como registro de auditoria.
 cd "C:\Projetos\pgd-ocde-icmbio"
 
 # Uma unidade
-python gestao/PT_STATUS.1_run.py --unidade CGGP --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --data-execucao 2026-09-13
 
 # Unidade + toda a hierarquia subordinada (até 3 níveis)
-python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-subordinadas
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
 
 # Várias unidades
-python gestao/PT_STATUS.1_run.py --unidade CGGP,DIPLAN
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP,DIPLAN
 
 # Instituto inteiro
-python gestao/PT_STATUS.1_run.py --todas
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas
 
 # Incluir também os planos já encerrados (CONCLUIDO/CANCELADO)
-python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-encerrados
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-encerrados
 ```
 
 Por padrão o script traz apenas os **status abertos** (`INCLUIDO`,

@@ -495,7 +495,7 @@ def oracle_i12(records: list[Row]) -> list[Row]:
     return _sorted(output, ("periodo", "unidade_sigla"))
 
 
-def oracle_pt_status(records: list[Row]) -> list[Row]:
+def oracle_ind_gest_01(records: list[Row]) -> list[Row]:
     labels = {
         "INCLUIDO": "Rascunho", "AGUARDANDO_ASSINATURA": "Aguardando assinatura",
         "ATIVO": "Em execução", "CONCLUIDO": "Concluído", "SUSPENSO": "Suspenso",
@@ -550,7 +550,7 @@ ORACLES: dict[str, Callable[[list[Row]], list[Row]]] = {
     "I01": oracle_i01, "I02": oracle_i02, "I03": oracle_i03, "I04": oracle_i04,
     "I05": oracle_i05, "I06": oracle_i06, "I07": oracle_i07, "I08": oracle_i08,
     "I09": oracle_i09, "I10": oracle_i10, "I11": oracle_i11, "I12": oracle_i12,
-    "PT_STATUS": oracle_pt_status,
+    "G01": oracle_ind_gest_01,
 }
 
 
