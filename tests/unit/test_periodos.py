@@ -1,162 +1,83 @@
-"""Testes de lib/periodos.py — regra de segmentação temporal dos indicadores.
-
-Piloto da suíte: função pura, sem I/O, sem mocks. `today` é sempre passado
-explicitamente — nunca `date.today()` real — para reprodutibilidade.
-"""
-from __future__ import annotations
-
 from datetime import date
+import os
+from pathlib import Path
 
 import pytest
 
-from lib.periodos import build_periods, build_periods_pe, build_periods_pt, period_metadata
+from lib.denodo_config import platform_path
+from lib.periodos import analysis_window, build_periods, build_periods_pe, build_periods_pt, period_metadata
 
 pytestmark = pytest.mark.unit
 
 
-def _labels(periods):
-    return [p[0] for p in periods]
+def labels(periods):
+    return [period[0] for period in periods]
 
 
-def _status_by_label(periods):
-    return {p[0]: p[4] for p in periods}
+def test_janela_setembro_2026_exata():
+    window = analysis_window(date(2026, 9, 11))
+    assert window.inicio == date(2025, 7, 1)
+    assert window.fim == date(2026, 8, 31)
+    assert window.mes_execucao == "2026-09"
 
 
-# ---------------------------------------------------------------------------
-# build_periods_pe — Plano de Entregas (trimestral 2025, quadrimestral 2026+)
-# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    "execution,expected",
+    [
+        (date(2026, 10, 1), date(2026, 9, 30)),
+        (date(2027, 1, 31), date(2026, 12, 31)),
+        (date(2028, 3, 17), date(2028, 2, 29)),
+    ],
+)
+def test_ultimo_dia_mes_anterior(execution, expected):
+    assert analysis_window(execution).fim == expected
 
-class TestBuildPeriodsPe:
-    def test_meio_do_t3_2025_so_traz_t3(self):
-        periods = build_periods_pe(date(2025, 7, 15))
-        assert _labels(periods) == ["T3-2025"]
-        assert _status_by_label(periods)["T3-2025"] == "em_andamento"
 
-    def test_fim_de_2025_t3_encerrado_t4_em_andamento(self):
-        periods = build_periods_pe(date(2025, 12, 31))
-        status = _status_by_label(periods)
-        assert status["T3-2025"] == "encerrado"
-        assert status["T4-2025"] == "em_andamento"
+def test_execucao_antes_da_base_falha():
+    with pytest.raises(ValueError):
+        analysis_window(date(2025, 7, 1))
 
-    def test_inicio_2026_traz_q1_em_andamento(self):
-        periods = build_periods_pe(date(2026, 1, 1))
-        status = _status_by_label(periods)
-        assert status["Q1-2026"] == "em_andamento"
-        # nenhum período de 2026 além de Q1 deve existir ainda
-        assert "Q2-2026" not in status
 
-    @pytest.mark.parametrize(
-        "today, expected_status",
-        [
-            (date(2026, 4, 30), "em_andamento"),  # borda exata: end >= current
-            (date(2026, 5, 1), "encerrado"),      # dia seguinte à borda
-        ],
+def test_pe_setembro_exclui_q3_2026():
+    periods = build_periods_pe(date(2026, 8, 31))
+    assert labels(periods) == ["T3-2025", "T4-2025", "Q1-2026", "Q2-2026"]
+    assert all(period[5] == "encerrado" for period in periods)
+
+
+def test_pt_setembro_termina_em_m08():
+    periods = build_periods_pt(date(2026, 8, 31))
+    assert labels(periods)[:2] == ["T3-2025", "T4-2025"]
+    assert labels(periods)[-1] == "M08-2026"
+    assert "M09-2026" not in labels(periods)
+
+
+def test_pe_parcial_e_truncado_no_corte():
+    period = build_periods_pe(date(2026, 9, 30))[-1]
+    assert period == (
+        "Q3-2026", "quadrimestral", date(2026, 9, 1), date(2026, 12, 31),
+        date(2026, 9, 30), "parcial_no_corte",
     )
-    def test_borda_exata_de_fim_de_periodo(self, today, expected_status):
-        periods = build_periods_pe(today)
-        assert _status_by_label(periods)["Q1-2026"] == expected_status
-
-    def test_transicao_q1_para_q2(self):
-        periods = build_periods_pe(date(2026, 5, 1))
-        status = _status_by_label(periods)
-        assert status["Q1-2026"] == "encerrado"
-        assert status["Q2-2026"] == "em_andamento"
-
-    @pytest.mark.parametrize(
-        "today",
-        [
-            date(2025, 1, 15),
-            date(2025, 6, 30),
-            date(2025, 7, 1),
-            date(2026, 12, 31),
-            date(2027, 3, 1),
-        ],
-    )
-    def test_h1_2025_nunca_aparece(self, today):
-        """T1-2025 e T2-2025 são excluídos intencionalmente em qualquer today."""
-        labels = _labels(build_periods_pe(today))
-        assert "T1-2025" not in labels
-        assert "T2-2025" not in labels
-
-    def test_datas_futuras_nao_sao_geradas(self):
-        periods = build_periods_pe(date(2025, 7, 1))
-        assert _labels(periods) == ["T3-2025"]
-
-    def test_virada_de_ano_2026_para_2027(self):
-        periods = build_periods_pe(date(2027, 1, 15))
-        labels = _labels(periods)
-        assert "Q3-2026" in labels
-        assert "Q1-2027" in labels
-        assert "Q2-2027" not in labels
-
-    def test_alias_build_periods_e_build_periods_pe(self):
-        assert build_periods is build_periods_pe
 
 
-# ---------------------------------------------------------------------------
-# build_periods_pt — Plano de Trabalho (trimestral 2025, mensal 2026+)
-# ---------------------------------------------------------------------------
-
-class TestBuildPeriodsPt:
-    def test_meio_do_t3_2025_so_traz_t3(self):
-        periods = build_periods_pt(date(2025, 8, 1))
-        assert _labels(periods) == ["T3-2025"]
-
-    @pytest.mark.parametrize(
-        "today",
-        [date(2025, 1, 1), date(2025, 6, 30)],
-    )
-    def test_h1_2025_nunca_aparece(self, today):
-        labels = _labels(build_periods_pt(today))
-        assert "T1-2025" not in labels
-        assert "T2-2025" not in labels
-
-    def test_janeiro_2026_gera_apenas_m01(self):
-        periods = build_periods_pt(date(2026, 1, 5))
-        labels = _labels(periods)
-        assert "M01-2026" in labels
-        assert "M02-2026" not in labels
-
-    def test_fim_de_2026_gera_os_12_meses(self):
-        periods = build_periods_pt(date(2026, 12, 31))
-        labels = _labels(periods)
-        for month in range(1, 13):
-            assert f"M{month:02d}-2026" in labels
-        assert _status_by_label(periods)["M12-2026"] == "em_andamento"
-
-    def test_virada_de_ano_2026_para_2027(self):
-        periods = build_periods_pt(date(2027, 1, 15))
-        labels = _labels(periods)
-        # todos os 12 meses de 2026 devem estar presentes e encerrados
-        for month in range(1, 13):
-            label = f"M{month:02d}-2026"
-            assert label in labels
-        assert _status_by_label(periods)["M12-2026"] == "encerrado"
-        assert "M01-2027" in labels
-        assert "M02-2027" not in labels
-
-    @pytest.mark.parametrize(
-        "today, expected_status",
-        [
-            (date(2026, 3, 31), "em_andamento"),  # borda exata do último dia de março
-            (date(2026, 4, 1), "encerrado"),
-        ],
-    )
-    def test_borda_exata_de_fim_de_mes(self, today, expected_status):
-        periods = build_periods_pt(today)
-        assert _status_by_label(periods)["M03-2026"] == expected_status
+def test_pt_ciclo_mensal_no_corte_fechado():
+    period = build_periods_pt(date(2026, 9, 30))[-1]
+    assert period[0] == "M09-2026"
+    assert period[3] == period[4] == date(2026, 9, 30)
+    assert period[5] == "encerrado"
 
 
-# ---------------------------------------------------------------------------
-# period_metadata — contrato de colunas usado por todos os 12 scripts A1
-# ---------------------------------------------------------------------------
+def test_inicio_fixo_e_alias():
+    assert build_periods is build_periods_pe
+    assert build_periods_pe(date(2027, 1, 1))[0][2] == date(2025, 7, 1)
 
-def test_period_metadata_colunas_exatas_e_ordem():
+
+def test_period_metadata_contrato():
     assert period_metadata() == [
-        "ciclo_tipo",
-        "periodo",
-        "periodo_inicio",
-        "periodo_fim",
-        "periodo_status",
-        "duracao_dias",
+        "ciclo_tipo", "periodo", "periodo_inicio", "periodo_fim",
+        "periodo_fim_efetivo", "periodo_status", "duracao_dias",
     ]
+
+
+@pytest.mark.skipif(os.name == "nt", reason="Conversão aplicada somente no WSL/POSIX")
+def test_caminho_windows_e_convertido_para_wsl():
+    assert platform_path(r"C:\Users\Pessoa\driver.jar") == Path("/mnt/c/Users/Pessoa/driver.jar")

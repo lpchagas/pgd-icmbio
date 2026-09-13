@@ -1,6 +1,6 @@
 # Guia Rapido para Gestores — Indicadores OCDE/PGD ICMBio
 
-Este guia e para **gestores e lideres de equipe** que precisam entender os indicadores OCDE/PGD sem precisar conhecer banco de dados ou SQL. Se voce e analista buscando as consultas, consulte [06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md).
+Este guia e para **gestores e lideres de equipe** que precisam entender os indicadores OCDE/PGD sem precisar conhecer banco de dados ou SQL. Se voce e analista buscando as consultas, consulte [índice técnico](ocde/06-indicadores-ocde-denodo.md).
 
 ---
 
@@ -181,7 +181,7 @@ Neste exemplo: 12 entregas da AUDIT sao individuais (risco de gargalo), 8 sao co
 
 Se voce nao tem acesso ao banco de dados ou ao DBeaver, solicite a analise para o analista responsavel da sua unidade. Forne�a:
 
-1. **Periodo de analise:** data de inicio e data de fim (ex: 01/01/2025 a 31/12/2025)
+1. **Periodo de analise:** data de execução do ciclo mensal (ex.: 13/09/2026, cuja janela termina em 31/08/2026)
 2. **Indicador desejado:** I02, I03, I04, I05, I06, I07 ou I08
 3. **Filtro de unidade:** se quiser ver apenas sua unidade, informe a sigla (ex: CGOV)
 
@@ -222,5 +222,5 @@ Os indicadores I09, I10, I11 e I12 (avaliacoes de planos de trabalho e entregas)
 ## 7. Proximos passos
 
 - Para entender o contexto estrategico completo do piloto OCDE/PGD: [05-contexto-ocde-pgd.md](05-contexto-ocde-pgd.md)
-- Para executar as consultas voce mesmo: [06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md)
-- Para entender a estrutura tecnica do banco: [07-estrutura-banco-dados.md](07-estrutura-banco-dados.md)
+- Para executar as consultas voce mesmo: [índice técnico](ocde/06-indicadores-ocde-denodo.md)
+- Para entender a estrutura tecnica do banco: [07-estrutura-banco-dados.md](07.1-estrutura-banco-dados.md)

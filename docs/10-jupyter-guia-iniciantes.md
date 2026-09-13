@@ -144,7 +144,7 @@ Uma célula em branco onde você cola qualquer query do manual técnico para exe
 
 ### Seção 4 — Exportar para CSV
 
-Código pronto para salvar o resultado de qualquer consulta em um arquivo `.csv` na pasta `Tabelas CSV/`.
+Código pronto para salvar o resultado de qualquer consulta em um arquivo `.csv` na pasta privada `artefatos_local/`.
 
 ---
 
@@ -244,11 +244,11 @@ Com a conexão funcionando, você pode executar qualquer indicador.
 **Passo 2** — Se quiser mudar o período de análise, altere as datas na linha:
 
 ```python
-CAST('2025-01-01' AS DATE) AS data_inicio,
-CAST('2025-12-31' AS DATE) AS data_fim,
+CAST('2025-07-01' AS DATE) AS data_inicio,
+CAST('2026-08-31' AS DATE) AS data_fim,
 ```
 
-Substitua `2025-01-01` e `2025-12-31` pelas datas desejadas, mantendo o formato `AAAA-MM-DD`.
+Use a janela retornada por `analysis_window(data_execucao)`; no exemplo, `2025-07-01` e `2026-08-31`, mantendo o formato `AAAA-MM-DD`.
 
 **Passo 3** — Pressione `Shift + Enter` para executar.
 
@@ -266,7 +266,7 @@ O resultado aparece como uma tabela com as colunas:
 
 Para usar qualquer query dos documentos `docs/06.x-ixxx.md`:
 
-**Passo 1** — Abra o documento do indicador desejado (ex.: [06.2.2-i03.md](06.2.2-i03.md)).
+**Passo 1** — Abra o documento do indicador desejado (ex.: [06.2.2-i03.md](ocde/06.2.2-i03.md)).
 
 **Passo 2** — Copie o bloco de código SQL completo (começa com `WITH parametros AS` e vai até o `ORDER BY` final).
 
@@ -292,7 +292,7 @@ Após executar uma query, você pode salvar o resultado. Role até a seção **"
 
 ```python
 # Se quiser exportar o resultado da consulta livre:
-output_path = r"Tabelas CSV\minha_consulta.csv"
+output_path = r"artefatos_local\minha_consulta.csv"
 df_livre.to_csv(output_path, ...)
 ```
 
@@ -305,7 +305,7 @@ Os nomes disponíveis são:
 
 **Passo 3** — Pressione `Shift + Enter`.
 
-O arquivo será salvo automaticamente na pasta `Tabelas CSV/` do projeto.
+O arquivo será salvo automaticamente na pasta privada `artefatos_local/` do projeto.
 
 ---
 
@@ -389,5 +389,5 @@ Pode ser que a conexão com o Denodo travou. Clique no botão **"Interrupt Kerne
 
 - Notebook de consultas: [consultas_denodo_template.ipynb](../consultas_denodo_template.ipynb)
 - Arquivo de credenciais (modelo): [.env.example](../.env.example)
-- Manual técnico dos indicadores: [06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md)
+- Manual técnico dos indicadores: [06-indicadores-ocde-denodo.md](ocde/06-indicadores-ocde-denodo.md)
 - Configuração da conexão Denodo: [03-acesso-direto-denodo-dbeaver.md](03-acesso-direto-denodo-dbeaver.md)

@@ -19,9 +19,7 @@ Os indicadores se dividem em dois grupos com cadências diferentes a partir de 2
 | **Mensal** | Plano de Trabalho (PT) | I01, I05, I06, I09, I10, I11 | M01-2026 … M12-2026 |
 | **Quadrimestral** | Plano de Entrega (PE) | I02, I03, I04, I07, I08, I12 | Q1-2026, Q2-2026, Q3-2026 |
 
-> **Histórico 2025 (trimestral):** todos os 12 indicadores também incluem os
-> períodos T1-2025, T2-2025, T3-2025 e T4-2025 em cada execução — esses períodos
-> estão encerrados e não mudam mais.
+> **Histórico 2025 (trimestral):** a janela oficial começa em 01/07/2025. Todos os 12 indicadores incluem T3-2025 e T4-2025; T1 e T2 são excluídos por baixa confiabilidade.
 
 ### Por que as cadências são diferentes?
 
@@ -39,10 +37,7 @@ A lógica de períodos está em `lib/periodos.py`:
 
 ## 2. Calendário anual 2026
 
-Execute os scripts **logo após o fechamento do período** — quando o próximo
-período já começou e o anterior está encerrado. Períodos em aberto
-(`periodo_status = em_andamento`) geram resultados parciais e não devem ser
-usados como base definitiva no Power BI.
+Cada execução usa cumulativamente 01/07/2025 até o último dia do mês anterior à `--data-execucao`. Ciclos iniciados depois do corte são excluídos; ciclos que o atravessam recebem `periodo_fim_efetivo` e `periodo_status = parcial_no_corte`.
 
 | Mês de execução | Período encerrado | O que rodar | Scripts |
 | --- | --- | --- | --- |
@@ -62,7 +57,9 @@ usados como base definitiva no Power BI.
 > **Resumo prático:** rodar **todos os 12 indicadores juntos apenas três vezes
 > no ano** (maio, setembro e janeiro), e só os 6 indicadores PT nos demais meses.
 > Nos três meses de rodada completa, o CSV dos PE substituirá a versão anterior
-> no Power BI com os dados do quadrimestre fechado.
+> no Power BI com os dados do quadrimestre fechado. O relatório gerencial
+> cumulativo é uma rotina distinta e reextrai I01–I12 em cada edição; consulte
+> [15-relatorio-gerencial-cumulativo-anonimizado.md](15-relatorio-gerencial-cumulativo-anonimizado.md).
 
 ---
 
@@ -483,25 +480,14 @@ Isso mostra o que seria executado sem conectar ao Denodo.
 
 ---
 
-## 13. Resultados dos testes em produção (17/06/2026)
+## 13. Registro histórico de testes em produção (17/06/2026)
 
-Todos os 12 indicadores foram testados com conexão real ao Denodo antes da
-publicação deste guia:
-
-| Indicador | Períodos executados | Total de linhas geradas | Status |
-|-----------|---------------------|------------------------|--------|
-| I01 | Mensal (inferido dos planos) | 137 (v1) + 10.367 (v2) | ✅ OK |
-| I02 | T1-T4/2025 + Q1-Q2/2026 | 1.935 linhas | ✅ OK |
-| I03 | T1-T4/2025 + Q1-Q2/2026 | 16.219 linhas | ✅ OK |
-| I04 | T1-T4/2025 + Q1-Q2/2026 | 1.935 linhas | ✅ OK |
-| I05 | T1-T4/2025 + Q1-Q2/2026 | 9.546 linhas | ✅ OK |
-| I06 | T1-T4/2025 + Q1-Q2/2026 | 4.921 linhas | ✅ OK |
-| I07 | T1-T4/2025 + Q1-Q2/2026 | 25.307 linhas | ✅ OK |
-| I08 | T1-T4/2025 + Q1-Q2/2026 | 25.307 linhas | ✅ OK |
-| I09 | T1-T4/2025 + Q1-Q2/2026 | 1.996 linhas | ✅ OK |
-| I10 | T1-T4/2025 + Q1-Q2/2026 | 1.996 linhas | ✅ OK |
-| I11 | T1-T4/2025 + Q1-Q2/2026 | 1.996 linhas | ✅ OK |
-| I12 | T1-T4/2025 + Q1-Q2/2026 | 1.295 linhas | ✅ OK |
+Os 12 indicadores foram executados com conexão real ao Denodo nessa data. Esse
+registro demonstra viabilidade técnica, mas não é o baseline do ciclo atual: a
+janela oficial passou a iniciar em 01/07/2025 e os números variam com a base
+operacional. Para validação reproduzível, use o protocolo público descrito em
+[09-protocolo-validacao-indicadores.md](09-protocolo-validacao-indicadores.md),
+sempre informando `--data-execucao`.
 
 ---
 
@@ -510,14 +496,14 @@ publicação deste guia:
 Prompts prontos para as principais ferramentas de IA disponíveis no projeto.
 Adapte substituindo `XX` pelo número do indicador e `ERRO` pela mensagem real.
 
-### Claude Code (recomendado — tem acesso ao contexto completo do projeto)
+### Assistente de código com acesso ao repositório
 
 **Executar a extração mensal completa:**
 ```
 Execute a extração mensal completa dos 12 indicadores OCDE. Rode todos os scripts em
 ocde/indicadores/ em sequência, registre os resultados (linhas geradas por período e
 por indicador) e me informe quais funcionaram e quais falharam. Se houver erros, diagnostique
-a causa com base no CLAUDE.md e nos logs.
+a causa com base nos logs, nas fichas em `docs/ocde/` e no protocolo público de validação.
 ```
 
 **Diagnosticar um erro específico:**
@@ -525,7 +511,7 @@ a causa com base no CLAUDE.md e nos logs.
 O script IND_XX.1_run.py falhou com o seguinte erro:
 [cole aqui a mensagem de erro completa]
 
-Com base no projeto pgd-ocde-icmbio e no CLAUDE.md, identifique a causa e proponha
+Com base no projeto `pgd-ocde-icmbio` e em `docs/ocde/`, identifique a causa e proponha
 a correção. Leve em conta que o banco é acessado via Denodo VQL (não MySQL), que funções
 MySQL como json_unquote(), date_add() e WITH RECURSIVE não funcionam, e que os nomes de
 tabela precisam do prefixo petrvs_icmbio_ no JDBC.
@@ -534,10 +520,10 @@ tabela precisam do prefixo petrvs_icmbio_ no JDBC.
 **Verificar se um CSV foi gerado corretamente:**
 ```
 Analise o arquivo artefatos_local/ocde/entregas/AAAA-MM/IND_XX.2_*.csv e verifique:
-1. Quantas linhas foram geradas por período (T1-2025 a Q2-2026)?
+1. Quantas linhas foram geradas por período (T3-2025 a Q2-2026)?
 2. Há linhas com campos vazios no campo unidade_sigla?
 3. Os valores numéricos estão dentro dos intervalos esperados (percentuais entre 0 e 100)?
-4. Compare com os resultados esperados na seção 11 do CLAUDE.md.
+4. Compare com o baseline público e com o A5 do ciclo, se disponíveis.
 ```
 
 **Gerar relatório de qualidade dos dados:**
@@ -549,8 +535,8 @@ unidades que aparecem em todos os indicadores e unidades com dados ausentes em a
 
 **Atualizar a documentação de um indicador:**
 ```
-O indicador IXX teve sua lógica ajustada conforme a validação registrada no CLAUDE.md seção 11.
-Execute o /atualizar-docs para atualizar a ficha docs/06.X.X-iXX.md refletindo o estado atual
+O indicador IXX teve sua lógica ajustada conforme o protocolo público de validação.
+Atualize a ficha `docs/ocde/06.X.X-iXX.md` refletindo o estado atual
 do script e do último relatório de validação.
 ```
 

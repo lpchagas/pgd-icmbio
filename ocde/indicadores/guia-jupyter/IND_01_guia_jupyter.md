@@ -1,7 +1,7 @@
 # I01 — Proporção de Servidores por Regime de Trabalho — Guia de Execução via Jupyter Notebook
 
 > Guia derivado de `ocde/indicadores/IND_01.1_run.py` (fonte canônica — Opção A/C).
-> Documenta a Opção B (seção 8 do CLAUDE.md): execução manual via
+> Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
@@ -12,11 +12,11 @@ Plano de Trabalho (PT) vigente no período.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver CLAUDE.md seção 2).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
-  **não copie credenciais para este arquivo**; ver CLAUDE.md seção 2
-  (arquivo local, não versionado). Se a célula 2 ainda não tiver usuário/senha
+  **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
+  e a checklist de `docs/12-seguranca-publicacao.md`. Se a célula 2 ainda não tiver usuário/senha
   preenchidos, edite-a localmente antes de continuar — nunca cole credenciais
   neste `.md`.
 
@@ -27,13 +27,13 @@ Plano de Trabalho (PT) vigente no período.
   Base: 01/07/2025.
 
 **Particularidade do I01:** a query `SQL_I01_PLANOS` **não recebe** `{ini}`/`{fim}`
-— ela carrega **todos** os planos de trabalho com vigência a partir de 2025-01-01
+— ela carrega **todos** os planos de trabalho com vigência a partir de 2025-07-01
 em uma única consulta (~14.000 registros), e a segmentação por período +
 agregação por modalidade é feita **em Python** (pandas, no notebook), não em SQL.
 Isso evita 9 round-trips ao Denodo. A tabela abaixo é usada apenas para filtrar
 o DataFrame por sobreposição de datas (`inicio <= periodo_fim AND fim >= periodo_ini`).
 
-Períodos vigentes em 24.07.2026 (recalcular com `build_periods_pt()` se datas futuras):
+Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pt()` se datas futuras):
 
 | Período | Tipo | Início | Fim | Status |
 |---|---|---|---|---|
@@ -45,7 +45,7 @@ Períodos vigentes em 24.07.2026 (recalcular com `build_periods_pt()` se datas f
 | M04-2026 | mensal | 2026-04-01 | 2026-04-30 | encerrado |
 | M05-2026 | mensal | 2026-05-01 | 2026-05-31 | encerrado |
 | M06-2026 | mensal | 2026-06-01 | 2026-06-30 | encerrado |
-| M07-2026 | mensal | 2026-07-01 | 2026-07-31 | em_andamento |
+| M08-2026 | mensal | 2026-08-01 | 2026-08-31 | encerrado |
 
 ## 4. Query SQL_I01_PLANOS
 
@@ -77,7 +77,7 @@ WHERE pt.deleted_at  IS NULL
   AND pt.usuario_id  IS NOT NULL
   AND pt.data_inicio IS NOT NULL
   AND pt.data_fim    IS NOT NULL
-  AND CAST(pt.data_fim AS DATE) >= CAST('2025-01-01' AS DATE)
+  AND CAST(pt.data_fim AS DATE) >= CAST('2025-07-01' AS DATE)
 ```
 
 Sem placeholders para trocar — a query roda uma única vez.
@@ -105,7 +105,7 @@ Sem placeholders para trocar — a query roda uma única vez.
        ("M04-2026", "mensal", "2026-04-01", "2026-04-30", "encerrado"),
        ("M05-2026", "mensal", "2026-05-01", "2026-05-31", "encerrado"),
        ("M06-2026", "mensal", "2026-06-01", "2026-06-30", "encerrado"),
-       ("M07-2026", "mensal", "2026-07-01", "2026-07-31", "em_andamento"),
+       ("M08-2026", "mensal", "2026-08-01", "2026-08-31", "encerrado"),
    ]
 
    df_i01["plano_inicio"] = pd.to_datetime(df_i01["plano_inicio"])
@@ -156,9 +156,9 @@ Ajuste `2026-07` para o mês corrente. Repita para `df_i01_v2` com o nome
   — não são um regime de trabalho válido.
 - Planos com `plano_inicio > plano_fim` ou datas nulas devem ser descartados
   antes da agregação (replicar filtro `skipped` do `.py`).
-- Período em andamento (M07-2026 nesta tabela): dados preliminares.
+- Período em andamento (M08-2026 nesta tabela): dados preliminares.
 - Pendência do projeto: decidir critério MIN vs. mais recente para servidores
-  com múltiplos registros de modalidade (ver CLAUDE.md seção 11).
+  com múltiplos registros de modalidade (ver a ficha técnica pública do I01).
 
 ## 8. Ver também
 

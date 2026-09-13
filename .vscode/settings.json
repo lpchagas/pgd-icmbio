@@ -28,5 +28,6 @@
         "Windows PowerShell (x64)": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"
     },
     "powershell.powerShellDefaultVersion": "Windows PowerShell (x64)",
-    "chatgpt.runCodexInWindowsSubsystemForLinux": true
+    "chatgpt.runCodexInWindowsSubsystemForLinux": true,
+    "python.terminal.useEnvFile": true
 }

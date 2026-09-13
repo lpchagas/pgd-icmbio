@@ -12,11 +12,15 @@ Desenvolvido pela Coordenação de Governança (CGOV/ICMBio) no âmbito do pilot
 
 | Data | O que mudou | Onde |
 | --- | --- | --- |
+| 13.09.2026 | Integração do ciclo gerencial retomável, Relatório V2, gates de segurança e caderno metodológico para deliberação. Os 13 alvos permanecem pendentes de homologação institucional. | [docs/16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) · [docs/17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) |
+| 12.09.2026 | Protocolo A1–A5 automatizado com contratos, extrações atômicas, oráculos independentes, drift, diagnósticos e fixtures sintéticas sem efeito de homologação. | [docs/09-protocolo-validacao-indicadores.md](docs/09-protocolo-validacao-indicadores.md) |
+| 11.09.2026 | Relatório cumulativo e anonimizado com escopos explícitos, proteção `k≥5`, supressão complementar, PDF e expansão controlada da GR2 para o nível nacional. | [docs/15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) |
+| 08.09.2026 | Novo grupo de análises **`gestao/`** — acompanhamento operacional para chefias, separado dos 12 indicadores OCDE. Primeira análise: situação dos Planos de Trabalho por unidade (rascunho, aguardando assinatura, em execução, aguardando avaliação, concluído), com data/hora da última mudança de status e quem procurar. Achado: "aguardando avaliação" não existe no campo `status` do plano — vive na consolidação mensal. | [gestao/](gestao/) · [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) |
 | 21.08.2026 | Documentação de como o **status** dos artefatos PGD (PE/PT) é obtido no PETRVS — status nativo do sistema vs. `periodo_status` calculado — com matriz técnica por indicador (I01–I12) e uma versão em linguagem não técnica para analistas de negócio. Corrigida uma generalização incorreta sobre a escala de notas do Eixo 4 (só I09 e I12 invertem a nota; I10 e I11 testam categoria diretamente). | [docs/07.1-estrutura-banco-dados.md §12](docs/07.1-estrutura-banco-dados.md) · [docs/07.2-status_artefatos_pgd_icmbio.md](docs/07.2-status_artefatos_pgd_icmbio.md) |
 | 05.08.2026 | Nova coluna **`mesogrupo`** (agrupador organizacional intermediário, ex. "Presidência", "DIPLAN") nos 12 CSVs de indicadores, cruzando a estrutura oficial do ICMBio com o cadastro do PETRVS. Corrigido um bug em 8 scripts onde a nova coluna deslocava os avisos de qualidade pós-CSV. | `lib/estrutura_organizacional.py` |
 | 24.07.2026 | Criados os 12 guias de execução via Jupyter Notebook (Opção B) — um por indicador, com a query e a tabela de períodos vigente, sem credenciais. | [ocde/indicadores/guia-jupyter/](ocde/indicadores/guia-jupyter/) |
 
-> Histórico completo de fases e decisões fica em `PROJECT.md` — arquivo de uso interno da equipe, não versionado neste repositório público.
+> O histórico público desta atualização está organizado na tabela acima, no caderno metodológico e nos commits da ramificação de publicação.
 
 ---
 
@@ -28,7 +32,7 @@ Este repositório mistura três tipos de conteúdo. Se você é gestor ou analis
 | --- | --- |
 | Entender o que cada indicador mede, sem código | [docs/08-guia-rapido-gestores.md](docs/08-guia-rapido-gestores.md) |
 | Ver o contexto do piloto OCDE/PGD e por que ele existe | [docs/05-contexto-ocde-pgd.md](docs/05-contexto-ocde-pgd.md) |
-| Consultar a ficha técnica de um indicador específico (I01–I12) | [docs/ocde/06-indicadores-ocde-mysql.md](docs/ocde/06-indicadores-ocde-mysql.md) |
+| Consultar a ficha técnica de um indicador específico (I01–I12) | [docs/ocde/06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md) |
 | Pegar os números já prontos (CSV/planilha) | Pasta `artefatos_local/` — só existe no computador de quem já rodou o processo; não fica no GitHub |
 | Rodar as consultas você mesmo | Seções "Início rápido" abaixo |
 
@@ -59,7 +63,7 @@ Leia [docs/08-guia-rapido-gestores.md](docs/08-guia-rapido-gestores.md) — ente
 ### Para analistas — Opção A: DBeaver (recomendado)
 
 1. Configure a conexão Denodo no DBeaver seguindo [docs/03-acesso-direto-denodo-dbeaver.md](docs/03-acesso-direto-denodo-dbeaver.md) (detalhamento em [docs/04-configuracao-dbeaver.md](docs/04-configuracao-dbeaver.md))
-2. Abra o índice do manual: [docs/ocde/06-indicadores-ocde-mysql.md](docs/ocde/06-indicadores-ocde-mysql.md)
+2. Abra o índice do manual: [docs/ocde/06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md)
 3. Navegue até o indicador desejado e copie a query para um SQL Editor
 4. Ajuste as datas no bloco `parametros` e execute com `Ctrl + A` > `Ctrl + Enter`
 
@@ -112,7 +116,7 @@ Os scripts em `ocde/indicadores/` geram os CSVs mensais dos indicadores sem arma
 Exemplo:
 
 ```powershell
-python ocde/indicadores/IND_02.1_run.py
+python ocde/indicadores/IND_02.1_run.py --data-execucao 2026-09-13
 ```
 
 Fluxo completo, calendário mensal e checklist: [docs/11-guia-extracao-mensal.md](docs/11-guia-extracao-mensal.md)
@@ -138,7 +142,7 @@ Checklist de segurança antes de publicar: [docs/12-seguranca-publicacao.md](doc
 | I11 | Percentual de avaliações excepcionais | 4. Desempenho e Avaliação | [06.4.3-i11.md](docs/ocde/06.4.3-i11.md) |
 | I12 | Coerência entre avaliação do PT e do PE | 4. Desempenho e Avaliação | [06.4.4-i12.md](docs/ocde/06.4.4-i12.md) |
 
-Índice navegável com descrição completa de cada indicador: [docs/ocde/06-indicadores-ocde-mysql.md](docs/ocde/06-indicadores-ocde-mysql.md)
+Índice navegável com descrição completa de cada indicador: [docs/ocde/06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md)
 
 ---
 
@@ -150,6 +154,7 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | --- | --- | --- |
 | **`docs/`** | 📄 Documentação | Manual do projeto: visão geral, guia para gestores, contexto OCDE/PGD, fichas técnicas dos 12 indicadores, protocolos de validação e segurança. É o ponto de entrada para entender o "o quê" e o "porquê" — veja detalhamento abaixo. |
 | **`ocde/`** | ⚙️ Código | Scripts que calculam os 12 indicadores OCDE/PGD a partir do Denodo (a iniciativa principal deste repositório). Inclui os scripts de extração mensal, os módulos de relatório gerencial e os templates de diagnóstico. |
+| **`gestao/`** | ⚙️ Código | Análises de **acompanhamento operacional** para chefias de unidade — respondem "o que está travado na minha equipe hoje e quem devo procurar", diferente dos 12 indicadores OCDE, que medem desempenho agregado ao longo do tempo. Veja detalhamento abaixo. |
 | **`mgi/`** | ⚙️ Código (embrionário) | Reservado para futuros indicadores solicitados diretamente pelo MGI, além dos 12 já validados com o ICMBio. Hoje contém apenas a estrutura inicial. |
 | **`lib/`** | ⚙️ Código | Biblioteca compartilhada usada por todos os scripts de indicadores: conexão com o Denodo, definição dos períodos de análise (mensal/trimestral/quadrimestral), limpeza e exportação de CSV, checagens automáticas de qualidade. Nada aqui precisa ser lido por quem só consome os resultados. |
 | **`artefatos_local/`** | 📊 Dados (não versionado) | Onde ficam os CSVs prontos (por mês, por indicador) depois que alguém executa a extração. **Não existe no GitHub** — só no computador de quem rodou o processo e sincroniza via OneDrive. É aqui que estão as planilhas que alimentam o Power BI/COCAGE. |
@@ -176,7 +181,11 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | [11-guia-extracao-mensal.md](docs/11-guia-extracao-mensal.md) | Calendário e comandos da rotina mensal de extração dos indicadores |
 | [12-seguranca-publicacao.md](docs/12-seguranca-publicacao.md) | Checklist para evitar vazamento de credenciais e dados pessoais antes de publicar |
 | [13-organizacao-publico-privado.md](docs/13-organizacao-publico-privado.md) | O que é público (GitHub), privado (OneDrive) e local em cada pasta |
-| `docs/ocde/` | As **fichas técnicas dos 12 indicadores** (uma por indicador) + 4 fichas de eixo + o índice geral [06-indicadores-ocde-mysql.md](docs/ocde/06-indicadores-ocde-mysql.md) |
+| [14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) | Método e cuidados do acompanhamento operacional da situação dos Planos de Trabalho |
+| [15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) | Rotina do relatório cumulativo: corte no mês anterior, escopos, anonimização, PDF e expansão GR2 → nacional |
+| [16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) | Arquitetura das skills, extrações automatizadas e Relatório Gerencial V2 |
+| [17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) | Minuta deliberativa: fórmulas, alternativas, scorecards e matriz de homologação I01–I12 + PT_STATUS |
+| `docs/ocde/` | As **fichas técnicas dos 12 indicadores** (uma por indicador) + 4 fichas de eixo + o índice geral [06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md) |
 | `docs/cgov/` e `docs/mgi/` | Páginas públicas de apresentação das iniciativas CGOV e MGI (sem dados sensíveis) |
 
 ### Dentro de `ocde/` — o motor dos indicadores
@@ -188,14 +197,50 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | `relatorios/` | Módulos que leem os CSVs já extraídos e montam análises gerenciais (classificação de desempenho, métricas agregadas, geração de relatório). |
 | `diagnosticos/` | Modelo (template) usado para investigar achados inesperados de um indicador antes de fechar a validação. |
 
+Relatório piloto GR2 de setembro/2026 (janela encerrada em 31/08/2026):
+
+```bash
+.venv/bin/python -m ocde.relatorios.relatorio_cumulativo \
+  --data-execucao 2026-09-11 --regional GR2 --reextrair --salvar --pdf
+```
+
+Os CSVs detalhados da reextração ficam somente em memória durante o cálculo;
+apenas produtos agregados e anonimizados são gravados em
+`artefatos_local/relatorios/AAAA-MM/`.
+
+### Dentro de `gestao/` — acompanhamento operacional das chefias
+
+Enquanto `ocde/` mede **desempenho agregado** (como a unidade se saiu no
+quadrimestre), `gestao/` responde a uma pergunta diferente e imediata: **o que
+está travado na minha equipe agora e com quem eu falo para destravar.** As duas
+famílias leem o mesmo banco, mas têm público, periodicidade e saída distintos.
+
+| Script | O que responde | Documentação |
+| --- | --- | --- |
+| [`PT_STATUS.1_run.py`](gestao/PT_STATUS.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou concluído — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) |
+
+```powershell
+python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-subordinadas
+```
+
+As saídas vão para `artefatos_local/gestao/AAAA-MM/` (não versionado): um CSV de
+detalhe, um painel unidade × status. **Contêm nome e e-mail de servidores** —
+tratar como dado pessoal.
+
+> **Por que não é um indicador OCDE:** os 12 indicadores medem resultado com
+> período fechado e passam pelo protocolo de validação A1–A5. As análises de
+> `gestao/` são fotografias do estado atual, para ação imediata, e não entram no
+> pacote enviado à COCAGE.
+
 ---
 
 ## Ciclo de vida de um indicador (resumo)
 
-1. **Extração (A1/A2):** o script Python roda a query no Denodo e gera o CSV do mês → `artefatos_local/ocde/entregas/AAAA-MM/`
-2. **Validação manual (A3):** a equipe CGOV analisa os números e aponta inconsistências ou confirma a leitura
-3. **Diagnóstico (A4):** se necessário, um script investigativo aprofunda um achado específico
-4. **Relatório de validação (A5):** documento final que registra a decisão técnica sobre o indicador
+1. **A1 — produção:** contrato e script executável do indicador.
+2. **A2 — resultado:** CSV, schema, janela e manifesto com hashes.
+3. **A3 — validação independente:** oráculo Python recalcula a métrica a partir de extrações atômicas.
+4. **A4 — diagnóstico:** classifica divergências, drift, cobertura e riscos de privacidade.
+5. **A5 — dossiê:** consolida evidências e registra a decisão; a homologação continua humana.
 
 Protocolo completo: [docs/09-protocolo-validacao-indicadores.md](docs/09-protocolo-validacao-indicadores.md)
 

@@ -34,7 +34,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pt, period_metadata
+from lib.periodos import analysis_window, build_periods_pt, period_metadata
 
 SQL_I11 = """
 WITH parametros AS (
@@ -47,6 +47,7 @@ avaliacoes_pt AS (
     SELECT
         av.id          AS id_avaliacao,
         pt.unidade_id,
+        pt.usuario_id  AS id_servidor,
         tan.sequencia  AS sequencia_nota
     FROM petrvs_icmbio_avaliacoes av
     JOIN petrvs_icmbio_planos_trabalhos_consolidacoes ptc
@@ -58,6 +59,7 @@ avaliacoes_pt AS (
     CROSS JOIN parametros p
     WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
@@ -67,6 +69,7 @@ proporcao_por_unidade AS (
         COALESCE(un.sigla, 'N.I.')                                   AS unidade_sigla,
         COALESCE(un.nome,  'N.I.')                                   AS unidade_nome,
         COUNT(avpt.id_avaliacao)                                     AS total_avaliacoes_pt,
+        COUNT(DISTINCT avpt.id_servidor)                             AS total_servidores_avaliados,
         SUM(CASE WHEN avpt.sequencia_nota = 1 THEN 1 ELSE 0 END)    AS qtd_excepcional,
         ROUND(
             SUM(CASE WHEN avpt.sequencia_nota = 1 THEN 1 ELSE 0 END) * 100.0
@@ -81,6 +84,7 @@ SELECT
     unidade_sigla,
     unidade_nome,
     total_avaliacoes_pt,
+    total_servidores_avaliados,
     qtd_excepcional,
     perc_excepcional,
     CASE
@@ -108,13 +112,14 @@ def main() -> None:
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_11.2_perc_excepcional_pt_{stamp}.csv"
 
-    periods = build_periods_pt()
+    window = analysis_window()
+    periods = build_periods_pt(window.fim)
     meta_cols = period_metadata()
     all_cols: list[str] | None = None
     all_rows: list[list] = []
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = SQL_I11.replace("{ini}", str(start)).replace("{fim}", str(end))
             print(f"Executando I11 {label} ({start} a {end})...")
             try:
@@ -126,7 +131,7 @@ def main() -> None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
             for row in rows:
-                all_rows.append([kind, label, str(start), str(end), status, duration] + row)
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:
         conn.close()
@@ -143,13 +148,13 @@ def main() -> None:
     write_pipe_csv(output, csv_cols, csv_rows)
     print(f"Arquivo salvo: {output}")
 
-    # Colunas apos meta_cols (6): sigla(0) nome(1) total_av(2) qtd_exc(3) perc_exc(4) nivel(5)
+    # Colunas apos meta_cols: sigla(0) nome(1) total_av(2) total_servidores(3) qtd_exc(4) perc_exc(5) nivel(6)
     n = len(meta_cols)
     offset_total = n + 2   # total_avaliacoes_pt
-    offset_perc  = n + 4   # perc_excepcional
-    offset_nivel = n + 5   # nivel_reconhecimento
+    offset_perc  = n + 5   # perc_excepcional
+    offset_nivel = n + 6   # nivel_reconhecimento
 
-    encerrados = [r for r in all_rows if r[4] == "encerrado"]
+    encerrados = [r for r in all_rows if r[5] == "encerrado"]
 
     # Alerta de possivel leniencia avaliativa (perc >= 40% requer cruzamento com I12)
     leniencia = [r for r in encerrados if _to_float(r[offset_perc]) >= 40]
@@ -169,9 +174,9 @@ def main() -> None:
     if low_count:
         print(f"  NOTA: {low_count} linha(s) com < 5 avaliacoes em periodos encerrados — percentuais frageis.")
 
-    em_andamento = sum(1 for r in all_rows if r[4] == "em_andamento")
-    if em_andamento:
-        print(f"  NOTA: {em_andamento} linha(s) em periodo em_andamento — valores preliminares.")
+    parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
+    if parciais:
+        print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores preliminares.")
 
 
 if __name__ == "__main__":

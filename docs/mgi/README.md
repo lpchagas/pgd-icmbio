@@ -7,4 +7,4 @@
 - `docs/mgi/` — fichas técnicas dos indicadores MGI
 - `mgi/indicadores/` — scripts MGI_XX.1_run.py (análogos aos scripts OCDE em `ocde/indicadores/`)
 
-Modelo de referência: [../ocde/06-indicadores-ocde-mysql.md](../ocde/06-indicadores-ocde-mysql.md)
+Modelo de referência: [../ocde/06-indicadores-ocde-denodo.md](../ocde/06-indicadores-ocde-denodo.md)

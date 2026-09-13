@@ -29,7 +29,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pt, period_metadata
+from lib.periodos import analysis_window, build_periods_pt, period_metadata
 
 SQL_I05 = """
 WITH parametros AS (
@@ -103,13 +103,14 @@ def main() -> None:
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_05.2_distribuicao_entregas_servidores_{stamp}.csv"
 
-    periods = build_periods_pt()
+    window = analysis_window()
+    periods = build_periods_pt(window.fim)
     meta_cols = period_metadata()
     all_cols: list[str] | None = None
     all_rows: list[list] = []
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = SQL_I05.replace("{ini}", str(start)).replace("{fim}", str(end))
             print(f"Executando I05 {label} ({start} a {end})...")
             try:
@@ -121,7 +122,7 @@ def main() -> None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
             for row in rows:
-                all_rows.append([kind, label, str(start), str(end), status, duration] + row)
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:
         conn.close()

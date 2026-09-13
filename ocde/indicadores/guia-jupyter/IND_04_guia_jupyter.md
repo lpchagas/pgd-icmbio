@@ -1,7 +1,7 @@
 # I04 — Score Médio de Atingimento de Metas por Unidade — Guia de Execução via Jupyter Notebook
 
 > Guia derivado de `ocde/indicadores/IND_04.1_run.py` (fonte canônica — Opção A/C).
-> Documenta a Opção B (seção 8 do CLAUDE.md): execução manual via
+> Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
@@ -13,11 +13,11 @@ superexecução.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver CLAUDE.md seção 2).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
-  **não copie credenciais para este arquivo**; ver CLAUDE.md seção 2
-  (arquivo local, não versionado).
+  **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
+  e a checklist de `docs/12-seguranca-publicacao.md`.
 
 ## 3. Instrumento e periodicidade
 
@@ -26,14 +26,14 @@ superexecução.
   Base: 01/07/2025.
 - Escopo idêntico ao I02: sobrepõe as datas do PE, não o vencimento individual.
 
-Períodos vigentes em 24.07.2026 (recalcular com `build_periods_pe()` se datas futuras):
+Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pe()` se datas futuras):
 
 | Período | Tipo | Início | Fim | Status |
 |---|---|---|---|---|
 | T3-2025 | trimestral | 2025-07-01 | 2025-09-30 | encerrado |
 | T4-2025 | trimestral | 2025-10-01 | 2025-12-31 | encerrado |
 | Q1-2026 | quadrimestral | 2026-01-01 | 2026-04-30 | encerrado |
-| Q2-2026 | quadrimestral | 2026-05-01 | 2026-08-31 | em_andamento |
+| Q2-2026 | quadrimestral | 2026-05-01 | 2026-08-31 | encerrado |
 
 ## 4. Query SQL_I04
 
@@ -149,7 +149,7 @@ print(f"Exportado: {output_path}")
   PETRVS 208,25% — diferença de 0,08 p.p. por precisão decimal).
 - `ciclo_tipo` muda entre 2025 (trimestral) e 2026+ (quadrimestral) — não
   comparar scores por período entre anos, usar totais anuais.
-- Pendências QD-02 e QD-03 do diagnóstico A4 ainda em aberto (ver CLAUDE.md seção 11).
+- Pendências QD-02 e QD-03 do diagnóstico A4 ainda em aberto (registradas no A5 do ciclo correspondente).
 
 ## 8. Ver também
 

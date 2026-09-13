@@ -1,0 +1,5 @@
+# Execução Denodo e geração dos relatórios gerenciais.
+JPype1>=1.5
+pandas>=2.2
+reportlab>=4.2
+pypdf>=5

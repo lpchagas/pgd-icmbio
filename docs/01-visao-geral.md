@@ -97,7 +97,7 @@ No banco de dados, isso fica em:
 
 ## 6. Os 12 indicadores OCDE/PGD
 
-O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice navegável completo está em [06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md).
+O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice navegável completo está em [06-indicadores-ocde-denodo.md](ocde/06-indicadores-ocde-denodo.md).
 
 | Eixo | Indicadores | Foco |
 | --- | --- | --- |
@@ -110,7 +110,7 @@ O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice 
 
 ## 7. Diferença em relação ao projeto datamart
 
-| Aspecto | Este projeto (Denodo/MySQL) | Projeto datamart (postgre) |
+| Aspecto | Este projeto (Denodo) | Projeto datamart (postgre) |
 | --- | --- | --- |
 | Acesso aos dados | Denodo — tempo real, via internet | PostgreSQL em container Docker local |
 | Instalação local necessária | Apenas DBeaver (gratuito) | Docker + PostgreSQL + Superset |
@@ -126,4 +126,4 @@ O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice 
 
 - **Para configurar o acesso:** [03-acesso-direto-denodo-dbeaver.md](03-acesso-direto-denodo-dbeaver.md)
 - **Para entender os indicadores sem SQL:** [08-guia-rapido-gestores.md](08-guia-rapido-gestores.md)
-- **Para executar as consultas:** [06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md)
+- **Para executar as consultas:** [06-indicadores-ocde-denodo.md](ocde/06-indicadores-ocde-denodo.md)

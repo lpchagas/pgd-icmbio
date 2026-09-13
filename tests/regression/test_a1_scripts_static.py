@@ -47,6 +47,33 @@ def _sql_constant(source: str, var_name: str) -> str:
 # ---------------------------------------------------------------------------
 
 class TestEscalaEixo4:
+    @pytest.mark.parametrize("indicador,var_name", [("09", "SQL_I09"), ("10", "SQL_I10"), ("11", "SQL_I11"), ("12", "SQL_I12")])
+    def test_exporta_cobertura_distinta_de_servidores_avaliados(self, indicador, var_name):
+        sql = _sql_constant(_source(indicador), var_name)
+        assert re.search(
+            r"COUNT\(DISTINCT\s+(?:avpt\.)?id_servidor\)\s+AS\s+total_servidores_avaliados",
+            sql,
+            flags=re.IGNORECASE,
+        )
+
+    def test_offsets_de_diagnostico_refletem_nova_coluna(self):
+        assert "offset_media = n + 5" in _source("09")
+        assert "offset_perc  = n + 5" in _source("10")
+        assert "offset_perc  = n + 5" in _source("11")
+        assert "offset_nivel = n + 6" in _source("11")
+        assert "offset_dif_abs = n + 7" in _source("12")
+        assert "offset_classif = n + 9" in _source("12")
+
+    @pytest.mark.parametrize("indicador,var_name", [("09", "SQL_I09"), ("10", "SQL_I10"), ("11", "SQL_I11"), ("12", "SQL_I12")])
+    def test_avaliacao_usa_data_de_negocio(self, indicador, var_name):
+        sql = _sql_constant(_source(indicador), var_name)
+        ocorrencias = len(re.findall(
+            r"CAST\(av\.data_avaliacao AS DATE\)\s+BETWEEN\s+p\.data_inicio\s+AND\s+p\.data_fim",
+            sql,
+        ))
+        esperado = 2 if indicador == "12" else 1
+        assert ocorrencias == esperado
+
     @pytest.mark.parametrize("indicador,var_name", [("09", "SQL_I09"), ("12", "SQL_I12")])
     def test_score_usa_formula_correta(self, indicador, var_name):
         sql = _sql_constant(_source(indicador), var_name)
@@ -89,6 +116,17 @@ class TestUnidadeI07I08:
             "COALESCE(pe.unidade_id, ph.unidade_id)."
         )
 
+    @pytest.mark.parametrize("indicador,var_name", [("07", "SQL_I07"), ("08", "SQL_I08")])
+    def test_horas_usam_somente_sobreposicao_proporcional(self, indicador, var_name):
+        sql = _sql_constant(_source(indicador), var_name)
+        assert "AS horas_proporcionais" in sql
+        assert "ELSE p.data_fim END" in sql
+        assert "ELSE p.data_inicio END" in sql
+        assert re.search(
+            r"CAST\(pt\.data_fim AS DATE\)\s*-\s*CAST\(pt\.data_inicio AS DATE\)",
+            sql,
+        )
+
 
 # ---------------------------------------------------------------------------
 # Conformidade com o padrão canônico — comum aos 12 scripts A1
@@ -116,6 +154,23 @@ class TestPadraoCanonico:
         assert "build_periods_pe" in source or "build_periods_pt" in source, (
             "Todo A1 deve usar a segmentação canônica de períodos de lib.periodos."
         )
+
+    @pytest.mark.parametrize("indicador", TODOS_OS_INDICADORES)
+    def test_injeta_analysis_end_explicitamente(self, indicador):
+        source = _source(indicador)
+        assert "window = analysis_window()" in source
+        assert re.search(r"build_periods_(?:pe|pt)\(window\.fim\)", source), (
+            "Todo A1 deve passar analysis_end explicitamente à segmentação canônica."
+        )
+        assert "date.today()" not in source
+
+    @pytest.mark.parametrize("indicador", ["07", "08", "09", "10", "11", "12"])
+    def test_aviso_de_ciclo_parcial_usa_novo_offset_e_status(self, indicador):
+        source = _source(indicador)
+        assert "r[5]" in source
+        assert "\"parcial_no_corte\"" in source
+        assert "r[4] == \"em_andamento\"" not in source
+        assert "r[4] == \"encerrado\"" not in source
 
     @pytest.mark.parametrize("indicador", [i for i in TODOS_OS_INDICADORES if i != "01"])
     def test_conexao_e_fechada_no_finally(self, indicador):

@@ -1,0 +1,33 @@
+name: Qualidade
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  testes-seguranca-documentacao:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependências de desenvolvimento
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Executar testes offline
+        run: python -m pytest -q
+
+      - name: Auditar credenciais incorporadas
+        run: python tools/security_audit.py

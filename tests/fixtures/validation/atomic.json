@@ -1,0 +1,72 @@
+{
+  "I01": [
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "modalidade": "Presencial"},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "modalidade": "Teletrabalho"},
+    {"periodo": "M01-2026", "unidade_sigla": "U2", "id_servidor": "S3", "modalidade": "Presencial"}
+  ],
+  "I02": [
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "meta_planejada": 100, "meta_executada": 100, "plano_status": "AVALIADO", "vence_no_periodo": true},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "meta_planejada": 100, "meta_executada": 50, "plano_status": "ATIVO", "vence_no_periodo": true},
+    {"periodo": "Q1-2026", "unidade_sigla": "U2", "id_entrega": "E3", "meta_planejada": 50, "meta_executada": 50, "plano_status": "CONCLUIDO", "vence_no_periodo": false}
+  ],
+  "I03": [
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "meta_planejada": 0.5, "meta_executada": 25},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "meta_planejada": 100, "meta_executada": 120}
+  ],
+  "I04": [
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "meta_planejada": 100, "meta_executada": 100},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "meta_planejada": 100, "meta_executada": 50},
+    {"periodo": "Q1-2026", "unidade_sigla": "U2", "id_entrega": "E3", "meta_planejada": 50, "meta_executada": 50}
+  ],
+  "I05": [
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "id_entrega": "E1"},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "id_entrega": "E2"},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "id_entrega": "E1"}
+  ],
+  "I06": [
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "id_entrega": "E1"},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "id_entrega": "E1"},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "id_entrega": "E2"}
+  ],
+  "I07": [
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "id_servidor": "S1", "plano_trabalho_id": "P1", "plano_inicio": "2026-01-01", "plano_fim": "2026-01-10", "sobreposicao_inicio": "2026-01-01", "sobreposicao_fim": "2026-01-10", "carga_horaria": 80, "forma_contagem_carga_horaria": "HORAS", "forca_trabalho": 50},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "id_servidor": "S2", "plano_trabalho_id": "P2", "plano_inicio": "2026-01-01", "plano_fim": "2026-01-10", "sobreposicao_inicio": "2026-01-01", "sobreposicao_fim": "2026-01-10", "carga_horaria": 40, "forma_contagem_carga_horaria": "HORAS", "forca_trabalho": 100},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "id_servidor": "S1", "plano_trabalho_id": "P1", "plano_inicio": "2026-01-01", "plano_fim": "2026-01-10", "sobreposicao_inicio": "2026-01-01", "sobreposicao_fim": "2026-01-10", "carga_horaria": 80, "forma_contagem_carga_horaria": "HORAS", "forca_trabalho": 25}
+  ],
+  "I08": [
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "id_servidor": "S1", "plano_trabalho_id": "P1", "plano_inicio": "2026-01-01", "plano_fim": "2026-01-10", "sobreposicao_inicio": "2026-01-01", "sobreposicao_fim": "2026-01-10", "carga_horaria": 80, "forma_contagem_carga_horaria": "HORAS", "forca_trabalho": 50},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "id_servidor": "S2", "plano_trabalho_id": "P2", "plano_inicio": "2026-01-01", "plano_fim": "2026-01-10", "sobreposicao_inicio": "2026-01-01", "sobreposicao_fim": "2026-01-10", "carga_horaria": 40, "forma_contagem_carga_horaria": "HORAS", "forca_trabalho": 100},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "id_servidor": "S1", "plano_trabalho_id": "P1", "plano_inicio": "2026-01-01", "plano_fim": "2026-01-10", "sobreposicao_inicio": "2026-01-01", "sobreposicao_fim": "2026-01-10", "carga_horaria": 80, "forma_contagem_carga_horaria": "HORAS", "forca_trabalho": 25}
+  ],
+  "I09": [
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_avaliacao": "A1", "id_servidor": "S1", "plano_trabalho_id": "P1", "sequencia_nota": 1},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_avaliacao": "A2", "id_servidor": "S2", "plano_trabalho_id": "P2", "sequencia_nota": 2},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_avaliacao": "A3", "id_servidor": "S3", "plano_trabalho_id": "P3", "sequencia_nota": 3},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_avaliacao": "A4", "id_servidor": "S4", "plano_trabalho_id": "P3", "sequencia_nota": 4},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_avaliacao": "A5", "id_servidor": "S4", "plano_trabalho_id": "P3", "sequencia_nota": 5}
+  ],
+  "I10": [
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "sequencia_nota": 1},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "sequencia_nota": 2},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S3", "sequencia_nota": 3},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S4", "sequencia_nota": 4},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S5", "sequencia_nota": 5}
+  ],
+  "I11": [
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "sequencia_nota": 1},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "sequencia_nota": 2},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S3", "sequencia_nota": 3},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S4", "sequencia_nota": 4},
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S5", "sequencia_nota": 5}
+  ],
+  "I12": [
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "instrumento": "PT", "id_servidor": "S1", "sequencia_nota": 1},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "instrumento": "PT", "id_servidor": "S2", "sequencia_nota": 3},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "instrumento": "PE", "sequencia_nota": 2},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "instrumento": "PE", "sequencia_nota": 4}
+  ],
+  "PT_STATUS": [
+    {"unidade_sigla": "U1", "status_codigo": "ATIVO", "periodos_aguardando_avaliacao": 1},
+    {"unidade_sigla": "U1", "status_codigo": "INCLUIDO", "periodos_aguardando_avaliacao": 0}
+  ]
+}

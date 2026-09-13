@@ -92,10 +92,11 @@ mensagem de erro clara antes de tentar qualquer conexão.
 
 ### `periodos.py` — Calendário inteligente de períodos
 
-Gera automaticamente a lista de períodos que devem ser calculados (trimestres de 2025,
-quadrimestres e meses de 2026), com base na data de hoje. Períodos futuros são ignorados.
-Cada período recebe o rótulo correto (`T1-2025`, `Q2-2026`, `M06-2026`) e o status
-`encerrado` ou `em_andamento`, que aparece no CSV de saída.
+Gera automaticamente a lista de períodos contidos na janela oficial cumulativa, de
+01/07/2025 até o último dia do mês anterior à data de execução. A data pode ser
+injetada com `--data-execucao AAAA-MM-DD`, garantindo reprodutibilidade. Cada
+período inclui `periodo_fim_efetivo` e o status `encerrado` ou
+`parcial_no_corte`; períodos iniciados após o corte são excluídos.
 
 Duas funções principais:
 

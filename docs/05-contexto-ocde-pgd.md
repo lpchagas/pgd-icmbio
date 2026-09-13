@@ -186,7 +186,7 @@ Os dados abaixo foram extraídos do banco PETRVS (dump de fevereiro/2026) e apre
 | Mapa de 130+ tabelas do PETRVS + 6 tabelas críticas para os indicadores | Concluído (`docs/07-estrutura-banco-dados.md`) |
 | Guia para gestores sem SQL | Concluído (`docs/08-guia-rapido-gestores.md`) |
 | Protocolo de validação manual (comparação SQL ↔ PETRVS online) | Concluído (`docs/09-protocolo-validacao-indicadores.md`) |
-| I02 validado — critério OCDE vs. fluxo formal documentado | Concluído (`Testes PETRVS/IND_02_resposta_tecnica_11.05.2026.md`) |
+| I02 validado — critério OCDE vs. fluxo formal documentado | Evidência histórica mantida na área privada de validação |
 | Conexão Denodo configurada no DBeaver (acesso em tempo real) | Concluído (maio/2026) |
 | Documentação de conexão Denodo atualizada | Concluído (`docs/03-acesso-direto-denodo-dbeaver.md`) |
 
@@ -255,8 +255,8 @@ Mede como o esforço está distribuído entre servidores e entregas. Identifica 
 | --- | --- | --- | --- |
 | I05 | Distribuição das entregas entre os servidores | `planos_trabalhos_entregas` | Disponível |
 | I06 | Grau de responsabilidade pelas entregas | `planos_trabalhos_entregas` | Disponível |
-| I07 | Horas por entrega — planejadas (absoluto) | `planos_trabalhos_entregas` | Disponível · verificar CTE recursiva no Denodo |
-| I08 | Proporção de horas por entrega — planejadas (%) | `planos_trabalhos_entregas` | Disponível · verificar CTE recursiva no Denodo |
+| I07 | Estimativa de horas planejadas por entrega | `planos_trabalhos_entregas` | Disponível no Denodo |
+| I08 | Proporção da capacidade planejada por entrega | `planos_trabalhos_entregas` | Disponível, com ressalva de unidade |
 
 ### Eixo 4 — Desempenho e Avaliação
 
@@ -265,8 +265,8 @@ Mede a qualidade percebida do desempenho via as avaliações registradas no PETR
 | Indicador | Descrição resumida | Tabela base | Status |
 | --- | --- | --- | --- |
 | I09 | Média da avaliação do Plano de Trabalho por unidade | `avaliacoes` + `tipos_avaliacoes_notas` | Disponível (validar campos) |
-| I10 | Percentual de avaliações inadequadas (nota 2) | `avaliacoes` + `tipos_avaliacoes_notas` | Disponível (validar campos) |
-| I11 | Percentual de avaliações excepcionais (nota 5) | `avaliacoes` + `tipos_avaliacoes_notas` | Disponível (validar campos) |
+| I10 | Percentual do conceito “Inadequado” (`sequencia = 4`) | `avaliacoes` + `tipos_avaliacoes_notas` | Disponível |
+| I11 | Percentual do conceito “Excepcional” (`sequencia = 1`) | `avaliacoes` + `tipos_avaliacoes_notas` | Disponível |
 | I12 | Coerência entre avaliação do PT e do PE por unidade | `avaliacoes` + `planos_entregas` | Disponível (validar campos) |
 
 ---
@@ -371,14 +371,16 @@ Nível de agregação: contagem de entregas por faixa, por unidade
 ### I07 — Horas por entrega — planejadas (absoluto)
 
 ```text
-Horas_entrega = SUM(horas_planejadas_plano_i * forca_trabalho_i / 100)
+Horas_entrega = SUM(horas_proporcionais_plano_i * forca_trabalho_i / 100)
 
-Onde para cada plano de trabalho i vinculado à entrega:
-  horas_planejadas_plano_i = dias_uteis_plano * horas_por_dia
-  dias_uteis_plano = dias no período, excluindo fins de semana e feriados nacionais
+Onde para cada PT vinculado à entrega:
+  horas_proporcionais_plano_i = carga_horaria do PT × dias de sobreposição / dias do PT
   forca_trabalho_i = percentual declarado em planos_trabalhos_entregas.forca_trabalho
 
-Nível de agregação: por entrega (soma de contribuições de todos os servidores)
+A estimativa usa dias corridos porque o PETRVS não fornece calendário laboral
+institucional suficiente para reconstrução retroativa.
+
+Nível de agregação: por entrega (soma das contribuições dos PTs)
 ```
 
 ---
@@ -402,49 +404,27 @@ Nível de agregação: por entrega + proporção em relação à capacidade da u
 ### I09 — Média da avaliação do Plano de Trabalho
 
 ```text
-I = AVG(nota_avaliacao_PT) por unidade
+score = 6 - tipos_avaliacoes_notas.sequencia
+I09 = AVG(score) por unidade
 
-Onde:
-  nota_avaliacao_PT = valor numérico de tipos_avaliacoes_notas.nota
-  Filtro: avaliações com plano_trabalho_consolidacao_id preenchido (avaliação de PT)
-
-Escala de notas:
-  1 = Não executado
-  2 = Inadequado
-  3 = Adequado
-  4 = Alto desempenho
-  5 = Excepcional
-
-Nível de agregação: por unidade
+Sequência bruta: 1 = Excepcional, 2 = Alto desempenho, 3 = Adequado,
+4 = Inadequado, 5 = Não executado.
+Score convertido: 5 = melhor resultado e 1 = pior resultado.
 ```
 
----
-
-### I10 — Percentual de avaliações inadequadas (nota 2)
+### I10 — Percentual de avaliações inadequadas
 
 ```text
-I = (A / B) * 100
-A = COUNT(avaliações de PT com nota = 2) por unidade
-B = COUNT(total de avaliações de PT) por unidade
-
-Nota 2 = avaliação classificada como "inadequada" na escala do sistema
-
-Nível de agregação: por unidade
+I10 = avaliações de PT com sequencia = 4 / total de avaliações de PT × 100
 ```
 
----
-
-### I11 — Percentual de avaliações excepcionais (nota 5)
+### I11 — Percentual de avaliações excepcionais
 
 ```text
-I = (A / B) * 100
-A = COUNT(avaliações de PT com nota = 5) por unidade
-B = COUNT(total de avaliações de PT) por unidade
-
-Nota 5 = avaliação classificada como "excepcional" na escala do sistema
-
-Nível de agregação: por unidade
+I11 = avaliações de PT com sequencia = 1 / total de avaliações de PT × 100
 ```
+
+I10 e I11 testam a sequência bruta; somente I09 e I12 aplicam `6 - sequencia`.
 
 ---
 
@@ -478,15 +458,16 @@ Nível de agregação: por unidade (uma linha por unidade com PT e PE avaliados)
 Todas as consultas usam um bloco `parametros` no início:
 
 ```sql
-with parametros as (
-    select
-        date('2025-01-01') as data_inicio,
-        date('2025-12-31') as data_fim,
-        0 as incluir_excluidos
+WITH parametros AS (
+    SELECT
+        CAST('2025-07-01' AS DATE) AS data_inicio,
+        CAST('2026-08-31' AS DATE) AS data_fim,
+        0 AS incluir_excluidos
 )
 ```
 
-- Ajuste `data_inicio` e `data_fim` conforme o período de análise.
+O exemplo representa uma execução em setembro/2026. Nos scripts, informe
+`--data-execucao`; `analysis_window()` calcula as datas e o mês corrente não entra.
 - `incluir_excluidos = 0`: apenas registros ativos (`deleted_at is null`).
 - `incluir_excluidos = 1`: inclui registros excluídos logicamente (útil para auditoria).
 
@@ -500,7 +481,7 @@ O campo principal do nome da entrega é `descricao`. Se estiver vazio, usa-se `d
 
 ### Nota sobre I01 e I09–I12
 
-Esses cinco indicadores dependem de tabelas (`tipos_modalidades`, `tipos_avaliacoes_notas`) cujo conteúdo exato varia conforme a versão e configuração do PETRVS. Antes de executar, rode as consultas de mapeamento documentadas em [06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md) para confirmar os nomes de campo e os valores de referência.
+Esses cinco indicadores dependem de tabelas (`tipos_modalidades`, `tipos_avaliacoes_notas`) cujo conteúdo exato varia conforme a versão e configuração do PETRVS. Antes de executar, rode as consultas de mapeamento documentadas em [06-indicadores-ocde-denodo.md](ocde/06-indicadores-ocde-denodo.md) para confirmar os nomes de campo e os valores de referência.
 
 ---
 

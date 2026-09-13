@@ -1,7 +1,7 @@
 # I07 — Horas por Entrega — Planejadas (Absolutas) — Guia de Execução via Jupyter Notebook
 
 > Guia derivado de `ocde/indicadores/IND_07.1_run.py` (fonte canônica — Opção A/C).
-> Documenta a Opção B (seção 8 do CLAUDE.md): execução manual via
+> Documenta a execução manual alternativa: execução manual via
 > `consultas_denodo.ipynb` (não o `consultas_denodo_template.ipynb`).
 
 ## 1. Objetivo
@@ -12,11 +12,11 @@ período e têm a entrega vinculada.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver CLAUDE.md seção 2).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
-  **não copie credenciais para este arquivo**; ver CLAUDE.md seção 2
-  (arquivo local, não versionado).
+  **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
+  e a checklist de `docs/12-seguranca-publicacao.md`.
 
 ## 3. Instrumento e periodicidade
 
@@ -25,14 +25,14 @@ período e têm a entrega vinculada.
 - Regra vigente: 2025 trimestral (T3–T4, H1/2025 excluído) | 2026+ quadrimestral (Q1–Q3).
   Base: 01/07/2025.
 
-Períodos vigentes em 24.07.2026 (recalcular com `build_periods_pe()` se datas futuras):
+Períodos encerrados no corte de 31.08.2026 (recalcular com `build_periods_pe()` se datas futuras):
 
 | Período | Tipo | Início | Fim | Status |
 |---|---|---|---|---|
 | T3-2025 | trimestral | 2025-07-01 | 2025-09-30 | encerrado |
 | T4-2025 | trimestral | 2025-10-01 | 2025-12-31 | encerrado |
 | Q1-2026 | quadrimestral | 2026-01-01 | 2026-04-30 | encerrado |
-| Q2-2026 | quadrimestral | 2026-05-01 | 2026-08-31 | em_andamento |
+| Q2-2026 | quadrimestral | 2026-05-01 | 2026-08-31 | encerrado |
 
 ## 4. Query SQL_I07
 

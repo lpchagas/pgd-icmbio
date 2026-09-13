@@ -23,8 +23,8 @@ Achados de validação (12.06.2026):
   - Diferença média 0,24–0,34 pts (escala 1–5).
   - Padrão PE > PT (38%) > PT > PE (27%): avaliador coletivo tende a dar nota
     levemente superior à média dos PTs (oposto de leniência avaliativa).
-  - 77 unidades com ciclo incompleto em T1/T2-2025 (PT sem PE correspondente)
-    excluídas do JOIN — fora do período base (H1/2025 não analisado).
+  - Registros do primeiro semestre de 2025 permanecem fora da base oficial e
+    não participam do JOIN entre PT e PE.
 
 Nota: o JOIN interno entre PT e PE exclui unidades sem as duas perspectivas.
 Para listar essas unidades, executar o diagnóstico A4 (IND_12.4).
@@ -42,7 +42,7 @@ from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
 from lib.monthly_runner import query_rows
-from lib.periodos import build_periods_pe, period_metadata
+from lib.periodos import analysis_window, build_periods_pe, period_metadata
 
 SQL_I12 = """
 WITH parametros AS (
@@ -54,6 +54,7 @@ WITH parametros AS (
 avaliacoes_pt AS (
     SELECT
         pt.unidade_id,
+        pt.usuario_id AS id_servidor,
         (6 - tan.sequencia) AS valor_nota
     FROM petrvs_icmbio_avaliacoes av
     JOIN petrvs_icmbio_planos_trabalhos_consolidacoes ptc
@@ -65,6 +66,7 @@ avaliacoes_pt AS (
     CROSS JOIN parametros p
     WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
@@ -81,6 +83,7 @@ avaliacoes_pe AS (
     CROSS JOIN parametros p
     WHERE av.plano_entrega_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pe.data_inicio AS DATE) <= p.data_fim
       AND CAST(pe.data_fim   AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pe.deleted_at IS NULL)
@@ -89,6 +92,7 @@ media_pt_por_unidade AS (
     SELECT
         unidade_id,
         COUNT(*)                           AS total_avaliacoes_pt,
+        COUNT(DISTINCT id_servidor)        AS total_servidores_avaliados,
         ROUND(AVG(valor_nota * 1.0), 2)    AS media_nota_pt
     FROM avaliacoes_pt
     GROUP BY unidade_id
@@ -106,6 +110,7 @@ coerencia AS (
         COALESCE(un.sigla, 'N.I.')                                     AS unidade_sigla,
         COALESCE(un.nome,  'N.I.')                                     AS unidade_nome,
         mpt.total_avaliacoes_pt,
+        mpt.total_servidores_avaliados,
         mpt.media_nota_pt,
         mpe.total_avaliacoes_pe,
         mpe.media_nota_pe,
@@ -119,6 +124,7 @@ SELECT
     unidade_sigla,
     unidade_nome,
     total_avaliacoes_pt,
+    total_servidores_avaliados,
     media_nota_pt,
     total_avaliacoes_pe,
     media_nota_pe,
@@ -153,13 +159,14 @@ def main() -> None:
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
     output = out_dir / f"IND_12.2_coerencia_pt_pe_{stamp}.csv"
 
-    periods = build_periods_pe()
+    window = analysis_window()
+    periods = build_periods_pe(window.fim)
     meta_cols = period_metadata()
     all_cols: list[str] | None = None
     all_rows: list[list] = []
 
     try:
-        for label, kind, start, end, status in periods:
+        for label, kind, start, scheduled_end, end, status in periods:
             sql = SQL_I12.replace("{ini}", str(start)).replace("{fim}", str(end))
             print(f"Executando I12 {label} ({start} a {end})...")
             try:
@@ -171,7 +178,7 @@ def main() -> None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
             for row in rows:
-                all_rows.append([kind, label, str(start), str(end), status, duration] + row)
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:
         conn.close()
@@ -189,13 +196,13 @@ def main() -> None:
     print(f"Arquivo salvo: {output}")
 
     # Colunas apos meta_cols (6):
-    # sigla(0) nome(1) total_pt(2) media_pt(3) total_pe(4) media_pe(5)
-    # dif_abs(6) dif_dir(7) classif(8) direcao(9)
+    # sigla(0) nome(1) total_pt(2) total_servidores(3) media_pt(4) total_pe(5) media_pe(6)
+    # dif_abs(7) dif_dir(8) classif(9) direcao(10)
     n = len(meta_cols)
-    offset_dif_abs = n + 6   # diferenca_absoluta
-    offset_classif = n + 8   # classificacao_coerencia
+    offset_dif_abs = n + 7   # diferenca_absoluta
+    offset_classif = n + 9   # classificacao_coerencia
 
-    encerrados = [r for r in all_rows if r[4] == "encerrado"]
+    encerrados = [r for r in all_rows if r[5] == "encerrado"]
 
     # Unidades com Alta divergencia (dif_abs > 2.0) — sinal de disfuncao avaliativa
     alta_div = [r for r in encerrados if _to_float(r[offset_dif_abs]) > 2.0]
@@ -214,9 +221,9 @@ def main() -> None:
     print("  NOTA: unidades sem avaliacao de PE no periodo sao excluidas do resultado (JOIN interno PT x PE).")
     print("        Para listar essas unidades, executar o diagnostico A4 (IND_12.4).")
 
-    em_andamento = sum(1 for r in all_rows if r[4] == "em_andamento")
-    if em_andamento:
-        print(f"  NOTA: {em_andamento} linha(s) em periodo em_andamento — valores de coerencia preliminares.")
+    parciais = sum(1 for r in all_rows if r[5] == "parcial_no_corte")
+    if parciais:
+        print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores de coerencia preliminares.")
 
 
 if __name__ == "__main__":

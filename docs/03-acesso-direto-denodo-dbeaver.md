@@ -92,7 +92,7 @@ select * from get_views();
 
 ```sql
 select count(*) as total_entregas_ativas
-from planos_entregas_entregas
+from petrvs_icmbio_planos_entregas_entregas
 where deleted_at is null;
 ```
 
@@ -100,7 +100,7 @@ where deleted_at is null;
 
 ```sql
 select count(*) as total_unidades
-from unidades
+from petrvs_icmbio_unidades
 where deleted_at is null;
 ```
 
@@ -112,7 +112,7 @@ select
     descricao,
     descricao_entrega,
     coalesce(nullif(trim(descricao), ''), nullif(trim(descricao_entrega), '')) as nome_entrega
-from planos_entregas_entregas
+from petrvs_icmbio_planos_entregas_entregas
 limit 200;
 ```
 
@@ -120,7 +120,7 @@ limit 200;
 
 ## 7. Próximo passo
 
-Com o ambiente validado, execute os indicadores OCDE/PGD seguindo [docs/06-indicadores-ocde-mysql.md](06-indicadores-ocde-mysql.md).
+Com o ambiente validado, execute os indicadores OCDE/PGD seguindo [docs/06-indicadores-ocde-denodo.md](ocde/06-indicadores-ocde-denodo.md).
 
 ---
 
