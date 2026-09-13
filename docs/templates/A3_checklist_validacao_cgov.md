@@ -1,4 +1,4 @@
-# A3 — Checklist de Validação Manual CGOV
+# E1 — Checklist de Consulta Humana Excepcional CGOV
 
 **Indicador:** IXX — `<nome do indicador>`
 **Período analisado:** `<ex.: T4-2025, Q1-2026, M03-2026>`
@@ -9,9 +9,8 @@ Preencher e salvar como
 `artefatos_local/validacao/IND_XX.3_PETRVS_consulta_DD.MM.AAAA.pdf`
 (ou, para confirmação verbal, ver seção "Confirmação verbal" ao final —
 **não deixe a validação sem nenhum artefato físico**: o objetivo deste
-checklist é fechar a lacuna A3→A5 identificada em CLAUDE.md §11, onde
-indicadores aparecem como validados sem nenhum rastro salvo em
-`artefatos_local/validacao/`.)
+checklist é complementar o A3 automatizado quando uma divergência exige
+consulta humana, mantendo evidência física em `artefatos_local/validacao/`.)
 
 Instruções gerais: `docs/09-protocolo-validacao-indicadores.md` §3 (Fase 2).
 
@@ -45,7 +44,7 @@ será refinada na Fase 3/A4 pelo analista técnico):
 
 Se a validação ocorreu em reunião/conversa informal em vez de consulta
 documentada no PETRVS, preencher aqui em vez da seção 1 — isso formaliza
-o padrão "✅ verbal" já usado em CLAUDE.md §11, em vez de deixá-lo sem
+uma confirmação apenas verbal, em vez de deixá-la sem
 nenhum registro:
 
 - Data: DD.MM.AAAA
@@ -59,5 +58,5 @@ nenhum registro:
 para a Fase 3 (`/p4-gerar-a4`) — diagnóstico técnico e elaboração do
 relatório A5 (`IND_XX.5_relatorio_validacao_DD.MM.AAAA.md` em
 `artefatos_local/validacao/`). **Um indicador só deve ser marcado ✅ em
-CLAUDE.md §11 depois que o A5 correspondente existir fisicamente nessa
+o registro institucional de homologação depois que o A5 correspondente existir nessa
 pasta** — ver `tests/regression/test_claude_md_consistency.py`.

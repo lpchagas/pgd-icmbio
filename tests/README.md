@@ -22,46 +22,24 @@ Ou via skill: `/verificar-consistencia`.
 | `regression` | Bugs históricos documentados (escala Eixo 4, unidade I07/I08) + sanidade de documentação | Não |
 | `integration` | Execução real contra o Denodo (não existe hoje — reservado) | Sim — **skip por padrão** (`addopts = "not integration"`) |
 
-## Divisão de responsabilidade: testes automatizados × CGOV
+## Divisão de responsabilidade: automação × deliberação institucional
 
-- **Testes automatizados (`tests/`)** verificam **sintaxe, estrutura e regressão**:
-  a query SQL embutida em cada `IND_XX.1_run.py` contém o padrão correto
-  (ex.: `(6 - tan.sequencia)`, não `JSON_UNQUOTE`), o CSV gerado tem a
-  estrutura esperada, a lógica de períodos não vaza dados de H1/2025. Rodam
-  em segundos, sem conexão ao Denodo, e pegam regressões de código.
-- **A equipe CGOV (artefato A3, `docs/09-protocolo-validacao-indicadores.md`)**
-  verifica **semântica de negócio e realidade dos dados**: os números batem
-  com o que o gestor vê no PETRVS ao vivo para uma amostra de 3-5 unidades.
-  Nenhum teste automatizado substitui isso — é o único jeito de saber se a
-  *interpretação* do indicador está certa, não só se o código está
-  sintaticamente correto.
+- Os testes offline verificam sintaxe, contratos, regressões históricas, fórmulas
+  independentes, propriedades, privacidade e a janela temporal.
+- A validação integrada compara A1 e A3 com extrações atômicas somente leitura do
+  Denodo. Indisponibilidade externa não é convertida em sucesso.
+- A CGOV homologa a definição de negócio e decide exceções. Fixture sintética e
+  convergência numérica não substituem essa deliberação.
 
-Um script pode passar 100% dos testes automatizados e ainda estar
-semanticamente errado (ex.: usar o critério de "concluída" errado); só a
-CGOV pega isso. Por isso a Fase 6 do protocolo (checklist A3) formaliza
-esse gate humano em vez de tentar substituí-lo por código.
+O protocolo e os estados permitidos estão em
+[`docs/09-protocolo-validacao-indicadores.md`](../docs/09-protocolo-validacao-indicadores.md).
+Os checks do GitHub não dependem de arquivos privados, Denodo ou artefatos locais.
 
 ## Por que não há mock de JDBC/jpype
 
-Decisão deliberada (não um gap): mockar `jpype`/`java.sql.Connection` teria
-custo alto (simular `ResultSet`, `Statement`, tipos JDBC) e baixo retorno —
-o mock testaria a si mesmo, não a query SQL real. A correção da query só é
-validada contra o Denodo real (papel do A3/CGOV) ou, estaticamente, pelos
-testes de regressão em `tests/regression/test_a1_scripts_static.py` que
-fazem `grep` estrutural no texto-fonte. Se no futuro for necessário testar
-contra Denodo real, usar `tests/integration/` com `@pytest.mark.integration`
-(ignorado por padrão).
-
-## Por que `test_claude_md_consistency.py` pode ficar vermelho
-
-Esse teste (`tests/regression/test_claude_md_consistency.py`) verifica que
-todo indicador marcado ✅ em `CLAUDE.md` §11 tem um arquivo A5 físico em
-`artefatos_local/validacao/`. Na criação desta suíite (agosto/2026), **nenhum
-A5 existe fisicamente** apesar de a maioria dos indicadores estar marcada
-como validada — uma dívida de rastreabilidade real, não um bug de teste.
-Esse teste fica vermelho **por design** até os relatórios A5 serem escritos
-(ver `docs/templates/A3_checklist_validacao_cgov.md` e Fase 6 do protocolo).
-Não "conserte" o teste — conserte a dívida documental.
+Mockar `ResultSet`, `Statement` e a conexão testaria a simulação, não a semântica
+da consulta Denodo. As fórmulas são exercitadas com fixtures sintéticas e a
+compatibilidade real é verificada no gate integrado, fora da integração contínua.
 
 ## Estrutura
 

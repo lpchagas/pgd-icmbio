@@ -58,7 +58,7 @@ Após executar a consulta:
 3. Escolha `CSV` ou `XLSX`.
 4. Siga o assistente e escolha a pasta de destino.
 
-Salve os CSVs na pasta local `Tabelas CSV/` (que está no `.gitignore` e não vai para o GitHub).
+Salve os CSVs na pasta privada `artefatos_local/` (que está no `.gitignore` e não vai para o GitHub).
 
 ---
 
@@ -85,7 +85,7 @@ Use `Ctrl+]` repetidamente para abrir novas abas.
 
 Os indicadores I07 e I08 usam CTEs recursivas para gerar o calendário de dias úteis. O comando `SET SESSION cte_max_recursion_depth`, específico do MySQL, **não se aplica ao Denodo**.
 
-Se as queries de I07 e I08 apresentarem erro de profundidade de recursão no Denodo, consulte [docs/06.3.3-i07.md](06.3.3-i07.md) para a versão adaptada da query.
+Se as queries de I07 e I08 apresentarem erro de profundidade de recursão no Denodo, consulte [docs/06.3.3-i07.md](ocde/06.3.3-i07.md) para a versão adaptada da query.
 
 ---
 

@@ -481,7 +481,7 @@ O campo principal do nome da entrega é `descricao`. Se estiver vazio, usa-se `d
 
 ### Nota sobre I01 e I09–I12
 
-Esses cinco indicadores dependem de tabelas (`tipos_modalidades`, `tipos_avaliacoes_notas`) cujo conteúdo exato varia conforme a versão e configuração do PETRVS. Antes de executar, rode as consultas de mapeamento documentadas em [06-indicadores-ocde-denodo.md](06-indicadores-ocde-denodo.md) para confirmar os nomes de campo e os valores de referência.
+Esses cinco indicadores dependem de tabelas (`tipos_modalidades`, `tipos_avaliacoes_notas`) cujo conteúdo exato varia conforme a versão e configuração do PETRVS. Antes de executar, rode as consultas de mapeamento documentadas em [06-indicadores-ocde-denodo.md](ocde/06-indicadores-ocde-denodo.md) para confirmar os nomes de campo e os valores de referência.
 
 ---
 
