@@ -1,9 +1,105 @@
 {
   "_schema": "validation-baselines.v1",
-  "_instructions": "Copiar para artefatos_local/validacao/baselines.json após homologação formal, sem dados pessoais.",
+  "_instructions": "Copiar para artefatos_local/validacao/baselines.json apos homologacao formal, sem dados pessoais. As versoes de formula abaixo refletem as decisoes CGOV de 13.09.2026 (D01-D16); qualquer divergencia devolve o alvo a HOMOLOGACAO_INICIAL_PENDENTE automaticamente.",
   "I01": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
     "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I02": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I03": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I04": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I05": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I06": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I07": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I08": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I09": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I10": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I11": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "I12": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "2.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles": {}
+  },
+  "PT_STATUS": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "3.0.0",
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,

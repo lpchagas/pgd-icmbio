@@ -253,7 +253,7 @@ def main() -> None:
     parser.add_argument(
         "--produto", choices=("operacional", "restrito", "compartilhavel"),
         default="operacional",
-        help="operacional mantém a saída histórica; restrito remove dados pessoais; compartilhavel gera somente painel agregado com k>=5.",
+        help="operacional e restrito trazem identificação nominal para ação da chefia (D14); compartilhavel gera somente painel agregado com k>=5.",
     )
     parser.add_argument("--dry-run", action="store_true",
                         help="Valida argumentos, janela, destino e SQL sem abrir conexão.")

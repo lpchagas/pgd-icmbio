@@ -162,13 +162,14 @@ def main() -> None:
     offset_total = cols.index("total_avaliacoes_pt")
     offset_perc = cols.index("perc_inadequado")
     offset_status = cols.index("periodo_status")
+    offset_unidade = cols.index("unidade_sigla")
 
     encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
 
     # Unidades em "Atencao critica" (>= 30% inadequado) em periodos encerrados
     criticos = [r for r in encerrados if _to_float(r[offset_perc]) >= 30]
     if criticos:
-        unids = set(r[n] for r in criticos)
+        unids = set(r[offset_unidade] for r in criticos)
         print(f"  AVISO: {len(unids)} unidade(s) com perc_inadequado >= 30% em periodos encerrados — requer acompanhamento.")
 
     # Unidades com < 5 avaliacoes (resultado fragil)

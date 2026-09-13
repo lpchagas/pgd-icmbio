@@ -85,6 +85,27 @@ class TestEscalaEixo4:
             f"I{indicador} deve localizar colunas por nome, não por len(meta_cols) + N."
         )
 
+    @pytest.mark.parametrize("indicador", TODOS_OS_INDICADORES)
+    def test_indice_de_linha_vem_de_variavel_nomeada(self, indicador):
+        """Indexação de linha deve usar um nome descritivo, não uma letra solta.
+
+        A migração dos offsets para busca por nome deixou ``r[n]`` em três
+        scripts: ``n`` deixara de ser atribuído, mas Python só reclama quando a
+        linha executa — ou seja, depois de a extração inteira ter rodado contra
+        o Denodo. Exigir um nome descritivo (``r[offset_unidade]``) elimina a
+        classe inteira, porque a variável passa a ser óbvia na leitura.
+
+        Escopo estreito de propósito: não é um verificador de escopo. Detecção
+        geral de nome indefinido é trabalho de linter (pyflakes/ruff), fora do
+        conjunto de dependências atual.
+        """
+        source = _source(indicador)
+        soltos = set(re.findall(r"r\[([a-z])\]", source))
+        assert not soltos, (
+            f"I{indicador}: índice de linha com nome de uma letra {sorted(soltos)} — "
+            "usar uma variável descritiva obtida por cols.index(...)."
+        )
+
     @pytest.mark.parametrize("indicador,var_name", [("09", "SQL_I09"), ("10", "SQL_I10"), ("11", "SQL_I11"), ("12", "SQL_I12")])
     def test_avaliacao_usa_data_de_negocio(self, indicador, var_name):
         sql = _sql_constant(_source(indicador), var_name)

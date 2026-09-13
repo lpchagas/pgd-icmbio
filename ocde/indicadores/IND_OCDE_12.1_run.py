@@ -204,20 +204,21 @@ def main() -> None:
     offset_dif_abs = cols.index("diferenca_absoluta")
     offset_classif = cols.index("classificacao_coerencia")
     offset_status = cols.index("periodo_status")
+    offset_unidade = cols.index("unidade_sigla")
 
     encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
 
     # Unidades com Alta divergencia (dif_abs > 2.0) — sinal de disfuncao avaliativa
     alta_div = [r for r in encerrados if _to_float(r[offset_dif_abs]) > 2.0]
     if alta_div:
-        unids = set(r[n] for r in alta_div)
+        unids = set(r[offset_unidade] for r in alta_div)
         print(f"  AVISO: {len(unids)} unidade(s) com 'Alta divergencia' (dif_abs > 2.0) em periodos encerrados"
               f" — revisar processo avaliativo.")
 
     # Unidades com Divergencia moderada
     div_mod = [r for r in encerrados if r[offset_classif] == "Divergencia moderada"]
     if div_mod:
-        unids = set(r[n] for r in div_mod)
+        unids = set(r[offset_unidade] for r in div_mod)
         print(f"  NOTA: {len(unids)} unidade(s) com 'Divergencia moderada' (1.0 < dif_abs <= 2.0) em periodos encerrados.")
 
     # Nota sobre exclusao do JOIN interno (unidades sem PT ou sem PE)

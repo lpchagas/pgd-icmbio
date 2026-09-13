@@ -164,20 +164,21 @@ def main() -> None:
     offset_perc = cols.index("perc_excepcional")
     offset_nivel = cols.index("nivel_reconhecimento")
     offset_status = cols.index("periodo_status")
+    offset_unidade = cols.index("unidade_sigla")
 
     encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
 
     # Alerta de possivel leniencia avaliativa (perc >= 40% requer cruzamento com I12)
     leniencia = [r for r in encerrados if _to_float(r[offset_perc]) >= 40]
     if leniencia:
-        unids = set(r[n] for r in leniencia)
+        unids = set(r[offset_unidade] for r in leniencia)
         print(f"  AVISO: {len(unids)} unidade(s) com perc_excepcional >= 40% em periodos encerrados"
               f" — cruzar com I12 para distinguir excelencia genuina de leniencia avaliativa.")
 
     # Escala subutilizada: nota maxima praticamente ausente
     subutilizadas = [r for r in encerrados if r[offset_nivel] == "Escala subutilizada"]
     if subutilizadas:
-        unids = set(r[n] for r in subutilizadas)
+        unids = set(r[offset_unidade] for r in subutilizadas)
         print(f"  NOTA: {len(unids)} unidade(s) com 'Escala subutilizada' — nota Excepcional quase ausente.")
 
     # Unidades com < 5 avaliacoes (resultado fragil)

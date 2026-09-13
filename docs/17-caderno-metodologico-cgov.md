@@ -4,7 +4,7 @@
 
 | Campo | Registro |
 |---|---|
-| Versão | 1.0 — minuta para deliberação |
+| Versão | 2.0 — deliberado pela CGOV em 13/09/2026 |
 | Data de referência | 13/09/2026 |
 | Unidade deliberativa | Coordenação de Governança — CGOV/ICMBio |
 | Escopo da evidência integrada | Gerência Regional Nordeste — GR2 |
@@ -12,9 +12,20 @@
 | Lente operacional de PT | fotografia datada, separada da janela acumulada |
 | Execução de referência | validação integrada datada de 13/09/2026; identificador preservado no manifesto privado |
 | Estado | 13 alvos em `HOMOLOGACAO_INICIAL_PENDENTE` |
-| Natureza | proposta técnica independente; não substitui a deliberação da CGOV |
+| Natureza | proposta técnica independente, já submetida e deliberada |
+| Deliberação | D01–D16 decididas; registro e efeitos em [`18-decisoes-homologacao-cgov-v2.md`](18-decisoes-homologacao-cgov-v2.md) |
 
 ## Resumo para decisão
+
+> **Situação em 13/09/2026.** A CGOV deliberou sobre a matriz D01–D16 deste
+> caderno. As decisões e o que cada uma produziu no código estão em
+> [`18-decisoes-homologacao-cgov-v2.md`](18-decisoes-homologacao-cgov-v2.md).
+> D07, D09, D10, D11, D12 e D14 alteraram fórmulas ou schema e elevaram a
+> `formula_version` dos alvos afetados para 3.0.0, o que os devolve a
+> `HOMOLOGACAO_INICIAL_PENDENTE`; D03, D04, D05, D06, D08 e D13 foram
+> auditadas e confirmadas sem alteração de código. A Baseline V2 depende da
+> reexecução integrada na GR2 (D15/D16) e do comparativo de séries do I07 e
+> do I09, cujos valores mudaram e não são retrocompatíveis.
 
 Este caderno consolida, em linguagem de negócio e com rastreabilidade técnica, as
 definições metodológicas implementadas para os doze indicadores do projeto
@@ -91,7 +102,9 @@ participação e a capacidade de trabalho. Consequentemente:
 
 ### 1.4 Fontes de verdade e precedência
 
-1. decisão formal da CGOV neste caderno ou ato associado;
+1. decisão formal da CGOV neste caderno ou ato associado — a deliberação
+   vigente é a de 13/09/2026, registrada em
+   [`18-decisoes-homologacao-cgov-v2.md`](18-decisoes-homologacao-cgov-v2.md);
 2. contrato executável em `lib/validation_contracts.py`;
 3. scripts de produção em `ocde/indicadores/` e `gestao/`;
 4. fichas em `docs/ocde/` e documentação de gestão;
