@@ -58,7 +58,8 @@ C:\Users\<SEU_USUARIO>\OneDrive - ICMBio\projetos\pgd-ocde-icmbio-privado\
 │   ├── ocde/
 │   │   ├── entregas/YYYY-MM/     CSVs mensais para entrega à COCAGE/Power BI
 │   │   └── diagnosticos/YYYY-MM/ Scripts A4 e CSVs de diagnóstico interno
-│   ├── validacao/                Relatórios A5 e PDFs de consulta A3
+│   ├── validacao/                A3–A5 automáticos, manifestos, baselines e documentos
+│   │                             deliberativos da CGOV (caderno metodológico, decisões)
 │   ├── docs_internos/            Documentação local não publicável
 │   ├── historico/                Artefatos de fases anteriores
 │   └── backup_scripts_a1/        Cópias de segurança dos scripts A1
@@ -76,6 +77,16 @@ C:\Users\<SEU_USUARIO>\OneDrive - ICMBio\projetos\pgd-ocde-icmbio-privado\
     ├── .codex/                   Configurações locais do Codex
     └── .agents/                  Configurações locais do Antigravity
 ```
+
+### Documentos deliberativos da CGOV (regra de 13.09.2026)
+
+Cadernos metodológicos, registros de decisão de homologação e atas da CGOV são
+**sempre privados** e ficam em `artefatos_local/validacao/`, com nome no padrão
+`caderno-metodologico-cgov-vN_DD.MM.AAAA.md`. Nunca são gravados em `docs/`.
+
+A documentação pública pode citar o identificador da decisão (D01, D02…) e o efeito
+técnico que ela produziu no código, mas não reproduz a deliberação nem aponta links
+para o acervo privado.
 
 ### O que fica apenas local (nem GitHub, nem OneDrive)
 
@@ -270,7 +281,7 @@ O script `setup\backup_privado.ps1` copia incrementalmente as partes não regene
 | `assistentes\` | CLAUDE.md, skills, .claude/, .codex/ | Não versionado no Git |
 | `cgov\` | Análises internas CGOV | Privadas e únicas |
 | `setup\` | configurar_env.ps1, criar_links_privados.ps1 | Scripts de recuperação do ambiente |
-| `artefatos_local\validacao\` | Relatórios A5 e PDFs A3 | Resultado de trabalho manual — não regenerável |
+| `artefatos_local\validacao\` | A3–A5, baselines e documentos deliberativos da CGOV | Caderno metodológico e decisões são registro institucional — não regeneráveis |
 | `artefatos_local\ocde\diagnosticos\` | Scripts A4 e CSVs de diagnóstico | Registro de investigações — não regenerável |
 | `artefatos_local\docs_internos\` | Documentação local | Não versionada |
 | `artefatos_local\historico\` | Artefatos de fases anteriores | Referência histórica |

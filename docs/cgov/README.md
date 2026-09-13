@@ -11,6 +11,10 @@ Para entender a separação público/privado, ver [../13-organizacao-publico-pri
 
 ## Deliberação metodológica
 
-O [Caderno Metodológico para Deliberação da CGOV](../17-caderno-metodologico-cgov.md)
-consolida as definições, alternativas e decisões de homologação dos indicadores
-I01–I12 e do indicador de gestão G01 (ex-`PT_STATUS`).
+O caderno metodológico e o registro das decisões de homologação dos indicadores
+I01–I12 e G01 são **documentos deliberativos internos da CGOV**. Ficam no acervo
+privado do projeto, fora do GitHub.
+
+A documentação pública registra apenas o identificador de cada decisão (D01…D17) e
+seu efeito técnico, nas fichas dos indicadores e na seção
+[Estado da homologação](../../README.md#estado-da-homologação) do README.
