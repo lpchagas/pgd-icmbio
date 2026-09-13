@@ -92,6 +92,109 @@ class MesogrupoLookup:
         return NAO_MAPEADO
 
 
+@dataclass(frozen=True)
+class OrganizationUnit:
+    """Unidade da estrutura oficial sem campos de pessoas."""
+
+    icmbio_id: str
+    parent_id: str
+    sigla: str
+    nome: str
+    tipo: str
+    mesogrupo: str
+    macroprocesso: str
+    microgrupo: str
+    status: str
+
+
+@dataclass
+class OrganizationStructure:
+    """Grafo organizacional cuja subordinação é definida exclusivamente por id_mae."""
+
+    units_by_id: dict[str, OrganizationUnit]
+    petrvs_to_id: dict[str, str]
+
+    def unit_for_sigla(self, sigla: str) -> OrganizationUnit | None:
+        normalized = _normalizar(sigla)
+        mapped_id = self.petrvs_to_id.get(normalized)
+        if mapped_id:
+            return self.units_by_id.get(mapped_id)
+        return next(
+            (unit for unit in self.units_by_id.values() if _normalizar(unit.sigla) == normalized),
+            None,
+        )
+
+    def descendants(self, root_id: str, include_root: bool = True) -> list[OrganizationUnit]:
+        children: dict[str, list[str]] = {}
+        for unit in self.units_by_id.values():
+            children.setdefault(unit.parent_id, []).append(unit.icmbio_id)
+        result: list[OrganizationUnit] = []
+        pending = [root_id]
+        seen: set[str] = set()
+        while pending:
+            current = pending.pop(0)
+            if current in seen:
+                continue
+            seen.add(current)
+            if current != root_id or include_root:
+                unit = self.units_by_id.get(current)
+                if unit:
+                    result.append(unit)
+            pending.extend(children.get(current, []))
+        return result
+
+    def select(
+        self,
+        *,
+        regional: str | None = None,
+        unidade: str | None = None,
+        mesogrupo: str | None = None,
+        tipo_unidade: str | None = None,
+        lista_unidades: list[str] | None = None,
+    ) -> list[OrganizationUnit]:
+        """Seleciona unidades; a expansão hierárquica sempre segue id_mae."""
+
+        if regional:
+            root = self.unit_for_sigla(regional)
+            if not root:
+                raise ValueError(f"Regional não localizada na estrutura: {regional}")
+            return self.descendants(root.icmbio_id)
+        if unidade:
+            unit = self.unit_for_sigla(unidade)
+            if not unit:
+                raise ValueError(f"Unidade não localizada na estrutura: {unidade}")
+            return [unit]
+        if mesogrupo:
+            key = _normalizar(mesogrupo)
+            return [u for u in self.units_by_id.values() if _normalizar(u.mesogrupo) == key]
+        if tipo_unidade:
+            key = _normalizar(tipo_unidade)
+            return [u for u in self.units_by_id.values() if _normalizar(u.tipo) == key]
+        if lista_unidades:
+            result: list[OrganizationUnit] = []
+            for sigla in lista_unidades:
+                unit = self.unit_for_sigla(sigla)
+                if not unit:
+                    raise ValueError(f"Unidade não localizada na estrutura: {sigla}")
+                result.append(unit)
+            return result
+        return list(self.units_by_id.values())
+
+    def diagnostics(self) -> dict[str, object]:
+        missing_parents = sorted(
+            unit.icmbio_id
+            for unit in self.units_by_id.values()
+            if unit.parent_id and unit.parent_id not in self.units_by_id
+        )
+        return {
+            "unidades": len(self.units_by_id),
+            "pontes_petrvs": len(self.petrvs_to_id),
+            "pais_ausentes": missing_parents,
+            "hierarquia_fonte": "id_mae",
+            "rotulos_grupo_usados_como_hierarquia": False,
+        }
+
+
 def _ler_estrutura(caminho: Path) -> tuple[dict[str, str], dict[str, str], dict[str, str]]:
     """Retorna (por_id, por_sigla, por_nome) a partir de ICMBIO_estrutura.csv.
 
@@ -198,6 +301,38 @@ def load_mesogrupo_lookup(
         estrutura_sigla_para_meso=estrutura_por_sigla,
         estrutura_nome_para_meso=estrutura_por_nome,
     )
+
+
+def load_organization_structure(
+    estrutura_csv: Path | None = None,
+    dicionario_csv: Path | None = None,
+) -> OrganizationStructure:
+    """Carrega apenas atributos organizacionais e ignora colunas pessoais do export."""
+
+    estrutura_path = estrutura_csv or DEFAULT_ESTRUTURA_CSV
+    dicionario_path = dicionario_csv or DEFAULT_DICIONARIO_CSV
+    if not estrutura_path.exists():
+        return OrganizationStructure({}, {})
+    with estrutura_path.open(encoding="utf-8-sig", errors="replace") as stream:
+        lines = stream.readlines()
+    reader = csv.DictReader(lines[1:])
+    units: dict[str, OrganizationUnit] = {}
+    for row in reader:
+        identifier = _normalizar_id(row.get("icmbio_id"))
+        if not identifier:
+            continue
+        units[identifier] = OrganizationUnit(
+            icmbio_id=identifier,
+            parent_id=_normalizar_id(row.get("id_mae")),
+            sigla=(row.get("sigla") or "").strip(),
+            nome=(row.get("uorg_nome") or row.get("uorg_nome-completo") or "").strip(),
+            tipo=(row.get("tipo") or "").strip(),
+            mesogrupo=(row.get("mesogrupo") or "").strip(),
+            macroprocesso=(row.get("macroprocesso") or "").strip(),
+            microgrupo=(row.get("microgrupo") or "").strip(),
+            status=(row.get("status") or "").strip(),
+        )
+    return OrganizationStructure(units, _ler_dicionario(dicionario_path))
 
 
 def insert_mesogrupo_column(
