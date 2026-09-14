@@ -26,6 +26,10 @@ from ocde.relatorios.pdf_export import export_pdf
 from ocde.relatorios.privacidade import K_MIN, assert_safe_outputs
 from ocde.relatorios.textos_execucao import TextSanitizer
 from lib.monthly_runner import query_rows
+from lib.validation_contracts import TARGETS
+from ocde.relatorios.gestao_report import (
+    load_management, render_delivery_report, render_management_chapter, sha256,
+)
 
 
 INPUT_BASE = PROJECT_ROOT / "artefatos_local" / "ocde" / "entregas"
@@ -47,6 +51,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--consultar-denodo", action="store_true", help="Opt-in para extrair textos e estado operacional.")
     parser.add_argument("--salvar", action="store_true")
     parser.add_argument("--pdf", action="store_true")
+    parser.add_argument("--manifesto-validacao", type=Path)
+    parser.add_argument("--rascunho", action="store_true", help="Produz material privado, marcado como não homologado.")
     return parser
 
 
@@ -144,6 +150,8 @@ def render_report(
     *, window, scope_label: str, product: str, cumulative: list[dict[str, str]],
     temporal: list[dict[str, str]], evidence: list[dict[str, object]], denodo_used: bool,
     evidence_origin: str = "indisponível",
+    management_chapter: str = "",
+    draft: bool = False,
 ) -> str:
     priorities = _unit_priorities(evidence)
     pe = [row for row in evidence if row.get("tipo_registro") == "PE"]
@@ -208,7 +216,15 @@ def render_report(
         ["Status PT/atividade", "Registros"],
         [[status, count] for status, count in pt_status.most_common()],
     )
-    return f"""# Relatório Gerencial V2 — Execução do PGD
+    evidence_summary = (
+        f"Foram analisados {len(pe)} registros de resultado de PE e {len(pt)} registros de processo de PT/atividades. "
+        f"A lente acumulada contém {lens_counts.get('acumulada', 0)} evidências e a fotografia operacional contém {lens_counts.get('operacional', 0)}. "
+        f"Há {cross_unit} registros em que unidade dona e executora diferem."
+        if evidence
+        else "Não foram carregadas evidências textuais complementares nesta geração; os capítulos estruturados OCDE e de gestão permanecem disponíveis e rastreáveis aos respectivos A2."
+    )
+    title = "# RASCUNHO NÃO HOMOLOGADO — Relatório Gerencial V2" if draft else "# Relatório Gerencial V2 — Execução do PGD"
+    return f"""{title}
 
 - **Escopo:** {scope_label}
 - **Produto:** {product}
@@ -218,7 +234,7 @@ def render_report(
 
 ## 1. Síntese decisória
 
-Foram analisados {len(pe)} registros de resultado de PE e {len(pt)} registros de processo de PT/atividades. A lente acumulada contém {lens_counts.get('acumulada', 0)} evidências e a fotografia operacional contém {lens_counts.get('operacional', 0)}. Há {cross_unit} registros em que unidade dona e executora diferem. A priorização é uma triagem transparente baseada em prazo, diferença para a meta do PE, status que requer ação e esforço acima do planejado; ela não substitui avaliação gerencial.
+{evidence_summary} A priorização é uma triagem transparente baseada em prazo, diferença para a meta do PE, status que requer ação e esforço acima do planejado; ela não substitui avaliação gerencial.
 
 ## 2. Unidades que demandam atenção
 
@@ -258,13 +274,39 @@ O anexo CSV contém a evidência completa elegível. Nomes de servidores, CPF, e
 
 {appendix}
 
-## 9. Limitações e governança
+{management_chapter}
+
+## 10. Limitações e governança
 
 - A lente acumulada termina no último dia do mês anterior; a fotografia operacional pode conter fatos posteriores e é identificada separadamente.
 - Textos são evidências de execução, não conclusões automáticas. Inferências devem manter vínculo com o registro e o gatilho exibido.
 - O produto restrito remove dados pessoais, mas preserva unidades, entregas, planos e textos sanitizados. O compartilhável aplica k≥{K_MIN} às unidades envolvidas.
 - Correções retroativas são aceitas como estado observado na data da extração.
 """
+
+
+def _validation_gate(path: Path | None, window, scope, draft: bool) -> tuple[dict, dict[str, dict]]:
+    if path is None:
+        if draft:
+            return {}, {}
+        raise ValueError("A edição final exige --manifesto-validacao.")
+    manifest = json.loads(path.read_text(encoding="utf-8"))
+    if manifest.get("modo") != "integrado":
+        raise ValueError("O relatório não aceita manifesto de fixture.")
+    if manifest.get("data_execucao") != window.data_execucao.isoformat():
+        raise ValueError("Data do manifesto de validação diverge do relatório.")
+    manifest_scope = manifest.get("escopo", {})
+    manifest_key = manifest_scope.get("chave") if isinstance(manifest_scope, dict) else ""
+    if manifest_key != scope.key:
+        raise ValueError("Escopo do manifesto de validação diverge do relatório.")
+    results = {item.get("alvo"): item for item in manifest.get("resultados", [])}
+    if not draft:
+        active = {code for code, target in TARGETS.items() if target.enabled_in_monthly_cycle}
+        missing = sorted(active - set(results))
+        uncertified = sorted(code for code in active if results.get(code, {}).get("decisao") != "CERTIFICADO_AUTOMATICAMENTE")
+        if manifest.get("status_global") != "sucesso" or missing or uncertified:
+            raise ValueError(f"Manifesto não certifica todos os alvos ativos; ausentes={missing}; não certificados={uncertified}")
+    return manifest, results
 
 
 def run(argv: list[str] | None = None) -> list[Path]:
@@ -275,8 +317,10 @@ def run(argv: list[str] | None = None) -> list[Path]:
         mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
         lista_unidades=args.lista_unidades,
     )
-    month_dir = INPUT_BASE / window.mes_execucao
-    output_dir = OUTPUT_BASE / window.mes_execucao
+    validation_manifest, validation_results = _validation_gate(args.manifesto_validacao, window, scope, args.rascunho)
+    month_dir = INPUT_BASE / window.mes_execucao / "escopos" / scope.key
+    output_dir = OUTPUT_BASE / window.mes_execucao / "escopos" / scope.key
+    management_dir = PROJECT_ROOT / "artefatos_local" / "gestao" / window.mes_execucao / "escopos" / scope.key
     loaded = load_all(month_dir, window)
     profiles = load_unit_profiles()
     data = scoped_data(loaded, scope, profiles)
@@ -297,7 +341,7 @@ def run(argv: list[str] | None = None) -> list[Path]:
             connection.close()
         evidence_origin = "Denodo somente leitura nesta execução"
     else:
-        previous = output_dir / f"evidencias_execucao_v2_{scope.kind}_restrito_{window.mes_execucao}.csv"
+        previous = output_dir / f"evidencias_execucao_v2_{scope.key}_restrito_{window.mes_execucao}.csv"
         evidence = _load_evidence(previous)
         if evidence:
             evidence_origin = f"artefato sanitizado reutilizado: {previous.name}"
@@ -306,6 +350,12 @@ def run(argv: list[str] | None = None) -> list[Path]:
     if args.salvar or args.pdf:
         output_dir.mkdir(parents=True, exist_ok=True)
     for product in products:
+        management, management_sources, management_manifest = load_management(management_dir, product)
+        for source in management_sources:
+            validation = validation_results.get(source["codigo"], {})
+            source["decisao_validacao"] = validation.get("decisao", "NAO_HOMOLOGADO")
+            source["validation_run_id"] = validation_manifest.get("run_id", "")
+        management_chapter = render_management_chapter(management, product)
         enforce_k = product == "compartilhavel"
         product_evidence = _eligible_shared(evidence, people_by_unit) if enforce_k else evidence
         cumulative = cumulative_summary(data, enforce_k=enforce_k)
@@ -314,15 +364,19 @@ def run(argv: list[str] | None = None) -> list[Path]:
             window=window, scope_label=scope.label, product=product,
             cumulative=cumulative, temporal=temporal, evidence=product_evidence,
             denodo_used=args.consultar_denodo, evidence_origin=evidence_origin,
+            management_chapter=management_chapter, draft=args.rascunho,
         )
         if not (args.salvar or args.pdf):
             print(report)
             continue
-        slug = f"{scope.kind}_{product}_{window.mes_execucao}"
+        slug = f"{scope.key}_{product}_{window.mes_execucao}"
         md = output_dir / f"relatorio_gerencial_v2_{slug}.md"
         csv_path = output_dir / f"evidencias_execucao_v2_{slug}.csv"
         manifest_path = output_dir / f"manifesto_relatorio_v2_{slug}.json"
         md.write_text(report, encoding="utf-8")
+        delivery_md = output_dir / f"relatorio_execucao_entregas_{slug}.md"
+        delivery_text = render_delivery_report(management, scope.label, product, args.rascunho)
+        delivery_md.write_text(delivery_text, encoding="utf-8")
         _write_csv(csv_path, product_evidence)
         manifest = {
             "versao_relatorio": "2.0",
@@ -338,15 +392,24 @@ def run(argv: list[str] | None = None) -> list[Path]:
             "unidade_dona_separada_da_executora": True,
             "resultado_pe_inferido_por_atividade_pt": False,
             "fontes_ocde": sorted(f"I{code}" for code in loaded),
+            "fontes_gestao": management_sources,
+            "manifesto_gestao": {"arquivo": f"manifesto_gestao_{product}.json", "sha256": sha256(management_dir / f"manifesto_gestao_{product}.json")},
+            "manifesto_validacao": {"arquivo": args.manifesto_validacao.name if args.manifesto_validacao else "", "sha256": sha256(args.manifesto_validacao) if args.manifesto_validacao else "", "run_id": validation_manifest.get("run_id", "")},
+            "rascunho": args.rascunho,
+            "aprovado": False,
+            "relatorio_execucao_entregas": delivery_md.name,
         }
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-        current = [md, manifest_path]
+        current = [md, delivery_md, manifest_path]
         if csv_path.exists():
             current.append(csv_path)
         if args.pdf:
             pdf = output_dir / f"relatorio_gerencial_v2_{slug}.pdf"
             export_pdf(report, pdf, f"Relatório Gerencial V2 · {window.mes_execucao}")
             current.append(pdf)
+            delivery_pdf = output_dir / f"relatorio_execucao_entregas_{slug}.pdf"
+            export_pdf(delivery_text, delivery_pdf, f"Relatório de Execução de Entregas · {window.mes_execucao}")
+            current.append(delivery_pdf)
         assert_safe_outputs(current)
         outputs.extend(current)
     return outputs

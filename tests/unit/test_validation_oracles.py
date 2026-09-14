@@ -21,13 +21,19 @@ def _project(rows, keys):
 
 
 def test_registry_covers_all_indicators_and_management():
-    assert set(TARGETS) == {*(f"I{i:02d}" for i in range(1, 13)), "PT_STATUS"}
+    assert set(TARGETS) == {*(f"I{i:02d}" for i in range(1, 13)), "G01", "G02"}
     assert validate_registry() == []
+
+
+def _fixture(code):
+    if code == "G02":
+        return _values("g02_atomic.json"), _values("g02_expected.json")
+    return _values("atomic.json")[code], _values("expected.json")[code]
 
 
 @pytest.mark.parametrize("code", sorted(TARGETS))
 def test_oracle_matches_reviewed_fixture(code):
-    atomic, expected = _values("atomic.json")[code], _values("expected.json")[code]
+    atomic, expected = _fixture(code)
     actual = calculate(code, atomic)
     keys = sorted(set().union(*(row.keys() for row in expected)))
     assert _project(actual, keys) == _project(expected, keys)
@@ -35,13 +41,13 @@ def test_oracle_matches_reviewed_fixture(code):
 
 @pytest.mark.parametrize("code", sorted(TARGETS))
 def test_oracle_is_invariant_to_row_order(code):
-    rows = _values("atomic.json")[code]
+    rows, _ = _fixture(code)
     assert calculate(code, rows) == calculate(code, list(reversed(rows)))
 
 
 @pytest.mark.parametrize("code", sorted(TARGETS))
 def test_soft_deleted_record_does_not_change_result(code):
-    rows = _values("atomic.json")[code]
+    rows, _ = _fixture(code)
     deleted = {**rows[0], "deleted_at": "2026-01-01"}
     assert calculate(code, rows) == calculate(code, rows + [deleted])
 
@@ -74,7 +80,7 @@ def test_independent_window_handles_cutoff_year_turn_and_leap_year():
 
 @pytest.mark.parametrize("code", sorted(TARGETS))
 def test_oracle_is_idempotent_and_ignores_explicitly_out_of_window(code):
-    rows = _values("atomic.json")[code]
+    rows, _ = _fixture(code)
     first = calculate(code, rows)
     assert calculate(code, rows) == first
     outside = {**rows[0], "in_window": False}

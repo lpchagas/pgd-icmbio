@@ -47,5 +47,11 @@ def test_i05_counts_distinct_deliveries(deliveries):
         }
         for delivery in deliveries
     ]
-    result = calculate("I05", rows)[0]
-    assert result["qtd_entregas_por_servidor"] == len(set(deliveries))
+    resultado = calculate("I05", rows)
+    nominal = next(row for row in resultado if row["visao"] == "nominal")
+    assert nominal["qtd_entregas_por_servidor"] == len(set(deliveries))
+    # D07: a visão estatística descreve a mesma população sem identificá-la.
+    estatistica = next(row for row in resultado if row["visao"] == "estatistica")
+    assert estatistica["total_servidores"] == 1
+    assert "id_servidor" not in estatistica
+    assert estatistica["mediana_entregas_por_servidor"] == len(set(deliveries))

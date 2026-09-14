@@ -1,0 +1,226 @@
+"""IND_OCDE_09.1_run.py — I09: Média da Avaliação do Plano de Trabalho por Unidade.
+
+Instrumento: Plano de Trabalho (PT).
+Periodicidade: 2025 trimestral (T3–T4) | 2026+ mensal (M01–M12). Base: 01/07/2025.
+
+Correção de escala (19.06.2026): o SQL original usava JSON_UNQUOTE(tan.nota) com
+CASE WHEN textual — que não funciona no Denodo VQL via JDBC (retorna NULL para todos
+os registros). Substituído por (6 - tan.sequencia), que usa o campo inteiro nativo:
+  sequencia=1 → Excepcional     → score 5
+  sequencia=2 → Alto desempenho → score 4
+  sequencia=3 → Adequado        → score 3
+  sequencia=4 → Inadequado      → score 2
+  sequencia=5 → Não executado   → score 1
+
+Achado de validação (19.06.2026): com a correção, média nacional ~4,0
+("Alto desempenho"), confirmando perfil ICMBio (9% Excepcional + 71% Alto desempenho).
+A coluna total_planos_com_avaliacao (COUNT DISTINCT plano_trabalho_id) é a referência
+correta para comparar com o PETRVS — o PETRVS exibe planos distintos (7.421), enquanto
+total_avaliacoes_pt conta eventos de avaliação (20.664, ratio ~2,78×) por planos com
+múltiplas consolidações mensais em 2026.
+
+Decisão CGOV D11 (13.09.2026) — média por Plano de Trabalho:
+  A métrica primária passou a ser calculada em dois passos — primeiro a média das
+  notas de cada plano, depois a média dessas médias por unidade. Sem isso, um
+  plano longo com muitas consolidações mensais pesava mais na média da unidade do
+  que um plano curto, distorcendo a comparação entre unidades.
+
+  media_nota_pt      = média das médias dos planos (métrica primária, D11)
+  media_nota_pt_eventos = média simples sobre os eventos (fórmula anterior a
+                          13.09.2026, preservada para a COCAGE comparar as duas
+                          leituras durante a transição)
+
+  nota_minima, nota_maxima e qtd_nota_1..5 continuam sobre o universo de eventos:
+  são distribuições, não médias, e mudá-las esconderia a dispersão real.
+"""
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+import sys
+
+ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
+sys.path.insert(0, str(ROOT))
+
+from lib.csv_utils import indicator_csv_dir, write_pipe_csv
+from lib.denodo_config import connect, get_config
+from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
+from lib.monthly_runner import query_rows
+from lib.periodos import analysis_window, build_periods_pt, period_metadata
+
+SQL_I09 = """
+WITH parametros AS (
+    SELECT
+        CAST('{ini}' AS DATE) AS data_inicio,
+        CAST('{fim}' AS DATE) AS data_fim,
+        0                     AS incluir_excluidos
+),
+avaliacoes_pt AS (
+    SELECT
+        av.id                    AS id_avaliacao,
+        pt.unidade_id,
+        pt.usuario_id            AS id_servidor,
+        ptc.plano_trabalho_id,
+        (6 - tan.sequencia)      AS valor_nota
+    FROM petrvs_icmbio_avaliacoes av
+    JOIN petrvs_icmbio_planos_trabalhos_consolidacoes ptc
+        ON ptc.id = av.plano_trabalho_consolidacao_id
+    JOIN petrvs_icmbio_planos_trabalhos pt
+        ON pt.id = ptc.plano_trabalho_id
+    JOIN petrvs_icmbio_tipos_avaliacoes_notas tan
+        ON tan.id = av.tipo_avaliacao_nota_id
+    CROSS JOIN parametros p
+    WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
+      AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
+      AND CAST(pt.data_inicio AS DATE) <= p.data_fim
+      AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
+      AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
+),
+media_por_plano AS (
+    -- D11: cada plano de trabalho entra na media da unidade com peso 1,
+    -- independentemente de quantas consolidacoes mensais ele acumulou.
+    SELECT
+        COALESCE(un.sigla, 'N.I.') AS unidade_sigla,
+        COALESCE(un.nome,  'N.I.') AS unidade_nome,
+        avpt.plano_trabalho_id,
+        AVG(avpt.valor_nota * 1.0) AS media_do_plano
+    FROM avaliacoes_pt avpt
+    LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
+    GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.'), avpt.plano_trabalho_id
+),
+media_de_planos_por_unidade AS (
+    SELECT
+        unidade_sigla,
+        unidade_nome,
+        ROUND(AVG(media_do_plano), 2) AS media_nota_pt
+    FROM media_por_plano
+    GROUP BY unidade_sigla, unidade_nome
+),
+media_por_unidade AS (
+    SELECT
+        COALESCE(un.sigla, 'N.I.')                               AS unidade_sigla,
+        COALESCE(un.nome,  'N.I.')                               AS unidade_nome,
+        COUNT(avpt.id_avaliacao)                                 AS total_avaliacoes_pt,
+        COUNT(DISTINCT avpt.plano_trabalho_id)                   AS total_planos_com_avaliacao,
+        COUNT(DISTINCT avpt.id_servidor)                         AS total_servidores_avaliados,
+        ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt_eventos,
+        MIN(avpt.valor_nota)                                     AS nota_minima,
+        MAX(avpt.valor_nota)                                     AS nota_maxima,
+        SUM(CASE WHEN avpt.valor_nota = 1 THEN 1 ELSE 0 END)    AS qtd_nota_1,
+        SUM(CASE WHEN avpt.valor_nota = 2 THEN 1 ELSE 0 END)    AS qtd_nota_2,
+        SUM(CASE WHEN avpt.valor_nota = 3 THEN 1 ELSE 0 END)    AS qtd_nota_3,
+        SUM(CASE WHEN avpt.valor_nota = 4 THEN 1 ELSE 0 END)    AS qtd_nota_4,
+        SUM(CASE WHEN avpt.valor_nota = 5 THEN 1 ELSE 0 END)    AS qtd_nota_5
+    FROM avaliacoes_pt avpt
+    LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
+    GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.')
+)
+SELECT
+    mu.unidade_sigla,
+    mu.unidade_nome,
+    mu.total_avaliacoes_pt,
+    mu.total_planos_com_avaliacao,
+    mu.total_servidores_avaliados,
+    mp.media_nota_pt,
+    mu.media_nota_pt_eventos,
+    mu.nota_minima,
+    mu.nota_maxima,
+    mu.qtd_nota_1,
+    mu.qtd_nota_2,
+    mu.qtd_nota_3,
+    mu.qtd_nota_4,
+    mu.qtd_nota_5,
+    CASE
+        WHEN mp.media_nota_pt >= 4.5 THEN 'Excepcional'
+        WHEN mp.media_nota_pt >= 3.5 THEN 'Alto desempenho'
+        WHEN mp.media_nota_pt >= 2.5 THEN 'Adequado'
+        WHEN mp.media_nota_pt >= 1.5 THEN 'Inadequado'
+        ELSE 'Nao executado'
+    END AS faixa_desempenho
+FROM media_por_unidade mu
+JOIN media_de_planos_por_unidade mp
+    ON mp.unidade_sigla = mu.unidade_sigla
+   AND mp.unidade_nome  = mu.unidade_nome
+ORDER BY mp.media_nota_pt DESC, mu.unidade_sigla
+"""
+
+
+def _to_float(value: object) -> float:
+    try:
+        return float(str(value).replace(",", "."))
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def main() -> None:
+    config = get_config(require_credentials=True)
+    conn = connect(config)
+    out_dir = indicator_csv_dir()
+    stamp = datetime.now().strftime("%Y%m%d_%H%M")
+    output = out_dir / f"IND_OCDE_09.2_media_avaliacao_pt_{stamp}.csv"
+
+    window = analysis_window()
+    periods = build_periods_pt(window.fim)
+    meta_cols = period_metadata()
+    all_cols: list[str] | None = None
+    all_rows: list[list] = []
+
+    try:
+        for label, kind, start, scheduled_end, end, status in periods:
+            sql = SQL_I09.replace("{ini}", str(start)).replace("{fim}", str(end))
+            print(f"Executando I09 {label} ({start} a {end})...")
+            try:
+                columns, rows = query_rows(conn, sql)
+            except Exception as exc:
+                print(f"  ERRO: {exc}")
+                continue
+            if all_cols is None:
+                all_cols = meta_cols + columns
+            duration = (end - start).days + 1
+            for row in rows:
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
+            print(f"  {len(rows)} linhas retornadas.")
+    finally:
+        conn.close()
+
+    if not all_rows:
+        print("Nenhum dado retornado. CSV nao gerado.")
+        return
+
+    # mesogrupo so entra no CSV escrito — all_cols/all_rows seguem com as
+    # posicoes originais para nao afetar as buscas por nome usadas abaixo.
+    lookup = load_mesogrupo_lookup()
+    csv_cols, csv_rows = insert_mesogrupo_column(all_cols or [], all_rows, lookup)
+
+    write_pipe_csv(output, csv_cols, csv_rows)
+    print(f"Arquivo salvo: {output}")
+
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas (como
+    # media_nota_pt_eventos na D11) deslocava as posicoes e quebrava os avisos.
+    cols = all_cols or []
+    offset_total = cols.index("total_avaliacoes_pt")
+    offset_media = cols.index("media_nota_pt")
+    offset_status = cols.index("periodo_status")
+    offset_unidade = cols.index("unidade_sigla")
+
+    encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
+
+    # Unidades com < 5 avaliacoes (resultado estatisticamente fragil)
+    low_count = sum(1 for r in encerrados if int(r[offset_total] or 0) < 5)
+    if low_count:
+        print(f"  AVISO: {low_count} linha(s) com < 5 avaliacoes em periodos encerrados — resultados frageis.")
+
+    # Unidades com media abaixo de 2.5 (Inadequado ou pior)
+    criticas = [r for r in encerrados if _to_float(r[offset_media]) < 2.5 and r[offset_media] != ""]
+    if criticas:
+        unids = set(r[offset_unidade] for r in criticas)
+        print(f"  AVISO: {len(unids)} unidade(s) com media < 2.5 (Inadequado) em periodos encerrados.")
+
+    parciais = sum(1 for r in all_rows if r[offset_status] == "parcial_no_corte")
+    if parciais:
+        print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores preliminares.")
+
+
+if __name__ == "__main__":
+    main()

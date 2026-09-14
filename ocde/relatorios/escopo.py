@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Iterable, Mapping
 
 from lib.estrutura_organizacional import DEFAULT_ESTRUTURA_CSV, load_organization_structure
+from lib.escopos import slug
 
 
 def normalize(value: object) -> str:
@@ -30,6 +31,10 @@ class ScopeSpec:
     units: frozenset[str] = frozenset()
 
     @property
+    def key(self) -> str:
+        return f"{slug(self.kind)}-{slug(self.value)}"
+
+    @property
     def label(self) -> str:
         labels = {
             "nacional": "ICMBio — nacional",
@@ -42,7 +47,7 @@ class ScopeSpec:
         return labels[self.kind]
 
     def as_dict(self) -> dict[str, object]:
-        result: dict[str, object] = {"tipo": self.kind, "valor": self.value}
+        result: dict[str, object] = {"tipo": self.kind, "valor": self.value, "chave": self.key}
         return result
 
 

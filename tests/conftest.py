@@ -14,7 +14,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 
 # lib/ e ocde/ são pacotes na raiz do projeto (mesmo padrão de bootstrap usado
-# pelos scripts IND_XX.1_run.py) — necessário para "import lib.xxx"/"import ocde.xxx".
+# pelos scripts IND_OCDE_XX.1_run.py) — necessário para "import lib.xxx"/"import ocde.xxx".
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 

@@ -1,0 +1,189 @@
+"""IND_OCDE_10.1_run.py — I10: Percentual de Avaliações Inadequadas por Unidade.
+
+Instrumento: Plano de Trabalho (PT).
+Periodicidade: 2025 trimestral (T3–T4) | 2026+ mensal (M01–M12). Base: 01/07/2025.
+
+Correção de escala (12.06.2026): o script original usava sequencia=2 para identificar
+"Inadequado", mas sequencia=2 é "Alto desempenho" no banco ICMBio. Resultado incorreto:
+82–86% das unidades classificadas em "Atencao critica" em todos os períodos.
+
+Mapeamento correto da escala ICMBio (confirmado 12.06.2026):
+  sequencia=1 → Excepcional
+  sequencia=2 → Alto desempenho
+  sequencia=3 → Adequado
+  sequencia=4 → Inadequado     ← critério correto para I10
+  sequencia=5 → Não executado
+
+Resultado após correção: 98,9% das unidades em "Baixa prevalencia".
+Alerta recorrente confirmado: PARNAEMAS (T1–T3/2025).
+
+Nota: o SQL não usa JSON_UNQUOTE(tan.nota) — função que não funciona no Denodo VQL
+via JDBC. A identificação de "Inadequado" é feita diretamente via tan.sequencia = 4.
+"""
+from __future__ import annotations
+
+from datetime import datetime
+from pathlib import Path
+import sys
+
+ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
+sys.path.insert(0, str(ROOT))
+
+from lib.csv_utils import indicator_csv_dir, write_pipe_csv
+from lib.denodo_config import connect, get_config
+from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
+from lib.monthly_runner import query_rows
+from lib.periodos import analysis_window, build_periods_pt, period_metadata
+
+# D12 (CGOV, 13.09.2026): abaixo deste volume de avaliacoes o percentual e
+# estatisticamente fragil. O indicador nao suprime a linha — exporta a
+# volumetria para que o BI da COCAGE decida ocultar ou cinzentar a unidade.
+VOLUME_MINIMO_AVALIACOES = 5
+
+SQL_I10 = """
+WITH parametros AS (
+    SELECT
+        CAST('{ini}' AS DATE) AS data_inicio,
+        CAST('{fim}' AS DATE) AS data_fim,
+        0                     AS incluir_excluidos
+),
+avaliacoes_pt AS (
+    SELECT
+        av.id          AS id_avaliacao,
+        pt.unidade_id,
+        pt.usuario_id  AS id_servidor,
+        tan.sequencia  AS sequencia_nota
+    FROM petrvs_icmbio_avaliacoes av
+    JOIN petrvs_icmbio_planos_trabalhos_consolidacoes ptc
+        ON ptc.id = av.plano_trabalho_consolidacao_id
+    JOIN petrvs_icmbio_planos_trabalhos pt
+        ON pt.id = ptc.plano_trabalho_id
+    JOIN petrvs_icmbio_tipos_avaliacoes_notas tan
+        ON tan.id = av.tipo_avaliacao_nota_id
+    CROSS JOIN parametros p
+    WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
+      AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
+      AND CAST(pt.data_inicio AS DATE) <= p.data_fim
+      AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
+      AND (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
+),
+proporcao_por_unidade AS (
+    SELECT
+        COALESCE(un.sigla, 'N.I.')                                   AS unidade_sigla,
+        COALESCE(un.nome,  'N.I.')                                   AS unidade_nome,
+        COUNT(avpt.id_avaliacao)                                     AS total_avaliacoes_pt,
+        COUNT(DISTINCT avpt.id_servidor)                             AS total_servidores_avaliados,
+        SUM(CASE WHEN avpt.sequencia_nota = 4 THEN 1 ELSE 0 END)    AS qtd_inadequado,
+        ROUND(
+            SUM(CASE WHEN avpt.sequencia_nota = 4 THEN 1 ELSE 0 END) * 100.0
+                / NULLIF(COUNT(avpt.id_avaliacao), 0),
+            2
+        )                                                            AS perc_inadequado
+    FROM avaliacoes_pt avpt
+    LEFT JOIN petrvs_icmbio_unidades un ON un.id = avpt.unidade_id
+    GROUP BY COALESCE(un.sigla, 'N.I.'), COALESCE(un.nome, 'N.I.')
+)
+SELECT
+    unidade_sigla,
+    unidade_nome,
+    total_avaliacoes_pt,
+    total_servidores_avaliados,
+    qtd_inadequado,
+    perc_inadequado,
+    CASE
+        WHEN perc_inadequado >= 30 THEN 'Atencao critica'
+        WHEN perc_inadequado >= 15 THEN 'Atencao moderada'
+        WHEN perc_inadequado >=  5 THEN 'Observacao'
+        ELSE 'Baixa prevalencia'
+    END AS nivel_alerta,
+    CASE WHEN total_avaliacoes_pt >= {volume_minimo} THEN 1 ELSE 0 END AS volume_suficiente
+FROM proporcao_por_unidade
+ORDER BY perc_inadequado DESC, unidade_sigla
+"""
+
+
+def _to_float(value: object) -> float:
+    try:
+        return float(str(value).replace(",", "."))
+    except (ValueError, TypeError):
+        return 0.0
+
+
+def main() -> None:
+    config = get_config(require_credentials=True)
+    conn = connect(config)
+    out_dir = indicator_csv_dir()
+    stamp = datetime.now().strftime("%Y%m%d_%H%M")
+    output = out_dir / f"IND_OCDE_10.2_perc_inadequado_pt_{stamp}.csv"
+
+    window = analysis_window()
+    periods = build_periods_pt(window.fim)
+    meta_cols = period_metadata()
+    all_cols: list[str] | None = None
+    all_rows: list[list] = []
+
+    try:
+        for label, kind, start, scheduled_end, end, status in periods:
+            sql = SQL_I10.replace("{ini}", str(start)).replace("{fim}", str(end)).replace(
+                "{volume_minimo}", str(VOLUME_MINIMO_AVALIACOES)
+            )
+            print(f"Executando I10 {label} ({start} a {end})...")
+            try:
+                columns, rows = query_rows(conn, sql)
+            except Exception as exc:
+                print(f"  ERRO: {exc}")
+                continue
+            if all_cols is None:
+                all_cols = meta_cols + columns
+            duration = (end - start).days + 1
+            for row in rows:
+                all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
+            print(f"  {len(rows)} linhas retornadas.")
+    finally:
+        conn.close()
+
+    if not all_rows:
+        print("Nenhum dado retornado. CSV nao gerado.")
+        return
+
+    # mesogrupo so entra no CSV escrito — all_cols/all_rows seguem com as
+    # posicoes originais para nao quebrar os offsets fixos usados abaixo.
+    lookup = load_mesogrupo_lookup()
+    csv_cols, csv_rows = insert_mesogrupo_column(all_cols or [], all_rows, lookup)
+
+    write_pipe_csv(output, csv_cols, csv_rows)
+    print(f"Arquivo salvo: {output}")
+
+    # Colunas apos meta_cols: sigla(0) nome(1) total_av(2) total_servidores(3) qtd_inadequado(4) perc_inadequado(5) nivel_alerta(6)
+    # Busca por nome, nao por offset fixo: a insercao de colunas novas
+    # deslocava as posicoes e quebrava os avisos (ver CGOV D09/D11).
+    cols = all_cols or []
+    offset_total = cols.index("total_avaliacoes_pt")
+    offset_perc = cols.index("perc_inadequado")
+    offset_status = cols.index("periodo_status")
+    offset_unidade = cols.index("unidade_sigla")
+
+    encerrados = [r for r in all_rows if r[offset_status] == "encerrado"]
+
+    # Unidades em "Atencao critica" (>= 30% inadequado) em periodos encerrados
+    criticos = [r for r in encerrados if _to_float(r[offset_perc]) >= 30]
+    if criticos:
+        unids = set(r[offset_unidade] for r in criticos)
+        print(f"  AVISO: {len(unids)} unidade(s) com perc_inadequado >= 30% em periodos encerrados — requer acompanhamento.")
+
+    # Unidades com < 5 avaliacoes (resultado fragil)
+    low_count = sum(
+        1 for r in encerrados
+        if int(r[offset_total] or 0) < VOLUME_MINIMO_AVALIACOES
+    )
+    if low_count:
+        print(f"  NOTA: {low_count} linha(s) com < 5 avaliacoes em periodos encerrados — percentuais estatisticamente frageis.")
+
+    parciais = sum(1 for r in all_rows if r[offset_status] == "parcial_no_corte")
+    if parciais:
+        print(f"  NOTA: {parciais} linha(s) em ciclo parcial_no_corte — valores preliminares.")
+
+
+if __name__ == "__main__":
+    main()

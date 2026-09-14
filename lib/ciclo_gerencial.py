@@ -13,6 +13,8 @@ from zoneinfo import ZoneInfo
 from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
+from .validation_contracts import TARGETS, artifact_indicator_number
+from ocde.relatorios.escopo import scope_from_values
 
 
 STAGES = (
@@ -50,6 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--salvar", action="store_true")
     parser.add_argument("--pdf", action="store_true")
     parser.add_argument("--consultar-denodo", action="store_true", help="Inclui evidências textuais PE/PT na V2.")
+    parser.add_argument("--rascunho", action="store_true")
     parser.add_argument(
         "--denodo-python", default=os.environ.get("PGD_DENODO_PYTHON", sys.executable),
         help="Python com JPype compatível com a JVM/driver Denodo.",
@@ -100,8 +103,9 @@ def _preflight(denodo_python: str, test_python: str) -> dict:
     required = [
         PROJECT_ROOT / ".env",
         PROJECT_ROOT / "lib" / "periodos.py",
-        PROJECT_ROOT / "ocde" / "indicadores" / "IND_01.1_run.py",
-        PROJECT_ROOT / "gestao" / "PT_STATUS.1_run.py",
+        TARGETS["I01"].production_entrypoint,
+        TARGETS["G01"].production_entrypoint,
+        TARGETS["G02"].production_entrypoint,
         PROJECT_ROOT / "artefatos_local" / "ocde" / "diagnosticos" / "ICMBIO_estrutura.csv",
     ]
     missing = [str(path.relative_to(PROJECT_ROOT)) for path in required if not path.exists()]
@@ -118,11 +122,13 @@ def _preflight(denodo_python: str, test_python: str) -> dict:
     }
 
 
-def _extraction_report(window) -> dict:
-    directory = indicator_csv_dir(window.mes_execucao)
+def _extraction_report(window, scope_key: str) -> dict:
+    directory = indicator_csv_dir(window.mes_execucao) / "escopos" / scope_key
+    # Aceita o nome atual (IND_OCDE_07.2_*) e o legado (IND_07.2_*), porque as
+    # entregas anteriores a 13.09.2026 permanecem em artefatos_local/.
     codes = {
-        path.name[4:6] for path in directory.glob("IND_??.2_*.csv")
-        if len(path.name) >= 6
+        number for path in directory.glob("IND_*.2_*.csv")
+        for number in [artifact_indicator_number(path.name)] if number
     } if directory.exists() else set()
     missing = [f"I{number:02d}" for number in range(1, 13) if f"{number:02d}" not in codes]
     return {
@@ -135,7 +141,12 @@ def _extraction_report(window) -> dict:
 def run(argv: list[str] | None = None) -> dict:
     args = build_parser().parse_args(argv)
     window = configure_execution_context(args.data_execucao)
-    final_path = indicator_csv_dir(window.mes_execucao) / "manifesto_ciclo_gerencial.json"
+    scope = scope_from_values(
+        escopo=args.escopo, regional=args.regional, unidade=args.unidade,
+        mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
+        lista_unidades=args.lista_unidades,
+    )
+    final_path = indicator_csv_dir(window.mes_execucao) / "escopos" / scope.key / "manifesto_ciclo_gerencial.json"
     manifest = {
         "tipo": "ciclo_gerencial_mensal",
         **window.as_dict(),
@@ -167,14 +178,14 @@ def run(argv: list[str] | None = None) -> dict:
         return manifest
     perform("analysis_window", lambda: {"status": "sucesso", **window.as_dict()})
 
-    indicator_cmd = [args.denodo_python, "-m", "lib.indicator_extraction", "--data-execucao", args.data_execucao, "--salvar-manifesto"]
+    scope_args = _scope_args(args)
+    indicator_cmd = [args.denodo_python, "-m", "lib.indicator_extraction", "--data-execucao", args.data_execucao, "--salvar-manifesto", *scope_args]
     if args.reextrair:
         indicator_cmd.append("--reextrair")
     if not perform("extrair_indicadores", lambda: _run(indicator_cmd)):
         manifest["status_global"] = "falha"
         return manifest
 
-    scope_args = _scope_args(args)
     products = ("restrito", "compartilhavel") if args.produto == "ambos" else (args.produto,)
     def run_management() -> dict:
         results = []
@@ -215,7 +226,7 @@ def run(argv: list[str] | None = None) -> dict:
     if not perform("validar_periodicidade", lambda: _run(tests_temporal)):
         manifest["status_global"] = "falha"
         return manifest
-    if not perform("relatorio_extracao", lambda: _extraction_report(window)):
+    if not perform("relatorio_extracao", lambda: _extraction_report(window, scope.key)):
         manifest["status_global"] = "falha"
         return manifest
     consistency_cmd = [args.test_python, "-m", "pytest", "-q", "tests/unit", "tests/regression"]
@@ -226,6 +237,12 @@ def run(argv: list[str] | None = None) -> dict:
     report_python = args.denodo_python if args.consultar_denodo else sys.executable
     report_cmd = [report_python, "-m", "ocde.relatorios.relatorio_v2", "--data-execucao", args.data_execucao,
                   "--produto", args.produto, "--lente", args.lente, *scope_args]
+    validation_dir = PROJECT_ROOT / "artefatos_local" / "validacao" / window.mes_execucao / "escopos" / scope.key
+    validation_manifests = sorted(validation_dir.glob("manifesto_validacao_*.json"), key=lambda path: path.stat().st_mtime_ns)
+    if validation_manifests:
+        report_cmd.extend(("--manifesto-validacao", str(validation_manifests[-1])))
+    if args.rascunho:
+        report_cmd.append("--rascunho")
     if args.salvar or args.pdf:
         report_cmd.append("--salvar")
     if args.pdf:
@@ -238,7 +255,7 @@ def run(argv: list[str] | None = None) -> dict:
 
     def security() -> dict:
         from ocde.relatorios.privacidade import scan_file
-        output_dir = PROJECT_ROOT / "artefatos_local" / "ocde" / "relatorios_v2" / window.mes_execucao
+        output_dir = PROJECT_ROOT / "artefatos_local" / "ocde" / "relatorios_v2" / window.mes_execucao / "escopos" / scope.key
         findings = {
             path.name: scan_file(path)
             for path in output_dir.glob("*") if path.is_file() and path.suffix.lower() in {".md", ".csv", ".json"}

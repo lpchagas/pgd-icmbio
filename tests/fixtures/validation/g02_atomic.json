@@ -1,0 +1,17 @@
+[
+  {"_extractor":"g02_entregas","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","id_entrega":"e1","unidade_dona_sigla":"CGOV","nome_entrega":"Entrega A","entrega_inicio":"2026-05-01","entrega_fim":"2026-08-31","meta_planejada":"100"},
+  {"_extractor":"g02_entregas","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","id_entrega":"e2","unidade_dona_sigla":"CGOV","nome_entrega":"Entrega B","entrega_inicio":"2026-05-01","entrega_fim":"2026-08-31","meta_planejada":"10"},
+  {"_extractor":"g02_entregas","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","id_entrega":"e3","unidade_dona_sigla":"CGOV","nome_entrega":"Entrega C","entrega_inicio":"2025-10-01","entrega_fim":"2025-12-31","meta_planejada":"5"},
+  {"_extractor":"g02_progressos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","progresso_id":"r1","id_entrega":"e1","data_progresso":"2026-05-15","progresso_esperado":"50","progresso_realizado":"20","registro_execucao":"linha 1\nlinha 2"},
+  {"_extractor":"g02_progressos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","progresso_id":"r2","id_entrega":"e1","data_progresso":"2026-06-30","progresso_esperado":"100","progresso_realizado":"80","registro_execucao":"atualização"},
+  {"_extractor":"g02_progressos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","progresso_id":"r3","id_entrega":"e3","data_progresso":"2025-12-20","progresso_esperado":"5","progresso_realizado":"5","registro_execucao":"concluída"},
+  {"_extractor":"g02_progressos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","progresso_id":"r4","id_entrega":"e1","data_progresso":"2026-09-01","progresso_esperado":"100","progresso_realizado":"100","registro_execucao":"fora do corte"},
+  {"_extractor":"g02_planos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","plano_trabalho_id":"p1","id_servidor":"s1","unidade_executora_sigla":"GR2","plano_inicio":"2025-07-01","plano_fim":"2026-09-13"},
+  {"_extractor":"g02_planos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","plano_trabalho_id":"p2","id_servidor":"s2","unidade_executora_sigla":"CGOV","plano_inicio":"2026-01-01","plano_fim":"2026-09-13"},
+  {"_extractor":"g02_planos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","plano_trabalho_id":"p3","id_servidor":"s1","unidade_executora_sigla":"GR2","plano_inicio":"2026-05-01","plano_fim":"2026-09-13"},
+  {"_extractor":"g02_vinculos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","vinculo_id":"v1","plano_trabalho_id":"p1","id_entrega":"e1","forca_trabalho":"50"},
+  {"_extractor":"g02_vinculos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","vinculo_id":"v2","plano_trabalho_id":"p3","id_entrega":"e2","forca_trabalho":"40"},
+  {"_extractor":"g02_vinculos","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","vinculo_id":"v3","plano_trabalho_id":"p3","id_entrega":"ausente","forca_trabalho":"10"},
+  {"_extractor":"g02_atividades","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","atividade_id":"a1","plano_trabalho_id":"p1","status":"CONCLUIDO","data_inicio":"2026-09-01","tempo_planejado":"8","tempo_despendido":"10"},
+  {"_extractor":"g02_atividades","_history_cutoff":"2026-08-31","_observation_date":"2026-09-13","atividade_id":"a2","plano_trabalho_id":"p2","status":"INCLUIDO","data_inicio":"","tempo_planejado":"4","tempo_despendido":"0"}
+]

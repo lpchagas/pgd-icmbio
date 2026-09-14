@@ -31,6 +31,10 @@ logs, manifestos ou artefatos.
 Para execução em setembro/2026, a janela obrigatória é `01/07/2025–31/08/2026`.
 O mês corrente nunca entra na lente acumulada.
 
+**Estado de referência em 14/09/2026:** D15 e D18 estão registradas em baselines
+separadas; I01–I12, G01 e G02 foram recertificados automaticamente na GR2. O
+manifesto integrado tem data de execução 13/09/2026 e 14/14 alvos em sucesso.
+
 ## 3. Contrato executável do alvo
 
 Cada indicador e análise de gestão é declarado como `ValidationTarget` em
@@ -72,8 +76,8 @@ Requisitos:
 Padrões existentes são preservados:
 
 ```text
-IND_XX.2_<nome>_AAAAMMDD_HHMM.csv
-PT_STATUS.2_<visao>_<produto>_<escopo>_AAAAMMDD_HHMM.csv
+IND_OCDE_XX.2_<nome>_AAAAMMDD_HHMM.csv
+IND_GEST_XX.2_<visao>_<produto>_<escopo>_AAAAMMDD_HHMM.csv
 ```
 
 O manifesto inclui `run_id`, janela, escopo, lente, produto, data/hora, versão,
@@ -89,10 +93,10 @@ manifesto inconsistente.
 Artefatos:
 
 ```text
-IND_XX.3_validacao_independente_<run_id>.json
-IND_XX.3_validacao_independente_<run_id>.md
-PT_STATUS.3_validacao_independente_<run_id>.json
-PT_STATUS.3_validacao_independente_<run_id>.md
+IND_OCDE_XX.3_validacao_independente_<run_id>.json
+IND_OCDE_XX.3_validacao_independente_<run_id>.md
+IND_GEST_XX.3_validacao_independente_<run_id>.json
+IND_GEST_XX.3_validacao_independente_<run_id>.md
 ```
 
 O oracle:
@@ -124,9 +128,9 @@ Exceções precisam de justificativa no contrato.
 Artefatos:
 
 ```text
-IND_XX.4_diagnostico_<run_id>.json
-IND_XX.4_diagnostico_<run_id>.md
-IND_XX.4_qN_<descricao>_<run_id>.csv
+IND_OCDE_XX.4_diagnostico_<run_id>.json
+IND_OCDE_XX.4_diagnostico_<run_id>.md
+IND_OCDE_XX.4_qN_<descricao>_<run_id>.csv
 ```
 
 A4 resumido é sempre gerado. Evidências detalhadas surgem apenas para regras
@@ -152,8 +156,8 @@ SEM_DIVERGENCIA
 Artefatos:
 
 ```text
-IND_XX.5_relatorio_validacao_<run_id>.md
-PT_STATUS.5_relatorio_validacao_<run_id>.md
+IND_OCDE_XX.5_relatorio_validacao_<run_id>.md
+IND_GEST_XX.5_relatorio_validacao_<run_id>.md
 ```
 
 A5 é gerado dos manifestos anteriores. Contém objetivo, versão, janela,
@@ -200,7 +204,8 @@ gate do ciclo automatizado.
 | I10 | categoria inadequada por `sequencia = 4` |
 | I11 | categoria excepcional por `sequencia = 1` |
 | I12 | médias PT/PE e diferença direcional `PT - PE` |
-| PT_STATUS | precedência da consolidação e status do plano |
+| G01 | precedência da consolidação, universo com concluídos pendentes (D17) e uma linha por plano |
+| G02 | agregação por entrega, cobertura integral dos servidores e reconciliação PE × PT em duas perspectivas |
 
 ## 6. Testes obrigatórios
 
@@ -250,7 +255,7 @@ incremental, nunca pelo total acumulado bruto.
 ```text
 python -m lib.validation_runner
   --familia ocde|gestao|todas
-  --alvo I01|...|I12|PT_STATUS|todos
+  --alvo I01|...|I12|G01|G02|todos   (aceita lista por vírgula, IND_OCDE_XX, IND_GEST_XX e PT_STATUS)
   --data-execucao AAAA-MM-DD
   --etapa A1|A2|A3|A4|A5|todas
   --modo fixture|integrado
@@ -262,6 +267,12 @@ python -m lib.validation_runner
 
 O runner retorna código diferente de zero para falha, pendência bloqueante ou
 artefato ausente.
+
+Os A2–A5 e manifestos são buscados exclusivamente em
+`AAAA-MM/escopos/<scope-key>/`; nenhum loader escolhe silenciosamente arquivo de
+outro escopo. Hashes de oracle/extrator são calculados por alvo e perfis de dados
+ficam na baseline por escopo. A aprovação aceita `--alvo` repetido ou lista por
+vírgula e grava todos os alvos transacionalmente. G02 é aprovado separadamente.
 
 ## 9. Integração mensal
 

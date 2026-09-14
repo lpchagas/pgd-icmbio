@@ -1,5 +1,16 @@
 # Guia de Extração Mensal dos Indicadores OCDE/PGD — ICMBio
 
+> **Escopos e gestão (14.09.2026):** toda execução do ciclo integrado informa um seletor
+> organizacional. A2–A5, manifestos, relatórios e anexos ficam em
+> `AAAA-MM/escopos/<scope-key>/`. O ciclo inclui G01 e G02. O relatório final exige
+> `--manifesto-validacao`. A D18 homologou o G02 e o anexo nominal somente restrito;
+> edições finais exigem os 14 alvos certificados. A expansão nacional está suspensa
+> até o aceite formal do piloto CGOV.
+
+> **Estado certificado:** a referência GR2 usa data de execução 13/09/2026, janela
+> `01/07/2025–31/08/2026` e 14/14 alvos certificados automaticamente. O próximo
+> passo institucional é o piloto CGOV; não executar escopo nacional.
+
 Este guia descreve **quando e como** gerar os CSVs dos 12 indicadores OCDE/PGD
 para alimentar o Painel Power BI do ICMBio — sem precisar entender programação.
 Basta copiar os comandos e seguir os passos.
@@ -70,19 +81,19 @@ Referência de nomes de arquivo, volume de dados e tamanho aproximado
 
 | # | Indicador | Arquivo CSV | Linhas | Tamanho |
 |---|-----------|-------------|--------|---------|
-| 1 | I01 — Regime de trabalho (resumo) | `IND_01.2_v1_proporcao_mensal_AAAAMMDD_HHMM.csv` | ~137 | ~8 KB |
-| 2 | I01 — Regime de trabalho (por unidade) | `IND_01.2_v2_proporcao_unidade_mensal_AAAAMMDD_HHMM.csv` | ~10.367 | ~1 MB |
-| 3 | I02 — Taxa de cumprimento das entregas | `IND_02.2_taxa_cumprimento_temporal_AAAAMMDD_HHMM.csv` | ~1.935 | ~345 KB |
-| 4 | I03 — Taxa de cumprimento por entrega | `IND_03.2_taxa_cumprimento_temporal_AAAAMMDD_HHMM.csv` | ~16.219 | ~7 MB |
-| 5 | I04 — Índice de atingimento de metas | `IND_04.2_score_atingimento_metas_AAAAMMDD_HHMM.csv` | ~1.935 | ~323 KB |
-| 6 | I05 — Distribuição de entregas por servidor | `IND_05.2_distribuicao_entregas_servidores_AAAAMMDD_HHMM.csv` | ~9.546 | ~1,8 MB |
-| 7 | I06 — Grau de responsabilidade por entrega | `IND_06.2_grau_responsabilidade_entregas_AAAAMMDD_HHMM.csv` | ~4.921 | ~643 KB |
-| 8 | I07 — Horas por entrega (absoluto) | `IND_07.2_horas_por_entrega_AAAAMMDD_HHMM.csv` | ~25.307 | ~6,8 MB |
-| 9 | I08 — Proporção de horas por entrega (%) | `IND_08.2_proporcao_horas_entrega_AAAAMMDD_HHMM.csv` | ~25.307 | ~5,6 MB |
-| 10 | I09 — Média das avaliações do PT | `IND_09.2_media_avaliacao_pt_AAAAMMDD_HHMM.csv` | ~1.996 | ~273 KB |
-| 11 | I10 — Percentual de avaliações inadequadas | `IND_10.2_perc_inadequado_pt_AAAAMMDD_HHMM.csv` | ~1.996 | ~263 KB |
-| 12 | I11 — Percentual de avaliações excepcionais | `IND_11.2_perc_excepcional_pt_AAAAMMDD_HHMM.csv` | ~1.996 | ~265 KB |
-| 13 | I12 — Coerência PT × PE | `IND_12.2_coerencia_pt_pe_AAAAMMDD_HHMM.csv` | ~1.295 | ~190 KB |
+| 1 | I01 — Regime de trabalho (resumo) | `IND_OCDE_01.2_v1_proporcao_mensal_AAAAMMDD_HHMM.csv` | ~137 | ~8 KB |
+| 2 | I01 — Regime de trabalho (por unidade) | `IND_OCDE_01.2_v2_proporcao_unidade_mensal_AAAAMMDD_HHMM.csv` | ~10.367 | ~1 MB |
+| 3 | I02 — Taxa de cumprimento das entregas | `IND_OCDE_02.2_taxa_cumprimento_temporal_AAAAMMDD_HHMM.csv` | ~1.935 | ~345 KB |
+| 4 | I03 — Taxa de cumprimento por entrega | `IND_OCDE_03.2_taxa_cumprimento_temporal_AAAAMMDD_HHMM.csv` | ~16.219 | ~7 MB |
+| 5 | I04 — Índice de atingimento de metas | `IND_OCDE_04.2_score_atingimento_metas_AAAAMMDD_HHMM.csv` | ~1.935 | ~323 KB |
+| 6 | I05 — Distribuição de entregas por servidor | `IND_OCDE_05.2_distribuicao_entregas_servidores_AAAAMMDD_HHMM.csv` | ~9.546 | ~1,8 MB |
+| 7 | I06 — Grau de responsabilidade por entrega | `IND_OCDE_06.2_grau_responsabilidade_entregas_AAAAMMDD_HHMM.csv` | ~4.921 | ~643 KB |
+| 8 | I07 — Horas por entrega (absoluto) | `IND_OCDE_07.2_horas_por_entrega_AAAAMMDD_HHMM.csv` | ~25.307 | ~6,8 MB |
+| 9 | I08 — Proporção de horas por entrega (%) | `IND_OCDE_08.2_proporcao_horas_entrega_AAAAMMDD_HHMM.csv` | ~25.307 | ~5,6 MB |
+| 10 | I09 — Média das avaliações do PT | `IND_OCDE_09.2_media_avaliacao_pt_AAAAMMDD_HHMM.csv` | ~1.996 | ~273 KB |
+| 11 | I10 — Percentual de avaliações inadequadas | `IND_OCDE_10.2_perc_inadequado_pt_AAAAMMDD_HHMM.csv` | ~1.996 | ~263 KB |
+| 12 | I11 — Percentual de avaliações excepcionais | `IND_OCDE_11.2_perc_excepcional_pt_AAAAMMDD_HHMM.csv` | ~1.996 | ~265 KB |
+| 13 | I12 — Coerência PT × PE | `IND_OCDE_12.2_coerencia_pt_pe_AAAAMMDD_HHMM.csv` | ~1.295 | ~190 KB |
 
 > Os números de linhas e tamanhos aumentam a cada mês à medida que novos dados
 > são registrados no PETRVS.
@@ -143,7 +154,7 @@ git pull
 Get-Content .env
 
 # 3. Testar a conexão sem abrir o Denodo
-python ocde/indicadores/IND_02.1_run.py --dry-run
+python ocde/indicadores/IND_OCDE_02.1_run.py --dry-run
 ```
 
 O `--dry-run` mostra o instrumento (PE ou PT), o documento-fonte, a SQL adaptada
@@ -165,18 +176,18 @@ e pressione Enter. Aguarde de 5 a 15 minutos dependendo da conexão com o Datapr
 cd "C:\Projetos\pgd-ocde-icmbio"
 
 $indicadores = @(
-    @{script="IND_01.1_run.py"; nome="I01 - Regime de trabalho"},
-    @{script="IND_02.1_run.py"; nome="I02 - Taxa cumprimento entregas"},
-    @{script="IND_03.1_run.py"; nome="I03 - Taxa cumprimento por entrega"},
-    @{script="IND_04.1_run.py"; nome="I04 - Índice atingimento metas"},
-    @{script="IND_05.1_run.py"; nome="I05 - Distribuição entregas servidores"},
-    @{script="IND_06.1_run.py"; nome="I06 - Grau responsabilidade"},
-    @{script="IND_07.1_run.py"; nome="I07 - Horas por entrega (absoluto)"},
-    @{script="IND_08.1_run.py"; nome="I08 - Proporção horas por entrega (%)"},
-    @{script="IND_09.1_run.py"; nome="I09 - Média avaliações PT"},
-    @{script="IND_10.1_run.py"; nome="I10 - % Avaliações inadequadas"},
-    @{script="IND_11.1_run.py"; nome="I11 - % Avaliações excepcionais"},
-    @{script="IND_12.1_run.py"; nome="I12 - Coerência PT x PE"}
+    @{script="IND_OCDE_01.1_run.py"; nome="I01 - Regime de trabalho"},
+    @{script="IND_OCDE_02.1_run.py"; nome="I02 - Taxa cumprimento entregas"},
+    @{script="IND_OCDE_03.1_run.py"; nome="I03 - Taxa cumprimento por entrega"},
+    @{script="IND_OCDE_04.1_run.py"; nome="I04 - Índice atingimento metas"},
+    @{script="IND_OCDE_05.1_run.py"; nome="I05 - Distribuição entregas servidores"},
+    @{script="IND_OCDE_06.1_run.py"; nome="I06 - Grau responsabilidade"},
+    @{script="IND_OCDE_07.1_run.py"; nome="I07 - Horas por entrega (absoluto)"},
+    @{script="IND_OCDE_08.1_run.py"; nome="I08 - Proporção horas por entrega (%)"},
+    @{script="IND_OCDE_09.1_run.py"; nome="I09 - Média avaliações PT"},
+    @{script="IND_OCDE_10.1_run.py"; nome="I10 - % Avaliações inadequadas"},
+    @{script="IND_OCDE_11.1_run.py"; nome="I11 - % Avaliações excepcionais"},
+    @{script="IND_OCDE_12.1_run.py"; nome="I12 - Coerência PT x PE"}
 )
 
 $erros = @()
@@ -214,12 +225,12 @@ artefatos_local\ocde\entregas\2026-06\
 Execute os 6 indicadores baseados em Plano de Trabalho:
 
 ```powershell
-python ocde/indicadores/IND_01.1_run.py
-python ocde/indicadores/IND_05.1_run.py
-python ocde/indicadores/IND_06.1_run.py
-python ocde/indicadores/IND_09.1_run.py
-python ocde/indicadores/IND_10.1_run.py
-python ocde/indicadores/IND_11.1_run.py
+python ocde/indicadores/IND_OCDE_01.1_run.py
+python ocde/indicadores/IND_OCDE_05.1_run.py
+python ocde/indicadores/IND_OCDE_06.1_run.py
+python ocde/indicadores/IND_OCDE_09.1_run.py
+python ocde/indicadores/IND_OCDE_10.1_run.py
+python ocde/indicadores/IND_OCDE_11.1_run.py
 ```
 
 ### 6c. Meses com todos os indicadores — maio, setembro e janeiro (3 meses no ano)
@@ -228,26 +239,26 @@ Execute os 12 indicadores na ordem abaixo (PT primeiro, PE depois):
 
 ```powershell
 # PT mensais
-python ocde/indicadores/IND_01.1_run.py
-python ocde/indicadores/IND_05.1_run.py
-python ocde/indicadores/IND_06.1_run.py
-python ocde/indicadores/IND_09.1_run.py
-python ocde/indicadores/IND_10.1_run.py
-python ocde/indicadores/IND_11.1_run.py
+python ocde/indicadores/IND_OCDE_01.1_run.py
+python ocde/indicadores/IND_OCDE_05.1_run.py
+python ocde/indicadores/IND_OCDE_06.1_run.py
+python ocde/indicadores/IND_OCDE_09.1_run.py
+python ocde/indicadores/IND_OCDE_10.1_run.py
+python ocde/indicadores/IND_OCDE_11.1_run.py
 
 # PE quadrimestrais
-python ocde/indicadores/IND_02.1_run.py
-python ocde/indicadores/IND_03.1_run.py
-python ocde/indicadores/IND_04.1_run.py
-python ocde/indicadores/IND_07.1_run.py
-python ocde/indicadores/IND_08.1_run.py
-python ocde/indicadores/IND_12.1_run.py
+python ocde/indicadores/IND_OCDE_02.1_run.py
+python ocde/indicadores/IND_OCDE_03.1_run.py
+python ocde/indicadores/IND_OCDE_04.1_run.py
+python ocde/indicadores/IND_OCDE_07.1_run.py
+python ocde/indicadores/IND_OCDE_08.1_run.py
+python ocde/indicadores/IND_OCDE_12.1_run.py
 ```
 
 Para forçar uma pasta de destino específica (útil para retroativos):
 
 ```powershell
-python ocde/indicadores/IND_02.1_run.py --month 2026-05
+python ocde/indicadores/IND_OCDE_02.1_run.py --month 2026-05
 ```
 
 ### 6d. Executar um indicador específico
@@ -263,20 +274,23 @@ Depois execute o indicador desejado:
 
 | Indicador | Comando | O que mostra |
 |-----------|---------|-------------|
-| **I01** | `python ocde/indicadores/IND_01.1_run.py` | Gera 2 arquivos: resumo nacional + detalhamento por unidade |
-| **I02** | `python ocde/indicadores/IND_02.1_run.py` | % das entregas de cada unidade concluídas no período |
-| **I03** | `python ocde/indicadores/IND_03.1_run.py` | Status de cada entrega individual (concluída / em andamento / não iniciada) |
-| **I04** | `python ocde/indicadores/IND_04.1_run.py` | Score médio de atingimento das metas por unidade (0 a 100+) |
-| **I05** | `python ocde/indicadores/IND_05.1_run.py` | Quantas entregas cada servidor está responsável por unidade |
-| **I06** | `python ocde/indicadores/IND_06.1_run.py` | Quantos servidores compartilham cada entrega e com que % de força de trabalho |
-| **I07** | `python ocde/indicadores/IND_07.1_run.py` | Total de horas planejadas para cada entrega em cada unidade |
-| **I08** | `python ocde/indicadores/IND_08.1_run.py` | % da capacidade total da unidade alocado em cada entrega |
-| **I09** | `python ocde/indicadores/IND_09.1_run.py` | Nota média (1 a 5) das avaliações dos servidores por unidade |
-| **I10** | `python ocde/indicadores/IND_10.1_run.py` | % das avaliações com nota "Inadequado" por unidade |
-| **I11** | `python ocde/indicadores/IND_11.1_run.py` | % das avaliações com nota "Excepcional" por unidade |
-| **I12** | `python ocde/indicadores/IND_12.1_run.py` | Se a avaliação individual (PT) está alinhada com a avaliação coletiva (PE) da unidade |
+| **I01** | `python ocde/indicadores/IND_OCDE_01.1_run.py` | Gera 2 arquivos: resumo nacional + detalhamento por unidade |
+| **I02** | `python ocde/indicadores/IND_OCDE_02.1_run.py` | % das entregas de cada unidade concluídas no período |
+| **I03** | `python ocde/indicadores/IND_OCDE_03.1_run.py` | Status de cada entrega individual (concluída / em andamento / não iniciada) |
+| **I04** | `python ocde/indicadores/IND_OCDE_04.1_run.py` | Score médio de atingimento das metas por unidade (0 a 100+) |
+| **I05** | `python ocde/indicadores/IND_OCDE_05.1_run.py` | Quantas entregas cada servidor está responsável por unidade |
+| **I06** | `python ocde/indicadores/IND_OCDE_06.1_run.py` | Quantos servidores compartilham cada entrega e com que % de força de trabalho |
+| **I07** | `python ocde/indicadores/IND_OCDE_07.1_run.py` | Total de horas planejadas para cada entrega em cada unidade |
+| **I08** | `python ocde/indicadores/IND_OCDE_08.1_run.py` | % da capacidade total da unidade alocado em cada entrega |
+| **I09** | `python ocde/indicadores/IND_OCDE_09.1_run.py` | Nota média (1 a 5) das avaliações dos servidores por unidade |
+| **I10** | `python ocde/indicadores/IND_OCDE_10.1_run.py` | % das avaliações com nota "Inadequado" por unidade |
+| **I11** | `python ocde/indicadores/IND_OCDE_11.1_run.py` | % das avaliações com nota "Excepcional" por unidade |
+| **I12** | `python ocde/indicadores/IND_OCDE_12.1_run.py` | Se a avaliação individual (PT) está alinhada com a avaliação coletiva (PE) da unidade |
 
-Os CSVs são salvos em `artefatos_local/ocde/entregas/AAAA-MM/`.
+Quando chamados diretamente, os scripts legados salvam em
+`artefatos_local/ocde/entregas/AAAA-MM/`. No ciclo e no runner oficiais, os A2
+persistidos ficam em `AAAA-MM/escopos/<scope-key>/`; nenhum loader pode selecionar
+silenciosamente um arquivo de outro escopo.
 
 ---
 
@@ -333,7 +347,7 @@ Arquivos públicos do repositório:
 
 ```text
 docs/                         documentação pública
-ocde/indicadores/          executores IND_XX.1_run.py
+ocde/indicadores/          executores IND_OCDE_XX.1_run.py
 lib/                  funções comuns sem credenciais
 ```
 
@@ -343,15 +357,16 @@ Arquivos locais, **nunca versionados** (caminhos gerenciados por `lib/csv_utils.
 artefatos_local/
   ocde/
     entregas/
-      AAAA-MM/            CSVs de indicadores prontos para envio à COCAGE/Power BI
-                          IND_XX.2_<nome>_AAAAMMDD_HHMM.csv (todos os 12 indicadores)
+      AAAA-MM/
+        escopos/<scope-key>/  A2 do ciclo oficial, isolados por escopo
+        IND_OCDE_XX.2_*       saídas legadas de scripts executados diretamente
     diagnosticos/
       AAAA-MM/            CSVs diagnósticos A4 (uso interno — não enviar)
-                          IND_XX.4_qN_<descricao>.csv
-      IND_XX.4_diagnostico_DD.MM.AAAA.py
-  validacao/              Relatórios A5 e PDFs A3
-                          IND_XX.5_relatorio_validacao_DD.MM.AAAA.md
-                          IND_XX.3_PETRVS_consulta_DD.MM.AAAA.pdf
+                          IND_OCDE_XX.4_qN_<descricao>.csv
+      IND_OCDE_XX.4_diagnostico_DD.MM.AAAA.py
+  validacao/
+    AAAA-MM/escopos/<scope-key>/  A3–A5 e manifestos do protocolo automatizado
+    baselines.json                 baseline privada registrada somente pela CLI
   docs_internos/          Protocolo de validação e docs não publicáveis
   backup_scripts_a1/      Cópias locais dos scripts A1 (backup jun 2026)
   historico/              Artefatos legados (dump e validação inicial mai/2026)
@@ -359,7 +374,8 @@ artefatos_local/
 
 Os caminhos são gerenciados por `lib/csv_utils.py`:
 
-- `indicator_csv_dir()` → `artefatos_local/ocde/entregas/AAAA-MM/`
+- `indicator_csv_dir()` → `artefatos_local/ocde/entregas/AAAA-MM/`; o runner move
+  apenas as linhas do escopo para `escopos/<scope-key>/`
 - `diagnostic_csv_dir()` → `artefatos_local/ocde/diagnosticos/AAAA-MM/`
 
 ---
@@ -383,7 +399,7 @@ Para manter o painel sempre atualizado:
 3. Clique em "Atualizar" no Power BI Desktop
 
 > **Atenção:** os CSVs têm nomes com timestamp
-> (`IND_02.2_taxa_cumprimento_temporal_20260614_2050.csv`). Configure o Power BI
+> (`IND_OCDE_02.2_taxa_cumprimento_temporal_20260614_2050.csv`). Configure o Power BI
 > para apontar para a **pasta** e não para um arquivo específico, usando a função
 > `Folder.Files` — assim uma nova execução não quebra o relatório.
 
@@ -465,7 +481,7 @@ no PETRVS), ou filtro temporal sem correspondência nos dados.
 **Como verificar:**
 
 ```powershell
-python ocde/indicadores/IND_XX.1_run.py --dry-run
+python ocde/indicadores/IND_OCDE_XX.1_run.py --dry-run
 ```
 
 Isso mostra o que seria executado sem conectar ao Denodo.
@@ -508,7 +524,7 @@ a causa com base nos logs, nas fichas em `docs/ocde/` e no protocolo público de
 
 **Diagnosticar um erro específico:**
 ```
-O script IND_XX.1_run.py falhou com o seguinte erro:
+O script IND_OCDE_XX.1_run.py falhou com o seguinte erro:
 [cole aqui a mensagem de erro completa]
 
 Com base no projeto `pgd-ocde-icmbio` e em `docs/ocde/`, identifique a causa e proponha
@@ -519,7 +535,7 @@ tabela precisam do prefixo petrvs_icmbio_ no JDBC.
 
 **Verificar se um CSV foi gerado corretamente:**
 ```
-Analise o arquivo artefatos_local/ocde/entregas/AAAA-MM/IND_XX.2_*.csv e verifique:
+Analise o arquivo artefatos_local/ocde/entregas/AAAA-MM/IND_OCDE_XX.2_*.csv e verifique:
 1. Quantas linhas foram geradas por período (T3-2025 a Q2-2026)?
 2. Há linhas com campos vazios no campo unidade_sigla?
 3. Os valores numéricos estão dentro dos intervalos esperados (percentuais entre 0 e 100)?
@@ -588,7 +604,7 @@ Query MySQL original:
 Quando houver validação pela equipe CGOV:
 
 - salve PDFs de consulta PETRVS em `artefatos_local/validacao/`
-- copie `ocde/diagnosticos/IND_XX.4_diagnostico_template.py` para
+- copie `ocde/diagnosticos/IND_OCDE_XX.4_diagnostico_template.py` para
   `artefatos_local/ocde/diagnosticos/` e preencha as queries locais
 - salve CSVs diagnósticos em `artefatos_local/ocde/diagnosticos/AAAA-MM/`
 - salve relatórios internos em `artefatos_local/validacao/`

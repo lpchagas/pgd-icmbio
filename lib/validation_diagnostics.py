@@ -73,7 +73,7 @@ def diagnose_atomic(code: str, rows: list[Row]) -> list[dict[str, str]]:
 
     orphan_deliveries = sum("id_entrega" in row and not row.get("id_entrega") for row in rows)
     if orphan_deliveries:
-        findings.append(_finding("ANOMALIA_DE_DADOS", f"vínculos sem entrega: {orphan_deliveries}"))
+        findings.append(_finding("ANOMALIA_DE_DADOS", f"vínculos sem entrega: {orphan_deliveries}", "alerta" if code == "G02" else "bloqueante"))
 
     reversed_dates = 0
     for row in rows:

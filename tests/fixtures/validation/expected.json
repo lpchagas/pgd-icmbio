@@ -19,34 +19,40 @@
     {"periodo": "Q1-2026", "unidade_sigla": "U2", "total_no_ciclo": 1, "score_atingimento_perc": 100.0}
   ],
   "I05": [
-    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "qtd_entregas_por_servidor": 2, "media_entregas_por_servidor_unidade": 1.5},
-    {"periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "qtd_entregas_por_servidor": 1, "media_entregas_por_servidor_unidade": 1.5}
+    {"visao": "estatistica", "periodo": "M01-2026", "unidade_sigla": "U1", "total_servidores": 2, "media_entregas_por_servidor": 1.5, "mediana_entregas_por_servidor": 1.5, "p25_entregas_por_servidor": 1.25, "p75_entregas_por_servidor": 1.75, "pct_servidores_sem_entrega": 0.0},
+    {"visao": "nominal", "periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S1", "qtd_entregas_por_servidor": 2, "media_entregas_por_servidor_unidade": 1.5},
+    {"visao": "nominal", "periodo": "M01-2026", "unidade_sigla": "U1", "id_servidor": "S2", "qtd_entregas_por_servidor": 1, "media_entregas_por_servidor_unidade": 1.5}
   ],
   "I06": [
     {"periodo": "M01-2026", "unidade_sigla": "U1", "tamanho_grupo_responsavel": "1 servidor", "total_entregas_na_categoria": 1, "total_entregas_unidade": 2, "pct_categoria": 50.0},
     {"periodo": "M01-2026", "unidade_sigla": "U1", "tamanho_grupo_responsavel": "2 servidores", "total_entregas_na_categoria": 1, "total_entregas_unidade": 2, "pct_categoria": 50.0}
   ],
   "I07": [
-    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "total_horas_planejadas_entrega": 80.0, "num_servidores_alocados": 2},
-    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "total_horas_planejadas_entrega": 20.0, "num_servidores_alocados": 1}
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "total_horas_planejadas_entrega": 80.0, "num_planos_trabalho_alocados": 2},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "total_horas_planejadas_entrega": 20.0, "num_planos_trabalho_alocados": 1},
+    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E3", "total_horas_planejadas_entrega": 28.57, "num_planos_trabalho_alocados": 1}
   ],
   "I08": [
-    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "horas_planejadas_entrega": 80.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 66.67},
-    {"periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "horas_planejadas_entrega": 20.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 16.67}
+    {"visao": "dona", "periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "horas_planejadas_entrega": 80.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 66.67},
+    {"visao": "dona", "periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "horas_planejadas_entrega": 20.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 16.67},
+    {"visao": "dona", "periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E3", "horas_planejadas_entrega": 50.0, "total_horas_disponiveis_unidade": 120.0, "proporcao_horas_perc": 41.67},
+    {"visao": "executora", "periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E1", "horas_executora": 80.0, "capacidade_executora": 120.0, "proporcao_executora_perc": 66.67},
+    {"visao": "executora", "periodo": "Q1-2026", "unidade_sigla": "U1", "id_entrega": "E2", "horas_executora": 20.0, "capacidade_executora": 120.0, "proporcao_executora_perc": 16.67},
+    {"visao": "executora", "periodo": "Q1-2026", "unidade_sigla": "U2", "id_entrega": "E3", "horas_executora": 50.0, "capacidade_executora": 100.0, "proporcao_executora_perc": 50.0}
   ],
   "I09": [
-    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "total_planos_com_avaliacao": 3, "media_nota_pt": 3.0}
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "total_planos_com_avaliacao": 3, "media_nota_pt": 3.67, "media_nota_pt_eventos": 3.0}
   ],
   "I10": [
-    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "qtd_inadequado": 1, "perc_inadequado": 20.0}
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "qtd_inadequado": 1, "perc_inadequado": 20.0, "volume_suficiente": 1}
   ],
   "I11": [
-    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "qtd_excepcional": 1, "perc_excepcional": 20.0}
+    {"periodo": "M01-2026", "unidade_sigla": "U1", "total_avaliacoes_pt": 5, "qtd_excepcional": 1, "perc_excepcional": 20.0, "volume_suficiente": 1}
   ],
   "I12": [
     {"periodo": "Q1-2026", "unidade_sigla": "U1", "media_nota_pt": 4.0, "media_nota_pe": 3.0, "diferenca_absoluta": 1.0, "diferenca_direcional": 1.0}
   ],
-  "PT_STATUS": [
+  "G01": [
     {"unidade_sigla": "U1", "status_negocio": "Aguardando avaliação", "qtd_planos": 1},
     {"unidade_sigla": "U1", "status_negocio": "Rascunho", "qtd_planos": 1}
   ]

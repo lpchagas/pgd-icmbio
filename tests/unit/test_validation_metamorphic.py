@@ -27,7 +27,7 @@ def test_pt_status_uses_atomic_consolidation_precedence_and_transition_date():
             "status_created_at": "2026-08-02T00:00:00",
         },
     ]
-    assert calculate("PT_STATUS", rows) == [
+    assert calculate("G01", rows) == [
         {"unidade_sigla": "U1", "status_negocio": "Aguardando avaliação", "qtd_planos": 1}
     ]
 

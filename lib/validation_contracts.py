@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
+import re
 from typing import Any
 
 from .csv_utils import PROJECT_ROOT
@@ -22,6 +23,67 @@ APPROVAL_STATES = (
     "REPROVADO",
     "HOMOLOGADO",
 )
+
+# Prefixo de artefato da família OCDE (decisão CGOV D01, 13.09.2026). Os
+# indicadores do MGI usarão IND_MGI_ na pasta mgi/indicadores/. O código lógico
+# de cada alvo continua sendo I01..I12: só o nome de arquivo carrega o namespace.
+OCDE_ARTIFACT_PREFIX = "IND_OCDE"
+LEGACY_OCDE_ARTIFACT_PREFIX = "IND"
+
+# Aceita I07, IND_07 (legado, anterior a 13.09.2026) e IND_OCDE_07.
+_TARGET_ALIAS = re.compile(r"^IND(?:_OCDE)?_(?=\d)")
+
+# Reconhece o número do indicador em nomes de artefato das duas gerações. Usado
+# por quem *lê* artefatos: os CSVs já entregues entre 2025-07 e 2026-08 seguem
+# com o nome antigo e precisam continuar carregando.
+OCDE_ARTIFACT_RE = re.compile(r"^IND_(?:OCDE_)?(\d{2})\.")
+
+# Prefixo de artefato da família de gestão (D17, 13.09.2026, pendente de
+# ratificação CGOV). Mesmo modelo do D01: o arquivo carrega o namespace
+# IND_GEST_XX e o código lógico é curto (G01). PT_STATUS era o código de G01 até
+# 13.09.2026 e segue aceito na CLI.
+GEST_ARTIFACT_PREFIX = "IND_GEST"
+_GEST_TARGET_ALIAS = re.compile(r"^IND_GEST_(?=\d)")
+_LEGACY_TARGET_CODES = {"PT_STATUS": "G01"}
+
+
+def ocde_artifact(number: str, suffix: str) -> str:
+    """Nome de artefato OCDE: ``ocde_artifact("07", "2_*.csv")``."""
+
+    return f"{OCDE_ARTIFACT_PREFIX}_{number}.{suffix}"
+
+
+def gest_artifact(number: str, suffix: str) -> str:
+    """Nome de artefato de gestão: ``gest_artifact("01", "2_painel_*.csv")``."""
+
+    return f"{GEST_ARTIFACT_PREFIX}_{number}.{suffix}"
+
+
+def target_artifact_prefix(code: str, family: str) -> str:
+    """Prefixo de arquivo de um alvo lógico: I07 -> IND_OCDE_07, G01 -> IND_GEST_01."""
+
+    prefix = OCDE_ARTIFACT_PREFIX if family == "ocde" else GEST_ARTIFACT_PREFIX
+    return f"{prefix}_{code[1:]}"
+
+
+def normalize_target(value: str) -> str:
+    """Normaliza um alvo informado na CLI para o código lógico (I07, G01)."""
+
+    normalized = value.strip().upper()
+    if normalized in _LEGACY_TARGET_CODES:
+        return _LEGACY_TARGET_CODES[normalized]
+    # A ordem importa: IND_GEST_01 precisa ser tratado antes do alias OCDE, que
+    # o transformaria em IGEST_01.
+    normalized = _GEST_TARGET_ALIAS.sub("G", normalized)
+    return _TARGET_ALIAS.sub("I", normalized)
+
+
+def artifact_indicator_number(name: str) -> str | None:
+    """Extrai o número do indicador de um nome de artefato, ou ``None``."""
+
+    match = OCDE_ARTIFACT_RE.match(name)
+    return match.group(1) if match else None
+
 
 COMMON_PERIOD_COLUMNS = (
     "ciclo_tipo",
@@ -136,17 +198,20 @@ def _indicator(
     *,
     period: str = "pe",
     baseline: str = "HOMOLOGACAO_INICIAL_PENDENTE",
+    formula_version: str = "2.0.0",
 ) -> ValidationTarget:
     extractors = (extractor,) if isinstance(extractor, str) else extractor
     return ValidationTarget(
         code=f"I{number}",
         family="ocde",
         name=name,
-        production_entrypoint=PROJECT_ROOT / "ocde" / "indicadores" / f"IND_{number}.1_run.py",
+        production_entrypoint=(
+            PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact(number, "1_run.py")
+        ),
         oracle_name=f"oracle_i{number}",
         atomic_extractors=extractors,
-        outputs=(OutputContract(f"IND_{number}.2_*.csv", columns, keys, metrics),),
-        formula_version="2.0.0",
+        outputs=(OutputContract(ocde_artifact(number, "2_*.csv"), columns, keys, metrics),),
+        formula_version=formula_version,
         temporal_lenses=(period,),
         supported_scopes=SCOPE_ALL,
         invariants=(
@@ -168,19 +233,21 @@ TARGETS["I01"] = ValidationTarget(
     code="I01",
     family="ocde",
     name="Proporção por regime de trabalho",
-    production_entrypoint=PROJECT_ROOT / "ocde" / "indicadores" / "IND_01.1_run.py",
+    production_entrypoint=(
+        PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact("01", "1_run.py")
+    ),
     oracle_name="oracle_i01",
     atomic_extractors=("pt_modalidade",),
     outputs=(
         OutputContract(
-            "IND_01.2_v1_*.csv",
+            ocde_artifact("01", "2_v1_*.csv"),
             _periodic("modalidade", "total_servidores", "proporcao_perc"),
             ("periodo", "modalidade"),
             ("total_servidores", "proporcao_perc"),
             view="institucional",
         ),
         OutputContract(
-            "IND_01.2_v2_*.csv",
+            ocde_artifact("01", "2_v2_*.csv"),
             _periodic(
                 "unidade_sigla", "unidade_nome", "mesogrupo", "modalidade",
                 "total_servidores", "proporcao_na_unidade_perc",
@@ -231,16 +298,51 @@ TARGETS.update({
         ("periodo", "unidade_sigla"),
         ("total_no_ciclo", "score_atingimento_perc"),
     ),
-    "I05": _indicator(
-        "05", "Distribuição de entregas por servidor", "pt_entregas_executor",
-        _periodic(
-            "unidade_sigla", "unidade_nome", "mesogrupo", "id_servidor", "nome_servidor",
-            "qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade",
-            "posicao_relativa_media",
+    # I05 tem duas visões desde a decisão CGOV D07: a nominal (restrita) e a
+    # estatística agregada, sem identificação de servidor.
+    "I05": ValidationTarget(
+        code="I05",
+        family="ocde",
+        name="Distribuição de entregas por servidor",
+        production_entrypoint=(
+            PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact("05", "1_run.py")
         ),
-        ("periodo", "unidade_sigla", "id_servidor"),
-        ("qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade"),
-        period="pt",
+        oracle_name="oracle_i05",
+        atomic_extractors=("pt_entregas_executor",),
+        outputs=(
+            OutputContract(
+                ocde_artifact("05", "2_v1_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "id_servidor", "nome_servidor",
+                    "qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade",
+                    "posicao_relativa_media",
+                ),
+                ("periodo", "unidade_sigla", "id_servidor"),
+                ("qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade"),
+                view="nominal",
+            ),
+            OutputContract(
+                ocde_artifact("05", "2_v2_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "total_servidores",
+                    "media_entregas_por_servidor", "mediana_entregas_por_servidor",
+                    "p25_entregas_por_servidor", "p75_entregas_por_servidor",
+                    "pct_servidores_sem_entrega",
+                ),
+                ("periodo", "unidade_sigla"),
+                ("total_servidores", "media_entregas_por_servidor",
+                 "mediana_entregas_por_servidor", "pct_servidores_sem_entrega"),
+                view="estatistica",
+            ),
+        ),
+        # D07: pacote de estatísticas descritivas por unidade.
+        formula_version="3.0.0",
+        temporal_lenses=("pt",),
+        supported_scopes=SCOPE_ALL,
+        invariants=(
+            "ordem_invariante", "idempotencia", "fora_da_janela_sem_efeito",
+            "soft_delete_sem_efeito", "chave_unica", "total_subtotais",
+        ),
     ),
     "I06": _indicator(
         "06", "Grau de responsabilidade por entrega", "pt_entregas_executor",
@@ -257,54 +359,97 @@ TARGETS.update({
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
             "id_plano_entrega", "inicio_vigencia_plano_entrega", "fim_vigencia_plano_entrega",
-            "total_horas_planejadas_entrega", "num_servidores_alocados",
+            "total_horas_planejadas_entrega", "num_planos_trabalho_alocados",
         ),
         ("periodo", "unidade_sigla", "id_entrega"),
-        ("total_horas_planejadas_entrega", "num_servidores_alocados"),
+        ("total_horas_planejadas_entrega", "num_planos_trabalho_alocados"),
+        # D09: rateio por dias úteis institucionais e renomeação do contador.
+        formula_version="3.0.0",
     ),
-    "I08": _indicator(
-        "08", "Proporção de horas por entrega",
-        ("pt_entregas_dono", "pt_capacidade_unidade"),
-        _periodic(
-            "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
-            "horas_planejadas_entrega", "total_horas_disponiveis_unidade",
-            "proporcao_horas_perc",
+    # I08 tem duas visões desde a decisão CGOV D10 e, por isso, não usa o
+    # atalho _indicator (que declara um único contrato de saída).
+    "I08": ValidationTarget(
+        code="I08",
+        family="ocde",
+        name="Proporção de horas por entrega",
+        production_entrypoint=(
+            PROJECT_ROOT / "ocde" / "indicadores" / ocde_artifact("08", "1_run.py")
         ),
-        ("periodo", "unidade_sigla", "id_entrega"),
-        ("horas_planejadas_entrega", "total_horas_disponiveis_unidade", "proporcao_horas_perc"),
+        oracle_name="oracle_i08",
+        atomic_extractors=("pt_entregas_dono", "pt_capacidade_unidade"),
+        outputs=(
+            OutputContract(
+                ocde_artifact("08", "2_v1_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
+                    "horas_planejadas_entrega", "total_horas_disponiveis_unidade",
+                    "proporcao_horas_perc",
+                ),
+                ("periodo", "unidade_sigla", "id_entrega"),
+                ("horas_planejadas_entrega", "total_horas_disponiveis_unidade",
+                 "proporcao_horas_perc"),
+                view="dona",
+            ),
+            OutputContract(
+                ocde_artifact("08", "2_v2_*.csv"),
+                _periodic(
+                    "unidade_sigla", "unidade_nome", "mesogrupo", "id_entrega", "nome_entrega",
+                    "horas_executora", "capacidade_executora", "proporcao_executora_perc",
+                ),
+                ("periodo", "unidade_sigla", "id_entrega"),
+                ("horas_executora", "capacidade_executora", "proporcao_executora_perc"),
+                view="executora",
+            ),
+        ),
+        # D09 (dias úteis) + D10 (dupla perspectiva).
+        formula_version="3.0.0",
+        temporal_lenses=("pe",),
+        supported_scopes=SCOPE_ALL,
+        invariants=(
+            "ordem_invariante", "idempotencia", "fora_da_janela_sem_efeito",
+            "soft_delete_sem_efeito", "chave_unica", "total_subtotais",
+        ),
     ),
     "I09": _indicator(
         "09", "Média da avaliação do PT", "avaliacoes_pt",
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "total_avaliacoes_pt",
             "total_planos_com_avaliacao", "total_servidores_avaliados", "media_nota_pt",
+            "media_nota_pt_eventos",
             "nota_minima", "nota_maxima", "qtd_nota_1", "qtd_nota_2", "qtd_nota_3",
             "qtd_nota_4", "qtd_nota_5", "faixa_desempenho",
         ),
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "total_planos_com_avaliacao", "media_nota_pt"),
         period="pt",
+        # D11: média das médias por plano de trabalho.
+        formula_version="3.0.0",
     ),
     "I10": _indicator(
         "10", "Percentual de avaliações inadequadas", "avaliacoes_pt",
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "total_avaliacoes_pt",
             "total_servidores_avaliados", "qtd_inadequado", "perc_inadequado", "nivel_alerta",
+            "volume_suficiente",
         ),
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "qtd_inadequado", "perc_inadequado"),
         period="pt",
+        # D12: volumetria exportada como limitador analítico.
+        formula_version="3.0.0",
     ),
     "I11": _indicator(
         "11", "Percentual de avaliações excepcionais", "avaliacoes_pt",
         _periodic(
             "unidade_sigla", "unidade_nome", "mesogrupo", "total_avaliacoes_pt",
             "total_servidores_avaliados", "qtd_excepcional", "perc_excepcional",
-            "nivel_reconhecimento",
+            "nivel_reconhecimento", "volume_suficiente",
         ),
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "qtd_excepcional", "perc_excepcional"),
         period="pt",
+        # D12: volumetria exportada como limitador analítico.
+        formula_version="3.0.0",
     ),
     "I12": _indicator(
         "12", "Coerência entre avaliação PT e PE", ("avaliacoes_pt", "avaliacoes_pe"),
@@ -319,35 +464,85 @@ TARGETS.update({
     ),
 })
 
-TARGETS["PT_STATUS"] = ValidationTarget(
-    code="PT_STATUS",
+TARGETS["G01"] = ValidationTarget(
+    code="G01",
     family="gestao",
-    name="Situação operacional dos Planos de Trabalho",
-    production_entrypoint=PROJECT_ROOT / "gestao" / "PT_STATUS.1_run.py",
-    oracle_name="oracle_pt_status",
+    name="Situação dos Planos de Trabalho",
+    production_entrypoint=PROJECT_ROOT / "gestao" / "IND_GEST_01" / "IND_GEST_01.1_run.py",
+    oracle_name="oracle_ind_gest_01",
     atomic_extractors=("pt_status_planos", "pt_status_consolidacoes", "pt_status_transicoes"),
     outputs=(
         OutputContract(
-            "PT_STATUS.2_painel_*.csv",
+            gest_artifact("01", "2_painel_*.csv"),
             ("unidade_sigla", "status_negocio", "qtd_planos"),
             ("unidade_sigla", "status_negocio"),
             ("qtd_planos",),
             view="painel",
         ),
     ),
-    formula_version="2.0.0",
+    # D14 (3.0.0): identificação nominal nos produtos internos da unidade.
+    # D17 (4.0.0): universo inclui concluídos com período aguardando avaliação.
+    formula_version="4.0.0",
     temporal_lenses=("operacional",),
     supported_scopes=SCOPE_ALL,
-    invariants=("precedencia_consolidacao", "fallback_data_status", "total_subtotais"),
+    invariants=(
+        "precedencia_consolidacao", "fallback_data_status", "total_subtotais",
+        "uma_linha_por_plano",
+    ),
+    privacy_class="ambos",
+)
+
+TARGETS["G02"] = ValidationTarget(
+    code="G02",
+    family="gestao",
+    name="Execução das Entregas",
+    production_entrypoint=PROJECT_ROOT / "gestao" / "IND_GEST_02" / "IND_GEST_02.1_run.py",
+    oracle_name="oracle_ind_gest_02",
+    atomic_extractors=("g02_entregas", "g02_progressos", "g02_planos", "g02_vinculos", "g02_atividades"),
+    outputs=(
+        OutputContract(
+            gest_artifact("02", "2_entregas_*.csv"),
+            (
+                "visao", "periodo", "periodo_inicio", "periodo_fim", "unidade_sigla",
+                "unidade_dona_sigla", "unidade_executora_sigla", "id_entrega",
+                "nome_entrega", "meta_planejada", "progresso_historico",
+                "taxa_atingimento_perc", "total_registros_execucao",
+                "data_ultimo_registro", "total_planos_trabalho", "total_servidores",
+                "total_vinculos", "forca_trabalho_media_perc", "atividades_total",
+                "atividades_iniciadas", "atividades_concluidas", "horas_planejadas",
+                "horas_despendidas", "situacao_cobertura", "situacao_reconciliacao",
+            ),
+            ("visao", "periodo", "unidade_sigla", "id_entrega"),
+            (
+                "meta_planejada", "progresso_historico", "taxa_atingimento_perc",
+                "total_registros_execucao", "total_planos_trabalho", "total_servidores",
+                "total_vinculos", "atividades_total", "atividades_concluidas",
+                "horas_planejadas", "horas_despendidas",
+            ),
+            view="entregas",
+            allow_empty=True,
+        ),
+    ),
+    formula_version="1.0.0",
+    temporal_lenses=("acumulada", "operacional"),
+    supported_scopes=SCOPE_ALL,
+    invariants=(
+        "corte_historico_pe", "fotografia_pt_nao_retroativa", "cobertura_integral_servidores",
+        "unidades_dona_e_executora_preservadas", "reconciliacao_transparente", "sem_score_sintetico",
+    ),
     privacy_class="ambos",
 )
 
 
 def selected_targets(family: str = "todas", target: str = "todos") -> list[ValidationTarget]:
-    normalized = target.strip().upper().replace("IND_", "I")
-    if normalized not in {"TODOS", *TARGETS}:
-        raise ValueError(f"Alvo de validação desconhecido: {target}")
-    values = list(TARGETS.values()) if normalized == "TODOS" else [TARGETS[normalized]]
+    requested = [normalize_target(item) for item in target.split(",") if item.strip()]
+    if requested == ["TODOS"]:
+        values = list(TARGETS.values())
+    else:
+        unknown = [item for item in requested if item not in TARGETS]
+        if unknown:
+            raise ValueError(f"Alvo de validação desconhecido: {', '.join(unknown)}")
+        values = [TARGETS[item] for item in requested]
     if family != "todas":
         values = [item for item in values if item.family == family]
     return [item for item in values if item.enabled_in_monthly_cycle]

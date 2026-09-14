@@ -11,7 +11,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_setembro_exclui_q3_e_m09(tmp_path):
-    path = tmp_path / "IND_02.2_teste.csv"
+    path = tmp_path / "IND_OCDE_02.2_teste.csv"
     with path.open("w", encoding="utf-8", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=[
             "periodo", "periodo_inicio", "periodo_fim", "periodo_status", "total_no_ciclo", "total_concluidas"
