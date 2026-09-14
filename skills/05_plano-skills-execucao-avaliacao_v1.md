@@ -97,7 +97,7 @@ derivação de regras, no mesmo critério de `natureza` usado pelo S01
 | D9 | *Acórdão TCU 2082/2022* (pasta ENAP) | TCU | Norma (controle externo) | Fundamenta a exigência de rastreabilidade e evidência dos registros |
 | D10 | Exercícios do curso de Avaliação (`exercio-m1.pdf`, `exercio-m2.pdf`) | Enap | Exemplo | **Não processáveis:** PDFs sem camada de texto (digitalizados). Ver Q4 na Seção 12 |
 
-Documentos internos do projeto usados como referência de conformidade: `proposta-projeto-v6.md`,
+Documentos internos do projeto usados como referência de conformidade: `docs/projeto-v6/00_proposta-projeto-v6.md`,
 `AT-01`, `ADR-006`, `src/dados/schema.sql`, `skills/01`–`skills/04`, e as skills Cowork
 sincronizadas `cgov-registro-execucao` e `cgov-avaliar-entrega`.
 

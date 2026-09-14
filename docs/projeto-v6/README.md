@@ -1,7 +1,7 @@
 # Portal documental da proposta v6
 
 Este diretório reúne os capítulos vinculantes da
-[`proposta-projeto-v6.md`](../../proposta-projeto-v6.md). O conjunto é autocontido: as
+[`00_proposta-projeto-v6.md`](00_proposta-projeto-v6.md). O conjunto é autocontido: as
 propostas anteriores não são necessárias para desenvolver, testar ou operar o projeto.
 
 ## Trilha rápida por público

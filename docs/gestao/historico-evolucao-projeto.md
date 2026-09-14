@@ -1,6 +1,6 @@
 # Histórico de evolução — orientação de compatibilidade
 
-O conteúdo vigente foi consolidado na [proposta v6](../../proposta-projeto-v6.md) e nos
+O conteúdo vigente foi consolidado na [proposta v6](../projeto-v6/00_proposta-projeto-v6.md) e nos
 [capítulos vinculantes](../projeto-v6/README.md). Este arquivo existe para preservar links
 antigos e orientar leitores; não é normativo.
 

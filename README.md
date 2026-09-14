@@ -6,7 +6,7 @@ planejamento, pactuação, execução, avaliação e aprendizagem.
 
 ## Documentação vigente
 
-- [Proposta de projeto v6](proposta-projeto-v6.md) — visão completa e normativa.
+- [Proposta de projeto v6](docs/projeto-v6/00_proposta-projeto-v6.md) — visão completa e normativa.
 - [Portal da v6](docs/projeto-v6/README.md) — capítulos por público e assunto.
 - [Catálogo S01–S24](docs/projeto-v6/03-catalogo-skills-s01-s24.md).
 - [Especificações das skills](skills/specs/README.md).
@@ -65,8 +65,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File src\dados\backup.ps1
 ## Estrutura
 
 ```text
-proposta-projeto-v6.md       Documento normativo principal
-docs/projeto-v6/             Nove capítulos vinculantes
+docs/projeto-v6/             Proposta v6 (00_, normativa) e nove capítulos vinculantes
 docs/gestao/                 Fontes, glossários, riscos, decisões e validações
 docs/tecnologia/             AT-01, AT-02 e referências técnicas
 docs/referencias-pgd/        Acervo local; somente README é versionado

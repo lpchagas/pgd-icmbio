@@ -2,7 +2,7 @@
 
 **Versão:** 1.0 — **APROVADO em 26.07.2026** (decisões D1–D4 conforme recomendado; ver ADR-006) | **Data:** 26.07.2026
 **Série:** AT (Tecnologia) — governança de artefatos da proposta v3, §5.1
-**Insumo histórico incorporado em:** `proposta-projeto-v6.md` e ADR-006
+**Insumo histórico incorporado em:** `docs/projeto-v6/00_proposta-projeto-v6.md` e ADR-006
 **Fontes:** introspecção JDBC do banco `petrvs_icmbio` via Denodo (documentada em
 `pgd-ocde-icmbio/docs/07-estrutura-banco-dados.md`, 24.05.2026); artefato
 `03_especificacao-funcional-skills_v2.md`, §5 e §16.2; síntese vigente na proposta v6.

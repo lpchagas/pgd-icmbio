@@ -2,14 +2,14 @@
 
 **Última revisão:** 23.08.2026
 
-O documento vigente é a [proposta v6](../proposta-projeto-v6.md). O
+O documento vigente é a [proposta v6](projeto-v6/00_proposta-projeto-v6.md). O
 [portal v6](projeto-v6/README.md) organiza os capítulos vinculantes. Propostas anteriores
 foram consolidadas e não são necessárias.
 
 ## Trilha para analistas de negócio
 
 1. [Glossário institucional](gestao/glossario-institucional.md).
-2. [Proposta v6](../proposta-projeto-v6.md), seções 2–6.
+2. [Proposta v6](projeto-v6/00_proposta-projeto-v6.md), seções 2–6.
 3. [Catálogo S01–S24](projeto-v6/03-catalogo-skills-s01-s24.md).
 4. [Índice das fontes PGD](referencias-pgd/README.md).
 5. [Fontes institucionais e Q5](gestao/fontes-institucionais.md).
@@ -28,7 +28,7 @@ foram consolidadas e não são necessárias.
 
 | Necessidade | Documento |
 | --- | --- |
-| Entender o produto | [Proposta v6](../proposta-projeto-v6.md) |
+| Entender o produto | [Proposta v6](projeto-v6/00_proposta-projeto-v6.md) |
 | Ver cronograma de 104 semanas | [Cronograma](projeto-v6/04-cronograma-capacidade-marcos.md) |
 | Implementar uma skill | [Fichas S01–S24](../skills/specs/README.md) |
 | Aprovar fontes/Q5 | [Fontes institucionais](gestao/fontes-institucionais.md) |

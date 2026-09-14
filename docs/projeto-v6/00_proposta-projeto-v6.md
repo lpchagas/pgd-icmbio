@@ -17,15 +17,15 @@
 
 Esta é a porta de entrada normativa do projeto. Ela explica o produto, a arquitetura, o
 catálogo S01–S24, o cronograma e os controles essenciais. Detalhes de implementação e
-operação estão no [portal da v6](docs/projeto-v6/README.md).
+operação estão no [portal da v6](README.md).
 
 | Perfil | Comece por | Depois consulte |
 | --- | --- | --- |
-| Gestor ou patrocinador | Seções 2, 3, 6 e 11 | [Visão e governança](docs/projeto-v6/01-visao-produto-governanca.md) |
-| Analista de negócio | Seções 4, 8 e 12 | [Catálogo S01–S24](docs/projeto-v6/03-catalogo-skills-s01-s24.md) |
-| Desenvolvedor | Seções 7, 9 e 13 | [Arquitetura](docs/projeto-v6/02-arquitetura-tecnologia-dados.md) e [qualidade](docs/projeto-v6/05-qualidade-testes-aceite.md) |
-| Pessoa nova no projeto | Seções 1 a 5 | [Operação e capacitação](docs/projeto-v6/07-operacao-capacitacao.md) |
-| Auditor ou encarregado de dados | Seções 10, 13 e 14 | [Segurança, privacidade e fontes](docs/projeto-v6/06-seguranca-privacidade-fontes.md) |
+| Gestor ou patrocinador | Seções 2, 3, 6 e 11 | [Visão e governança](01-visao-produto-governanca.md) |
+| Analista de negócio | Seções 4, 8 e 12 | [Catálogo S01–S24](03-catalogo-skills-s01-s24.md) |
+| Desenvolvedor | Seções 7, 9 e 13 | [Arquitetura](02-arquitetura-tecnologia-dados.md) e [qualidade](05-qualidade-testes-aceite.md) |
+| Pessoa nova no projeto | Seções 1 a 5 | [Operação e capacitação](07-operacao-capacitacao.md) |
+| Auditor ou encarregado de dados | Seções 10, 13 e 14 | [Segurança, privacidade e fontes](06-seguranca-privacidade-fontes.md) |
 
 ### 1.1. Hierarquia e precedência
 
@@ -229,7 +229,7 @@ confirmação, que também é registrada.
 | RAG | não implementado | local, citável e governado | Q5 e pipeline seguro |
 | Interface Microsoft | experimental | canal institucional opcional | licença e autorização futuras |
 
-Detalhes: [arquitetura, tecnologia e dados](docs/projeto-v6/02-arquitetura-tecnologia-dados.md).
+Detalhes: [arquitetura, tecnologia e dados](02-arquitetura-tecnologia-dados.md).
 
 ## 8. Catálogo S01–S24
 
@@ -242,8 +242,8 @@ Detalhes: [arquitetura, tecnologia e dados](docs/projeto-v6/02-arquitetura-tecno
 | 5 — Execução e avaliação | S21, S22, S23, S24 | ciclo completo de PE e PT |
 
 O catálogo completo, os nomes canônicos e as dependências estão em
-[Catálogo S01–S24](docs/projeto-v6/03-catalogo-skills-s01-s24.md). As fichas operacionais
-ficam em [`skills/specs/`](skills/specs/README.md).
+[Catálogo S01–S24](03-catalogo-skills-s01-s24.md). As fichas operacionais
+ficam em [`skills/specs/`](../../skills/specs/README.md).
 
 ## 9. Interfaces planejadas
 
@@ -276,7 +276,7 @@ O vocabulário será confirmado nos contratos Pydantic durante a implementação
 | Sigiloso ou `99_restrito` | Segregado | Proibido |
 
 Q5 permanece pendente. Uma fonte só é promovida ao S01 após conferência, validação humana,
-ata e atualização do índice. Consulte [Segurança, privacidade e fontes](docs/projeto-v6/06-seguranca-privacidade-fontes.md).
+ata e atualização do índice. Consulte [Segurança, privacidade e fontes](06-seguranca-privacidade-fontes.md).
 
 ## 11. Cronograma-base
 
@@ -294,7 +294,7 @@ máximo duas skills em andamento e revisão bimestral.
 | Estabilização | 93–104 | jun.–ago./2028 | regressão S01–S24 e piloto integrado |
 
 Com 8 horas semanais, a previsão é 30–34 meses; com 20 horas, 15–17 meses. O detalhamento
-por ciclo está em [Cronograma, capacidade e marcos](docs/projeto-v6/04-cronograma-capacidade-marcos.md).
+por ciclo está em [Cronograma, capacidade e marcos](04-cronograma-capacidade-marcos.md).
 
 ## 12. Governança e responsabilidades
 
@@ -321,11 +321,11 @@ passos, a revisão de privacidade e a documentação operacional estiverem regis
 
 Testes abrangem unidade, contrato, integração, regressão, persistência, imutabilidade,
 segurança, LGPD, RAG, Denodo, ambiguidade, conflito normativo, autorização, backup e
-desempenho local. Consulte [Qualidade, testes e aceite](docs/projeto-v6/05-qualidade-testes-aceite.md).
+desempenho local. Consulte [Qualidade, testes e aceite](05-qualidade-testes-aceite.md).
 
 ## 14. Riscos, decisões e questões
 
-O registro ativo é [`docs/gestao/riscos.md`](docs/gestao/riscos.md). Os riscos centrais
+O registro ativo é [`docs/gestao/riscos.md`](../gestao/riscos.md). Os riscos centrais
 são alucinação, exposição de dados, conflito normativo, perda de histórico, indisponibilidade
 local, sobrecarga individual, expansão de escopo e dependência de validação humana.
 
@@ -334,7 +334,7 @@ o ADR-008 formaliza a estratégia individual, local-first e S01–S24 em ondas.
 
 Questões abertas nunca são preenchidas como fatos. Q5, validação do modelo comum, datas e
 regras institucionais sem fonte continuam visíveis no
-[registro de rastreabilidade](docs/projeto-v6/08-rastreabilidade-decisoes-riscos.md).
+[registro de rastreabilidade](08-rastreabilidade-decisoes-riscos.md).
 
 ## 15. Estado do projeto
 
@@ -372,17 +372,17 @@ institucional.
 
 | Documento | Conteúdo |
 | --- | --- |
-| [Portal v6](docs/projeto-v6/README.md) | navegação e precedência |
-| [01 — Visão e governança](docs/projeto-v6/01-visao-produto-governanca.md) | produto, escopo, EAP e RACI |
-| [02 — Arquitetura](docs/projeto-v6/02-arquitetura-tecnologia-dados.md) | tecnologia, dados e integrações |
-| [03 — Catálogo](docs/projeto-v6/03-catalogo-skills-s01-s24.md) | S01–S24 e dependências |
-| [04 — Cronograma](docs/projeto-v6/04-cronograma-capacidade-marcos.md) | 104 semanas e capacidade |
-| [05 — Qualidade](docs/projeto-v6/05-qualidade-testes-aceite.md) | testes, métricas e aceite |
-| [06 — Segurança](docs/projeto-v6/06-seguranca-privacidade-fontes.md) | LGPD, fontes e serviços externos |
-| [07 — Operação](docs/projeto-v6/07-operacao-capacitacao.md) | tutoriais e runbooks |
-| [08 — Rastreabilidade](docs/projeto-v6/08-rastreabilidade-decisoes-riscos.md) | decisões, riscos e pendências |
-| [09 — Evolução](docs/projeto-v6/09-memoria-evolucao.md) | memória v1→v6 |
-| [AT-01](docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md) | esquema PETRVS/MySQL |
+| [Portal v6](README.md) | navegação e precedência |
+| [01 — Visão e governança](01-visao-produto-governanca.md) | produto, escopo, EAP e RACI |
+| [02 — Arquitetura](02-arquitetura-tecnologia-dados.md) | tecnologia, dados e integrações |
+| [03 — Catálogo](03-catalogo-skills-s01-s24.md) | S01–S24 e dependências |
+| [04 — Cronograma](04-cronograma-capacidade-marcos.md) | 104 semanas e capacidade |
+| [05 — Qualidade](05-qualidade-testes-aceite.md) | testes, métricas e aceite |
+| [06 — Segurança](06-seguranca-privacidade-fontes.md) | LGPD, fontes e serviços externos |
+| [07 — Operação](07-operacao-capacitacao.md) | tutoriais e runbooks |
+| [08 — Rastreabilidade](08-rastreabilidade-decisoes-riscos.md) | decisões, riscos e pendências |
+| [09 — Evolução](09-memoria-evolucao.md) | memória v1→v6 |
+| [AT-01](../tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md) | esquema PETRVS/MySQL |
 | AT-02 | análise de recursos e arquitetura local-first, incorporada nesta revisão |
 
 ## 19. Glossário mínimo
@@ -401,8 +401,8 @@ institucional.
 | Skill | capacidade executável com entradas, regras, saídas e testes definidos |
 | Tool calling | chamada controlada a uma função ou fonte de dados |
 
-Glossários completos: [técnico](docs/gestao/glossario-tecnico.md) e
-[institucional](docs/gestao/glossario-institucional.md).
+Glossários completos: [técnico](../gestao/glossario-tecnico.md) e
+[institucional](../gestao/glossario-institucional.md).
 
 ## 20. Critério de vigência
 

@@ -2,7 +2,7 @@
 
 **Última revisão de status:** 23.08.2026
 
-> Este é o registro ativo vinculado à [`proposta-projeto-v6.md`](../../proposta-projeto-v6.md).
+> Este é o registro ativo vinculado à [`00_proposta-projeto-v6.md`](../projeto-v6/00_proposta-projeto-v6.md).
 > A v6 consolidou RP01–RP24 e acrescentou os riscos do desenvolvimento individual,
 > serviços pessoais e adoção institucional. Atualize a coluna **Status** conforme forem
 > mitigados, materializados ou encerrados; não edite o histórico de identificação

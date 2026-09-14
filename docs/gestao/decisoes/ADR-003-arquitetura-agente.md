@@ -2,7 +2,7 @@
 
 **Data:** registrada nas revisões iniciais | **Estado:** aprovada; escolhas de orquestrador/interface revisadas pelo ADR-008
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos vigentes:** [Proposta v6](../../../proposta-projeto-v6.md) e
+**Documentos vigentes:** [Proposta v6](../../projeto-v6/00_proposta-projeto-v6.md) e
 [arquitetura](../../projeto-v6/02-arquitetura-tecnologia-dados.md)
 
 > **Nota de reconstrução:** este ADR formaliza decisões já tomadas e documentadas em v1–v3,

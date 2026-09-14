@@ -2,7 +2,7 @@
 
 **Data:** registrada nas revisões iniciais | **Estado:** princípio vigente; ferramentas específicas revisadas pelo ADR-008
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos vigentes:** [Proposta v6](../../../proposta-projeto-v6.md),
+**Documentos vigentes:** [Proposta v6](../../projeto-v6/00_proposta-projeto-v6.md),
 [segurança e fontes](../../projeto-v6/06-seguranca-privacidade-fontes.md) e ADR-008
 
 > **Nota de reconstrução:** este ADR formaliza uma decisão já registrada em v1/v2 e
