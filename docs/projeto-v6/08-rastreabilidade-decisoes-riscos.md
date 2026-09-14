@@ -46,7 +46,7 @@ IDs não são reutilizados. Renumeração exige tabela de correspondência.
 | ID | Questão | Destinatário | Bloqueia | Status/evidência necessária |
 | --- | --- | --- | --- | --- |
 | Q05 | Quais fontes entram no registro/RAG inicial? | analistas/autoridade | G1 | pendente, exige validação e ata |
-| Q17 | Qual calendário institucional deve alimentar prazos futuros? | CGGE | S21–S24 | configuração validada |
+| Q17 | Qual calendário institucional deve alimentar prazos futuros? Em 14.09.2026 a nomenclatura foi fixada (Q1–Q3 são quadrimestres, sem Q4) e adotou-se Q2 = 01/05–31/08; falta a CGGE confirmar as datas publicadas, que divergem | CGGE | S21–S24 | configuração validada |
 | Q18 | Faixa percentual CGOV será mantida, revista ou descartada? | CGGE/CGOV | S22 | decisão como regra institucional |
 | Q19 | Medidas para conceitos 4/5 do PE | direção/CGGE | S22 | regra e fonte/decisão |
 | Q20 | Tratamento de chefia dispensada sem PT | CGGE | S21/S24 | decisão funcional |

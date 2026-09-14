@@ -5,6 +5,9 @@
 O catálogo normativo está em
 [`docs/projeto-v6/03-catalogo-skills-s01-s24.md`](../docs/projeto-v6/03-catalogo-skills-s01-s24.md)
 e as fichas operacionais em [`skills/specs/`](specs/README.md).
+Os protótipos que hoje operam no Cowork da CGOV — e que S21–S24 pretendem
+substituir — estão versionados em
+[`skills/prototipos-cowork/`](prototipos-cowork/README.md).
 
 ## Artefatos desta pasta
 

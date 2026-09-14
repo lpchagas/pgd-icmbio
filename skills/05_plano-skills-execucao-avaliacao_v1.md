@@ -180,6 +180,16 @@ Registrar em `regras_conflitos` (S01) — **não resolver silenciosamente** (reg
   internamente inconsistentes (31/04 não existe; há lacuna entre 30/07 e 01/08; a terceira
   faixa tem 5 meses). O motor de prazos **não pode** ser implementado sobre esses valores
   sem confirmação da CGGE. → **Q1**, Seção 12.
+  - **Decisão parcial de 14.09.2026 — nomenclatura, não calendário.** Os rótulos
+    `Q1/Q2/Q3` designam **quadrimestres** (três períodos de quatro meses por ano,
+    sem Q4), e não trimestres com Q4 implícito como diziam as skills-protótipo
+    `cgov-*`. As cópias corrigidas estão em `skills/prototipos-cowork/`. A
+    segmentação operacional adotada é a de `lib/periodos.py` do `pgd-ocde-icmbio`
+    — Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12 —, única
+    implementada e coberta por teste. **Isto não resolve o C-01:** as datas
+    publicadas pela CGGE continuam inconsistentes e divergem das adotadas (para
+    o segundo período, `01/05–30/07` contra `01/05–31/08`). O motor de prazos
+    segue bloqueado até a confirmação da CGGE.
 - **C-02 — Escala do PE sem consequências × escala do PT com consequências.** RN-15 × RN-32.
   A mesma nomenclatura de 5 conceitos produz efeitos jurídicos diferentes conforme o objeto
   avaliado. O modelo de dados precisa **separar as duas avaliações** (Seção 7), sob pena de

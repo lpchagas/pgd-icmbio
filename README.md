@@ -10,6 +10,7 @@ planejamento, pactuação, execução, avaliação e aprendizagem.
 - [Portal da v6](docs/projeto-v6/README.md) — capítulos por público e assunto.
 - [Catálogo S01–S24](docs/projeto-v6/03-catalogo-skills-s01-s24.md).
 - [Especificações das skills](skills/specs/README.md).
+- [Protótipos Cowork da CGOV, versionados](skills/prototipos-cowork/README.md).
 - [AT-01 — PETRVS/MySQL](docs/tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md).
 - [AT-02 — recursos e local-first](docs/tecnologia/AT-02_recursos-arquitetura-local-first_v1.md).
 - [ADRs](docs/gestao/decisoes/) e [riscos](docs/gestao/riscos.md).
@@ -70,6 +71,7 @@ docs/gestao/                 Fontes, glossários, riscos, decisões e validaçõ
 docs/tecnologia/             AT-01, AT-02 e referências técnicas
 docs/referencias-pgd/        Acervo local; somente README é versionado
 skills/specs/                Fichas S01–S24
+skills/prototipos-cowork/     Protótipos cgov-* do Cowork (cópias versionadas)
 skills/                      Insumos metodológicos/históricos
 src/dados/                   Banco, versões, sincronização e backup
 src/agente|rag|skills_engine|api/  Componentes futuros
