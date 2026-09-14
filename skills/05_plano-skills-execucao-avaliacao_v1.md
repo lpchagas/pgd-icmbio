@@ -175,21 +175,16 @@ códigos provisórios `RN-xx` para referência cruzada dentro deste documento.
 
 Registrar em `regras_conflitos` (S01) — **não resolver silenciosamente** (regra de ouro 5):
 
-- **C-01 — Datas do ciclo 2026 (D2).** A página do ciclo do PGD/ICMBio informa os
-  quadrimestres como `01/01–31/04`, `01/05–30/07` e `01/08–31/12`. As três faixas são
-  internamente inconsistentes (31/04 não existe; há lacuna entre 30/07 e 01/08; a terceira
-  faixa tem 5 meses). O motor de prazos **não pode** ser implementado sobre esses valores
-  sem confirmação da CGGE. → **Q1**, Seção 12.
-  - **Decisão parcial de 14.09.2026 — nomenclatura, não calendário.** Os rótulos
-    `Q1/Q2/Q3` designam **quadrimestres** (três períodos de quatro meses por ano,
-    sem Q4), e não trimestres com Q4 implícito como diziam as skills-protótipo
-    `cgov-*`. As cópias corrigidas estão em `skills/prototipos-cowork/`. A
-    segmentação operacional adotada é a de `lib/periodos.py` do `pgd-ocde-icmbio`
-    — Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12 —, única
-    implementada e coberta por teste. **Isto não resolve o C-01:** as datas
-    publicadas pela CGGE continuam inconsistentes e divergem das adotadas (para
-    o segundo período, `01/05–30/07` contra `01/05–31/08`). O motor de prazos
-    segue bloqueado até a confirmação da CGGE.
+- **C-01 — Datas do ciclo 2026 (D2). Decidido em 14.09.2026.** A página do ciclo do
+  PGD/ICMBio informava os quadrimestres como `01/01–31/04`, `01/05–30/07` e `01/08–31/12`,
+  faixas internamente inconsistentes (31/04 não existe; há lacuna entre 30/07 e 01/08; a
+  terceira faixa teria 5 meses). Esses valores **não são usados**.
+  - **Decisão:** `Q1/Q2/Q3` são **quadrimestres**, três por ano, sem Q4 — Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12.
+    **O Q2 termina sempre em 31/08.** É a segmentação de `lib/periodos.py` do
+    `pgd-ocde-icmbio`. As skills-protótipo `cgov-*`, que tratavam os rótulos como
+    trimestres com Q4 implícito, foram corrigidas em `skills/prototipos-cowork/`.
+    O motor de prazos recebe esse calendário por configuração. → **Q1**, Seção 12
+    (respondida).
 - **C-02 — Escala do PE sem consequências × escala do PT com consequências.** RN-15 × RN-32.
   A mesma nomenclatura de 5 conceitos produz efeitos jurídicos diferentes conforme o objeto
   avaliado. O modelo de dados precisa **separar as duas avaliações** (Seção 7), sob pena de
@@ -737,7 +732,7 @@ registrado é RP16):
 | **RP17** | **Dado sensível de saúde em intercorrência.** D1 §2.3 cita expressamente "situações de saúde" como intercorrência a registrar. Persistir isso violaria o RP06 e a governança de dados da v4 §11 | Alta × Alto | `ocorrencias.sensivel = 1`; armazenar **apenas categoria e impacto em horas**; conteúdo clínico nunca persistido; S23-T06 como teste de segurança obrigatório; orientação explícita ao participante na interface |
 | **RP18** | **Agente induzindo o conceito.** Sugestão de conceito com aparência de decisão pode enviesar a chefia e gerar contestação com efeito funcional | Média × Alto | Invariante I2; `origem_conceito` explícito; parecer não homologado ostenta marcação; justificativa sempre exigida da chefia, nunca autopreenchida sem revisão |
 | **RP19** | **Assimetria PE × PT** (C-02): tratar as duas avaliações como um só objeto levaria a oferecer recurso onde ele não existe | Média × Alto | Separação estrutural desde o modelo de dados (`avaliacoes.objeto_tipo`); testes de regressão específicos |
-| **RP20** | **Datas do ciclo 2026 inconsistentes** (C-01): o motor de prazos calcularia prazos errados | Alta × Alto | E0 bloqueia a implementação até confirmação da CGGE (**Q1**); enquanto isso, o motor recebe o calendário por configuração, não por constante |
+| **RP20** | **Datas do ciclo 2026 inconsistentes** (C-01): o motor de prazos calcularia prazos errados | Alta × Alto | **Resolvido em 14.09.2026** (C-01/Q1): Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12; o motor recebe esse calendário por configuração, não por constante |
 | **RP21** | **Faixa percentual sem lastro normativo** (A-01) migrar para o agente como se fosse norma | Média × Médio | Registro como regra institucional com fonte e vigência; rotulagem obrigatória na saída (S22-T07) |
 | **RP22** | **Uso indevido da avaliação do PGD como avaliação de desempenho anual** (RN-36) | Média × Médio | Ressalva obrigatória em todo parecer (S24-T09); menção na capacitação |
 | **RP23** | **Volume do ciclo mensal.** No ICMBio, PT mensal × N participantes × 12 meses gera carga de registro e avaliação que pode inviabilizar o uso manual da skill | Média × Médio | Processamento em lote no S18; priorizar unidades-piloto; medir tempo médio por registro no E7 |
@@ -783,7 +778,7 @@ Uma skill do bloco S21–S24 só é considerada pronta quando:
 
 | # | Questão | Destinatário | Bloqueia |
 | - | ------- | ------------ | -------- |
-| **Q1** | Quais são exatamente as datas dos quadrimestres do PE em 2026? A página do ciclo informa `01/01–31/04`, `01/05–30/07` e `01/08–31/12`, faixas internamente inconsistentes (C-01) | CGGE | E0, E1 (motor de prazos) |
+| **Q1** | Quais são exatamente as datas dos quadrimestres do PE em 2026? **Respondida em 14.09.2026:** Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12; o Q2 termina sempre em 31/08 (C-01) | — | nenhum |
 | **Q2** | A faixa percentual usada hoje pela CGOV (`≥ 80 % = Adequado`) deve ser adotada como regra institucional do ICMBio, revista ou descartada? (A-01) | CGGE / CGOV | E0, E4 |
 | **Q3** | Qual a política interna de medidas corretivas para conceitos 4 e 5 no **Plano de Entregas**, já que a IN 24/2023 não a estabelece (RN-15)? | CGGE / Direção | E4 |
 | **Q4** | Os exercícios `exercio-m1.pdf` e `exercio-m2.pdf` do curso de Avaliação estão digitalizados sem camada de texto. Existe versão pesquisável, ou devem ser processados por OCR para compor os conjuntos anotados? | Solicitante | E1 (conjuntos anotados) |

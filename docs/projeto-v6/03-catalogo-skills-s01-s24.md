@@ -234,7 +234,7 @@ institucionais devem ser confirmadas em Q5; a tabela não constitui aprovação.
 
 ### 11.1. Conflitos obrigatórios
 
-- C-01: calendário 2026 inconsistente; motor recebe configuração validada.
+- C-01: calendário 2026 decidido em 14.09.2026 (Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12); motor recebe essa configuração.
 - C-02: conceitos de PE e PT têm efeitos distintos; avaliações ficam separadas.
 - C-03: conclusão de PE depende da situação dos ciclos mensais de PT.
 - A-01: faixa percentual CGOV é regra institucional, não norma.

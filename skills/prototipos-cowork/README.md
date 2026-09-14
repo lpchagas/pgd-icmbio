@@ -34,7 +34,8 @@ implícito — resíduo do ciclo trimestral de 2025.
 
 O peso 0,33 por período sempre esteve correto; o rótulo é que não.
 
-A divergência com o calendário publicado pela CGGE (C-01 / RP20 / Q17) **não**
-foi resolvida por esta correção e segue aberta — ver
+O calendário também foi decidido em 14.09.2026 (C-01 / RP20 / Q17): as datas
+acima são definitivas e **o Q2 termina sempre em 31/08**. A página da CGGE, com
+faixas inconsistentes, não é usada — ver
 [`../05_plano-skills-execucao-avaliacao_v1.md`](../05_plano-skills-execucao-avaliacao_v1.md),
 seção de conflitos.

@@ -252,10 +252,7 @@ o rótulo "trimestre" é que era resíduo do ciclo trimestral de 2025, que de fa
 usava T1–T4. A segmentação acima é a implementada e testada em
 `lib/periodos.py` do projeto `pgd-ocde-icmbio`.
 
-**Divergência que permanece aberta (C-01 / RP20 / Q17).** A página do ciclo
-publicada pela CGGE informa as faixas como `01/01–31/04`, `01/05–30/07` e
-`01/08–31/12` — internamente inconsistentes (31/04 não existe; há lacuna entre
-30/07 e 01/08; a terceira faixa tem cinco meses). Para o segundo período a
-diferença é material: `01/05–30/07` (CGGE) contra `01/05–31/08` (adotado aqui).
-A confirmação formal da CGGE segue pendente — ao usar estes períodos em ato
-oficial, confira o recorte.
+**Calendário decidido (C-01 / RP20 / Q17 — 14.09.2026).** As datas da tabela
+acima são definitivas: **o Q2 termina sempre em 31/08**. A página do ciclo
+publicada pela CGGE, com faixas internamente inconsistentes (`01/01–31/04`,
+`01/05–30/07`, `01/08–31/12`), não é usada como referência.
