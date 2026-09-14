@@ -27,6 +27,7 @@ class ManagementExtraction:
     invariants: tuple[str, ...]
     tolerances: dict[str, float]
     baseline: str
+    report_adapter: str
 
     @property
     def artifact_prefix(self) -> str:
@@ -53,6 +54,8 @@ class ManagementExtraction:
             "HOMOLOGACAO_INICIAL_PENDENTE", "HOMOLOGADO"
         }:
             problems.append("baseline inválida")
+        if self.enabled_in_monthly_cycle and not self.report_adapter:
+            problems.append("adaptador de apresentação ausente")
         return problems
 
 
@@ -81,7 +84,28 @@ REGISTRY: dict[str, ManagementExtraction] = {
         invariants=TARGETS["G01"].invariants,
         tolerances={"counts": 0.0, "percentages": 0.05},
         baseline="HOMOLOGACAO_INICIAL_PENDENTE",
-    )
+        report_adapter="g01_status_pt",
+    ),
+    "execucao-entregas": ManagementExtraction(
+        code="G02",
+        name="Execução das Entregas",
+        entrypoint=TARGETS["G02"].production_entrypoint,
+        temporal_lenses=("acumulada", "operacional"),
+        supported_scopes=("nacional", "regional", "unidade", "mesogrupo", "tipo-unidade", "lista-unidades"),
+        output_schema="IND_GEST_02.v1",
+        privacy_class="ambos",
+        contains_narrative=True,
+        enabled_in_monthly_cycle=True,
+        oracle_entrypoint=PROJECT_ROOT / "lib" / "validation_oracles.py",
+        atomic_extractors=TARGETS["G02"].atomic_extractors,
+        business_keys=("visao", "periodo", "unidade_sigla", "id_entrega"),
+        validation_schema="IND_GEST_02.validation.v1",
+        formula_version=TARGETS["G02"].formula_version,
+        invariants=TARGETS["G02"].invariants,
+        tolerances={"counts": 0.0, "percentages": 0.05, "hours": 0.01},
+        baseline="HOMOLOGACAO_INICIAL_PENDENTE",
+        report_adapter="g02_execucao_entregas",
+    ),
 }
 
 

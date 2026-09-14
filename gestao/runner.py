@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 from lib.auditoria import minimal_subprocess_env, redact_log
 from lib.csv_utils import PROJECT_ROOT
+from lib.escopos import slug
 from lib.estrutura_organizacional import load_organization_structure
 from lib.periodos import ANALYSIS_TIMEZONE, configure_execution_context
 
@@ -53,6 +54,7 @@ def build_parser() -> argparse.ArgumentParser:
     _scope_group(parser)
     parser.add_argument("--produto", default="restrito", choices=("restrito", "compartilhavel"))
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--usar-existentes", action="store_true", help="Reconcilia artefatos já gerados no mesmo escopo.")
     return parser
 
 
@@ -94,7 +96,8 @@ def run(argv: list[str] | None = None) -> dict:
         raise RuntimeError("Registro de gestão inválido: " + "; ".join(registry_problems))
     window = configure_execution_context(args.data_execucao)
     scope_label, units = _scope_units(args)
-    output_dir = PROJECT_ROOT / "artefatos_local" / "gestao" / window.mes_execucao
+    scope_key = "nacional-nacional" if scope_label == "nacional" else "-".join(slug(part) for part in scope_label.split(":", 1))
+    output_dir = PROJECT_ROOT / "artefatos_local" / "gestao" / window.mes_execucao / "escopos" / scope_key
     selected = enabled_extractions() if args.analise == "todas" else [REGISTRY[args.analise]]
     requested_lenses = {"acumulada", "operacional"} if args.lente == "ambas" else {args.lente}
     results: list[dict] = []
@@ -107,6 +110,24 @@ def run(argv: list[str] | None = None) -> dict:
                 "codigo": extraction.code,
                 "status": "nao_aplicavel",
                 "motivo": "A análise não oferece a lente solicitada.",
+            })
+            continue
+        if args.usar_existentes:
+            candidates = sorted(output_dir.glob(f"{extraction.artifact_prefix}.2_*_{args.produto}_*.csv"), key=lambda path: (path.stat().st_mtime_ns, path.name)) if output_dir.exists() else []
+            # Mantém somente a versão mais recente de cada visão (painel, detalhe,
+            # entregas, histórico ou nominal), sem atravessar o diretório do escopo.
+            latest_by_view: dict[str, Path] = {}
+            for path in candidates:
+                view = path.name.split(".2_", 1)[1].split(f"_{args.produto}_", 1)[0]
+                latest_by_view[view] = path
+            files = [_inspect_csv(path) for path in latest_by_view.values()]
+            results.append({
+                "codigo": extraction.code, "nome": extraction.name, "lentes": lenses,
+                "status": "sucesso" if files else "erro_sem_artefato",
+                "schema": extraction.output_schema, "privacidade": args.produto,
+                "contem_narrativa": extraction.contains_narrative,
+                "adaptador_relatorio": extraction.report_adapter,
+                "arquivos": files, "erro": "",
             })
             continue
         before = set(output_dir.glob(f"{extraction.artifact_prefix}.2_*.csv")) if output_dir.exists() else set()
@@ -142,6 +163,7 @@ def run(argv: list[str] | None = None) -> dict:
             "schema": extraction.output_schema,
             "privacidade": args.produto,
             "contem_narrativa": extraction.contains_narrative,
+            "adaptador_relatorio": extraction.report_adapter,
             "arquivos": files,
             "erro": redact_log(completed.stderr[-1000:]) if completed.returncode else "",
         })
@@ -152,9 +174,10 @@ def run(argv: list[str] | None = None) -> dict:
         **window.as_dict(),
         "data_hora_extracao": datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)).isoformat(timespec="seconds"),
         "lentes_solicitadas": sorted(requested_lenses),
-        "escopo": scope_label,
+        "escopo": {"rotulo": scope_label, "chave": scope_key, "unidades": units or []},
         "produto": args.produto,
         "dry_run": args.dry_run,
+        "artefatos_existentes_reconciliados": args.usar_existentes,
         "status_global": "falha" if failure else "dry-run" if args.dry_run else "sucesso",
         "resultados": results,
     }

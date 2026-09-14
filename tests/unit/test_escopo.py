@@ -40,5 +40,5 @@ def test_lista_nao_persiste_caminho(tmp_path: Path):
     scope = scope_from_values(lista_unidades=path)
     assert scope.value == "LISTA_FORNECIDA"
     assert scope.units == frozenset({"UC-A", "CT-X"})
-    assert scope.as_dict() == {"tipo": "lista_unidades", "valor": "LISTA_FORNECIDA"}
+    assert scope.as_dict() == {"tipo": "lista_unidades", "valor": "LISTA_FORNECIDA", "chave": "lista_unidades-lista_fornecida"}
     assert scope.label == "Lista de unidades selecionada"

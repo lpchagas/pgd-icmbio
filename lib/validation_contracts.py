@@ -492,12 +492,57 @@ TARGETS["G01"] = ValidationTarget(
     privacy_class="ambos",
 )
 
+TARGETS["G02"] = ValidationTarget(
+    code="G02",
+    family="gestao",
+    name="Execução das Entregas",
+    production_entrypoint=PROJECT_ROOT / "gestao" / "IND_GEST_02" / "IND_GEST_02.1_run.py",
+    oracle_name="oracle_ind_gest_02",
+    atomic_extractors=("g02_entregas", "g02_progressos", "g02_planos", "g02_vinculos", "g02_atividades"),
+    outputs=(
+        OutputContract(
+            gest_artifact("02", "2_entregas_*.csv"),
+            (
+                "visao", "periodo", "periodo_inicio", "periodo_fim", "unidade_sigla",
+                "unidade_dona_sigla", "unidade_executora_sigla", "id_entrega",
+                "nome_entrega", "meta_planejada", "progresso_historico",
+                "taxa_atingimento_perc", "total_registros_execucao",
+                "data_ultimo_registro", "total_planos_trabalho", "total_servidores",
+                "total_vinculos", "forca_trabalho_media_perc", "atividades_total",
+                "atividades_iniciadas", "atividades_concluidas", "horas_planejadas",
+                "horas_despendidas", "situacao_cobertura", "situacao_reconciliacao",
+            ),
+            ("visao", "periodo", "unidade_sigla", "id_entrega"),
+            (
+                "meta_planejada", "progresso_historico", "taxa_atingimento_perc",
+                "total_registros_execucao", "total_planos_trabalho", "total_servidores",
+                "total_vinculos", "atividades_total", "atividades_concluidas",
+                "horas_planejadas", "horas_despendidas",
+            ),
+            view="entregas",
+            allow_empty=True,
+        ),
+    ),
+    formula_version="1.0.0",
+    temporal_lenses=("acumulada", "operacional"),
+    supported_scopes=SCOPE_ALL,
+    invariants=(
+        "corte_historico_pe", "fotografia_pt_nao_retroativa", "cobertura_integral_servidores",
+        "unidades_dona_e_executora_preservadas", "reconciliacao_transparente", "sem_score_sintetico",
+    ),
+    privacy_class="ambos",
+)
+
 
 def selected_targets(family: str = "todas", target: str = "todos") -> list[ValidationTarget]:
-    normalized = normalize_target(target)
-    if normalized not in {"TODOS", *TARGETS}:
-        raise ValueError(f"Alvo de validação desconhecido: {target}")
-    values = list(TARGETS.values()) if normalized == "TODOS" else [TARGETS[normalized]]
+    requested = [normalize_target(item) for item in target.split(",") if item.strip()]
+    if requested == ["TODOS"]:
+        values = list(TARGETS.values())
+    else:
+        unknown = [item for item in requested if item not in TARGETS]
+        if unknown:
+            raise ValueError(f"Alvo de validação desconhecido: {', '.join(unknown)}")
+        values = [TARGETS[item] for item in requested]
     if family != "todas":
         values = [item for item in values if item.family == family]
     return [item for item in values if item.enabled_in_monthly_cycle]

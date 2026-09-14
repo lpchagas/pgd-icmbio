@@ -1,5 +1,16 @@
 # Guia de Extração Mensal dos Indicadores OCDE/PGD — ICMBio
 
+> **Escopos e gestão (14.09.2026):** toda execução do ciclo integrado informa um seletor
+> organizacional. A2–A5, manifestos, relatórios e anexos ficam em
+> `AAAA-MM/escopos/<scope-key>/`. O ciclo inclui G01 e G02. O relatório final exige
+> `--manifesto-validacao`. A D18 homologou o G02 e o anexo nominal somente restrito;
+> edições finais exigem os 14 alvos certificados. A expansão nacional está suspensa
+> até o aceite formal do piloto CGOV.
+
+> **Estado certificado:** a referência GR2 usa data de execução 13/09/2026, janela
+> `01/07/2025–31/08/2026` e 14/14 alvos certificados automaticamente. O próximo
+> passo institucional é o piloto CGOV; não executar escopo nacional.
+
 Este guia descreve **quando e como** gerar os CSVs dos 12 indicadores OCDE/PGD
 para alimentar o Painel Power BI do ICMBio — sem precisar entender programação.
 Basta copiar os comandos e seguir os passos.
@@ -276,7 +287,10 @@ Depois execute o indicador desejado:
 | **I11** | `python ocde/indicadores/IND_OCDE_11.1_run.py` | % das avaliações com nota "Excepcional" por unidade |
 | **I12** | `python ocde/indicadores/IND_OCDE_12.1_run.py` | Se a avaliação individual (PT) está alinhada com a avaliação coletiva (PE) da unidade |
 
-Os CSVs são salvos em `artefatos_local/ocde/entregas/AAAA-MM/`.
+Quando chamados diretamente, os scripts legados salvam em
+`artefatos_local/ocde/entregas/AAAA-MM/`. No ciclo e no runner oficiais, os A2
+persistidos ficam em `AAAA-MM/escopos/<scope-key>/`; nenhum loader pode selecionar
+silenciosamente um arquivo de outro escopo.
 
 ---
 
@@ -343,15 +357,16 @@ Arquivos locais, **nunca versionados** (caminhos gerenciados por `lib/csv_utils.
 artefatos_local/
   ocde/
     entregas/
-      AAAA-MM/            CSVs de indicadores prontos para envio à COCAGE/Power BI
-                          IND_OCDE_XX.2_<nome>_AAAAMMDD_HHMM.csv (todos os 12 indicadores)
+      AAAA-MM/
+        escopos/<scope-key>/  A2 do ciclo oficial, isolados por escopo
+        IND_OCDE_XX.2_*       saídas legadas de scripts executados diretamente
     diagnosticos/
       AAAA-MM/            CSVs diagnósticos A4 (uso interno — não enviar)
                           IND_OCDE_XX.4_qN_<descricao>.csv
       IND_OCDE_XX.4_diagnostico_DD.MM.AAAA.py
-  validacao/              Relatórios A5 e PDFs A3
-                          IND_OCDE_XX.5_relatorio_validacao_DD.MM.AAAA.md
-                          IND_OCDE_XX.3_PETRVS_consulta_DD.MM.AAAA.pdf
+  validacao/
+    AAAA-MM/escopos/<scope-key>/  A3–A5 e manifestos do protocolo automatizado
+    baselines.json                 baseline privada registrada somente pela CLI
   docs_internos/          Protocolo de validação e docs não publicáveis
   backup_scripts_a1/      Cópias locais dos scripts A1 (backup jun 2026)
   historico/              Artefatos legados (dump e validação inicial mai/2026)
@@ -359,7 +374,8 @@ artefatos_local/
 
 Os caminhos são gerenciados por `lib/csv_utils.py`:
 
-- `indicator_csv_dir()` → `artefatos_local/ocde/entregas/AAAA-MM/`
+- `indicator_csv_dir()` → `artefatos_local/ocde/entregas/AAAA-MM/`; o runner move
+  apenas as linhas do escopo para `escopos/<scope-key>/`
 - `diagnostic_csv_dir()` → `artefatos_local/ocde/diagnosticos/AAAA-MM/`
 
 ---

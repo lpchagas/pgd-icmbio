@@ -31,6 +31,10 @@ logs, manifestos ou artefatos.
 Para execução em setembro/2026, a janela obrigatória é `01/07/2025–31/08/2026`.
 O mês corrente nunca entra na lente acumulada.
 
+**Estado de referência em 14/09/2026:** D15 e D18 estão registradas em baselines
+separadas; I01–I12, G01 e G02 foram recertificados automaticamente na GR2. O
+manifesto integrado tem data de execução 13/09/2026 e 14/14 alvos em sucesso.
+
 ## 3. Contrato executável do alvo
 
 Cada indicador e análise de gestão é declarado como `ValidationTarget` em
@@ -201,6 +205,7 @@ gate do ciclo automatizado.
 | I11 | categoria excepcional por `sequencia = 1` |
 | I12 | médias PT/PE e diferença direcional `PT - PE` |
 | G01 | precedência da consolidação, universo com concluídos pendentes (D17) e uma linha por plano |
+| G02 | agregação por entrega, cobertura integral dos servidores e reconciliação PE × PT em duas perspectivas |
 
 ## 6. Testes obrigatórios
 
@@ -250,7 +255,7 @@ incremental, nunca pelo total acumulado bruto.
 ```text
 python -m lib.validation_runner
   --familia ocde|gestao|todas
-  --alvo I01|...|I12|G01|todos   (aceita IND_OCDE_XX, IND_GEST_XX e PT_STATUS)
+  --alvo I01|...|I12|G01|G02|todos   (aceita lista por vírgula, IND_OCDE_XX, IND_GEST_XX e PT_STATUS)
   --data-execucao AAAA-MM-DD
   --etapa A1|A2|A3|A4|A5|todas
   --modo fixture|integrado
@@ -262,6 +267,12 @@ python -m lib.validation_runner
 
 O runner retorna código diferente de zero para falha, pendência bloqueante ou
 artefato ausente.
+
+Os A2–A5 e manifestos são buscados exclusivamente em
+`AAAA-MM/escopos/<scope-key>/`; nenhum loader escolhe silenciosamente arquivo de
+outro escopo. Hashes de oracle/extrator são calculados por alvo e perfis de dados
+ficam na baseline por escopo. A aprovação aceita `--alvo` repetido ou lista por
+vírgula e grava todos os alvos transacionalmente. G02 é aprovado separadamente.
 
 ## 9. Integração mensal
 

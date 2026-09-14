@@ -7,8 +7,8 @@
 | Script A1 | [`gestao/IND_GEST_01/IND_GEST_01.1_run.py`](../../gestao/IND_GEST_01/IND_GEST_01.1_run.py) |
 | Artefatos | `IND_GEST_01.2_detalhe_*`, `IND_GEST_01.2_painel_*`, `IND_GEST_01.{3,4,5}_*` |
 | `formula_version` | **4.0.0** |
-| Decisões | D14 (identificação nominal), D17 (namespace e correções, pendente de ratificação CGOV) |
-| Estado de validação | `HOMOLOGACAO_INICIAL_PENDENTE` |
+| Decisões | D14 (identificação nominal), D17 (namespace e correções, ratificada) |
+| Estado de validação | Baseline D15; `CERTIFICADO_AUTOMATICAMENTE` na reexecução GR2 de 13.09.2026 |
 | Lente temporal | `operacional`: fotografia na data de execução |
 | Público | Chefias de unidade e CGOV |
 | Fonte | `petrvs_icmbio` via Denodo (MGI/Dataprev), consulta direta |
@@ -345,7 +345,8 @@ O A2 validado é o do produto solicitado; `ambos` usa o restrito. Células
 `SUPRIMIDO_K` não entram na comparação com o oracle.
 
 Resultado em 13.09.2026 (GR2, produtos `restrito` e `compartilhavel`):
-`HOMOLOGACAO_INICIAL_PENDENTE`, sem achado bloqueante.
+baseline D15 registrada pela CLI e reexecução GR2 em `CERTIFICADO_AUTOMATICAMENTE`,
+sem achado bloqueante.
 
 ---
 

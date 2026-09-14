@@ -12,9 +12,9 @@ Para entender a separação público/privado, ver [../13-organizacao-publico-pri
 ## Deliberação metodológica
 
 O caderno metodológico e o registro das decisões de homologação dos indicadores
-I01–I12 e G01 são **documentos deliberativos internos da CGOV**. Ficam no acervo
+I01–I12, G01 e G02 são **documentos deliberativos internos da CGOV**. Ficam no acervo
 privado do projeto, fora do GitHub.
 
-A documentação pública registra apenas o identificador de cada decisão (D01…D17) e
+A documentação pública registra apenas o identificador de cada decisão (D01…D18) e
 seu efeito técnico, nas fichas dos indicadores e na seção
 [Estado da homologação](../../README.md#estado-da-homologação) do README.

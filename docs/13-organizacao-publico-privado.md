@@ -28,6 +28,7 @@ C:\Projetos\pgd-ocde-icmbio\
 ├── docs/                         Documentação técnica e de negócio
 │   ├── 01–13 *.md                Documentos compartilhados do projeto
 │   ├── ocde/                     Fichas técnicas dos 12 indicadores OCDE (I01–I12)
+│   ├── gestao/                   Fichas técnicas dos indicadores G01 e G02
 │   ├── mgi/                      Documentação MGI (em construção)
 │   └── cgov/                     Placeholder público (sem análises — apenas README)
 ├── lib/                          Módulos Python compartilhados
@@ -41,6 +42,7 @@ C:\Projetos\pgd-ocde-icmbio\
 │   ├── indicadores/              Scripts IND_OCDE_XX.1_run.py sanitizados (I01–I12)
 │   ├── relatorios/               Módulos de análise e relatório gerencial
 │   └── diagnosticos/             Template público de diagnóstico (IND_OCDE_XX.4_template)
+├── gestao/                       G01/G02, registro e runner da família de gestão
 ├── mgi/                          Placeholder — indicadores MGI (em construção)
 │   └── indicadores/
 ├── .env.example                  Modelo do .env — sem senhas reais
@@ -56,10 +58,12 @@ Tudo aqui é **local e sincronizado via nuvem**. Nunca vai para o GitHub.
 C:\Users\<SEU_USUARIO>\OneDrive - ICMBio\projetos\pgd-ocde-icmbio-privado\
 ├── artefatos_local/
 │   ├── ocde/
-│   │   ├── entregas/YYYY-MM/     CSVs mensais para entrega à COCAGE/Power BI
+│   │   ├── entregas/YYYY-MM/escopos/<scope-key>/  CSVs mensais OCDE por escopo
+│   │   ├── relatorios_v2/YYYY-MM/escopos/<scope-key>/  relatórios finais e manifestos
 │   │   └── diagnosticos/YYYY-MM/ Scripts A4 e CSVs de diagnóstico interno
-│   ├── validacao/                A3–A5 automáticos, manifestos, baselines e documentos
-│   │                             deliberativos da CGOV (caderno metodológico, decisões)
+│   ├── gestao/YYYY-MM/escopos/<scope-key>/  A2 de G01/G02 e anexos restritos
+│   ├── validacao/YYYY-MM/escopos/<scope-key>/  A3–A5 e manifestos por escopo
+│   ├── validacao/                baselines e documentos deliberativos da CGOV
 │   ├── docs_internos/            Documentação local não publicável
 │   ├── historico/                Artefatos de fases anteriores
 │   └── backup_scripts_a1/        Cópias de segurança dos scripts A1
@@ -87,6 +91,10 @@ Cadernos metodológicos, registros de decisão de homologação e atas da CGOV s
 A documentação pública pode citar o identificador da decisão (D01, D02…) e o efeito
 técnico que ela produziu no código, mas não reproduz a deliberação nem aponta links
 para o acervo privado.
+
+Desde a D18, o anexo nominal do G02 é autorizado somente no produto restrito e para
+finalidade gerencial. Ele permanece em `artefatos_local/`, nunca em `docs/` ou no
+GitHub, e não contém CPF, e-mail, telefone ou endereço.
 
 ### O que fica apenas local (nem GitHub, nem OneDrive)
 

@@ -1,13 +1,13 @@
 {
-  "_schema": "validation-baselines.v1",
-  "_instructions": "Copiar para artefatos_local/validacao/baselines.json apos homologacao formal, sem dados pessoais. As versoes de formula abaixo refletem as decisoes CGOV de 13.09.2026 (D01-D16); qualquer divergencia devolve o alvo a HOMOLOGACAO_INICIAL_PENDENTE automaticamente.",
+  "_schema": "validation-baselines.v2",
+  "_instructions": "Exemplo sem hashes reais. Registrar a baseline em artefatos_local/validacao/baselines.json somente pela CLI após homologação formal. I01-I12 e G01 pertencem à D15; G02 é registrado separadamente sob D18. Qualquer divergência metodológica devolve o alvo a HOMOLOGACAO_INICIAL_PENDENTE.",
   "I01": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
     "formula_version": "2.0.0",
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I02": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -15,7 +15,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I03": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -23,7 +23,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I04": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -31,7 +31,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I05": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -39,7 +39,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I06": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -47,7 +47,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I07": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -55,7 +55,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I08": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -63,7 +63,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I09": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -71,7 +71,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I10": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -79,7 +79,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I11": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -87,7 +87,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "I12": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -95,7 +95,7 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
   },
   "G01": {
     "status": "HOMOLOGACAO_INICIAL_PENDENTE",
@@ -103,6 +103,14 @@
     "approved_run_id": null,
     "approved_at": null,
     "approved_by_role": null,
-    "profiles": {}
+    "profiles_by_scope": {}
+  },
+  "G02": {
+    "status": "HOMOLOGACAO_INICIAL_PENDENTE",
+    "formula_version": "1.0.0",
+    "approved_run_id": null,
+    "approved_at": null,
+    "approved_by_role": null,
+    "profiles_by_scope": {}
   }
 }

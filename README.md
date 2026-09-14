@@ -12,8 +12,9 @@ Desenvolvido pela Coordenação de Governança (CGOV/ICMBio) no âmbito do pilot
 
 | Data | O que mudou | Onde |
 | --- | --- | --- |
-| 13.09.2026 | **Governança documental:** o caderno metodológico e o registro de decisões de homologação da CGOV deixam a pasta pública `docs/` e passam a ser mantidos só no acervo privado da CGOV. A documentação pública cita o identificador de cada decisão (D01…D17) e seu efeito técnico. | [Estado da homologação](#estado-da-homologação) |
-| 13.09.2026 | Família **`gestao/`** reorganizada no namespace `IND_GEST_XX` (D17, pendente de ratificação): o `PT_STATUS` vira o indicador **G01 — Situação dos Planos de Trabalho**, com ficha própria e `formula_version` 4.0.0 (fila de avaliação passa a incluir planos concluídos com período pendente; fim de duplicidade no painel; supressão complementar no produto compartilhável). | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) · [ficha G01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) |
+| 14.09.2026 | **D18 homologada e GR2 certificada:** G02 1.0.0 aprovado sem ajustes, anexo nominal autorizado somente no produto restrito e 14 alvos recertificados automaticamente. As edições finais restrita e compartilhável foram geradas com manifesto certificado; a expansão nacional continua suspensa. | [ficha G02](docs/gestao/IND_GEST_02-execucao-entregas.md) |
+| 13.09.2026 | **Governança documental:** o caderno metodológico e o registro de decisões de homologação da CGOV deixam a pasta pública `docs/` e passam a ser mantidos só no acervo privado da CGOV. A documentação pública cita o identificador de cada decisão (D01…D18) e seu efeito técnico. | [Estado da homologação](#estado-da-homologação) |
+| 13.09.2026 | Família **`gestao/`** reorganizada no namespace `IND_GEST_XX` (D17 ratificada): o `PT_STATUS` vira o indicador **G01 — Situação dos Planos de Trabalho**, com ficha própria e `formula_version` 4.0.0. | [índice de gestão](docs/14-status-planos-trabalho-gestores.md) · [ficha G01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) |
 | 13.09.2026 | Decisões CGOV D01–D14 implementadas: namespace `IND_OCDE_`, visão estatística do I05, dias úteis no I07/I08, dupla perspectiva no I08, média por plano no I09, `volume_suficiente` no I10/I11 e identificação nominal nos produtos internos do G01. | [Estado da homologação](#estado-da-homologação) |
 | 13.09.2026 | Integração do ciclo gerencial retomável, Relatório V2 e gates de segurança. | [docs/16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) |
 | 12.09.2026 | Protocolo A1–A5 automatizado com contratos, extrações atômicas, oráculos independentes, drift, diagnósticos e fixtures sintéticas sem efeito de homologação. | [docs/09-protocolo-validacao-indicadores.md](docs/09-protocolo-validacao-indicadores.md) |
@@ -29,10 +30,10 @@ Desenvolvido pela Coordenação de Governança (CGOV/ICMBio) no âmbito do pilot
 
 ## Estado da homologação
 
-Situação em 13.09.2026. Os **13 alvos** — I01 a I12 e o G01 — estão em
-`HOMOLOGACAO_INICIAL_PENDENTE`. A validação automatizada da GR2 não apontou
-divergência bloqueante entre a produção e os oracles independentes; falta a
-aprovação de negócio.
+Situação em 14.09.2026. O registro contém **14 alvos** — I01 a I12, G01 e G02.
+D15 e D18 foram aprovadas, D17 ratificada e D16 ajustada. Os 14 alvos estão em
+`CERTIFICADO_AUTOMATICAMENTE` na GR2. A expansão nacional está suspensa até o
+aceite formal do piloto CGOV.
 
 | Alvo | `formula_version` | Decisão aplicada | Efeito |
 | --- | --- | --- | --- |
@@ -48,9 +49,15 @@ aprovação de negócio.
 | I10, I11 | **3.0.0** | D12 | coluna `volume_suficiente` |
 | I12 | 2.0.0 | D13 | uso como triagem |
 | G01 | **4.0.0** | D14, D17 | nomes só nos produtos internos; universo e supressão revistos |
+| G02 | **1.0.0** | D18 | histórico PE + fotografia PT; perspectivas dona e executora; anexo nominal somente restrito |
 
-**Em deliberação:** D15 (Baseline V2), D16 (expansão nacional e seletores) e D17
-(ratificação da família de gestão). Séries de I05, I07, I08, I09, I10 e I11
+**Próximo gate institucional:** executar e obter o aceite formal do piloto CGOV;
+somente nova deliberação poderá liberar a expansão nacional.
+O manifesto integrado de referência tem data de execução 13/09/2026, janela
+`01/07/2025–31/08/2026` e resultado global `sucesso`. A regressão associada passou
+em 459 testes, com 2 skips esperados de plataforma. O G02 preserva como observação
+gerencial 114 vínculos sem entrega de PE identificável.
+Séries de I05, I07, I08, I09, I10 e I11
 anteriores a 13.09.2026 **não são comparáveis** às atuais sem reprocessamento.
 
 ---
@@ -216,7 +223,7 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | [15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) | Rotina do relatório cumulativo: corte no mês anterior, escopos, anonimização, PDF e expansão GR2 → nacional |
 | [16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) | Arquitetura das skills, extrações automatizadas e Relatório Gerencial V2 |
 | `docs/ocde/` | As **fichas técnicas dos 12 indicadores** (uma por indicador) + 4 fichas de eixo + o índice geral [06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md) |
-| `docs/gestao/` | Fichas técnicas dos indicadores de gestão — hoje [IND_GEST_01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) |
+| `docs/gestao/` | Fichas técnicas dos indicadores de gestão — [G01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) e [G02](docs/gestao/IND_GEST_02-execucao-entregas.md) |
 
 > Cadernos metodológicos e registros de decisão da CGOV **não ficam em `docs/`**:
 > são documentos deliberativos internos. A numeração 17 e 18, antes usada por eles,
@@ -256,13 +263,14 @@ Cada indicador de gestão tem uma subpasta `gestao/IND_GEST_XX/` e código lógi
 | Código | Script | O que responde | Ficha |
 | --- | --- | --- | --- |
 | G01 | [`IND_GEST_01.1_run.py`](gestao/IND_GEST_01/IND_GEST_01.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou suspenso — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [IND_GEST_01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) |
+| G02 | [`IND_GEST_02.1_run.py`](gestao/IND_GEST_02/IND_GEST_02.1_run.py) | Execução das entregas nas perspectivas dona e executora, reconciliando histórico do PE com a fotografia dos PT | [IND_GEST_02](docs/gestao/IND_GEST_02-execucao-entregas.md) |
 
 ```powershell
 python -m gestao.runner --analise todas --data-execucao 2026-09-13 --regional GR2 --produto restrito
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
 ```
 
-As saídas vão para `artefatos_local/gestao/AAAA-MM/` (não versionado): um CSV de
+As saídas vão para `artefatos_local/gestao/AAAA-MM/escopos/<scope-key>/` (não versionado): um CSV de
 detalhe e um painel unidade × status. Nos produtos `operacional` e `restrito`, o
 detalhe **contém nome de servidores** (D14) — tratar como dado pessoal. O produto
 `compartilhavel` só gera o painel, com supressão k<5 e complementar.

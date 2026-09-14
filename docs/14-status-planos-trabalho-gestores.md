@@ -1,6 +1,6 @@
 # 14 — Indicadores de gestão para as chefias
 
-**Atualizado em:** 13 de setembro de 2026 (D17)
+**Atualizado em:** 14 de setembro de 2026 (D17 e D18)
 **Pasta de código:** [`gestao/`](../gestao/README.md)
 **Público:** chefias de unidade, CGOV
 
@@ -22,7 +22,7 @@ o que está parado, desde quando e com quem falar.
 | Pergunta | O que está travado e com quem falar? | Como a unidade desempenhou no ciclo? |
 | Tempo | Fotografia na data de execução | Janela cumulativa desde 01/07/2025 |
 | Destino | Chefias e CGOV | COCAGE, Power BI, relatório V2 |
-| Identificação nominal | Nos produtos internos da unidade (D14) | Nunca |
+| Identificação nominal | Nos produtos internos, conforme D14 (G01) e D18 (G02) | Nunca |
 | Validação | Protocolo A1–A5 com oracle independente | Protocolo A1–A5 com oracle independente |
 | Pasta | `gestao/IND_GEST_XX/` | `ocde/indicadores/` |
 | Fichas | `docs/gestao/` | `docs/ocde/` |
@@ -51,7 +51,12 @@ novo indicador está em [`gestao/README.md`](../gestao/README.md).
 
 | Código | Nome | Pergunta | `formula_version` | Estado | Ficha |
 | --- | --- | --- | --- | --- | --- |
-| **G01** | Situação dos Planos de Trabalho | Em que ponto do fluxo está cada PT da equipe e com quem falar para destravá-lo? | 4.0.0 | Homologação inicial pendente | [IND_GEST_01](gestao/IND_GEST_01-situacao-planos-trabalho.md) |
+| **G01** | Situação dos Planos de Trabalho | Em que ponto do fluxo está cada PT da equipe e com quem falar para destravá-lo? | 4.0.0 | Baseline D15; recertificação automática GR2 | [IND_GEST_01](gestao/IND_GEST_01-situacao-planos-trabalho.md) |
+| **G02** | Execução das Entregas | Como o histórico do PE se reconcilia com a fotografia dos PT nas perspectivas dona e executora? | 1.0.0 | D18 homologada; recertificação automática GR2 | [IND_GEST_02](gestao/IND_GEST_02-execucao-entregas.md) |
+
+Na referência vigente, os dois indicadores estão certificados automaticamente na
+GR2. O G02 mantém 114 vínculos sem entrega identificável como alerta cadastral não
+bloqueante. Seu anexo nominal é exclusivo do produto restrito.
 
 ---
 
@@ -67,10 +72,10 @@ python -m gestao.runner --analise todas --data-execucao 2026-09-13 --regional GR
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
 
 # Validação automatizada
-python -m lib.validation_runner --familia gestao --alvo G01 --modo integrado --produto restrito --data-execucao 2026-09-13 --regional GR2
+python -m lib.validation_runner --familia gestao --alvo G01,G02 --modo integrado --produto restrito --data-execucao 2026-09-13 --regional GR2
 ```
 
-As saídas ficam em `artefatos_local/gestao/AAAA-MM/`, que nunca é versionado.
+As saídas ficam em `artefatos_local/gestao/AAAA-MM/escopos/<scope-key>/`, que nunca é versionado.
 
 ---
 

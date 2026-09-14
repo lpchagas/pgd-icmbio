@@ -11,12 +11,14 @@ def _manifest(path, mode="integrado"):
     payload = {
         "run_id": "20260912T120000-deadbeef",
         "modo": mode,
+        "status_global": "pendente",
+        "escopo": {"chave": "regional-gr2"},
         "fingerprint": "f" * 64,
         "resultados": [{
             "alvo": "I01",
             "status": "pendente",
             "formula_version": "2.0.0",
-            "hashes": {"A1": "a" * 64},
+            "hashes": {name: name[0].lower() * 64 for name in ("A1", "oracle", "production_sql", "extractors", "schema")},
             "perfis_A2": [],
         }],
     }
@@ -48,3 +50,14 @@ def test_integrated_manifest_creates_private_baseline(tmp_path):
     saved = json.loads(baseline.read_text(encoding="utf-8"))["I01"]
     assert saved["status"] == "HOMOLOGADO"
     assert saved["approved_by_role"] == "CGOV"
+    assert "regional-gr2" in saved["profiles_by_scope"]
+
+
+def test_incomplete_manifest_cannot_form_baseline(tmp_path):
+    manifest = tmp_path / "manifest.json"
+    _manifest(manifest)
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload["resultados"][0]["hashes"].pop("oracle")
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+    with pytest.raises(ValueError, match="hashes metodológicos"):
+        approve(["--manifesto", str(manifest), "--alvo", "I01", "--papel-aprovador", "CGOV", "--decisao", "HOMOLOGADO", "--justificativa", "Aprovado.", "--baseline", str(tmp_path / "baseline.json")])

@@ -20,7 +20,9 @@ fonte indispensável nem gate da integração contínua.
 - `ocde/relatorios/textos_execucao.py`: sanitização local de nomes e dados
   pessoais e regras transparentes de prioridade.
 - `ocde/relatorios/relatorio_v2.py`: relatório restrito e compartilhável,
-  evidências, riscos, mitigação, tendências e apêndice I01–I12.
+  evidências, riscos, tendências, apêndice I01–I12 e capítulo dinâmico de gestão.
+- `gestao/IND_GEST_02/IND_GEST_02.1_run.py`: G02 e seus produtos; o renderizador
+  consome A2/manifestos certificados e não repete consultas nem fórmulas.
 - `tools/skills_manager.py`: validação local, instalação idempotente, backup e
   certificação multiplataforma do catálogo opcional de assistentes.
 
@@ -32,10 +34,11 @@ setembro/2026, o acumulado termina em 31/08/2026.
 
 ## Produtos e privacidade
 
-O produto restrito mantém unidades, planos, entregas, atividades e textos de
-negócio sanitizados, sem nomes, CPF, e-mails, telefones, endereços ou UUIDs. O
-produto compartilhável aplica adicionalmente k≥5 às unidades envolvidas e
-supressão quando necessária.
+O relatório restrito mantém unidades, planos, entregas, atividades e textos de
+negócio sanitizados. O anexo nominal G02 é um artefato separado e restrito, com
+nome e identificador interno autorizados pela D18, mas sem CPF, e-mail, telefone
+ou endereço. O produto compartilhável não contém identificação pessoal e aplica
+k≥5 às unidades/entregas envolvidas e supressão complementar.
 
 Textos são processados localmente. Os gatilhos de prioridade são prazo vencido
 sem conclusão, meta de PE abaixo do pactuado, status operacional que requer
@@ -45,10 +48,10 @@ do resultado do PE.
 ## Execução
 
 ```text
-python -m lib.indicator_extraction --data-execucao 2026-09-12 --salvar-manifesto
-python -m gestao.runner --analise todas --data-execucao 2026-09-12 --lente ambas --regional GR2 --produto restrito
-python -m ocde.relatorios.relatorio_v2 --data-execucao 2026-09-12 --regional GR2 --produto ambos --lente ambas --consultar-denodo --salvar --pdf
-python -m lib.ciclo_gerencial --data-execucao 2026-09-12 --regional GR2 --produto ambos --lente ambas --retomar --salvar --pdf
+python -m lib.indicator_extraction --data-execucao 2026-09-13 --regional GR2 --salvar-manifesto
+python -m gestao.runner --analise todas --data-execucao 2026-09-13 --lente ambas --regional GR2 --produto restrito
+python -m ocde.relatorios.relatorio_v2 --data-execucao 2026-09-13 --regional GR2 --produto ambos --lente ambas --manifesto-validacao <manifesto.json> --salvar --pdf
+python -m lib.ciclo_gerencial --data-execucao 2026-09-13 --regional GR2 --produto ambos --lente ambas --retomar --salvar --pdf
 ```
 
 No Windows, usar um Python compatível com a JVM do DBeaver. O runtime WSL não
@@ -58,18 +61,28 @@ Python com pytest; o preflight bloqueia o ciclo se qualquer dependência faltar.
 
 ## Gates e conclusão
 
-O ciclo só recebe sucesso se todas as etapas concluírem. A aprovação do piloto
-GR2 abre a fase nacional, que exige execução nacional, reconciliação e testes
-de unidade, mesogrupo, tipo e lista arbitrária. A certificação local do catálogo de assistentes só recebe estado `certificado`
+O ciclo só recebe sucesso se todas as etapas concluírem. A aprovação da GR2 abre
+apenas o piloto CGOV; a expansão nacional continua suspensa até o aceite formal
+desse piloto. A edição final exige todos os alvos ativos certificados, com data e
+escopo coerentes. `--rascunho` continua reservado a material privado não homologado;
+não pode ser registrado como edição final. A certificação local do catálogo de assistentes só recebe estado `certificado`
 quando as ferramentas configuradas estiverem disponíveis e produzirem
 descoberta/hash equivalentes. Esse controle local não participa dos checks da PR.
 
-## Estado operacional em 13.09.2026
+## Estado operacional em 14.09.2026
 
 - A extração I01–I12 foi concluída com a janela `01/07/2025–31/08/2026`.
-- O gate integrado GR2 comparou A1 e oracle para os 12 indicadores e o `PT_STATUS` (hoje G01) sem divergência bloqueante.
-- Foram gerados 13 dossiês A5; todos estão em `HOMOLOGACAO_INICIAL_PENDENTE`, pois a decisão institucional não é automatizada.
-- A suíte offline registrou 371 testes aprovados e 14 skips esperados de plataforma/homologação.
+- O manifesto integrado vigente é `20260914T071359-f2e1a481`, com data de execução
+  13/09/2026 e `status_global=sucesso`.
+- O gate integrado GR2 comparou A1 e oracle para I01–I12, G01 e G02 sem divergência bloqueante.
+- O registro contém 14 alvos; todos foram recertificados automaticamente na GR2.
+- A D18 homologou o G02 1.0.0 e autorizou seu anexo nominal exclusivamente restrito.
+- O G02 processou 2.454 registros atômicos e 341 linhas no oracle; 114 vínculos sem
+  entrega identificável permanecem como alerta cadastral não bloqueante.
+- A suíte offline registrou 459 testes aprovados e 2 skips esperados de plataforma.
 - O catálogo local de 33 skills passou pela validação estrutural e pela instalação idempotente; a certificação funcional externa permanece fora do escopo desta publicação.
 - A auditoria pública confirmou que o código e a documentação não incorporam credenciais; o acesso ao Denodo continua restrito ao `.env` local.
-- O próximo gate é a homologação inicial pela CGOV, seguida da recertificação automática, do relatório V2 GR2 e da expansão nacional.
+- I01–I12 e G01 foram recertificados após D15; G02 foi registrado separadamente e
+  recertificado após D18. As edições finais da GR2 foram geradas com o manifesto
+  dos 14 alvos. O próximo gate é o piloto CGOV; a expansão nacional continua
+  suspensa até seu aceite formal e nova deliberação.

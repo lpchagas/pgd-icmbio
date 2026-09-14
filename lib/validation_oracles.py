@@ -548,11 +548,135 @@ def oracle_ind_gest_01(records: list[Row]) -> list[Row]:
     ]
 
 
+def _g02_periods(cutoff: date) -> list[tuple[str, date, date]]:
+    raw = [
+        ("T3-2025", date(2025, 7, 1), date(2025, 9, 30)),
+        ("T4-2025", date(2025, 10, 1), date(2025, 12, 31)),
+        ("Q1-2026", date(2026, 1, 1), date(2026, 4, 30)),
+        ("Q2-2026", date(2026, 5, 1), date(2026, 8, 31)),
+    ]
+    return [(label, start, min(end, cutoff)) for label, start, end in raw if start <= cutoff]
+
+
+def _g02_reconciliation(history: bool, links: bool) -> str:
+    if history and links:
+        return "HISTORICO_PE_E_EVIDENCIA_PT"
+    if history:
+        return "HISTORICO_PE_SEM_VINCULO_PT"
+    if links:
+        return "TRABALHO_PT_SEM_HISTORICO_PE"
+    return "SEM_HISTORICO_PE_E_SEM_VINCULO_PT"
+
+
+def oracle_ind_gest_02(records: list[Row]) -> list[Row]:
+    """Oracle independente da implementação de produção do G02."""
+    names = ("g02_entregas", "g02_progressos", "g02_planos", "g02_vinculos", "g02_atividades")
+    buckets = {name: [] for name in names}
+    for row in records:
+        source = str(row.get("_extractor") or "")
+        if source in buckets and not row.get("deleted_at"):
+            buckets[source].append(dict(row))
+    all_rows = [row for values in buckets.values() for row in values]
+    cutoff = _date(next((row.get("_history_cutoff") for row in all_rows if row.get("_history_cutoff")), "2026-08-31")) or date(2026, 8, 31)
+    deliveries = {str(row.get("id_entrega")): row for row in _unique(buckets["g02_entregas"], "id_entrega")}
+    plans = {str(row.get("plano_trabalho_id")): row for row in _unique(buckets["g02_planos"], "plano_trabalho_id")}
+    progress = _group(_unique(buckets["g02_progressos"], "progresso_id"), "id_entrega")
+    links = _group(_unique(buckets["g02_vinculos"], "vinculo_id"), "id_entrega")
+    links_by_plan = _group(_unique(buckets["g02_vinculos"], "vinculo_id"), "plano_trabalho_id")
+    activities = _group(_unique(buckets["g02_atividades"], "atividade_id"), "plano_trabalho_id")
+    output: list[Row] = []
+    for delivery_id, delivery in deliveries.items():
+        owner = str(delivery.get("unidade_dona_sigla") or "N.I.")
+        events = sorted(progress.get((delivery_id,), []), key=lambda row: str(row.get("data_progresso") or ""))
+        delivery_links = links.get((delivery_id,), [])
+        executors = sorted({str(plans.get(str(link.get("plano_trabalho_id")), {}).get("unidade_executora_sigla") or "N.I.") for link in delivery_links})
+        views = [("dona", owner, "MULTIPLAS" if len(executors) > 1 else (executors[0] if executors else "SEM_VINCULO"))]
+        views.extend(("executora", executor, executor) for executor in executors)
+        for label, start, end in _g02_periods(cutoff):
+            if (_date(delivery.get("entrega_inicio")) or date.min) > end or (_date(delivery.get("entrega_fim")) or date.max) < start:
+                continue
+            within = [row for row in events if start <= (_date(row.get("data_progresso")) or date.min) <= end]
+            historical = [row for row in events if (_date(row.get("data_progresso")) or date.max) <= end]
+            latest = historical[-1] if historical else {}
+            for view, unit, executor in views:
+                selected = delivery_links if view == "dona" else [row for row in delivery_links if str(plans.get(str(row.get("plano_trabalho_id")), {}).get("unidade_executora_sigla") or "N.I.") == unit]
+                plan_ids = {str(row.get("plano_trabalho_id")) for row in selected}
+                people = {str(plans.get(pid, {}).get("id_servidor") or "") for pid in plan_ids} - {""}
+                acts = [row for pid in plan_ids for row in activities.get((pid,), [])]
+                planned = _float(latest.get("progresso_esperado", delivery.get("meta_planejada")))
+                actual = _float(latest.get("progresso_realizado", latest.get("realizado")))
+                output.append({
+                    "visao": view, "periodo": label, "periodo_inicio": start.isoformat(), "periodo_fim": end.isoformat(),
+                    "unidade_sigla": unit, "unidade_dona_sigla": owner,
+                    "unidade_executora_sigla": executor, "id_entrega": delivery_id,
+                    "nome_entrega": delivery.get("nome_entrega", "N.I."),
+                    "meta_planejada": planned, "progresso_historico": actual,
+                    "taxa_atingimento_perc": round(100 * actual / planned, 2) if planned else "",
+                    "total_registros_execucao": len(within), "data_ultimo_registro": latest.get("data_progresso", ""),
+                    "total_planos_trabalho": len(plan_ids), "total_servidores": len(people),
+                    "total_vinculos": len(selected),
+                    "forca_trabalho_media_perc": round(sum(_float(row.get("forca_trabalho")) for row in selected) / len(selected), 2) if selected else 0,
+                    "atividades_total": len(acts), "atividades_iniciadas": sum(bool(row.get("data_inicio")) for row in acts),
+                    "atividades_concluidas": sum(str(row.get("status") or "").upper() == "CONCLUIDO" for row in acts),
+                    "horas_planejadas": round(sum(_float(row.get("tempo_planejado")) for row in acts), 2),
+                    "horas_despendidas": round(sum(_float(row.get("tempo_despendido")) for row in acts), 2),
+                    "situacao_cobertura": "COM_VINCULO_PT" if selected else "SEM_VINCULO_PT",
+                    "situacao_reconciliacao": _g02_reconciliation(bool(historical), bool(selected)),
+                })
+    observation = _date(next((row.get("_observation_date") for row in all_rows if row.get("_observation_date")), cutoff)) or cutoff
+    uncovered: dict[str, list[Row]] = defaultdict(list)
+    for plan_id, plan in plans.items():
+        if not links_by_plan.get((plan_id,), []):
+            uncovered[str(plan.get("unidade_executora_sigla") or "N.I.")].append(plan)
+    for unit, unit_plans in uncovered.items():
+        plan_ids = {str(row.get("plano_trabalho_id")) for row in unit_plans}
+        people = {str(row.get("id_servidor") or "") for row in unit_plans} - {""}
+        acts = [row for pid in plan_ids for row in activities.get((pid,), [])]
+        output.append({
+            "visao": "executora", "periodo": f"FOTOGRAFIA-{observation.isoformat()}",
+            "periodo_inicio": observation.isoformat(), "periodo_fim": observation.isoformat(),
+            "unidade_sigla": unit, "unidade_dona_sigla": "N.I.", "unidade_executora_sigla": unit,
+            "id_entrega": f"SEM_ENTREGA:{unit}", "nome_entrega": "PT sem entrega identificável",
+            "meta_planejada": "", "progresso_historico": "", "taxa_atingimento_perc": "",
+            "total_registros_execucao": 0, "data_ultimo_registro": "",
+            "total_planos_trabalho": len(plan_ids), "total_servidores": len(people),
+            "total_vinculos": 0, "forca_trabalho_media_perc": 0,
+            "atividades_total": len(acts), "atividades_iniciadas": sum(bool(row.get("data_inicio")) for row in acts),
+            "atividades_concluidas": sum(str(row.get("status") or "").upper() == "CONCLUIDO" for row in acts),
+            "horas_planejadas": round(sum(_float(row.get("tempo_planejado")) for row in acts), 2),
+            "horas_despendidas": round(sum(_float(row.get("tempo_despendido")) for row in acts), 2),
+            "situacao_cobertura": "PT_SEM_ENTREGA", "situacao_reconciliacao": "PT_OU_VINCULO_SEM_ENTREGA_IDENTIFICAVEL",
+        })
+    orphan_groups: dict[str, list[Row]] = defaultdict(list)
+    for row in buckets["g02_vinculos"]:
+        if str(row.get("id_entrega") or "") not in deliveries:
+            plan = plans.get(str(row.get("plano_trabalho_id") or ""), {})
+            orphan_groups[str(plan.get("unidade_executora_sigla") or "N.I.")].append(row)
+    for unit, orphan_links in orphan_groups.items():
+        plan_ids = {str(row.get("plano_trabalho_id")) for row in orphan_links}
+        people = {str(plans.get(pid, {}).get("id_servidor") or "") for pid in plan_ids} - {""}
+        output.append({
+            "visao": "executora", "periodo": f"FOTOGRAFIA-{observation.isoformat()}",
+            "periodo_inicio": observation.isoformat(), "periodo_fim": observation.isoformat(),
+            "unidade_sigla": unit, "unidade_dona_sigla": "N.I.", "unidade_executora_sigla": unit,
+            "id_entrega": f"VINCULO_SEM_ENTREGA:{unit}", "nome_entrega": "Vínculo sem entrega de PE identificável",
+            "meta_planejada": "", "progresso_historico": "", "taxa_atingimento_perc": "",
+            "total_registros_execucao": 0, "data_ultimo_registro": "",
+            "total_planos_trabalho": len(plan_ids), "total_servidores": len(people),
+            "total_vinculos": len(orphan_links),
+            "forca_trabalho_media_perc": round(sum(_float(row.get("forca_trabalho")) for row in orphan_links) / len(orphan_links), 2),
+            "atividades_total": 0, "atividades_iniciadas": 0, "atividades_concluidas": 0,
+            "horas_planejadas": 0, "horas_despendidas": 0,
+            "situacao_cobertura": "VINCULO_SEM_ENTREGA", "situacao_reconciliacao": "PT_OU_VINCULO_SEM_ENTREGA_IDENTIFICAVEL",
+        })
+    return _sorted(output, ("periodo", "visao", "unidade_sigla", "id_entrega"))
+
+
 ORACLES: dict[str, Callable[[list[Row]], list[Row]]] = {
     "I01": oracle_i01, "I02": oracle_i02, "I03": oracle_i03, "I04": oracle_i04,
     "I05": oracle_i05, "I06": oracle_i06, "I07": oracle_i07, "I08": oracle_i08,
     "I09": oracle_i09, "I10": oracle_i10, "I11": oracle_i11, "I12": oracle_i12,
-    "G01": oracle_ind_gest_01,
+    "G01": oracle_ind_gest_01, "G02": oracle_ind_gest_02,
 }
 
 

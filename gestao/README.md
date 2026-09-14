@@ -8,13 +8,18 @@ dia a dia. Diferem dos indicadores OCDE (`ocde/indicadores/`) em quatro pontos:
 | Pergunta | O que está parado e com quem falar? | Como a unidade desempenhou no ciclo? |
 | Tempo | Fotografia na data de execução (lente `operacional`) | Janela cumulativa desde 01/07/2025 |
 | Destino | Chefias e CGOV | COCAGE, Power BI, relatório V2 |
-| Identificação nominal | Permitida nos produtos internos (D14) | Nunca |
+| Identificação nominal | Permitida nos produtos internos conforme D14 (G01) e D18 (G02) | Nunca |
 
 A validação usa o mesmo protocolo automatizado A1–A5, com oracle independente
 (`lib/validation_oracles.py`), e cada indicador tem contrato próprio em
 `lib/validation_contracts.py`.
 
-## Namespace (D17 — 13.09.2026, pendente de ratificação CGOV)
+**Estado em 14.09.2026:** G01 4.0.0 e G02 1.0.0 estão certificados
+automaticamente na GR2. A D18 autorizou o anexo nominal G02 exclusivamente no
+produto restrito. O próximo gate institucional é o piloto CGOV; a expansão nacional
+continua suspensa.
+
+## Namespace (D17 — ratificada em 13.09.2026)
 
 Mesmo modelo do D01 da família OCDE:
 
@@ -35,6 +40,7 @@ ele identifica o indicador, não o arquivo.
 | Código | Pasta | Nome | Ficha | Código anterior |
 | --- | --- | --- | --- | --- |
 | G01 | [`IND_GEST_01/`](IND_GEST_01/) | Situação dos Planos de Trabalho | [ficha](../docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) | `PT_STATUS` (aceito como alias na CLI) |
+| G02 | [`IND_GEST_02/`](IND_GEST_02/) | Execução das Entregas | [ficha](../docs/gestao/IND_GEST_02-execucao-entregas.md) | — |
 
 ## Como executar
 
@@ -44,9 +50,10 @@ python -m gestao.runner --analise status-pt --data-execucao 2026-09-13 --regiona
 
 # Diretamente, para uso imediato da chefia
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
+python -m gestao.runner --analise execucao-entregas --data-execucao 2026-09-13 --regional GR2 --produto restrito
 ```
 
-As saídas vão para `artefatos_local/gestao/AAAA-MM/`, que nunca é versionado.
+As saídas vão para `artefatos_local/gestao/AAAA-MM/escopos/<scope-key>/`, que nunca é versionado.
 
 ## Como incluir um novo indicador
 
