@@ -47,6 +47,14 @@ from lib.estrutura_organizacional import (  # noqa: E402
     insert_mesogrupo_column,
     load_mesogrupo_lookup,
 )
+from gestao.comum import (  # noqa: E402
+    SQL_UNIDADES_FILHAS,
+    expandir_subordinadas,
+    quote_list,
+    rotulo_de_escopo,
+    run_query,
+    siglas_de_argumentos,
+)
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
@@ -121,53 +129,6 @@ WHERE pt.deleted_at IS NULL
 ORDER BY u.sigla, us.nome, pt.numero
 """
 
-SQL_UNIDADES_FILHAS = """
-SELECT f.sigla
-FROM petrvs_icmbio_unidades f
-JOIN petrvs_icmbio_unidades p ON p.id = f.unidade_pai_id AND p.deleted_at IS NULL
-WHERE f.deleted_at IS NULL
-  AND UPPER(p.sigla) IN ({siglas})
-"""
-
-
-def quote_list(valores) -> str:
-    """Monta uma lista SQL de literais com escape de aspas simples."""
-    partes = []
-    for valor in valores:
-        escapado = str(valor).replace("'", "''")
-        partes.append("'" + escapado + "'")
-    return ", ".join(partes)
-
-
-def run_query(conn, sql: str) -> tuple[list[str], list[list]]:
-    stmt = conn.createStatement()
-    rs = stmt.executeQuery(sql)
-    meta = rs.getMetaData()
-    total = meta.getColumnCount()
-    cols = [str(meta.getColumnLabel(i + 1)) for i in range(total)]
-    rows: list[list] = []
-    while rs.next():
-        rows.append([clean(rs.getObject(i + 1)) for i in range(total)])
-    rs.close()
-    stmt.close()
-    return cols, rows
-
-
-def expandir_subordinadas(conn, siglas: list[str], niveis: int = 3) -> list[str]:
-    """Denodo VQL não tem CTE recursiva — expande a hierarquia por iteração."""
-    acumulado = {s.upper() for s in siglas}
-    fronteira = set(acumulado)
-    for _ in range(niveis):
-        if not fronteira:
-            break
-        sql = SQL_UNIDADES_FILHAS.format(siglas=quote_list(sorted(fronteira)))
-        _, rows = run_query(conn, sql)
-        filhas = {r[0].upper() for r in rows if r[0]}
-        fronteira = filhas - acumulado
-        acumulado |= filhas
-    return sorted(acumulado)
-
-
 def derivar_status_negocio(
     registro: dict, *, incluir_nome: bool = True
 ) -> tuple[str, str, str, str]:
@@ -237,9 +198,7 @@ def main() -> None:
                         help="Valida argumentos, janela, destino e SQL sem abrir conexão.")
     args = parser.parse_args()
 
-    siglas: list[str] = []
-    for item in args.unidade:
-        siglas.extend(s.strip().upper() for s in item.split(",") if s.strip())
+    siglas = siglas_de_argumentos(args.unidade)
     if not siglas and not args.todas:
         parser.error("informe --unidade SIGLA ou --todas")
 
@@ -313,12 +272,7 @@ def main() -> None:
     out_cols, out_rows = insert_mesogrupo_column(out_cols, out_rows, lookup)
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M")
-    if args.todas:
-        escopo = "TODAS"
-    else:
-        escopo = "_".join(siglas[:3])
-        if len(siglas) > 3:
-            escopo += f"_e_mais_{len(siglas) - 3}"
+    escopo = rotulo_de_escopo(siglas, args.todas)
 
     if args.produto != "compartilhavel":
         detalhe = destino / f"PT_STATUS.2_detalhe_{args.produto}_{escopo}_{stamp}.csv"

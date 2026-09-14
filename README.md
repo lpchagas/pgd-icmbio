@@ -12,6 +12,7 @@ Desenvolvido pela Coordenação de Governança (CGOV/ICMBio) no âmbito do pilot
 
 | Data | O que mudou | Onde |
 | --- | --- | --- |
+| 14.09.2026 | Registro de execução do Plano de Entregas por período (`REG_EXEC`): recorta um quadrimestre fechado, cruza a meta de cada entrega com os quatro ciclos mensais de Plano de Trabalho exigidos pela RN-04 e diz se o PE já pode ser concluído. | [docs/18-registro-execucao-quadrimestral.md](docs/18-registro-execucao-quadrimestral.md) |
 | 13.09.2026 | Integração do ciclo gerencial retomável, Relatório V2, gates de segurança e caderno metodológico para deliberação. Os 13 alvos permanecem pendentes de homologação institucional. | [docs/16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) · [docs/17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) |
 | 12.09.2026 | Protocolo A1–A5 automatizado com contratos, extrações atômicas, oráculos independentes, drift, diagnósticos e fixtures sintéticas sem efeito de homologação. | [docs/09-protocolo-validacao-indicadores.md](docs/09-protocolo-validacao-indicadores.md) |
 | 11.09.2026 | Relatório cumulativo e anonimizado com escopos explícitos, proteção `k≥5`, supressão complementar, PDF e expansão controlada da GR2 para o nível nacional. | [docs/15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) |
@@ -185,6 +186,7 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | [15-relatorio-gerencial-cumulativo-anonimizado.md](docs/15-relatorio-gerencial-cumulativo-anonimizado.md) | Rotina do relatório cumulativo: corte no mês anterior, escopos, anonimização, PDF e expansão GR2 → nacional |
 | [16-skills-e-relatorio-gerencial-v2.md](docs/16-skills-e-relatorio-gerencial-v2.md) | Arquitetura das skills, extrações automatizadas e Relatório Gerencial V2 |
 | [17-caderno-metodologico-cgov.md](docs/17-caderno-metodologico-cgov.md) | Minuta deliberativa: fórmulas, alternativas, scorecards e matriz de homologação I01–I12 + PT_STATUS |
+| [18-registro-execucao-quadrimestral.md](docs/18-registro-execucao-quadrimestral.md) | Registro de execução do Plano de Entregas por período, verificação da RN-04 e por que Q2 é quadrimestre |
 | `docs/ocde/` | As **fichas técnicas dos 12 indicadores** (uma por indicador) + 4 fichas de eixo + o índice geral [06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md) |
 | `docs/cgov/` e `docs/mgi/` | Páginas públicas de apresentação das iniciativas CGOV e MGI (sem dados sensíveis) |
 
@@ -218,9 +220,11 @@ famílias leem o mesmo banco, mas têm público, periodicidade e saída distinto
 | Script | O que responde | Documentação |
 | --- | --- | --- |
 | [`PT_STATUS.1_run.py`](gestao/PT_STATUS.1_run.py) | Situação de cada Plano de Trabalho da unidade — rascunho, aguardando assinatura, em execução, aguardando avaliação ou concluído — com há quantos dias está parado, quem fez a última mudança e qual servidor procurar | [docs/14-status-planos-trabalho-gestores.md](docs/14-status-planos-trabalho-gestores.md) |
+| [`REG_EXEC.1_run.py`](gestao/REG_EXEC.1_run.py) | O Plano de Entregas do quadrimestre já pode ser concluído? Evolução de cada entrega no período e verificação dos quatro ciclos mensais de PT de cada servidor (RN-04) | [docs/18-registro-execucao-quadrimestral.md](docs/18-registro-execucao-quadrimestral.md) |
 
 ```powershell
 python gestao/PT_STATUS.1_run.py --unidade CGGP --incluir-subordinadas
+python gestao/REG_EXEC.1_run.py --unidade CGOV --periodo Q2-2026 --relatorio
 ```
 
 As saídas vão para `artefatos_local/gestao/AAAA-MM/` (não versionado): um CSV de

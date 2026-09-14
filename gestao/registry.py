@@ -71,7 +71,41 @@ REGISTRY: dict[str, ManagementExtraction] = {
         invariants=("precedencia_consolidacao", "fallback_data_status", "total_subtotais"),
         tolerances={"counts": 0.0, "percentages": 0.05},
         baseline="HOMOLOGACAO_INICIAL_PENDENTE",
-    )
+    ),
+    "registro-execucao-pe": ManagementExtraction(
+        code="REG_EXEC",
+        name="Registro de execução do Plano de Entregas por período",
+        entrypoint=PROJECT_ROOT / "gestao" / "REG_EXEC.1_run.py",
+        # A lente continua sendo "acumulada": --periodo é uma dimensão
+        # ortogonal à lente. Criar uma lente "periodo" exigiria alargar o
+        # vocabulário aceito em validate() e em runner.py --lente, e faria
+        # "--lente ambas" deixar de selecionar esta análise no ciclo mensal.
+        temporal_lenses=("acumulada",),
+        supported_scopes=(
+            "nacional", "regional", "unidade", "mesogrupo", "tipo-unidade", "lista-unidades"
+        ),
+        output_schema="REG_EXEC.v1",
+        privacy_class="ambos",
+        contains_narrative=True,
+        enabled_in_monthly_cycle=True,
+        oracle_entrypoint=PROJECT_ROOT / "lib" / "validation_oracles.py",
+        atomic_extractors=(
+            "reg_exec_entregas", "reg_exec_consolidacoes", "reg_exec_vinculos",
+        ),
+        business_keys=("periodo", "unidade_sigla"),
+        validation_schema="REG_EXEC.validation.v1",
+        formula_version="1.0.0",
+        invariants=(
+            "recorte_dentro_da_janela_cumulativa",
+            "meta_pe_nao_derivada_de_atividade",
+            "separacao_dono_executora",
+            "rn04_cobertura_dos_ciclos",
+            "ciclo_fora_da_vigencia_nao_conta",
+            "total_subtotais",
+        ),
+        tolerances={"counts": 0.0, "percentages": 0.05, "hours": 0.01, "scores": 0.01},
+        baseline="HOMOLOGACAO_INICIAL_PENDENTE",
+    ),
 }
 
 

@@ -7,6 +7,12 @@
 
 ---
 
+> **Este documento ou o 18?** `PT_STATUS` responde "qual plano de trabalho está
+> parado agora e com quem eu falo" — uma fotografia do estado atual. Para fechar
+> o Plano de Entregas de um quadrimestre e saber se ele já pode ser concluído
+> (RN-04), use o
+> [registro de execução por período](18-registro-execucao-quadrimestral.md).
+
 ## 1. Resposta curta
 
 **Sim.** O Denodo expõe o status de situação de cada Plano de Trabalho, o servidor
