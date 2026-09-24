@@ -15,6 +15,14 @@ _ADDRESS = re.compile(
     r"\b(?:rua|avenida|av\.?|travessa|alameda|rodovia|estrada)\s+[^,;\n]{3,80}", re.I
 )
 _SPACE = re.compile(r"\s+")
+# Intervalos de anos ("2025-2027"), processos SEI formatados ("02070.020242/2025-88") e documentos
+# SEI citados com o prefixo ("SEI nº 23687646") não são dado pessoal; sem esta proteção, casavam o
+# padrão de telefone de 8 dígitos.
+PROTECTED_SPANS = re.compile(
+    r"(?<![\w.-])(?:(?:19|20)\d{2} ?[-–] ?(?:19|20)\d{2}|\d{5}\.\d{6}/\d{4}-\d{2}"
+    r"|SEI\s*(?:n[º°o]\.?\s*)?\d{7,10})(?!\w)",
+    re.I,
+)
 
 
 def _fold(value: str) -> str:
@@ -37,12 +45,21 @@ class TextSanitizer:
     def sanitize(self, value: object) -> SanitizedText:
         text = _SPACE.sub(" ", str(value or "").replace("\x00", " ")).strip()
         redactions: list[str] = []
+        protected: list[str] = []
+
+        def protect(match: re.Match[str]) -> str:
+            protected.append(match.group(0))
+            return f"[PROTEGIDO_{len(protected) - 1}]"
+
+        text = PROTECTED_SPANS.sub(protect, text)
         for label, pattern in (
             ("email", _EMAIL), ("cpf", _CPF), ("telefone", _PHONE), ("endereco", _ADDRESS)
         ):
             text, count = pattern.subn(f"[DADO_PESSOAL_{label.upper()}]", text)
             if count:
                 redactions.append(label)
+        for index, span in enumerate(protected):
+            text = text.replace(f"[PROTEGIDO_{index}]", span, 1)
         folded = _fold(text)
         for name in self._names:
             folded_name = _fold(name)

@@ -162,6 +162,9 @@ def run(argv: list[str] | None = None) -> dict:
     if args.dry_run:
         manifest["status_global"] = "dry-run"
         manifest["plano_execucao"] = list(STAGES)
+        manifest["escopo_resolvido"] = scope.as_dict()
+        manifest["pasta_destino"] = str(final_path.parent)
+        manifest["alvos_previstos"] = list(TARGETS)
         return manifest
 
     def perform(name: str, action) -> bool:
