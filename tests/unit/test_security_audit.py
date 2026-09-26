@@ -692,10 +692,10 @@ def test_rl1v2_02_interpolation_and_escapes_are_refused_with_any_quote(tmp_path,
 
 
 @pytest.mark.parametrize("line", [
-    "DENODO_PASSWORD=valor-fixture-simples",
-    'DENODO_PASSWORD="valor fixture duplas"',
-    "DENODO_PASSWORD='valor fixture simples'",
-    "export DENODO_PASSWORD='valor#fixture'",
+    "DENODO_PASSWORD=valor-fixture-simples",  # pragma: allowlist secret
+    'DENODO_PASSWORD="valor fixture duplas"',  # pragma: allowlist secret
+    "DENODO_PASSWORD='valor fixture simples'",  # pragma: allowlist secret
+    "export DENODO_PASSWORD='valor#fixture'",  # pragma: allowlist secret
     "DENODO_PASSWORD=valor-fixture # comentario",
 ])
 def test_rl1v2_02_accepted_syntax_matches_python_dotenv(line):

@@ -31,7 +31,7 @@ def test_detecta_identificadores_e_campos_livres():
 
 
 def test_hash_sha256_nao_e_confundido_com_cpf():
-    digest = "aae0e12345678901a4a5eed5bf4e79cd95d1fede347a43f0d7f9828e2fa93314"
+    digest = "aae0e12345678901a4a5eed5bf4e79cd95d1fede347a43f0d7f9828e2fa93314"  # pragma: allowlist secret
     assert redact_personal_identifiers(digest) == digest
     assert scan_text(digest) == []
     assert "[CPF_REMOVIDO]" in redact_personal_identifiers("CPF 123.456.789-00")

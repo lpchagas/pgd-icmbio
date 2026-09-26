@@ -1,5 +1,5 @@
-# Dependências do pgd-agente-icmbio (Python 3.14, .venv local)
-# Instalar: .venv\Scripts\pip install -r requirements.txt
+# Dependências do agente de gestão (agente/), grupo "agente" (plano §8).
+# Instalar: pip install -r requirements-agente.txt (não é necessário para a suíte offline).
 
 # Camada de dados (I0) — MySQL local + Denodo via JDBC
 PyMySQL>=1.2

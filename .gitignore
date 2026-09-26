@@ -166,3 +166,26 @@ plano_estrutura_projeto.md
 # Pasta aninhada criada em sessão anterior (pode ser deletada manualmente)
 # -----------------------------------------------------------------------------
 /DM_Petrvs_icmbio_mysql/
+
+# ─── Agente de gestão (incorporado no L3; ex-pgd-agente-icmbio) ───────────────
+# Dados locais do agente: não migram pelo Git (inventário privado no L6).
+data/
+agente/data/
+testes_cgov/
+agente/testes_cgov/
+*.pyc
+*.ipynb_checkpoints/
+.pytest_cache/
+# Exceção SQL restrita (plano §5): só o schema e as migrações numeradas do agente.
+!agente/dados/schema.sql
+!agente/dados/migracoes/
+!agente/dados/migracoes/[0-9][0-9][0-9]_*.sql
+# Dumps continuam recusados mesmo dentro da exceção.
+*.dump.sql
+agente/dados/**/pgd_agente_*.sql
+agente/dados/pgd_agente_*.sql
+# Acervo de referências: só o README é público (raiz e local intermediário do L3).
+docs/referencias-pgd/**
+!docs/referencias-pgd/README.md
+agente/docs/referencias-pgd/**
+!agente/docs/referencias-pgd/README.md
