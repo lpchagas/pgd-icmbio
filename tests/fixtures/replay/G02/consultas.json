@@ -1,0 +1,463 @@
+{
+  "descricao": "Linhas congeladas sintéticas do G02 (entregas, progressos, planos, vínculos e atividades) para o replay offline (data de execução 2026-09-13). Fixture manual; a consulta de planos tem uma variante por produto (só o restrito traz servidor_nome). O dublê não aplica os filtros SQL. Sem dados reais.",
+  "consultas": [
+    {
+      "nome": "entregas",
+      "inicio": "2026-08-31",
+      "fim": "2025-07-01",
+      "contem": [
+        "AS unidade_dona_sigla"
+      ],
+      "colunas": [
+        "id_entrega",
+        "plano_entrega_id",
+        "unidade_dona_sigla",
+        "nome_entrega",
+        "entrega_inicio",
+        "entrega_fim",
+        "meta_planejada"
+      ],
+      "linhas": [
+        [
+          "sint-ent-1",
+          "sint-pe-1",
+          "CGSIN",
+          "Relatório de monitoramento sintético",
+          "2025-07-01",
+          "2026-08-31",
+          "100"
+        ],
+        [
+          "sint-ent-2",
+          "sint-pe-1",
+          "CGSIN",
+          "Plano enviado por servidor.sintetico@exemplo.invalid",
+          "2025-10-01",
+          "2025-12-31",
+          "100"
+        ],
+        [
+          "sint-ent-3",
+          "sint-pe-2",
+          "NGI-SINT",
+          "Ação regional | fase 1",
+          "2026-01-01",
+          "2026-04-30",
+          "50"
+        ],
+        [
+          "sint-ent-4",
+          "sint-pe-3",
+          "UNID-NOME",
+          "Entrega sem vínculo",
+          "2026-05-01",
+          "2026-08-31",
+          "100"
+        ],
+        [
+          "sint-ent-5",
+          "sint-pe-4",
+          "SEM-MAPA",
+          "Entrega de outra unidade\ncom executor da CGSIN",
+          "2025-07-01",
+          "2025-09-30",
+          "100"
+        ]
+      ]
+    },
+    {
+      "nome": "progressos",
+      "inicio": "2025-07-01",
+      "fim": "2026-08-31",
+      "contem": [
+        "AS progresso_id"
+      ],
+      "colunas": [
+        "progresso_id",
+        "id_entrega",
+        "data_progresso",
+        "meta",
+        "realizado",
+        "progresso_esperado",
+        "progresso_realizado",
+        "registro_execucao"
+      ],
+      "linhas": [
+        [
+          "sint-pr-1",
+          "sint-ent-1",
+          "2025-09-15",
+          "{\"porcentagem\": 100}",
+          "{\"porcentagem\": 25}",
+          "30",
+          "25",
+          "Reunião com Servidor Sintético 01; contato (00) 90000-0000; SEI 1234567"
+        ],
+        [
+          "sint-pr-2",
+          "sint-ent-1",
+          "2026-03-10",
+          "{\"porcentagem\": 100}",
+          "{\"porcentagem\": 70}",
+          "60",
+          "70",
+          "Visita à Rua das Flores Sintéticas, 100"
+        ],
+        [
+          "sint-pr-3",
+          "sint-ent-3",
+          "2026-02-01",
+          "{\"porcentagem\": 50}",
+          "{\"porcentagem\": 50}",
+          "50",
+          "50",
+          null
+        ],
+        [
+          "sint-pr-4",
+          "sint-ent-1",
+          "2026-09-05",
+          "{\"porcentagem\": 100}",
+          "{\"porcentagem\": 90}",
+          "90",
+          "90",
+          "Registro após o corte histórico"
+        ],
+        [
+          "sint-pr-5",
+          "sint-ent-2",
+          "2025-11-20",
+          "{\"porcentagem\": 100}",
+          "{\"porcentagem\": 100}",
+          "100",
+          "100",
+          "Concluída conforme servidor.sintetico@exemplo.invalid"
+        ],
+        [
+          "sint-pr-6",
+          "sint-ent-5",
+          "2025-08-10",
+          "{\"porcentagem\": 100}",
+          "{\"porcentagem\": 20}",
+          "50",
+          "20",
+          "Registro de outra unidade"
+        ]
+      ]
+    },
+    {
+      "nome": "planos",
+      "variantes": [
+        "restrito"
+      ],
+      "inicio": "2026-09-13",
+      "fim": "2025-07-01",
+      "contem": [
+        "AS plano_numero",
+        "us.nome AS servidor_nome"
+      ],
+      "colunas": [
+        "plano_trabalho_id",
+        "id_servidor",
+        "servidor_nome",
+        "plano_numero",
+        "plano_inicio",
+        "plano_fim",
+        "unidade_executora_sigla"
+      ],
+      "linhas": [
+        [
+          "sint-pt-1",
+          "sint-srv-01",
+          "Servidor Sintético 01",
+          "2001",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-2",
+          "sint-srv-02",
+          "Servidor Sintético 02",
+          "2002",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-3",
+          "sint-srv-03",
+          "Servidor Sintético 03",
+          "2003",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-4",
+          "sint-srv-04",
+          "Servidor Sintético 04",
+          "2004",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-5",
+          "sint-srv-05",
+          "Servidor Sintético 05",
+          "2005",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-6",
+          "sint-srv-06",
+          "Servidor Sintético 06",
+          "2006",
+          "2025-07-01",
+          "2026-12-31",
+          "NGI-SINT"
+        ],
+        [
+          "sint-pt-7",
+          "sint-srv-07",
+          "Servidor Sintético 07",
+          "2007",
+          "2025-07-01",
+          "2026-12-31",
+          "NGI-SINT"
+        ],
+        [
+          "sint-pt-8",
+          "sint-srv-08",
+          "Servidor Sintético 08",
+          "2008",
+          "2025-07-01",
+          "2026-12-31",
+          "SEM-MAPA"
+        ]
+      ]
+    },
+    {
+      "nome": "planos",
+      "variantes": [
+        "compartilhavel"
+      ],
+      "inicio": "2026-09-13",
+      "fim": "2025-07-01",
+      "contem": [
+        "AS plano_numero"
+      ],
+      "nao_contem": [
+        "servidor_nome"
+      ],
+      "colunas": [
+        "plano_trabalho_id",
+        "id_servidor",
+        "plano_numero",
+        "plano_inicio",
+        "plano_fim",
+        "unidade_executora_sigla"
+      ],
+      "linhas": [
+        [
+          "sint-pt-1",
+          "sint-srv-01",
+          "2001",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-2",
+          "sint-srv-02",
+          "2002",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-3",
+          "sint-srv-03",
+          "2003",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-4",
+          "sint-srv-04",
+          "2004",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-5",
+          "sint-srv-05",
+          "2005",
+          "2025-07-01",
+          "2026-12-31",
+          "CGSIN"
+        ],
+        [
+          "sint-pt-6",
+          "sint-srv-06",
+          "2006",
+          "2025-07-01",
+          "2026-12-31",
+          "NGI-SINT"
+        ],
+        [
+          "sint-pt-7",
+          "sint-srv-07",
+          "2007",
+          "2025-07-01",
+          "2026-12-31",
+          "NGI-SINT"
+        ],
+        [
+          "sint-pt-8",
+          "sint-srv-08",
+          "2008",
+          "2025-07-01",
+          "2026-12-31",
+          "SEM-MAPA"
+        ]
+      ]
+    },
+    {
+      "nome": "vinculos",
+      "inicio": "2026-09-13",
+      "fim": "2025-07-01",
+      "contem": [
+        "AS vinculo_id"
+      ],
+      "colunas": [
+        "vinculo_id",
+        "plano_trabalho_id",
+        "id_entrega",
+        "forca_trabalho"
+      ],
+      "linhas": [
+        [
+          "sint-vi-1",
+          "sint-pt-1",
+          "sint-ent-1",
+          "20.00"
+        ],
+        [
+          "sint-vi-2",
+          "sint-pt-2",
+          "sint-ent-1",
+          "40.00"
+        ],
+        [
+          "sint-vi-3",
+          "sint-pt-3",
+          "sint-ent-1",
+          "60.00"
+        ],
+        [
+          "sint-vi-4",
+          "sint-pt-4",
+          "sint-ent-1",
+          "80.00"
+        ],
+        [
+          "sint-vi-5",
+          "sint-pt-5",
+          "sint-ent-1",
+          "100.00"
+        ],
+        [
+          "sint-vi-6",
+          "sint-pt-6",
+          "sint-ent-3",
+          "50.00"
+        ],
+        [
+          "sint-vi-7",
+          "sint-pt-7",
+          "sint-ent-3",
+          "30.00"
+        ],
+        [
+          "sint-vi-8",
+          "sint-pt-1",
+          "sint-ent-5",
+          "10.00"
+        ],
+        [
+          "sint-vi-9",
+          "sint-pt-7",
+          "sint-ent-inexistente",
+          "25.00"
+        ],
+        [
+          "sint-vi-1",
+          "sint-pt-1",
+          "sint-ent-1",
+          "20.00"
+        ]
+      ]
+    },
+    {
+      "nome": "atividades",
+      "inicio": "2026-09-13",
+      "fim": "2025-07-01",
+      "contem": [
+        "petrvs_icmbio_atividades"
+      ],
+      "colunas": [
+        "atividade_id",
+        "plano_trabalho_id",
+        "status",
+        "data_inicio",
+        "data_entrega",
+        "tempo_planejado",
+        "tempo_despendido"
+      ],
+      "linhas": [
+        [
+          "sint-at-1",
+          "sint-pt-1",
+          "CONCLUIDO",
+          "2026-01-10",
+          "2026-01-20",
+          "8",
+          "6"
+        ],
+        [
+          "sint-at-2",
+          "sint-pt-1",
+          "INICIADO",
+          "2026-02-01",
+          null,
+          "4",
+          "1.5"
+        ],
+        [
+          "sint-at-3",
+          "sint-pt-6",
+          null,
+          null,
+          null,
+          "2",
+          "0"
+        ],
+        [
+          "sint-at-4",
+          "sint-pt-3",
+          "CONCLUIDO",
+          "2025-08-01",
+          "2025-08-02",
+          "3",
+          "3"
+        ]
+      ]
+    }
+  ]
+}

@@ -41,10 +41,26 @@ SHIM_DIR = Path(__file__).resolve().parent / "replay_sitecustomize"
 FIXTURES_DIR = PROJECT_ROOT / "tests" / "fixtures" / "replay"
 
 def _ocde(numero: str, periodos: str, fixture: str = "gerada") -> dict[str, object]:
-    return {"script": f"ocde/indicadores/IND_OCDE_{numero}.1_run.py", "periodos": periodos, "fixture": fixture}
+    # Mesmo comando do runner oficial (lib.indicator_extraction).
+    return {
+        "script": f"ocde/indicadores/IND_OCDE_{numero}.1_run.py", "periodos": periodos, "fixture": fixture,
+        "argumentos": ("--data-execucao", "{data}", "--month", "{mes}"),
+    }
 
+
+def _gestao(numero: str, produto: str, *escopo: str) -> dict[str, object]:
+    # Mesmo comando do runner oficial (gestao.runner): produto, --out e escopo explícitos.
+    return {
+        "script": f"gestao/IND_GEST_{numero}/IND_GEST_{numero}.1_run.py", "fixture": "manual",
+        "contrato": f"G{numero}", "fixtures": f"G{numero}", "variante": produto,
+        "argumentos": ("--data-execucao", "{data}", "--produto", produto, "--out", "{saida}", *escopo),
+    }
+
+
+_UNIDADES_SINTETICAS = ("--unidade", "CGSIN", "--unidade", "NGI-SINT", "--unidade", "UNID-NOME", "--unidade", "SEM-MAPA")
 
 # fixture "gerada": tools/gerar_fixtures_replay.py; "manual": escrita à mão.
+# Alvos de gestão rodam por produto: o restrito com lista de unidades, o compartilhável com --todas.
 ALVOS: dict[str, dict[str, object]] = {
     "I02": _ocde("02", "pe", fixture="manual"),
     "I03": _ocde("03", "pe"),
@@ -58,8 +74,16 @@ ALVOS: dict[str, dict[str, object]] = {
     "I12": _ocde("12", "pe"),
     "I01": _ocde("01", "pt", fixture="manual"),
     "I08": _ocde("08", "pe", fixture="manual"),
+    "G01-restrito": _gestao("01", "restrito", *_UNIDADES_SINTETICAS),
+    "G01-compartilhavel": _gestao("01", "compartilhavel", "--todas"),
+    "G02-restrito": _gestao("02", "restrito", "--unidade", "CGSIN", "--unidade", "NGI-SINT"),
+    "G02-compartilhavel": _gestao("02", "compartilhavel", "--todas"),
 }
 _CHAVE_PADRAO = ("periodo", "unidade_sigla")
+
+
+def pasta_de_fixtures(alvo: str) -> Path:
+    return FIXTURES_DIR / str(ALVOS[alvo].get("fixtures", alvo))
 
 
 def chave_do_arquivo(alvo: str, nome: str) -> tuple[str, ...]:
@@ -68,14 +92,14 @@ def chave_do_arquivo(alvo: str, nome: str) -> tuple[str, ...]:
     from lib.validation_contracts import TARGETS
 
     base = nome.rsplit("/", 1)[-1].replace("_<carimbo>", "_00000000_0000")
-    for contrato in TARGETS[alvo].outputs:
+    for contrato in TARGETS[str(ALVOS[alvo].get("contrato", alvo))].outputs:
         if fnmatch.fnmatch(base, contrato.pattern):
             return tuple(contrato.business_keys)
     return _CHAVE_PADRAO
 
 # Variáveis herdadas pelo subprocesso; credenciais e PGD_* do pai nunca passam.
 _AMBIENTE_BASE = ("PATH", "SYSTEMROOT", "WINDIR", "TEMP", "TMP", "HOME", "USERPROFILE", "LANG", "LC_ALL")
-_CARIMBO = re.compile(r"_\d{8}_\d{4}(?=\.csv\b)")
+_CARIMBO = re.compile(r"_\d{8}_\d{4}(?:\d{2})?(?=\.csv\b)")  # HHMM (OCDE, G01) ou HHMMSS (G02)
 _COLUNA_PESSOAL = re.compile(r"(^|_)(cpf|email|e_mail|telefone|matricula|nome_servidor|servidor_nome|usuario_nome)($|_)")
 _BOM = b"\xef\xbb\xbf"
 _EXEMPLOS = 10
@@ -123,7 +147,9 @@ def normalizar_saida(texto: str, saida: Path) -> str:
     return _CARIMBO.sub("_<carimbo>", texto.replace("\\", "/"))
 
 
-def ambiente_subprocesso(raiz: Path, data_execucao: str, fixtures: Path, saida: Path, registro: Path) -> dict[str, str]:
+def ambiente_subprocesso(
+    raiz: Path, data_execucao: str, fixtures: Path, saida: Path, registro: Path, variante: str = "",
+) -> dict[str, str]:
     """Ambiente do A1 sob replay: mínimo, com a substituição de I/O ativada."""
 
     env = {chave: os.environ[chave] for chave in _AMBIENTE_BASE if chave in os.environ}
@@ -136,6 +162,7 @@ def ambiente_subprocesso(raiz: Path, data_execucao: str, fixtures: Path, saida: 
         "PGD_REPLAY_FIXTURES": str(fixtures),
         "PGD_REPLAY_RAIZ": str(raiz),
         "PGD_REPLAY_REGISTRO": str(registro),
+        "PGD_REPLAY_VARIANTE": variante,
     })
     return env
 
@@ -148,10 +175,12 @@ def executar(raiz: Path, alvo: str, data_execucao: str, fixtures: Path, trabalho
         raise ReplayError(f"A1 ausente na origem: {ALVOS[alvo]['script']}")
     saida = trabalho / "saida"
     registro = trabalho / "registro.json"
-    mes = data_execucao[:7]
-    env = ambiente_subprocesso(raiz, data_execucao, fixtures, saida, registro)
+    variante = str(ALVOS[alvo].get("variante", ""))
+    env = ambiente_subprocesso(raiz, data_execucao, fixtures, saida, registro, variante)
+    valores = {"data": data_execucao, "mes": data_execucao[:7], "saida": str(saida)}
+    argumentos = [str(item).format(**valores) for item in ALVOS[alvo]["argumentos"]]
     processo = subprocess.run(
-        [sys.executable, str(script), "--data-execucao", data_execucao, "--month", mes],
+        [sys.executable, str(script), *argumentos],
         cwd=raiz, env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
     )
     arquivos = {
@@ -166,6 +195,7 @@ def executar(raiz: Path, alvo: str, data_execucao: str, fixtures: Path, trabalho
         "stderr": processo.stderr,
         "arquivos": arquivos,
         "registro": dados_registro,
+        "variante": variante,
     }
 
 
@@ -181,9 +211,14 @@ def _validar_execucao(lado: str, execucao: dict, fixtures: Path) -> None:
     nao_servidas = [c for c in registro["consultas"] if not c["servida"]]
     if nao_servidas:
         raise ReplayError(f"{lado}: {len(nao_servidas)} consulta(s) sem linhas congeladas")
-    fixture = json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
-    esperadas = sorted((c["inicio"], c["fim"], c.get("nome", "")) for c in fixture)
-    servidas = sorted((c["inicio"], c["fim"], c.get("nome", "")) for c in registro["consultas"])
+    variante = execucao.get("variante", "")
+    fixture = [
+        c for c in json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
+        if not c.get("variantes") or variante in c["variantes"]
+    ]
+    identificar = lambda c: (c.get("inicio") or "", c.get("fim") or "", c.get("nome", ""))  # noqa: E731
+    esperadas = sorted(map(identificar, fixture))
+    servidas = sorted(map(identificar, registro["consultas"]))
     if servidas != esperadas:
         raise ReplayError(f"{lado}: consultas feitas diferem das fixtures (faltam, sobram ou se repetem)")
     if not execucao["arquivos"]:
@@ -210,6 +245,9 @@ def _comparar_arquivo(nome: str, ref: bytes, cand: bytes, chave: tuple[str, ...]
         diferencas.append({"tipo": "numero_linhas", "arquivo": nome, "referencia": len(linhas_ref), "candidato": len(linhas_cand)})
     if cab_ref == cab_cand:
         posicoes = [cab_ref.index(c) for c in chave if c in cab_ref]
+        unica = all(len({tuple(l[p] for p in posicoes) for l in ls}) == len(ls) for ls in (linhas_ref, linhas_cand))
+        if not (posicoes and unica):
+            posicoes = []  # chave ausente ou repetida: compara por posição da linha
         indexar = lambda linhas: {tuple(l[p] for p in posicoes) if posicoes else (str(i),): l for i, l in enumerate(linhas)}  # noqa: E731
         por_chave_ref, por_chave_cand = indexar(linhas_ref), indexar(linhas_cand)
         divergentes = []
@@ -261,7 +299,7 @@ def replay(alvo: str, referencia: str, candidato: str, data_execucao: str, fixtu
 
     if alvo not in ALVOS:
         raise ReplayError(f"alvo sem replay configurado: {alvo}")
-    fixtures = (fixtures or FIXTURES_DIR / alvo).resolve()
+    fixtures = (fixtures or pasta_de_fixtures(alvo)).resolve()
     relatorio: dict = {"alvo": alvo, "data_execucao": data_execucao, "fixtures": fixtures.name}
     with tempfile.TemporaryDirectory(prefix="pgd-replay-") as tmp:
         base = Path(tmp)

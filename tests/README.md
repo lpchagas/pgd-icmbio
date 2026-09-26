@@ -45,20 +45,25 @@ compatibilidade real é verificada no gate integrado, fora da integração cont�
 
 O replay (`tools/replay_producao.py`) não testa a semântica da consulta. Ele roda o
 A1 real de duas versões do código (referência e candidata) sobre as **mesmas**
-linhas congeladas e exige artefatos idênticos. A substituição fica acima do JDBC:
-`query_rows`, `connect`/`get_config` e as planilhas de estrutura servem fixtures
-sintéticas (`tests/fixtures/replay/<alvo>/`). O subprocesso não lê `.env` nem
-`artefatos_local/` e não abre rede. É evidência técnica de equivalência numa
-mudança estrutural, não aceite institucional.
+linhas congeladas e exige artefatos idênticos. `connect`/`get_config` devolvem um
+dublê JDBC (Statement/ResultSet) que serve as fixtures sintéticas
+(`tests/fixtures/replay/<alvo>/`); o `query_rows` e o `clean` reais continuam no
+caminho. As planilhas de estrutura também são sintéticas. O subprocesso não lê
+`.env` nem `artefatos_local/` e não abre rede. É evidência técnica de equivalência
+numa mudança estrutural, não aceite institucional; o dublê serve linhas, não
+simula a semântica da consulta (os filtros SQL não são aplicados).
 
-Cobertura atual: os 12 indicadores OCDE. I01, I02 e I08 têm fixture manual (o I08
+Cobertura atual: os 14 alvos. G01 e G02 rodam com o mesmo comando do
+`gestao.runner`, um alvo por produto (restrito com lista de unidades, compartilhável
+com `--todas`); a consulta de planos do G02 tem uma fixture por produto
+(`variantes`). I01, I02 e I08 têm fixture manual (o I08
 faz duas consultas por período, distinguidas pelos marcadores `contem`/`nao_contem`);
 I03–I07 e I09–I12 usam fixtures geradas por
 `tools/gerar_fixtures_replay.py`, determinísticas e versionadas (o teste confere que
 a versão commitada é reproduzível). As planilhas de estrutura comuns ficam em
 `tests/fixtures/replay/_comum/`. Um A1 que imprime `ERRO:` e continua torna o
 replay `erro`, nunca equivalência, assim como consulta sem fixture, fixture ambígua
-ou fixture que sobra. G01 e G02 ainda não têm replay.
+ou fixture que sobra.
 
 ```powershell
 python -m tools.replay_producao --alvo I07 --referencia git:HEAD --candidato . --data-execucao 2026-09-13

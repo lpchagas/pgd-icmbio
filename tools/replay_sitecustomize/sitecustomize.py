@@ -4,7 +4,8 @@ Só age quando PGD_REPLAY_FIXTURES está definido, o que acontece apenas no
 subprocesso aberto pelo replay. Substitui exclusivamente o I/O do A1:
 
 - configuração e conexão Denodo (``get_config``, ``connect``), sem ler o .env;
-- ``query_rows``, que passa a servir as linhas congeladas do período;
+- a conexão devolvida é um dublê JDBC (Statement/ResultSet) que serve as linhas
+  congeladas de cada consulta; ``query_rows``/``clean`` reais continuam em uso;
 - as planilhas de estrutura organizacional, trocadas pelas fixtures sintéticas.
 
 Um audit hook recusa leitura de .env e do acervo privado, rede e subprocessos.
@@ -71,21 +72,44 @@ def _ativar() -> None:
     raiz = os.path.normcase(os.path.abspath(os.environ["PGD_REPLAY_RAIZ"]))
     registro = Path(os.environ["PGD_REPLAY_REGISTRO"])
 
-    consultas = json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
+    variante = os.environ.get("PGD_REPLAY_VARIANTE", "")
+    consultas = [
+        item for item in json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
+        if not item.get("variantes") or variante in item["variantes"]
+    ]
     servidas: list[dict] = []
 
-    def localizar(chave: tuple | None, sql: str) -> dict | None:
-        """Fixture do período cujos marcadores casam com a SQL (I08: duas consultas por período)."""
+    def localizar(chave: tuple, sql: str) -> dict | None:
+        """Fixture cujo período e marcadores casam com a SQL.
+
+        Período: as duas primeiras datas literais da SQL, ou (None, None) se não houver.
+        Marcadores ``contem``/``nao_contem`` separam consultas do mesmo período (I08, G02).
+        """
 
         candidatas = [
             item for item in consultas
-            if chave == (item["inicio"], item["fim"])
+            if chave == (item.get("inicio"), item.get("fim"))
             and all(trecho in sql for trecho in item.get("contem", ()))
             and not any(trecho in sql for trecho in item.get("nao_contem", ()))
         ]
         if len(candidatas) > 1:
             raise ConsultaNaoCongelada(f"fixtures ambíguas para o período {chave}")
         return candidatas[0] if candidatas else None
+
+    def servir(sql: str) -> tuple[list[str], list[list]]:
+        datas = _DATAS.findall(sql)[:2]
+        chave = tuple(datas) if len(datas) == 2 else (None, None)
+        item = localizar(chave, sql)
+        servidas.append({
+            "inicio": chave[0],
+            "fim": chave[1],
+            "nome": item.get("nome", "") if item else "",
+            "sql_sha256": _sha256(sql.encode("utf-8")),
+            "servida": item is not None,
+        })
+        if item is None:
+            raise ConsultaNaoCongelada(f"sem linhas congeladas para a consulta do período {chave}")
+        return list(item["colunas"]), [list(linha) for linha in item["linhas"]]
 
     # Traceback legível pelo replay (que decodifica UTF-8) também no console Windows.
     sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
@@ -101,7 +125,42 @@ def _ativar() -> None:
     import lib.estrutura_organizacional as estrutura
     import lib.monthly_runner as monthly_runner
 
+    # Dublê no nível JDBC: o query_rows real (e o run_query próprio do G01) percorre
+    # um ResultSet congelado, então clean() e a leitura de colunas continuam sob teste.
+    class ResultadoCongelado:
+        def __init__(self, colunas: list[str], linhas: list[list]) -> None:
+            self._colunas, self._linhas, self._atual = colunas, linhas, -1
+
+        def getMetaData(self):
+            return self
+
+        def getColumnCount(self) -> int:
+            return len(self._colunas)
+
+        def getColumnLabel(self, indice: int) -> str:
+            return self._colunas[indice - 1]
+
+        def next(self) -> bool:
+            self._atual += 1
+            return self._atual < len(self._linhas)
+
+        def getObject(self, indice: int):
+            return self._linhas[self._atual][indice - 1]
+
+        def close(self) -> None:
+            return None
+
+    class ComandoCongelado:
+        def executeQuery(self, sql: str) -> ResultadoCongelado:
+            return ResultadoCongelado(*servir(sql))
+
+        def close(self) -> None:
+            return None
+
     class ConexaoCongelada:
+        def createStatement(self) -> ComandoCongelado:
+            return ComandoCongelado()
+
         def close(self) -> None:
             return None
 
@@ -114,26 +173,11 @@ def _ativar() -> None:
     def connect(config):
         return ConexaoCongelada()
 
-    def query_rows(conn, sql: str):
-        datas = _DATAS.findall(sql)[:2]
-        chave = tuple(datas) if len(datas) == 2 else None
-        item = localizar(chave, sql) if chave else None
-        servidas.append({
-            "inicio": chave[0] if chave else None,
-            "fim": chave[1] if chave else None,
-            "nome": item.get("nome", "") if item else "",
-            "sql_sha256": _sha256(sql.encode("utf-8")),
-            "servida": item is not None,
-        })
-        if item is None:
-            raise ConsultaNaoCongelada(f"sem linhas congeladas para o período {chave}")
-        return list(item["colunas"]), [list(linha) for linha in item["linhas"]]
-
     for modulo in (denodo_config, monthly_runner):
         modulo.get_config = get_config
         modulo.connect = connect
     denodo_config.load_dotenv = lambda *args, **kwargs: None
-    monthly_runner.query_rows = query_rows
+
     def planilha(nome: str) -> Path:
         propria = fixtures / nome
         return propria if propria.exists() else fixtures.parent / "_comum" / nome

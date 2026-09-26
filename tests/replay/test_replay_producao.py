@@ -308,3 +308,70 @@ def test_fixture_que_sobra_torna_o_replay_nao_conclusivo(tmp_path):
 
     assert relatorio["status"] == "erro"
     assert "diferem das fixtures" in relatorio["erro"]
+
+
+# --- Dublê JDBC e indicadores de gestão (G01, G02) ---------------------------------------
+
+def test_controle_negativo_query_rows_real_esta_sob_replay(tmp_path):
+    raiz = _copia(tmp_path)
+    _alterar(raiz / "lib" / "monthly_runner.py",
+             "rows.append([clean(rs.getObject(i + 1)) for i in range(count)])",
+             "rows.append([clean(rs.getObject(i + 1)).upper() for i in range(count)])")
+
+    relatorio = rp.replay("I02", REFERENCIA, str(raiz), DATA)
+
+    assert relatorio["status"] == "divergente"
+    assert relatorio["dependencias"]["hash_alterado"] == ["lib/monthly_runner.py"]
+
+
+@pytest.mark.parametrize("alvo, arquivos", [
+    ("G01-restrito", ["IND_GEST_01.2_detalhe_restrito_CGSIN_NGI-SINT_UNID-NOME_e_mais_1_<carimbo>.csv",
+                      "IND_GEST_01.2_painel_restrito_CGSIN_NGI-SINT_UNID-NOME_e_mais_1_<carimbo>.csv"]),
+    ("G01-compartilhavel", ["IND_GEST_01.2_painel_compartilhavel_TODAS_<carimbo>.csv"]),
+    ("G02-restrito", ["IND_GEST_02.2_entregas_restrito_CGSIN_NGI-SINT_<carimbo>.csv",
+                      "IND_GEST_02.2_historico_restrito_CGSIN_NGI-SINT_<carimbo>.csv",
+                      "IND_GEST_02.2_nominal_restrito_CGSIN_NGI-SINT_<carimbo>.csv"]),
+    ("G02-compartilhavel", ["IND_GEST_02.2_entregas_compartilhavel_TODAS_<carimbo>.csv"]),
+])
+def test_replay_de_gestao_e_equivalente_por_produto(alvo, arquivos):
+    relatorio = rp.replay(alvo, REFERENCIA, REFERENCIA, DATA)
+
+    assert relatorio["status"] == "equivalente", relatorio.get("erro")
+    assert relatorio["referencia"]["arquivos"] == arquivos
+
+
+@pytest.mark.parametrize("alvo", ["G01-compartilhavel", "G02-compartilhavel"])
+def test_produto_compartilhavel_nao_traz_identificacao_pessoal(tmp_path, alvo):
+    raiz = _copia(tmp_path)
+    execucao = rp.executar(raiz, alvo, DATA, rp.pasta_de_fixtures(alvo), tmp_path / "trabalho")
+    rp._validar_execucao("referencia", execucao, rp.pasta_de_fixtures(alvo))
+
+    for caminho in execucao["arquivos"].values():
+        texto = caminho.read_bytes().decode("utf-8-sig")
+        cabecalho = texto.splitlines()[0].split("|")
+        assert not {"servidor_nome", "id_servidor", "status_alterado_por"} & set(cabecalho)
+        assert "Servidor Sintético" not in texto and "sint-srv-" not in texto
+
+
+def test_controle_negativo_supressao_k_do_g01_em_modulo_que_muda_de_lugar(tmp_path):
+    raiz = _copia(tmp_path)
+    _alterar(raiz / "ocde" / "relatorios" / "privacidade.py", "K_MIN = 5", "K_MIN = 6")
+
+    relatorio = rp.replay("G01-compartilhavel", REFERENCIA, str(raiz), DATA)
+
+    assert relatorio["status"] == "divergente"
+    assert relatorio["dependencias"]["hash_alterado"] == ["ocde/relatorios/privacidade.py"]
+    assert relatorio["dependencias"]["a1_alterado"] is False
+
+
+def test_controle_negativo_sanitizacao_do_g02_em_modulo_que_muda_de_lugar(tmp_path):
+    raiz = _copia(tmp_path)
+    _alterar(raiz / "ocde" / "relatorios" / "textos_execucao.py",
+             r'_EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@', r'_EMAIL = re.compile(r"(?!)\b[A-Z0-9._%+-]+@')
+
+    relatorio = rp.replay("G02-restrito", REFERENCIA, str(raiz), DATA)
+
+    assert relatorio["status"] == "divergente"
+    assert relatorio["dependencias"]["hash_alterado"] == ["ocde/relatorios/textos_execucao.py"]
+    arquivos = {d.get("arquivo", "") for d in relatorio["diferencas"]}
+    assert any("historico" in a for a in arquivos) and any("entregas" in a for a in arquivos)
