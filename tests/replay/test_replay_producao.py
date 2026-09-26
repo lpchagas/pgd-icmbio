@@ -254,3 +254,57 @@ def test_erro_engolido_pelo_a1_torna_o_replay_nao_conclusivo(tmp_path):
 
     assert relatorio["status"] == "erro"
     assert "falha engolida" in relatorio["erro"]
+
+
+# --- Alvos com fixture manual além do I02 ------------------------------------------------
+
+@pytest.mark.parametrize("alvo, arquivos", [
+    ("I01", ["2026-09/IND_OCDE_01.2_v1_proporcao_mensal_<carimbo>.csv",
+             "2026-09/IND_OCDE_01.2_v2_proporcao_unidade_mensal_<carimbo>.csv"]),
+    ("I08", ["2026-09/IND_OCDE_08.2_v1_proporcao_horas_dona_<carimbo>.csv",
+             "2026-09/IND_OCDE_08.2_v2_proporcao_horas_executora_<carimbo>.csv"]),
+])
+def test_replay_de_alvo_manual_e_equivalente(alvo, arquivos):
+    relatorio = rp.replay(alvo, REFERENCIA, REFERENCIA, DATA)
+
+    assert relatorio["status"] == "equivalente", relatorio.get("erro")
+    assert relatorio["referencia"]["arquivos"] == arquivos
+
+
+def test_i08_serve_capacidade_e_vinculos_pelos_marcadores(tmp_path):
+    raiz = _copia(tmp_path)
+    execucao = rp.executar(raiz, "I08", DATA, rp.FIXTURES_DIR / "I08", tmp_path / "trabalho")
+
+    rp._validar_execucao("referencia", execucao, rp.FIXTURES_DIR / "I08")
+    assert [c["nome"] for c in execucao["registro"]["consultas"]] == ["capacidade", "vinculos"] * 4
+    assert "AVISO: 1 entrega(s) com proporcao > 100%" in execucao["stdout"]
+
+
+def _fixture_alterada(tmp_path, alvo, alterar) -> Path:
+    destino = tmp_path / "fixtures" / alvo
+    shutil.copytree(rp.FIXTURES_DIR / alvo, destino)
+    documento = json.loads((destino / "consultas.json").read_text(encoding="utf-8"))
+    alterar(documento["consultas"])
+    (destino / "consultas.json").write_text(json.dumps(documento, ensure_ascii=False), encoding="utf-8")
+    return destino
+
+
+def test_marcadores_ambiguos_tornam_o_replay_nao_conclusivo(tmp_path):
+    def sem_marcador(consultas):
+        for item in consultas:
+            item.pop("nao_contem", None)
+
+    relatorio = rp.replay("I08", REFERENCIA, REFERENCIA, DATA, fixtures=_fixture_alterada(tmp_path, "I08", sem_marcador))
+
+    assert relatorio["status"] == "erro"
+    assert "ambíguas" in relatorio["erro"]
+
+
+def test_fixture_que_sobra_torna_o_replay_nao_conclusivo(tmp_path):
+    def duplicar(consultas):
+        consultas.append(dict(consultas[0], nome="nunca-consultada", contem=["texto-que-nao-existe"]))
+
+    relatorio = rp.replay("I01", REFERENCIA, REFERENCIA, DATA, fixtures=_fixture_alterada(tmp_path, "I01", duplicar))
+
+    assert relatorio["status"] == "erro"
+    assert "diferem das fixtures" in relatorio["erro"]

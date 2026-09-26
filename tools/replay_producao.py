@@ -56,6 +56,8 @@ ALVOS: dict[str, dict[str, object]] = {
     "I10": _ocde("10", "pt"),
     "I11": _ocde("11", "pt"),
     "I12": _ocde("12", "pe"),
+    "I01": _ocde("01", "pt", fixture="manual"),
+    "I08": _ocde("08", "pe", fixture="manual"),
 }
 _CHAVE_PADRAO = ("periodo", "unidade_sigla")
 
@@ -179,10 +181,11 @@ def _validar_execucao(lado: str, execucao: dict, fixtures: Path) -> None:
     nao_servidas = [c for c in registro["consultas"] if not c["servida"]]
     if nao_servidas:
         raise ReplayError(f"{lado}: {len(nao_servidas)} consulta(s) sem linhas congeladas")
-    esperadas = {(c["inicio"], c["fim"]) for c in json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]}
-    servidas = {(c["inicio"], c["fim"]) for c in registro["consultas"]}
+    fixture = json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
+    esperadas = sorted((c["inicio"], c["fim"], c.get("nome", "")) for c in fixture)
+    servidas = sorted((c["inicio"], c["fim"], c.get("nome", "")) for c in registro["consultas"])
     if servidas != esperadas:
-        raise ReplayError(f"{lado}: períodos consultados diferem das fixtures")
+        raise ReplayError(f"{lado}: consultas feitas diferem das fixtures (faltam, sobram ou se repetem)")
     if not execucao["arquivos"]:
         raise ReplayError(f"{lado}: nenhum artefato gerado")
 

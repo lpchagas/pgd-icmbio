@@ -72,8 +72,23 @@ def _ativar() -> None:
     registro = Path(os.environ["PGD_REPLAY_REGISTRO"])
 
     consultas = json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
-    por_periodo = {(item["inicio"], item["fim"]): item for item in consultas}
     servidas: list[dict] = []
+
+    def localizar(chave: tuple | None, sql: str) -> dict | None:
+        """Fixture do período cujos marcadores casam com a SQL (I08: duas consultas por período)."""
+
+        candidatas = [
+            item for item in consultas
+            if chave == (item["inicio"], item["fim"])
+            and all(trecho in sql for trecho in item.get("contem", ()))
+            and not any(trecho in sql for trecho in item.get("nao_contem", ()))
+        ]
+        if len(candidatas) > 1:
+            raise ConsultaNaoCongelada(f"fixtures ambíguas para o período {chave}")
+        return candidatas[0] if candidatas else None
+
+    # Traceback legível pelo replay (que decodifica UTF-8) também no console Windows.
+    sys.stderr.reconfigure(encoding="utf-8", errors="backslashreplace")
 
     # Leituras das fixtures feitas acima; daqui em diante vale o bloqueio.
     _instalar_bloqueios(raiz)
@@ -102,10 +117,11 @@ def _ativar() -> None:
     def query_rows(conn, sql: str):
         datas = _DATAS.findall(sql)[:2]
         chave = tuple(datas) if len(datas) == 2 else None
-        item = por_periodo.get(chave) if chave else None
+        item = localizar(chave, sql) if chave else None
         servidas.append({
             "inicio": chave[0] if chave else None,
             "fim": chave[1] if chave else None,
+            "nome": item.get("nome", "") if item else "",
             "sql_sha256": _sha256(sql.encode("utf-8")),
             "servida": item is not None,
         })
