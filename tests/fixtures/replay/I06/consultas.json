@@ -1,0 +1,442 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I06 para o replay offline (data de execução 2026-09-13). Geradas por tools/gerar_fixtures_replay.py. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "1 servidor",
+          "1",
+          "2",
+          "33.16"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "2 servidores",
+          "5",
+          "18",
+          "91.21"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "4+ servidores",
+          "18",
+          "9",
+          "70.65"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "3 servidores",
+          "15",
+          "0",
+          "53.91"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "1 servidor",
+          "14",
+          "7",
+          "22.24"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "3 servidores",
+          "5",
+          "3",
+          ""
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "3 servidores",
+          "7",
+          "0",
+          "9.80"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "3 servidores",
+          "15",
+          "22",
+          "64.22"
+        ]
+      ]
+    },
+    {
+      "periodo": "M01-2026",
+      "inicio": "2026-01-01",
+      "fim": "2026-01-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "2 servidores",
+          "24",
+          "14",
+          "24.58"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "3 servidores",
+          "22",
+          "21",
+          "90.17"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "2 servidores",
+          "13",
+          "12",
+          "20.37"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "4+ servidores",
+          "2",
+          "7",
+          "51.84"
+        ]
+      ]
+    },
+    {
+      "periodo": "M02-2026",
+      "inicio": "2026-02-01",
+      "fim": "2026-02-28",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "4+ servidores",
+          "10",
+          "15",
+          "86.75"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "2 servidores",
+          "14",
+          "17",
+          "69.03"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "4+ servidores",
+          "16",
+          "23",
+          ""
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "3 servidores",
+          "21",
+          "3",
+          "65.80"
+        ]
+      ]
+    },
+    {
+      "periodo": "M03-2026",
+      "inicio": "2026-03-01",
+      "fim": "2026-03-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "2 servidores",
+          "12",
+          "21",
+          "68.10"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "4+ servidores",
+          "18",
+          "16",
+          "28.80"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "2 servidores",
+          "5",
+          "10",
+          ""
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "1 servidor",
+          "22",
+          "4",
+          "68.72"
+        ]
+      ]
+    },
+    {
+      "periodo": "M04-2026",
+      "inicio": "2026-04-01",
+      "fim": "2026-04-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "4+ servidores",
+          "2",
+          "18",
+          "72.44"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "3 servidores",
+          "15",
+          "3",
+          "69.60"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "4+ servidores",
+          "25",
+          "3",
+          "18.00"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "3 servidores",
+          "25",
+          "2",
+          "84.61"
+        ]
+      ]
+    },
+    {
+      "periodo": "M05-2026",
+      "inicio": "2026-05-01",
+      "fim": "2026-05-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "4+ servidores",
+          "10",
+          "0",
+          "50.13"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "2 servidores",
+          "1",
+          "20",
+          "75.42"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "3 servidores",
+          "18",
+          "25",
+          "63.43"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "3 servidores",
+          "17",
+          "7",
+          "19.74"
+        ]
+      ]
+    },
+    {
+      "periodo": "M06-2026",
+      "inicio": "2026-06-01",
+      "fim": "2026-06-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "3 servidores",
+          "6",
+          "3",
+          "55.97"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "1 servidor",
+          "16",
+          "25",
+          "58.10"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "2 servidores",
+          "1",
+          "24",
+          "1.14"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "2 servidores",
+          "6",
+          "16",
+          "46.33"
+        ]
+      ]
+    },
+    {
+      "periodo": "M07-2026",
+      "inicio": "2026-07-01",
+      "fim": "2026-07-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "3 servidores",
+          "9",
+          "9",
+          "91.54"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "1 servidor",
+          "15",
+          "23",
+          "65.60"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "4+ servidores",
+          "23",
+          "2",
+          "34.65"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "2 servidores",
+          "3",
+          "22",
+          "24.82"
+        ]
+      ]
+    },
+    {
+      "periodo": "M08-2026",
+      "inicio": "2026-08-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "tamanho_grupo_responsavel",
+        "total_entregas_na_categoria",
+        "total_entregas_unidade",
+        "pct_categoria"
+      ],
+      "linhas": []
+    }
+  ]
+}

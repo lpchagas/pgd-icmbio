@@ -1,0 +1,192 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I04 para o replay offline (data de execução 2026-09-13). Geradas por tools/gerar_fixtures_replay.py. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "score_atingimento_perc",
+        "total_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "20",
+          "8",
+          "13.84",
+          "12",
+          "C — Desempenho intermediario",
+          "ciclo avaliado"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "19",
+          "13",
+          "26.28",
+          "19",
+          "C — Desempenho intermediario",
+          "ciclo avaliado"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "21",
+          "3",
+          "87.08",
+          "11",
+          "C — Desempenho intermediario",
+          "ciclo avaliado"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "16",
+          "25",
+          "69.03",
+          "2",
+          "A — Alto desempenho",
+          "atencao: ha entregas em planos nao avaliados"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "score_atingimento_perc",
+        "total_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "19",
+          "23",
+          "",
+          "11",
+          "B — Bom desempenho",
+          "ciclo avaliado"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "0",
+          "17",
+          "40.18",
+          "24",
+          "C — Desempenho intermediario",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "1",
+          "3",
+          "12.59",
+          "18",
+          "C — Desempenho intermediario",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "8",
+          "1",
+          "1.83",
+          "9",
+          "B — Bom desempenho",
+          "ciclo avaliado"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q1-2026",
+      "inicio": "2026-01-01",
+      "fim": "2026-04-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "score_atingimento_perc",
+        "total_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "25",
+          "4",
+          "57.31",
+          "0",
+          "C — Desempenho intermediario",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "14",
+          "3",
+          "53.11",
+          "13",
+          "A — Alto desempenho",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "21",
+          "19",
+          "83.35",
+          "7",
+          "A — Alto desempenho",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "4",
+          "0",
+          "88.80",
+          "25",
+          "C — Desempenho intermediario",
+          "ciclo avaliado"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q2-2026",
+      "inicio": "2026-05-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "score_atingimento_perc",
+        "total_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": []
+    }
+  ]
+}

@@ -49,10 +49,17 @@ linhas congeladas e exige artefatos idênticos. A substituição fica acima do J
 `query_rows`, `connect`/`get_config` e as planilhas de estrutura servem fixtures
 sintéticas (`tests/fixtures/replay/<alvo>/`). O subprocesso não lê `.env` nem
 `artefatos_local/` e não abre rede. É evidência técnica de equivalência numa
-mudança estrutural, não aceite institucional. Hoje cobre o I02.
+mudança estrutural, não aceite institucional.
+
+Cobertura atual: I02 (fixture manual) e I03–I07, I09–I12 (fixtures geradas por
+`tools/gerar_fixtures_replay.py`, determinísticas e versionadas; o teste confere que
+a versão commitada é reproduzível). As planilhas de estrutura comuns ficam em
+`tests/fixtures/replay/_comum/`. Um A1 que imprime `ERRO:` e continua torna o
+replay `erro`, nunca equivalência. I01, I08, G01 e G02 ainda não têm replay.
 
 ```powershell
-python -m tools.replay_producao --alvo I02 --referencia git:HEAD --candidato . --data-execucao 2026-09-13
+python -m tools.replay_producao --alvo I07 --referencia git:HEAD --candidato . --data-execucao 2026-09-13
+python -m tools.gerar_fixtures_replay --alvo todos --verificar
 ```
 
 ## Estrutura

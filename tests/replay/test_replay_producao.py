@@ -182,3 +182,75 @@ def test_substituicao_bloqueia_env_acervo_privado_rede_e_subprocesso(tmp_path):
     assert processo.stdout.split("\n")[:5] == ["env bloqueado", "acervo bloqueado", "rede bloqueado", "subprocesso bloqueado", "jpype bloqueado"]
     assert "usuario 'replay'" in processo.stdout
     assert "sentinela-replay" not in processo.stdout + processo.stderr
+
+
+# --- Alvos com fixtures geradas (tools/gerar_fixtures_replay.py) -------------------------
+
+from tools import gerar_fixtures_replay as gf  # noqa: E402
+
+
+@pytest.mark.parametrize("alvo", gf.GERADOS)
+def test_fixture_versionada_e_reproduzivel_pelo_gerador(alvo):
+    versionada = (rp.FIXTURES_DIR / alvo / "consultas.json").read_text(encoding="utf-8")
+
+    assert versionada == gf.serializar(gf.gerar(alvo))
+
+
+@pytest.mark.parametrize("alvo", gf.GERADOS)
+def test_replay_de_alvo_gerado_e_equivalente_e_nao_vazio(alvo):
+    relatorio = rp.replay(alvo, REFERENCIA, REFERENCIA, DATA)
+
+    assert relatorio["status"] == "equivalente", relatorio.get("erro")
+    periodos = json.loads((rp.FIXTURES_DIR / alvo / "consultas.json").read_text(encoding="utf-8"))["consultas"]
+    assert relatorio["referencia"]["consultas"] == len(periodos)
+    assert relatorio["referencia"]["arquivos"]
+
+
+def test_controle_negativo_calendario_de_dias_uteis_no_i07(tmp_path):
+    raiz = _copia(tmp_path)
+    calendario = raiz / "lib" / "calendario.py"
+    texto = calendario.read_text(encoding="utf-8")
+    assert "def dias_uteis(" in texto
+    calendario.write_text(texto + "\n\n_original = dias_uteis\n\n\ndef dias_uteis(inicio, fim):\n    return _original(inicio, fim) + 1\n", encoding="utf-8")
+
+    relatorio = rp.replay("I07", REFERENCIA, str(raiz), DATA)
+
+    assert relatorio["status"] == "divergente"
+    (linhas,) = [d for d in relatorio["diferencas"] if d["tipo"] == "linhas"]
+    assert {c for e in linhas["exemplos"] for c in e["colunas"]} == {"total_horas_planejadas_entrega"}
+    assert relatorio["dependencias"]["hash_alterado"] == ["lib/calendario.py"]
+
+
+def test_chave_de_comparacao_vem_do_contrato_por_arquivo():
+    assert rp.chave_do_arquivo("I05", "2026-09/IND_OCDE_05.2_v1_distribuicao_<carimbo>.csv") == ("periodo", "unidade_sigla", "id_servidor")
+    assert rp.chave_do_arquivo("I05", "2026-09/IND_OCDE_05.2_v2_distribuicao_<carimbo>.csv") == ("periodo", "unidade_sigla")
+    assert rp.chave_do_arquivo("I07", "2026-09/IND_OCDE_07.2_horas_<carimbo>.csv") == ("periodo", "unidade_sigla", "id_entrega")
+
+
+@pytest.mark.parametrize("alvo", ["I02", "I08", "I01"])
+def test_gerador_recusa_alvos_de_fixture_manual(alvo):
+    with pytest.raises(ValueError):
+        gf.gerar(alvo)
+
+
+def test_extrator_le_colunas_e_categorias_da_sql():
+    sql = "WITH x AS (SELECT CASE WHEN a > 1 THEN 'Alto' ELSE 'Baixo' END AS faixa, b FROM t)\n" \
+          "SELECT x.faixa, SUM(b) AS total_b, CASE WHEN SUM(b) >= 5 THEN 1 ELSE 0 END AS volume_ok\nFROM x GROUP BY x.faixa"
+
+    assert gf.colunas_do_select_final(sql) == ["faixa", "total_b", "volume_ok"]
+    assert gf.categorias(sql, "faixa") == ["Alto", "Baixo"]
+    assert gf.categorias(sql, "volume_ok") == ["1", "0"]
+
+
+def test_erro_engolido_pelo_a1_torna_o_replay_nao_conclusivo(tmp_path):
+    raiz = _copia(tmp_path)
+    _alterar(raiz / "ocde" / "indicadores" / "IND_OCDE_04.1_run.py",
+             "                columns, rows = query_rows(conn, sql)\n",
+             "                columns, rows = query_rows(conn, sql)\n"
+             "                if label == 'T4-2025':\n"
+             "                    raise RuntimeError('falha simulada')\n")
+
+    relatorio = rp.replay("I04", str(raiz), str(raiz), DATA)
+
+    assert relatorio["status"] == "erro"
+    assert "falha engolida" in relatorio["erro"]

@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import fnmatch
 import hashlib
 import io
 import json
@@ -34,15 +35,41 @@ import tempfile
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 SHIM_DIR = Path(__file__).resolve().parent / "replay_sitecustomize"
 FIXTURES_DIR = PROJECT_ROOT / "tests" / "fixtures" / "replay"
 
+def _ocde(numero: str, periodos: str, fixture: str = "gerada") -> dict[str, object]:
+    return {"script": f"ocde/indicadores/IND_OCDE_{numero}.1_run.py", "periodos": periodos, "fixture": fixture}
+
+
+# fixture "gerada": tools/gerar_fixtures_replay.py; "manual": escrita à mão.
 ALVOS: dict[str, dict[str, object]] = {
-    "I02": {
-        "script": "ocde/indicadores/IND_OCDE_02.1_run.py",
-        "chave": ("periodo", "unidade_sigla"),
-    },
+    "I02": _ocde("02", "pe", fixture="manual"),
+    "I03": _ocde("03", "pe"),
+    "I04": _ocde("04", "pe"),
+    "I05": _ocde("05", "pt"),
+    "I06": _ocde("06", "pt"),
+    "I07": _ocde("07", "pe"),
+    "I09": _ocde("09", "pt"),
+    "I10": _ocde("10", "pt"),
+    "I11": _ocde("11", "pt"),
+    "I12": _ocde("12", "pe"),
 }
+_CHAVE_PADRAO = ("periodo", "unidade_sigla")
+
+
+def chave_do_arquivo(alvo: str, nome: str) -> tuple[str, ...]:
+    """Chaves de negócio do contrato A2 cujo padrão casa com o arquivo."""
+
+    from lib.validation_contracts import TARGETS
+
+    base = nome.rsplit("/", 1)[-1].replace("_<carimbo>", "_00000000_0000")
+    for contrato in TARGETS[alvo].outputs:
+        if fnmatch.fnmatch(base, contrato.pattern):
+            return tuple(contrato.business_keys)
+    return _CHAVE_PADRAO
 
 # Variáveis herdadas pelo subprocesso; credenciais e PGD_* do pai nunca passam.
 _AMBIENTE_BASE = ("PATH", "SYSTEMROOT", "WINDIR", "TEMP", "TMP", "HOME", "USERPROFILE", "LANG", "LC_ALL")
@@ -144,6 +171,8 @@ def _validar_execucao(lado: str, execucao: dict, fixtures: Path) -> None:
     if execucao["returncode"] != 0:
         ultima = (execucao["stderr"].strip().splitlines() or [""])[-1]
         raise ReplayError(f"{lado}: A1 terminou com código {execucao['returncode']}: {ultima}")
+    if re.search(r"^\s*ERRO:", execucao["stdout"], re.MULTILINE):
+        raise ReplayError(f"{lado}: A1 relatou ERRO e seguiu (falha engolida)")
     registro = execucao["registro"]
     if not registro or not registro.get("ativo"):
         raise ReplayError(f"{lado}: substituição de I/O não foi ativada")
@@ -202,10 +231,10 @@ def comparar(alvo: str, referencia: dict, candidato: dict) -> tuple[list[dict], 
     nomes_ref, nomes_cand = set(referencia["arquivos"]), set(candidato["arquivos"])
     if nomes_ref != nomes_cand:
         diferencas.append({"tipo": "arquivos", "so_referencia": sorted(nomes_ref - nomes_cand), "so_candidato": sorted(nomes_cand - nomes_ref)})
-    chave = tuple(ALVOS[alvo]["chave"])
     for nome in sorted(nomes_ref & nomes_cand):
         diferencas += _comparar_arquivo(
-            nome, referencia["arquivos"][nome].read_bytes(), candidato["arquivos"][nome].read_bytes(), chave,
+            nome, referencia["arquivos"][nome].read_bytes(), candidato["arquivos"][nome].read_bytes(),
+            chave_do_arquivo(alvo, nome),
         )
     sql_ref = [(c["inicio"], c["fim"], c["sql_sha256"]) for c in referencia["registro"]["consultas"]]
     sql_cand = [(c["inicio"], c["fim"], c["sql_sha256"]) for c in candidato["registro"]["consultas"]]

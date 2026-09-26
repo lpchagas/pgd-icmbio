@@ -118,8 +118,12 @@ def _ativar() -> None:
         modulo.connect = connect
     denodo_config.load_dotenv = lambda *args, **kwargs: None
     monthly_runner.query_rows = query_rows
-    estrutura.DEFAULT_ESTRUTURA_CSV = fixtures / "ICMBIO_estrutura.csv"
-    estrutura.DEFAULT_DICIONARIO_CSV = fixtures / "dicionario_petrvs_digiteca_v2.csv"
+    def planilha(nome: str) -> Path:
+        propria = fixtures / nome
+        return propria if propria.exists() else fixtures.parent / "_comum" / nome
+
+    estrutura.DEFAULT_ESTRUTURA_CSV = planilha("ICMBIO_estrutura.csv")
+    estrutura.DEFAULT_DICIONARIO_CSV = planilha("dicionario_petrvs_digiteca_v2.csv")
 
     def gravar_registro() -> None:
         proprio = os.path.normcase(os.path.abspath(__file__))
