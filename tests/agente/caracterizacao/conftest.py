@@ -14,7 +14,10 @@ from pathlib import Path
 
 import pytest
 
-RAIZ = Path(__file__).resolve().parents[2]
+# Raiz do repositório onde estiver o conftest (tests/caracterizacao no agente,
+# tests/agente/caracterizacao no monorepo): primeira pasta com agente/dados ou src/dados.
+RAIZ = next(p for p in Path(__file__).resolve().parents
+            if (p / "agente" / "dados").is_dir() or (p / "src" / "dados").is_dir())
 # src/dados hoje; agente/dados depois do L3 (mesma profundidade).
 DADOS = next(p for p in (RAIZ / "agente" / "dados", RAIZ / "src" / "dados") if p.is_dir())
 
