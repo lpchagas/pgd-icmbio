@@ -3,3 +3,8 @@
 -r requirements-report.txt
 pytest>=8
 hypothesis>=6
+# Auditoria de segredos (tools/security_audit.py --alvos). Versão fixada: as regras
+# e o relatório dependem dela; atualizar junto com DETECT_SECRETS_VERSION.
+detect-secrets==1.5.0
+# Referência de interpretação do .env nos testes do scanner (RL1v2-02).
+python-dotenv>=1
