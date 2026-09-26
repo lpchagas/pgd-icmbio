@@ -25,6 +25,12 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Cadastro das três unidades piloto em `config/unidades-piloto.json` e gate de liberação (`lib/liberacao.py`): fora dos pilotos, produto final ou compartilhável exige três aceites da mesma identidade e deliberação de expansão. O relatório cumulativo e o V2 compartilhável no escopo nacional passam a ser recusados até lá.
 - Novas CLIs: `tools/executar_pilotos.py` e `tools/registrar_aceite_piloto.py`. Fluxo em `docs/projeto/fluxo-unidades-piloto.md`.
 
+### Ambiente local e banco do agente (L6)
+
+- Caminho local de trabalho congelado em `C:\Projetos\pgd-icmbio` (clone novo; o caminho antigo fica como rollback até o L8), com `.venv` nativo do Windows.
+- `agente/dados/backup.ps1`: destino em `PGD_BACKUP_DIR` (absoluto, fora da raiz do disco e de pasta versionada), padrão `data\backups`; retenção só no destino validado e no padrão de nome do dump.
+- Instância MySQL isolada (`agente/dados/mysql_isolada.ps1`, porta 3307) e `agente/dados/banco_teste.py` (restauração conferida e banco `pgd_agente_teste` com recusa de SQL que cite `pgd_agente`). Guia em `docs/ambiente/banco-local-agente.md`.
+
 ### Pontes temporárias
 
 | Ponte | Destino | Criada | Retirada |

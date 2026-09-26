@@ -46,7 +46,7 @@ recuperável no histórico do Git.
 ## Verificação rápida
 
 ```powershell
-.venv\Scripts\python src\dados\versoes.py --teste
+.venv\Scripts\python agente\dados\versoes.py --teste
 ```
 
 O teste usa rollback: cria e versiona uma entrega, confirma histórico e não deixa registro.
@@ -54,14 +54,11 @@ O teste usa rollback: cria e versiona uma entrega, confirma histórico e não de
 Sincronização Denodo, quando a rede estiver disponível:
 
 ```powershell
-.venv\Scripts\python src\dados\sincronizar_ref.py
+.venv\Scripts\python agente\dados\sincronizar_ref.py
 ```
 
-Backup manual:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File src\dados\backup.ps1
-```
+Backup manual (destino em `PGD_BACKUP_DIR`), instância isolada e banco de teste:
+ver [Banco local do agente](../ambiente/banco-local-agente.md).
 
 ## Estrutura
 
