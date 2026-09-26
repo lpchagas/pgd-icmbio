@@ -60,9 +60,10 @@ def sinc(carregar):
     return carregar("sincronizar_ref")
 
 
-def test_importar_carrega_env_da_raiz_sem_ler_arquivo(sinc):
-    (caminho,) = sinc._dubles["dotenv"].chamadas
-    assert caminho.name == ".env" and caminho.parent == sinc.Path(sinc.__file__).resolve().parents[2]
+def test_importar_nao_carrega_env(sinc):
+    """DP-L2-04 corrigido no L3: antes, importar o módulo lia o .env da raiz."""
+
+    assert sinc._dubles["dotenv"].chamadas == []
 
 
 def test_piloto_e_filtro_por_sigla(sinc, conexao):
@@ -107,28 +108,45 @@ def test_fallback_por_planos_de_trabalho_quando_integrantes_falha(sinc, conexao,
 
     assert "JOIN petrvs_icmbio_planos_trabalhos pt" in denodo.consultas[2]
     assert "via planos_trabalhos" in capsys.readouterr().out
-    assert conn.commits == 1
+    assert conn.commits == 0
 
 
-def test_defeito_conhecido_sincronizar_faz_commit_interno(sinc, conexao):
-    """Contraria a convenção de versoes.py (quem chama decide); o plano §8 move o commit para main() no L3."""
+def test_sincronizar_nao_encerra_a_transacao(sinc, conexao):
+    """DP-L2-03 corrigido no L3: antes, sincronizar() fazia commit interno.
+
+    Agora segue a convenção de versoes.py: quem chama decide o limite da transação.
+    """
 
     conn = conexao()
     sinc.sincronizar(conn, DenodoFalso({"FROM petrvs_icmbio_unidades\n": UNIDADES, "unidades_integrantes": USUARIOS}))
 
-    assert conn.commits == 1 and conn.rollbacks == 0
+    assert conn.commits == 0 and conn.rollbacks == 0
 
 
-def test_falha_no_meio_nao_commita_nem_faz_rollback_explicito(sinc, conexao, falha_injetada):
-    """Registro de defeito preexistente: depende do close() descartar a transação aberta."""
+def test_main_commita_uma_vez_no_sucesso(sinc, conexao, monkeypatch):
+    denodo = DenodoFalso({"FROM petrvs_icmbio_unidades\n": UNIDADES, "unidades_integrantes": USUARIOS})
+    conn = conexao()
+    monkeypatch.setattr(sinc, "_denodo_conn", lambda: denodo)
+    monkeypatch.setattr(sinc, "get_conn", lambda: conn)
 
+    sinc.main()
+
+    assert (conn.commits, conn.rollbacks, conn.fechada, denodo.fechada) == (1, 0, True, True)
+
+
+def test_falha_no_meio_faz_rollback_explicito_no_main(sinc, conexao, falha_injetada, monkeypatch):
+    """DP-L2-03 corrigido no L3: antes, a falha dependia do close() para descartar a transação."""
+
+    denodo = DenodoFalso({"FROM petrvs_icmbio_unidades\n": UNIDADES, "unidades_integrantes": USUARIOS})
     conn = conexao(falhar_quando="INSERT INTO ref_usuarios")
+    monkeypatch.setattr(sinc, "_denodo_conn", lambda: denodo)
+    monkeypatch.setattr(sinc, "get_conn", lambda: conn)
 
     with pytest.raises(falha_injetada):
-        sinc.sincronizar(conn, DenodoFalso({"FROM petrvs_icmbio_unidades\n": UNIDADES, "unidades_integrantes": USUARIOS}))
+        sinc.main()
 
     assert len(conn.sql("INSERT INTO ref_unidades")) == 1
-    assert conn.commits == 0 and conn.rollbacks == 0
+    assert (conn.commits, conn.rollbacks, conn.fechada) == (0, 1, True)
 
 
 def test_denodo_indisponivel_interrompe_antes_de_abrir_mysql(sinc, monkeypatch):
@@ -152,14 +170,31 @@ def test_main_fecha_as_duas_conexoes_quando_a_sincronizacao_falha(sinc, conexao,
         sinc.main()
 
     assert conn.fechada and denodo.fechada
-    assert conn.commits == 0 and conn.rollbacks == 0
+    assert conn.commits == 0 and conn.rollbacks == 1
 
 
-def test_conexao_denodo_usa_variaveis_proprias_do_agente(sinc, monkeypatch):
-    """Nomes que o ADR-012 converte em aliases no L3 (DENODO_JDBC_JAR, DENODO_PASS, DENODO_URL)."""
+def test_conexao_denodo_usa_o_adaptador_unico_do_nucleo(sinc, monkeypatch):
+    """Teste sintético do adaptador agente -> núcleo (plano §8, ADR-012).
 
-    for nome in ("DENODO_JDBC_JAR", "DENODO_JVM_DLL", "DENODO_USER", "DENODO_PASS", "DENODO_URL"):
-        monkeypatch.delenv(nome, raising=False)
+    Antes do L3, o agente lia DENODO_JDBC_JAR/DENODO_PASS/DENODO_URL diretamente;
+    agora usa lib.denodo_config, que aceita esses nomes como aliases.
+    """
 
-    with pytest.raises(KeyError, match="DENODO_JDBC_JAR"):
-        sinc._denodo_conn()
+    import lib.denodo_config
+
+    assert (sinc.get_config, sinc.connect) == (lib.denodo_config.get_config, lib.denodo_config.connect)
+    chamadas = []
+    config = object()
+    monkeypatch.setattr(sinc, "get_config", lambda require_credentials: chamadas.append(require_credentials) or config)
+    monkeypatch.setattr(sinc, "connect", lambda recebido: ("conexao", recebido))
+
+    assert sinc._denodo_conn() == ("conexao", config)
+    assert chamadas == [True]
+
+
+def test_adaptador_do_agente_importa_o_nucleo_da_mesma_arvore(sinc):
+    import lib.denodo_config
+
+    fonte = sinc.Path(sinc.__file__).read_text(encoding="utf-8")
+    assert "from lib.denodo_config import connect, get_config" in fonte
+    assert sinc.Path(lib.denodo_config.__file__).resolve().parents[1] == sinc.Path(sinc.__file__).resolve().parents[2]

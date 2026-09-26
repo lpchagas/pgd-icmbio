@@ -8,22 +8,20 @@ Sincroniza:
 Padrão de acesso herdado do pgd-ocde-icmbio (JDBC via jpype; restrições VQL:
 CAST em datas, sem window functions, prefixo petrvs_icmbio_ obrigatório).
 Upsert idempotente (INSERT ... ON DUPLICATE KEY UPDATE) com sincronizado_em.
+sincronizar() não encerra a transação: main() faz commit ou rollback (DP-L2-03).
 
 Uso:  python src/dados/sincronizar_ref.py
 """
 
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
 
-import jpype
-from dotenv import load_dotenv
-
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # raiz do monorepo
 from db import get_conn  # noqa: E402
+from lib.denodo_config import connect, get_config  # noqa: E402
 
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 PILOTO_SIGLAS = ["CGOV", "COCAGE"]  # Q8, respondida em 26.07.2026
@@ -60,14 +58,8 @@ WHERE u.deleted_at IS NULL
 
 
 def _denodo_conn():
-    jar, jvm = os.environ["DENODO_JDBC_JAR"], os.environ["DENODO_JVM_DLL"]
-    if not jpype.isJVMStarted():
-        jpype.startJVM(jvm, classpath=[jar])
-    props = jpype.JClass("java.util.Properties")()
-    props.setProperty("user", os.environ["DENODO_USER"])
-    props.setProperty("password", os.environ["DENODO_PASS"])
-    return jpype.JClass("java.sql.DriverManager").getConnection(
-        os.environ["DENODO_URL"], props)
+    """Conexão pelo adaptador único do monorepo (ADR-012), que aceita os nomes antigos como aliases."""
+    return connect(get_config(require_credentials=True))
 
 
 def _query(conn, sql):
@@ -134,7 +126,6 @@ def sincronizar(mysql_conn, denodo):
         )
     print(f"ref_usuarios: {len(usuarios)} servidores das unidades-piloto"
           f" {PILOTO_SIGLAS} (via {origem})")
-    mysql_conn.commit()
 
 
 def main():
@@ -144,7 +135,11 @@ def main():
     mysql_conn = get_conn()
     try:
         sincronizar(mysql_conn, denodo)
+        mysql_conn.commit()  # DP-L2-03: o limite da transação é do chamador
         print("Concluido.")
+    except BaseException:
+        mysql_conn.rollback()
+        raise
     finally:
         mysql_conn.close()
         denodo.close()
