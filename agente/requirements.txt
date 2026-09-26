@@ -1,0 +1,12 @@
+# Dependências do pgd-agente-icmbio (Python 3.14, .venv local)
+# Instalar: .venv\Scripts\pip install -r requirements.txt
+
+# Camada de dados (I0) — MySQL local + Denodo via JDBC
+PyMySQL>=1.2
+python-dotenv>=1.2
+JPype1>=1.7
+
+# Núcleo conversacional e API (I1) — Tutoriais T3/T6
+anthropic>=0.40
+fastapi>=0.115
+uvicorn>=0.30
