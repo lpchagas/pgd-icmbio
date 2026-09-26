@@ -1,6 +1,6 @@
 # Plano de desenvolvimento das skills de Execução e Avaliação dos Planos do PGD
 
-**Documento:** `skills/05_plano-skills-execucao-avaliacao_v1.md`
+**Documento:** `agente/skills/05_plano-skills-execucao-avaliacao_v1.md`
 **Versão:** v1 — 18.08.2026
 **Objeto:** especificação e plano de desenvolvimento, em etapas, de quatro novas skills
 executáveis do agente `pgd-agente-icmbio`, cobrindo a fase de **execução e avaliação** do
@@ -97,8 +97,8 @@ derivação de regras, no mesmo critério de `natureza` usado pelo S01
 | D9 | *Acórdão TCU 2082/2022* (pasta ENAP) | TCU | Norma (controle externo) | Fundamenta a exigência de rastreabilidade e evidência dos registros |
 | D10 | Exercícios do curso de Avaliação (`exercio-m1.pdf`, `exercio-m2.pdf`) | Enap | Exemplo | **Não processáveis:** PDFs sem camada de texto (digitalizados). Ver Q4 na Seção 12 |
 
-Documentos internos do projeto usados como referência de conformidade: `docs/projeto-v6/00_proposta-projeto-v6.md`,
-`AT-01`, `ADR-006`, `src/dados/schema.sql`, `skills/01`–`skills/04`, e as skills Cowork
+Documentos internos do projeto usados como referência de conformidade: `docs/agente/projeto-v6/00_proposta-projeto-v6.md`,
+`AT-01`, `ADR-006`, `agente/dados/schema.sql`, `skills/01`–`skills/04`, e as skills Cowork
 sincronizadas `cgov-registro-execucao` e `cgov-avaliar-entrega`.
 
 ---
@@ -182,7 +182,7 @@ Registrar em `regras_conflitos` (S01) — **não resolver silenciosamente** (reg
   - **Decisão:** `Q1/Q2/Q3` são **quadrimestres**, três por ano, sem Q4 — Q1 = 01/01–30/04, Q2 = 01/05–31/08, Q3 = 01/09–31/12.
     **O Q2 termina sempre em 31/08.** É a segmentação de `lib/periodos.py` do
     `pgd-ocde-icmbio`. As skills-protótipo `cgov-*`, que tratavam os rótulos como
-    trimestres com Q4 implícito, foram corrigidas em `skills/prototipos-cowork/`.
+    trimestres com Q4 implícito, foram corrigidas em `capacidades/prototipos-cowork/`.
     O motor de prazos recebe esse calendário por configuração. → **Q1**, Seção 12
     (respondida).
 - **C-02 — Escala do PE sem consequências × escala do PT com consequências.** RN-15 × RN-32.
@@ -516,7 +516,7 @@ Aderência às cinco regras de ouro:
 | 4 — Decisão humana separada | `avaliacoes_versoes.decisao_humana_id`; sem ele, `origem_conceito = 'sugerido_agente'` e `estado = 'rascunho'` |
 | 5 — Dado ausente vira pergunta | Critério de aceite ausente, evidência ausente, registro do participante ausente e impacto de ocorrência ausente geram `perguntas_pendentes` |
 
-Toda escrita nessas tabelas passa por funções novas em `src/dados/versoes.py`:
+Toda escrita nessas tabelas passa por funções novas em `agente/dados/versoes.py`:
 `criar_plano_trabalho`, `nova_versao_plano_trabalho`, `registrar_execucao_entrega`,
 `registrar_execucao_trabalho`, `registrar_ocorrencia`, `criar_avaliacao`,
 `nova_versao_avaliacao`, `registrar_recurso`. **Nenhum INSERT/UPDATE manual.**
@@ -550,7 +550,7 @@ Três usos previstos, todos **somente leitura** (ADR-002):
    disponível para o bloco. Exige anonimização (ver Seção 10).
 
 **Dependência crítica:** os três usos estão bloqueados enquanto o acesso ao Denodo não for
-restabelecido (RP16, `docs/gestao/riscos.md`). O plano trata isso na Seção 9 com uma
+restabelecido (RP16, `docs/governanca-projeto/riscos.md`). O plano trata isso na Seção 9 com uma
 estratégia de *dados sintéticos realistas* para não travar E1–E5.
 
 ---
@@ -724,7 +724,7 @@ Escala de referência do `04_backlog` (sprints de 2 semanas):
 
 ## 10. Riscos específicos do bloco
 
-A registrar em `docs/gestao/riscos.md`, na sequência da matriz v4 §10 (o último risco
+A registrar em `docs/governanca-projeto/riscos.md`, na sequência da matriz v4 §10 (o último risco
 registrado é RP16):
 
 | ID | Risco | P × I | Mitigação |
@@ -753,7 +753,7 @@ Uma skill do bloco S21–S24 só é considerada pronta quando:
 4. 100 % dos casos de teste da ficha executados e registrados em `docs/testes/`.
 5. Cálculos determinísticos com exatidão de 100 % em bateria dedicada.
 6. Contrato de saída v4 §8.3 gravado em `execucoes_skill` para toda execução.
-7. Escrita exclusivamente via `src/dados/versoes.py`.
+7. Escrita exclusivamente via `agente/dados/versoes.py`.
 8. Teste de segurança de dados pessoais aprovado (RP17/RP24).
 9. Nenhuma decisão de conceito emitida sem `decisao_humana_id` (S22/S24).
 10. Documentação em `skills/specs/SKILL_Sxx.md`.

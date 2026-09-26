@@ -12,11 +12,11 @@ a coerência entre os dois níveis de avaliação.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/ambiente/acesso-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
   **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
-  e a checklist de `docs/12-seguranca-publicacao.md`.
+  e a checklist de `docs/ambiente/seguranca-publicacao.md`.
 
 ## 3. Instrumento e periodicidade
 

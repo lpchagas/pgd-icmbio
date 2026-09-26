@@ -157,7 +157,7 @@ duas vezes.
 
 `petrvs_icmbio_audits` (Laravel Auditing) também guarda o histórico, mas foi
 descartada como fonte primária: exigiria parse de JSON em LONGVARCHAR, vedado pela
-§6.5 do [07.1](../07.1-estrutura-banco-dados.md), e tem volume muito maior.
+§6.5 do [07.1](../dados-petrvs/estrutura-banco-dados.md), e tem volume muito maior.
 
 ---
 

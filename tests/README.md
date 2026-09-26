@@ -1,7 +1,7 @@
 # Suíte de testes automatizados — pgd-ocde-icmbio
 
 Protocolo de verificação de código complementar ao processo humano CGOV
-(`docs/09-protocolo-validacao-indicadores.md`). Ver seção "Divisão de
+(`docs/indicadores/protocolo-validacao.md`). Ver seção "Divisão de
 responsabilidade" abaixo.
 
 ## Como rodar
@@ -32,7 +32,7 @@ Ou via skill: `/verificar-consistencia`.
   convergência numérica não substituem essa deliberação.
 
 O protocolo e os estados permitidos estão em
-[`docs/09-protocolo-validacao-indicadores.md`](../docs/09-protocolo-validacao-indicadores.md).
+[`docs/indicadores/protocolo-validacao.md`](../docs/indicadores/protocolo-validacao.md).
 Os checks do GitHub não dependem de arquivos privados, Denodo ou artefatos locais.
 
 ## Por que não há mock de JDBC/jpype

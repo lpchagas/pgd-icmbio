@@ -12,6 +12,12 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - A raiz do projeto tem uma fonte única, `lib/caminhos.py`.
 - A configuração Denodo tem um único adaptador (`lib/denodo_config.py`), que aceita temporariamente os nomes antigos do agente como aliases: `DENODO_PASS`, `DENODO_JDBC_JAR` e `DENODO_URL`.
 
+### Documentação e capacidades
+
+- `docs/` foi reorganizado por público (L4b), com página-ponte em cada caminho numerado antigo.
+- Os documentos do agente estão em `docs/agente/`, `docs/decisoes/`, `docs/governanca-projeto/`, `docs/projeto/` e `docs/dados-petrvs/`.
+- As fichas S01–S24 e os protótipos estão em `capacidades/`, com o `CATALOGO.md` (L4c).
+
 ### Pontes temporárias
 
 | Ponte | Destino | Criada | Retirada |
@@ -20,5 +26,6 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 | `ocde.relatorios.textos_execucao` | `relatorios.textos_execucao` | L4a | Na próxima revisão metodológica do G02 (importada pelo A1 certificado) |
 | Demais `ocde.relatorios.*` (14 módulos, incluindo as CLIs `relatorio_v2` e `relatorio_cumulativo`) | `relatorios.*` | L4a | Após dois ciclos mensais completos sem consumidor conhecido |
 | Aliases `DENODO_PASS`, `DENODO_JDBC_JAR`, `DENODO_URL` | nomes canônicos `DENODO_*` | L3 | Com evidência de que não há consumidor **e** uma execução operacional compatível |
+| Páginas-ponte `docs/01…16-*.md` e `docs/templates/` (16) | pastas temáticas `docs/projeto/`, `docs/ambiente/`, `docs/dados-petrvs/`, `docs/indicadores/`, `docs/relatorios/`, `docs/gestao/README.md` e `docs/modelos/` | L4b | Após dois ciclos mensais completos sem consumidor conhecido (links compartilhados) |
 
 Cada retirada deve ser registrada aqui, com a data e a evidência.

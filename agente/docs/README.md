@@ -2,40 +2,40 @@
 
 **Última revisão:** 23.08.2026
 
-O documento vigente é a [proposta v6](projeto-v6/00_proposta-projeto-v6.md). O
-[portal v6](projeto-v6/README.md) organiza os capítulos vinculantes. Propostas anteriores
+O documento vigente é a [proposta v6](../../docs/agente/projeto-v6/00_proposta-projeto-v6.md). O
+[portal v6](../../docs/agente/projeto-v6/README.md) organiza os capítulos vinculantes. Propostas anteriores
 foram consolidadas e não são necessárias.
 
 ## Trilha para analistas de negócio
 
-1. [Glossário institucional](gestao/glossario-institucional.md).
-2. [Proposta v6](projeto-v6/00_proposta-projeto-v6.md), seções 2–6.
-3. [Catálogo S01–S24](projeto-v6/03-catalogo-skills-s01-s24.md).
-4. [Índice das fontes PGD](referencias-pgd/README.md).
-5. [Fontes institucionais e Q5](gestao/fontes-institucionais.md).
-6. [Validação do modelo comum](gestao/validacao-modelo-comum.md).
-7. [Riscos](gestao/riscos.md).
+1. [Glossário institucional](../../docs/projeto/glossario-institucional.md).
+2. [Proposta v6](../../docs/agente/projeto-v6/00_proposta-projeto-v6.md), seções 2–6.
+3. [Catálogo S01–S24](../../docs/agente/projeto-v6/03-catalogo-skills-s01-s24.md).
+4. [Índice das fontes PGD](../../docs/referencias-pgd/README.md).
+5. [Fontes institucionais e Q5](../../docs/governanca-projeto/fontes-institucionais.md).
+6. [Validação do modelo comum](../../docs/governanca-projeto/validacao-modelo-comum.md).
+7. [Riscos](../../docs/governanca-projeto/riscos.md).
 
 ## Trilha técnica
 
-1. [Arquitetura, tecnologia e dados](projeto-v6/02-arquitetura-tecnologia-dados.md).
-2. [AT-01 — PETRVS/MySQL](tecnologia/AT-01_analise-petrvs-esquema-mysql_v1.md).
-3. [AT-02 — recursos/local-first](tecnologia/AT-02_recursos-arquitetura-local-first_v1.md).
-4. [Qualidade e testes](projeto-v6/05-qualidade-testes-aceite.md).
-5. [Operação e capacitação](projeto-v6/07-operacao-capacitacao.md).
+1. [Arquitetura, tecnologia e dados](../../docs/agente/projeto-v6/02-arquitetura-tecnologia-dados.md).
+2. [AT-01 — PETRVS/MySQL](../../docs/dados-petrvs/esquema-mysql-agente.md).
+3. [AT-02 — recursos/local-first](../../docs/agente/recursos-local-first.md).
+4. [Qualidade e testes](../../docs/agente/projeto-v6/05-qualidade-testes-aceite.md).
+5. [Operação e capacitação](../../docs/agente/projeto-v6/07-operacao-capacitacao.md).
 
 ## Por necessidade
 
 | Necessidade | Documento |
 | --- | --- |
-| Entender o produto | [Proposta v6](projeto-v6/00_proposta-projeto-v6.md) |
-| Ver cronograma de 104 semanas | [Cronograma](projeto-v6/04-cronograma-capacidade-marcos.md) |
-| Implementar uma skill | [Fichas S01–S24](../skills/specs/README.md) |
-| Aprovar fontes/Q5 | [Fontes institucionais](gestao/fontes-institucionais.md) |
-| Consultar decisão | [ADRs](gestao/decisoes/) |
-| Acompanhar risco | [Matriz ativa](gestao/riscos.md) |
-| Entender a evolução | [Memória v1→v6](projeto-v6/09-memoria-evolucao.md) |
-| Preparar ambiente | [Operação/capacitação](projeto-v6/07-operacao-capacitacao.md) |
+| Entender o produto | [Proposta v6](../../docs/agente/projeto-v6/00_proposta-projeto-v6.md) |
+| Ver cronograma de 104 semanas | [Cronograma](../../docs/agente/projeto-v6/04-cronograma-capacidade-marcos.md) |
+| Implementar uma skill | [Fichas S01–S24](../../capacidades/especificacoes/README.md) |
+| Aprovar fontes/Q5 | [Fontes institucionais](../../docs/governanca-projeto/fontes-institucionais.md) |
+| Consultar decisão | [ADRs](../../docs/decisoes/) |
+| Acompanhar risco | [Matriz ativa](../../docs/governanca-projeto/riscos.md) |
+| Entender a evolução | [Memória v1→v6](../../docs/agente/projeto-v6/09-memoria-evolucao.md) |
+| Preparar ambiente | [Operação/capacitação](../../docs/agente/projeto-v6/07-operacao-capacitacao.md) |
 
 ## Decisões
 

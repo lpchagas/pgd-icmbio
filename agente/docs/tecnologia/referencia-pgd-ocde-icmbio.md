@@ -13,8 +13,8 @@ gitignored, não replicado aqui); o `pgd-agente-icmbio` deve configurar as suas 
 local, seguindo o mesmo padrão de nomes.
 
 Para normas, guias e orientações de negócio, use o catálogo em
-[`referencias-pgd/README.md`](../referencias-pgd/README.md). Para a decisão de cadastro e RAG,
-use [`gestao/fontes-institucionais.md`](../gestao/fontes-institucionais.md).
+[`referencias-pgd/README.md`](../../../docs/referencias-pgd/README.md). Para a decisão de cadastro e RAG,
+use [`gestao/fontes-institucionais.md`](../../../docs/governanca-projeto/fontes-institucionais.md).
 
 ---
 
@@ -47,7 +47,7 @@ def run_query(sql: str) -> pd.DataFrame:
     ...
 ```
 
-**Recomendação para o `pgd-agente-icmbio`:** o módulo `src/dados/` deve replicar esse padrão
+**Recomendação para o `pgd-agente-icmbio`:** o módulo `agente/dados/` deve replicar esse padrão
 (`.env` + `jpype` + função central de query), mas encapsulado como uma **tool** que o agente pode
 chamar (ex.: `consultar_indicador(indicador, periodo, unidade)`), em vez de uma célula de notebook
 de uso manual.

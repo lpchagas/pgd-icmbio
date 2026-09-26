@@ -54,7 +54,7 @@ lib/                    Módulos compartilhados (raiz do repositório)
 ## Scripts de indicadores (`indicadores/`)
 
 Cada arquivo `IND_OCDE_XX.1_run.py` extrai um indicador específico e gera um CSV mensal.
-São executados uma vez por mês, seguindo o calendário em `docs/11-guia-extracao-mensal.md`.
+São executados uma vez por mês, seguindo o calendário em `docs/indicadores/extracao-mensal.md`.
 
 | Script | Indicador | O que mede | Periodicidade 2026 |
 | --- | --- | --- | --- |
@@ -224,7 +224,7 @@ DENODO_DRIVER_PATH=C:\Users\SEU_USUARIO\AppData\Roaming\DBeaverData\drivers\remo
 JAVA_HOME=C:\Program Files\DBeaver\jre
 ```
 
-Guia detalhado: `docs/10-jupyter-guia-iniciantes.md`
+Guia detalhado: `docs/ambiente/jupyter.md`
 
 ### Executar um indicador
 
@@ -253,7 +253,7 @@ Por padrão, o script usa o mês atual. Use `--month` para gerar em uma pasta es
 | Plano de Entrega (PE) | I02, I03, I04, I07, I08, I12 | Trimestral (T1–T4) | Quadrimestral (Q1–Q3) |
 | Plano de Trabalho (PT) | I01, I05, I06, I09, I10, I11 | Trimestral (T1–T4) | Mensal (M01–M12) |
 
-Calendário completo de execução mensal: `docs/11-guia-extracao-mensal.md`
+Calendário completo de execução mensal: `docs/indicadores/extracao-mensal.md`
 
 ---
 
@@ -275,6 +275,6 @@ sincronizada via OneDrive. Nunca é versionada no GitHub.
 
 - Nunca grave credenciais (CPF, senha, token) nesta pasta.
 - Nunca salve CSV, PDF ou relatório dentro de `ocde/` — use `artefatos_local/`.
-- Antes de qualquer `git push`, execute o checklist em `docs/12-seguranca-publicacao.md`.
+- Antes de qualquer `git push`, execute o checklist em `docs/ambiente/seguranca-publicacao.md`.
 - Os scripts desta pasta são seguros para compartilhar com outros órgãos da APF
   que utilizem PETRVS + Denodo — esta é uma das finalidades do repositório.
