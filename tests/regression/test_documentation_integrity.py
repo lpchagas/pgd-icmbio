@@ -1,18 +1,17 @@
 """Integridade estrutural da documentação pública."""
 from collections import Counter
+import os
 from pathlib import Path
 import re
 from urllib.parse import unquote
 
 import pytest
 
+from tools.security_audit import is_private_path
+
 pytestmark = pytest.mark.regression
 ROOT = Path(__file__).resolve().parents[2]
 LINK = re.compile(r"(?<!!)\[[^\]]*\]\(([^)]+)\)")
-PRIVATE = {
-    ".agents", ".claude", ".codex", "agents.md", "claude.md",
-    "project.md", "artefatos_local",
-}
 PROMPT_TITLES = {"chain of thought", "self-consistency", "task breakdown"}
 
 
@@ -37,9 +36,11 @@ def test_links_relativos_e_areas_privadas():
             target = clean_target(raw)
             if not target or re.match(r"^[a-z][a-z0-9+.-]*:", target, re.I):
                 continue
-            parts = {part.casefold() for part in Path(target).parts}
             label = f"{path.relative_to(ROOT)} -> {target}"
-            if parts & PRIVATE:
+            # Política única (tools/security_audit.py), sobre o caminho lexical relativo à raiz.
+            lexical = Path(os.path.normpath(path.parent / target))
+            relative = lexical.relative_to(ROOT).as_posix() if lexical.is_relative_to(ROOT) else None
+            if relative is not None and is_private_path(relative):
                 private.append(label)
             elif not (path.parent / target).resolve().exists():
                 broken.append(label)

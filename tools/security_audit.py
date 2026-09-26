@@ -47,7 +47,7 @@ TEXT_SUFFIXES = {
 }
 
 # ─── Auditoria completa ──────────────────────────────────────────────────────
-RULES_VERSION = "2026.09.25-l1v2"
+RULES_VERSION = "2026.09.26-prel3"
 DETECT_SECRETS_VERSION = "1.5.0"
 ALL_TARGETS = ("arquivos", "indice", "historico", "proibidos")
 MAX_BYTES = 20 * 1024 * 1024
@@ -72,9 +72,9 @@ PLACEHOLDER_PATTERN = re.compile(
     r"^(<[^>]*>|\$\{[^}]*\}|\{\{.*\}\}|x{3,}|\*{3,}|(seu|sua)_[a-z_]+|defina-[a-z-]+|cole-[a-z-]+|[a-z_]+_aqui)$",
     re.IGNORECASE,
 )
-# Privados em qualquer profundidade até a H1: espelha o PRIVATE de
-# tests/regression/test_documentation_integrity.py, que já compara todos os
-# componentes do caminho.
+# Fonte única da política de caminhos privados: o teste documental e o
+# tools/verificar_links.py consultam forbidden_reason com PRIVACY_REASONS.
+# Instruções: privadas em qualquer componente até a H1.
 PRIVATE_INSTRUCTIONS = {"agents.md", "claude.md", "project.md"}
 PRIVATE_ANY_DEPTH = {".agents", ".claude", ".codex", "artefatos_local"}
 # Privados na raiz de cada componente do repositório (ver PERFIS).
@@ -92,6 +92,16 @@ PERFIS = {
     },
 }
 DEFAULT_PERFIL = "pre-merge"
+# Motivos de forbidden_reason que significam conteúdo privado (não só não versionável).
+PRIVACY_REASONS = frozenset({
+    "area_privada", "instrucao_privada_ate_h1", "credencial_env", "credencial_cnf", "acervo_referencias_privado",
+})
+
+
+def is_private_path(path: str, perfil: str = DEFAULT_PERFIL) -> bool:
+    """Caminho relativo à raiz do repositório aponta para área privada (política única)."""
+
+    return forbidden_reason(path, perfil) in PRIVACY_REASONS
 DUMP_NAME = re.compile(r"(\.dump\.sql|^pgd_agente_.*\.sql)$", re.IGNORECASE)
 DUMP_CONTENT = re.compile(r"^(-- (MySQL|MariaDB) dump|-- Dump completed|/\*!40\d{3} SET )", re.MULTILINE)
 ALLOWED_NOTEBOOKS = {"consultas_denodo_template.ipynb"}
@@ -239,19 +249,24 @@ def forbidden_reason(path: str, perfil: str = DEFAULT_PERFIL) -> str | None:
     parts = [part.lower() for part in posix.parts]
     name = posix.name.lower()
     suffix = posix.suffix.lower()
-    if set(parts) & PRIVATE_ANY_DEPTH or lower.startswith(".github/skills/"):
+    if set(parts) & PRIVATE_ANY_DEPTH:
         return "area_privada"
     for raiz in config["raizes"]:
-        if lower.startswith(raiz) and lower[len(raiz):].split("/", 1)[0] in PRIVATE_COMPONENT_DIRS:
+        # RL1v2-06: as mesmas regras de raiz valem para cada componente do perfil.
+        resto = lower[len(raiz):] if lower.startswith(raiz) else None
+        if resto is not None and (resto.split("/", 1)[0] in PRIVATE_COMPONENT_DIRS or resto.startswith(".github/skills/")):
             return "area_privada"
-    if name in PRIVATE_INSTRUCTIONS:
+    # RL1v2-06: nome de instrução é privado em qualquer componente (arquivo ou pasta).
+    if set(parts) & PRIVATE_INSTRUCTIONS:
         return "instrucao_privada_ate_h1"
     if name.startswith(".env") and name != ".env.example":
         return "credencial_env"
     if suffix == ".cnf":
         return "credencial_cnf"
-    if lower.startswith("docs/referencias-pgd/") and lower != "docs/referencias-pgd/readme.md":
-        return "acervo_referencias_privado"
+    for raiz in config["raizes"]:
+        acervo = f"{raiz}docs/referencias-pgd/"
+        if lower.startswith(acervo) and lower != f"{acervo}readme.md":
+            return "acervo_referencias_privado"
     if suffix == ".dump" or ".sql." in name or DUMP_NAME.search(name):
         return "dump_sql"
     if suffix == ".sql" and not config["sql_permitido"].match(str(posix)):
@@ -616,7 +631,9 @@ class _TrackedStream(io.StringIO):
         super().__init__(text, newline=None)
         self._files = files
         self._key = key
-        self._length = len(text)
+        # RL1v3-02: com newline=None o buffer guarda o texto já normalizado (CRLF/CR -> LF);
+        # o fim da leitura é medido nessa representação, não no texto original.
+        self._length = len(self.getvalue())
 
     def _mark(self) -> None:
         if self.tell() >= self._length:
@@ -654,8 +671,10 @@ class _MemoryFiles:
     silêncio falhas de leitura (``except IOError``), registrando-as apenas em log
     de nível WARNING, que o logger da biblioteca (ERROR) não entrega. Servindo o
     texto já decodificado, a leitura não depende da plataforma; e um arquivo só
-    conta como processado se foi aberto **e** lido até o fim. Abertura sem
-    leitura completa, ou aviso de falha no log, vira falha registrada.
+    conta como processado se foi aberto, lido até o fim e as etapas supervisionadas
+    do detector terminaram sem exceção (RL1v3-01: a falha é registrada antes de a
+    biblioteca absorvê-la, sem depender do log). O aviso no log continua valendo
+    como sinal adicional.
     """
 
     def __init__(self) -> None:
@@ -663,6 +682,12 @@ class _MemoryFiles:
         self.opened: set[str] = set()
         self.completed: set[str] = set()
         self.swallowed: set[str] = set()
+        self.finished: set[str] = set()
+        self.failed: set[str] = set()
+
+    def processed(self, key: str) -> bool:
+        return (key in self.opened and key in self.completed and key in self.finished
+                and key not in self.failed and key not in self.swallowed)
 
     def open(self, file, mode="r", *args, **kwargs):
         key = _key(str(file))
@@ -685,6 +710,39 @@ class _SwallowedReads(logging.Handler):
             self.files.swallowed.add(_key(message[len("Unable to open file: "):]))
 
 
+def _supervised(files: _MemoryFiles, get_lines, process_lines):
+    """Envolve as etapas que o ``scan_file`` protege com ``except IOError``.
+
+    Qualquer exceção é registrada em ``files.failed`` e relançada, preservando o
+    contrato da biblioteca. ``GeneratorExit`` é o encerramento antecipado legítimo
+    (o detector achou segredo e parou); só então, ou no fim normal da leitura, a
+    unidade conta como terminada.
+    """
+
+    def get_lines_supervised(filename):
+        key = _key(str(filename))
+        try:
+            yield from get_lines(filename)
+        except GeneratorExit:
+            files.finished.add(key)
+            raise
+        except BaseException:
+            files.failed.add(key)
+            raise
+        files.finished.add(key)
+
+    def process_lines_supervised(lines, filename):
+        try:
+            yield from process_lines(lines=lines, filename=filename)
+        except GeneratorExit:
+            raise
+        except BaseException:
+            files.failed.add(_key(str(filename)))
+            raise
+
+    return get_lines_supervised, process_lines_supervised
+
+
 @contextmanager
 def _detector(files: _MemoryFiles):
     """Configura o detect-secrets só durante a auditoria e restaura tudo no fim."""
@@ -694,11 +752,13 @@ def _detector(files: _MemoryFiles):
 
     handler = _SwallowedReads(files)
     previous = scan.__dict__.get("open")
+    stages = (scan._get_lines_from_file, scan._process_line_based_plugins)
     log = scan.log
     saved = (log.level, log.propagate, log.disabled, list(log.handlers))
     with default_settings():
         get_settings().disable_filters(*DISABLED_FILTERS)
         scan.open = files.open
+        scan._get_lines_from_file, scan._process_line_based_plugins = _supervised(files, *stages)
         log.setLevel(logging.WARNING)
         log.propagate = False
         log.disabled = False
@@ -706,6 +766,7 @@ def _detector(files: _MemoryFiles):
         try:
             yield
         finally:
+            scan._get_lines_from_file, scan._process_line_based_plugins = stages
             log.handlers[:] = saved[3]
             log.setLevel(saved[0])
             log.propagate, log.disabled = saved[1], saved[2]
@@ -758,7 +819,7 @@ def _scan_items(items: list[_Item], exact: dict[str, str], result: _TargetResult
                 result.falhas_leitura.append({**_base(item), "erro": f"detector:{_safe_error(exc)}"})
                 continue
             key = _key(virtual)
-            if key in files.swallowed or key not in files.opened or key not in files.completed:
+            if not files.processed(key):
                 result.falhas_leitura.append({**_base(item), "erro": "detector_nao_leu"})
                 continue
             result.unidades_detector += 1

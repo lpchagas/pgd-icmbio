@@ -785,3 +785,170 @@ def test_rl1v2_04_same_blob_with_different_extension_case_keeps_each_context(tmp
     assert found
     assert {path for item in found for path in item["caminhos"]} == {"z.PY"}
     assert report["alvos"]["historico"]["contextos_detector"] == 2
+
+
+# ─── RL1v3-01 — falha absorvida sem depender do log ──────────────────────────
+
+
+def _repo_exato(tmp_path: Path, files: dict[str, str]) -> Path:
+    """Como _repo, mas grava os bytes exatos: no Windows, write_text trocaria LF por CRLF."""
+
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    _git(repo, "init", "-q")
+    for relative, content in files.items():
+        path = repo / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(content.encode("utf-8"))
+    _git(repo, "add", "-A", "-f")
+    _git(repo, "commit", "-q", "-m", "inicial")
+    return repo
+
+
+class _BloqueiaTudo:
+    def filter(self, record):
+        return False
+
+
+@pytest.mark.parametrize("supressao", ["disable_global", "filtro_no_logger"])
+@pytest.mark.parametrize("momento", ["antes_de_abrir", "leitura_parcial", "leitura_total", "etapa_plugins"])
+def test_rl1v3_01_falha_absorvida_nunca_vira_sucesso(tmp_path, monkeypatch, supressao, momento):
+    import logging
+
+    from detect_secrets.core import scan
+
+    repo = _repo_exato(tmp_path, {"lib/a.py": "A = 1\nB = 2\n"})
+    originais = (scan._get_lines_from_file, scan._process_line_based_plugins)
+
+    def obter_linhas(filename):
+        if momento == "antes_de_abrir":
+            raise OSError(MARCADOR)
+        with scan.open(filename) as stream:
+            stream.read(1) if momento == "leitura_parcial" else stream.read()
+            if momento != "etapa_plugins":
+                raise OSError(MARCADOR)
+        yield ["A = 1\n", "B = 2\n"]
+
+    def plugins(lines, filename):
+        if momento == "etapa_plugins":
+            raise OSError(MARCADOR)
+        yield from ()
+
+    monkeypatch.setattr(scan, "_get_lines_from_file", obter_linhas)
+    monkeypatch.setattr(scan, "_process_line_based_plugins", plugins)
+    filtro = _BloqueiaTudo()
+    if supressao == "disable_global":
+        logging.disable(logging.CRITICAL)
+    else:
+        scan.log.addFilter(filtro)
+    try:
+        report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)])
+    finally:
+        logging.disable(logging.NOTSET)
+        scan.log.removeFilter(filtro)
+
+    target = report["alvos"]["arquivos"]
+    assert (target["status"], target["unidades_detector"]) == ("incompleto", 0)
+    assert target["falhas_leitura"][0]["erro"] == "detector_nao_leu"
+    assert security_audit.STATUS_EXIT[report["status"]] == 2
+    assert MARCADOR not in json.dumps(report)
+    assert (scan._get_lines_from_file, scan._process_line_based_plugins) == (obter_linhas, plugins)
+    assert "open" not in scan.__dict__
+    monkeypatch.undo()
+    assert (scan._get_lines_from_file, scan._process_line_based_plugins) == originais
+
+
+def test_rl1v3_01_encerramento_antecipado_por_segredo_conta_como_processado(tmp_path):
+    segredo = "AKIA" + "IOSFODNN7EXAMPLF"  # formato AWS sintético  # pragma: allowlist secret
+    repo = _repo_exato(tmp_path, {"lib/a.py": f"CHAVE = '{segredo}'\nOUTRA = 1\n"})
+
+    report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)])
+
+    target = report["alvos"]["arquivos"]
+    assert target["unidades_detector"] == 1 and not target["falhas_leitura"]
+    assert target["status"] == "completo_com_ocorrencia"
+
+
+# ─── RL1v3-02 — quebras de linha não viram falso incompleto ──────────────────
+
+
+@pytest.mark.parametrize("quebra", ["\n", "\r\n", "\r", "misto"])
+def test_rl1v3_02_formatos_validos_com_qualquer_quebra_sao_processados(tmp_path, quebra):
+    def texto(linhas):
+        if quebra == "misto":
+            return "".join(l + ("\r\n", "\n", "\r")[i % 3] for i, l in enumerate(linhas))
+        return "".join(l + quebra for l in linhas)
+
+    arquivos = {
+        "config.yaml": texto(["chave: valor", "lista:", "  - a"]),
+        "config.yml": texto(["chave: valor"]),
+        "segredo.eyaml": texto(["chave: valor"]),
+        "swagger.yaml": texto(["openapi: 3.0.0"]),
+        "dados.json": texto(['{"a": 1,', '"b": 2}']),
+        "config.ini": texto(["[secao]", "chave = valor"]),
+        "notas.txt": texto(["linha um", "linha dois"]),
+        "vazio.txt": "",
+        "so_quebra.txt": "\r\n" if quebra == "\r\n" else "\n",
+        "sem_quebra_final.txt": "unica linha",
+    }
+    repo = _repo_exato(tmp_path, arquivos)
+
+    report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)])
+
+    target = report["alvos"]["arquivos"]
+    assert target["falhas_leitura"] == [], target["falhas_leitura"]
+    assert target["unidades_detector"] == len(arquivos)
+    assert target["status"] == "completo_sem_ocorrencia"
+
+
+def test_rl1v3_02_leitura_parcial_com_crlf_continua_incompleta(tmp_path, monkeypatch):
+    from detect_secrets.core import scan
+
+    repo = _repo_exato(tmp_path, {"config.yaml": "chave: valor\r\noutra: 2\r\n"})
+
+    def le_parte(filename):
+        with scan.open(filename) as stream:
+            stream.readline()
+        yield ["chave: valor\n"]
+
+    monkeypatch.setattr(scan, "_get_lines_from_file", le_parte)
+
+    report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)])
+
+    target = report["alvos"]["arquivos"]
+    assert (target["status"], target["unidades_detector"]) == ("incompleto", 0)
+
+
+# ─── RL1v2-06 — política de caminhos única e raiz de componente ──────────────
+
+
+@pytest.mark.parametrize(("path", "perfil", "reason"), [
+    ("docs/AGENTS.md/info.txt", "pre-merge", "instrucao_privada_ate_h1"),   # nome de instrução como pasta
+    ("docs/sub/CLAUDE.md", "pre-merge", "instrucao_privada_ate_h1"),
+    ("agente/.github/skills/a.py", "monorepo", "area_privada"),              # raiz de componente
+    ("agente/.github/skills/a.py", "pre-merge", None),                       # antes do merge, agente/ não é componente
+    (".github/skills/a.py", "monorepo", "area_privada"),
+    (".github/workflows/quality.yml", "monorepo", None),
+    ("agente/.github/workflows/ci.yml", "monorepo", None),
+    ("docs/cgov/README.md", "pre-merge", None),                              # cgov só é privada na raiz
+    ("agente/docs/referencias-pgd/norma.pdf", "monorepo", "acervo_referencias_privado"),  # local intermediário do L3
+    ("agente/docs/referencias-pgd/README.md", "monorepo", None),
+])
+def test_rl1v2_06_fronteiras_da_politica_de_caminhos(path, perfil, reason):
+    assert security_audit.forbidden_reason(path, perfil) == reason
+
+
+def test_rl1v2_06_verificador_e_teste_documental_usam_a_mesma_politica():
+    from tools import verificar_links
+
+    caminhos = [
+        "artefatos_local/x.md", "docs/artefatos_local/x.md", ".claude/skills/a.md", "cgov/analises/run.py",
+        "docs/cgov/README.md", "setup/configurar_env.ps1", "CLAUDE.md", "docs/AGENTS.md/info.txt",
+        ".env", ".env.example", "docs/referencias-pgd/norma.md", "docs/referencias-pgd/README.md",
+        "relatorio.csv", "docs/README.md",
+    ]
+    for caminho in caminhos:
+        esperado = security_audit.forbidden_reason(caminho) in security_audit.PRIVACY_REASONS
+        assert verificar_links._privado(tuple(caminho.split("/"))) is esperado, caminho
+        assert security_audit.is_private_path(caminho) is esperado, caminho
+    assert not security_audit.is_private_path("relatorio.csv")  # não versionável, mas não é área privada

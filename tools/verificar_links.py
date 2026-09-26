@@ -10,7 +10,8 @@ referência:
 - ``crase``: caminho citado entre crases (``lib/x.py``, ``docs/y.md``);
 - ``placeholder``: caminho genérico (``XX``, ``AAAA-MM``, ``<escopo>``, ``*``);
 - ``planejado``: alvo ausente com rótulo "planejado"/"futuro" na mesma linha;
-- ``privado``: alvo em área privada (``artefatos_local``, ``cgov``, ``setup``…);
+- ``privado``: alvo em área privada, pela política única do scanner
+  (``tools.security_audit.is_private_path``: ``artefatos_local``, ``cgov``, ``setup``…);
   exige rótulo "privado" na mesma linha.
 
 Links externos (``http:``, ``mailto:``…) são contados e não verificados.
@@ -35,11 +36,11 @@ from pathlib import Path
 from urllib.parse import unquote
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
-# Privado em qualquer nível; privado só na raiz (docs/cgov/, por exemplo, é pública);
-# instruções dos assistentes, privadas até a H1.
-PRIVADOS_QUALQUER_NIVEL = {".agents", ".claude", ".codex", "artefatos_local"}
-PRIVADOS_NA_RAIZ = {"cgov", "setup", "data", "testes_cgov", "agents.md", "claude.md", "project.md"}
+from tools.security_audit import DEFAULT_PERFIL, is_private_path  # noqa: E402
+
 PROBLEMAS = ("link_quebrado", "ancora_quebrada", "crase_inexistente", "privado_sem_rotulo", "fora_da_raiz")
 
 _LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+(?:\s+\"[^\"]*\")?)\)")
@@ -101,9 +102,10 @@ def ancoras(texto: str) -> set[str]:
     return resultado
 
 
-def _privado(partes: tuple[str, ...]) -> bool:
-    nomes = [parte.casefold() for parte in partes]
-    return bool(nomes) and (nomes[0] in PRIVADOS_NA_RAIZ or any(n in PRIVADOS_QUALQUER_NIVEL for n in nomes))
+def _privado(partes: tuple[str, ...], perfil: str = DEFAULT_PERFIL) -> bool:
+    """Política única de caminhos privados: a do scanner (tools/security_audit.py)."""
+
+    return bool(partes) and is_private_path("/".join(partes), perfil)
 
 
 def verificar(arquivos: list[Path], raiz: Path = PROJECT_ROOT, excecoes: dict[str, str] | None = None) -> list[Referencia]:
