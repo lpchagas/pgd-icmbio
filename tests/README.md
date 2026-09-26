@@ -70,6 +70,17 @@ python -m tools.replay_producao --alvo I07 --referencia git:HEAD --candidato . -
 python -m tools.gerar_fixtures_replay --alvo todos --verificar
 ```
 
+### Verificador de links (`tools/verificar_links.py`)
+
+Relatório de links, âncoras (slug do GitHub) e caminhos entre crases nos `.md`
+listados pelo `git ls-files` (o acervo privado, ignorado pelo Git, não é percorrido).
+Hoje é **não bloqueante**; o `--bloqueante` passa a valer depois da revisão
+integral da documentação. Exceções só por arquivo e com justificativa (`--excecoes`).
+
+```powershell
+python -m tools.verificar_links
+```
+
 ## Estrutura
 
 ```
