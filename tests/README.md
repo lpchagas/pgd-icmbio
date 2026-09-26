@@ -63,7 +63,8 @@ I03–I07 e I09–I12 usam fixtures geradas por
 a versão commitada é reproduzível). As planilhas de estrutura comuns ficam em
 `tests/fixtures/replay/_comum/`. Um A1 que imprime `ERRO:` e continua torna o
 replay `erro`, nunca equivalência, assim como consulta sem fixture, fixture ambígua
-ou fixture que sobra.
+ou fixture que sobra, módulo carregado de fora da árvore sob teste (ponte ou alias,
+conferido pela origem física) e dois artefatos que só diferem no carimbo.
 
 ```powershell
 python -m tools.replay_producao --alvo I07 --referencia git:HEAD --candidato . --data-execucao 2026-09-13

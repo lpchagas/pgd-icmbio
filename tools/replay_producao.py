@@ -132,7 +132,14 @@ def materializar(origem: str, destino: Path) -> tuple[Path, str]:
     raiz = Path(origem).resolve()
     if not (raiz / "lib" / "__init__.py").is_file():
         raise ReplayError(f"diretório sem o pacote lib: {origem}")
-    return raiz, "diretorio"
+    # Identidade da árvore efetivamente usada (RL2-01): HEAD e alterações locais, se houver Git.
+    head = subprocess.run(["git", "-C", str(raiz), "rev-parse", "HEAD"], capture_output=True, text=True)
+    if head.returncode != 0:
+        return raiz, "diretorio:sem-git"
+    estado = subprocess.run(["git", "-C", str(raiz), "status", "--porcelain", "--untracked-files=all"],
+                            capture_output=True, text=True)
+    alteracoes = len([linha for linha in estado.stdout.splitlines() if linha.strip()])
+    return raiz, f"diretorio:{head.stdout.strip()}" + (f"+{alteracoes}-alteracoes-locais" if alteracoes else "")
 
 
 def normalizar_nome(nome: str) -> str:
@@ -140,11 +147,35 @@ def normalizar_nome(nome: str) -> str:
 
 
 def normalizar_saida(texto: str, saida: Path) -> str:
-    """Remove da saída padrão só o diretório temporário e o carimbo de horário."""
+    """Remove da saída padrão só o diretório temporário e o carimbo de horário.
 
-    for caminho in {str(saida), str(saida).replace("\\", "/")}:
+    As barras só são uniformizadas dentro do caminho que começa em ``<SAIDA>``;
+    o restante do texto fica byte a byte (RL2-02).
+    """
+
+    for caminho in sorted({str(saida), str(saida).replace("\\", "/")}, key=len, reverse=True):
         texto = texto.replace(caminho, "<SAIDA>")
-    return _CARIMBO.sub("_<carimbo>", texto.replace("\\", "/"))
+    texto = re.sub(r"<SAIDA>[^\s\"']*", lambda achado: achado.group(0).replace("\\", "/"), texto)
+    return _CARIMBO.sub("_<carimbo>", texto)
+
+
+def coletar_arquivos(saida: Path) -> tuple[dict[str, Path], list[dict[str, list[str]]]]:
+    """Artefatos por nome normalizado; nomes que colidem após a normalização são devolvidos à parte.
+
+    RL2-02: dois arquivos que diferem só no carimbo nunca são reduzidos a um.
+    """
+
+    grupos: dict[str, list[Path]] = {}
+    if saida.exists():
+        for caminho in sorted(saida.rglob("*")):
+            if caminho.is_file():
+                grupos.setdefault(normalizar_nome(caminho.relative_to(saida).as_posix()), []).append(caminho)
+    arquivos = {nome: caminhos[0] for nome, caminhos in grupos.items() if len(caminhos) == 1}
+    colisoes = [
+        {"normalizado": nome, "fisicos": [c.relative_to(saida).as_posix() for c in caminhos]}
+        for nome, caminhos in grupos.items() if len(caminhos) > 1
+    ]
+    return arquivos, colisoes
 
 
 def ambiente_subprocesso(
@@ -183,10 +214,7 @@ def executar(raiz: Path, alvo: str, data_execucao: str, fixtures: Path, trabalho
         [sys.executable, str(script), *argumentos],
         cwd=raiz, env=env, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
     )
-    arquivos = {
-        normalizar_nome(caminho.relative_to(saida).as_posix()): caminho
-        for caminho in sorted(saida.rglob("*")) if caminho.is_file()
-    } if saida.exists() else {}
+    arquivos, colisoes = coletar_arquivos(saida)
     dados_registro = json.loads(registro.read_text(encoding="utf-8")) if registro.exists() else None
     return {
         "a1_sha256": hashlib.sha256(script.read_bytes()).hexdigest(),
@@ -194,6 +222,7 @@ def executar(raiz: Path, alvo: str, data_execucao: str, fixtures: Path, trabalho
         "stdout": normalizar_saida(processo.stdout, saida),
         "stderr": processo.stderr,
         "arquivos": arquivos,
+        "colisoes": colisoes,
         "registro": dados_registro,
         "variante": variante,
     }
@@ -205,9 +234,16 @@ def _validar_execucao(lado: str, execucao: dict, fixtures: Path) -> None:
         raise ReplayError(f"{lado}: A1 terminou com código {execucao['returncode']}: {ultima}")
     if re.search(r"^\s*ERRO:", execucao["stdout"], re.MULTILINE):
         raise ReplayError(f"{lado}: A1 relatou ERRO e seguiu (falha engolida)")
+    if execucao.get("colisoes"):
+        nomes = ", ".join(c["normalizado"] for c in execucao["colisoes"])
+        raise ReplayError(f"{lado}: artefatos distintos colidem após a normalização do carimbo: {nomes}")
     registro = execucao["registro"]
     if not registro or not registro.get("ativo"):
         raise ReplayError(f"{lado}: substituição de I/O não foi ativada")
+    fora = registro.get("fora_da_raiz", [])
+    if fora:
+        nomes = ", ".join(sorted(m["modulo"] for m in fora))
+        raise ReplayError(f"{lado}: módulo(s) carregado(s) de fora da árvore sob teste: {nomes}")
     nao_servidas = [c for c in registro["consultas"] if not c["servida"]]
     if nao_servidas:
         raise ReplayError(f"{lado}: {len(nao_servidas)} consulta(s) sem linhas congeladas")

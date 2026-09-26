@@ -72,6 +72,14 @@ def _ativar() -> None:
     raiz = os.path.normcase(os.path.abspath(os.environ["PGD_REPLAY_RAIZ"]))
     registro = Path(os.environ["PGD_REPLAY_REGISTRO"])
 
+    # sys.path do ambiente antes de o A1 rodar (stdlib, site-packages, .pth do uv),
+    # sem a própria raiz: uma árvore acrescentada depois por ponte não é autorizada.
+    raiz_real = os.path.normcase(os.path.realpath(raiz))
+    caminhos_de_ambiente = [
+        p for p in sys.path
+        if p and not (os.path.normcase(os.path.realpath(p)) == raiz_real
+                      or os.path.normcase(os.path.realpath(p)).startswith(raiz_real + os.sep))
+    ]
     variante = os.environ.get("PGD_REPLAY_VARIANTE", "")
     consultas = [
         item for item in json.loads((fixtures / "consultas.json").read_text(encoding="utf-8"))["consultas"]
@@ -186,19 +194,50 @@ def _ativar() -> None:
     estrutura.DEFAULT_DICIONARIO_CSV = planilha("dicionario_petrvs_digiteca_v2.csv")
 
     def gravar_registro() -> None:
-        proprio = os.path.normcase(os.path.abspath(__file__))
+        """Manifesto dos módulos pela origem física (RL2-01).
+
+        Dentro da árvore sob teste: entram em ``modulos`` com hash. Na biblioteca
+        padrão, em site-packages ou no próprio shim: ignorados. Em qualquer outro
+        lugar, com qualquer nome (ponte, alias): ``fora_da_raiz``, que o replay
+        transforma em ``erro``.
+        """
+
+        import site
+
+        def fisico(caminho: str) -> str:
+            return os.path.normcase(os.path.realpath(caminho))
+
+        def lexico(caminho: str) -> str:
+            return os.path.normcase(os.path.abspath(caminho))
+
+        raiz_fisica = fisico(raiz)
+        bases = [p for p in (
+            sys.prefix, sys.base_prefix, sys.exec_prefix, sys.base_exec_prefix,
+            *getattr(site, "getsitepackages", lambda: [])(), site.getusersitepackages(),
+            os.path.dirname(os.path.abspath(__file__)), *caminhos_de_ambiente,
+        ) if p]
+        # Bibliotecas instaladas (inclusive o cache do uv, que entra por .pth): vale o
+        # caminho lexical ou o físico. Código do projeto: só o físico, dentro da raiz.
+        autorizados = {fisico(p) for p in bases} | {lexico(p) for p in bases}
+
+        def dentro(caminho: str, base: str) -> bool:
+            return caminho == base or caminho.startswith(base.rstrip(os.sep) + os.sep)
+
         modulos: dict[str, str] = {}
-        for modulo in list(sys.modules.values()):
+        fora: list[dict[str, str]] = []
+        for nome, modulo in sorted(sys.modules.items()):
             arquivo = getattr(modulo, "__file__", None)
-            if not arquivo:
+            if not isinstance(arquivo, str) or not arquivo:
                 continue
-            absoluto = os.path.normcase(os.path.abspath(arquivo))
-            if absoluto != proprio and absoluto.startswith(raiz + os.sep):
-                relativo = os.path.relpath(absoluto, raiz).replace(os.sep, "/")
+            origem = fisico(arquivo)
+            if dentro(origem, raiz_fisica):
+                relativo = os.path.relpath(origem, raiz_fisica).replace(os.sep, "/")
                 modulos[relativo] = _sha256(Path(arquivo).read_bytes())
+            elif not any(dentro(origem, base) or dentro(lexico(arquivo), base) for base in autorizados):
+                fora.append({"modulo": nome, "origem": origem})
         registro.write_text(
-            json.dumps({"ativo": True, "consultas": servidas, "modulos": dict(sorted(modulos.items()))},
-                       ensure_ascii=False, indent=2),
+            json.dumps({"ativo": True, "consultas": servidas, "modulos": dict(sorted(modulos.items())),
+                        "fora_da_raiz": fora}, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
 
