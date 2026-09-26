@@ -1,0 +1,5 @@
+﻿{"schema":"export sintetico de teste"}
+icmbio_id,sigla,uorg_nome,uorg_nome-completo,mesogrupo,id_mae,tipo,status
+900001,CG-OUTRA,Coordenação Outra,Coordenação Outra (nome completo),Meso Sintético A,,sede,ativo
+900002,NGI-SINT,Núcleo de Gestão Sintético,Núcleo de Gestão Sintético (completo),Meso Sintético B,900001,ngi,ativo
+900003,OUTRA-SIG,Unidade Mapeada Pelo Nome,Unidade Mapeada Pelo Nome (completo),Meso Sintético C,900001,uc,ativo

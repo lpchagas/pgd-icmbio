@@ -41,6 +41,20 @@ Mockar `ResultSet`, `Statement` e a conexão testaria a simulação, não a sem�
 da consulta Denodo. As fórmulas são exercitadas com fixtures sintéticas e a
 compatibilidade real é verificada no gate integrado, fora da integração contínua.
 
+### Replay de produção (`tests/replay/`)
+
+O replay (`tools/replay_producao.py`) não testa a semântica da consulta. Ele roda o
+A1 real de duas versões do código (referência e candidata) sobre as **mesmas**
+linhas congeladas e exige artefatos idênticos. A substituição fica acima do JDBC:
+`query_rows`, `connect`/`get_config` e as planilhas de estrutura servem fixtures
+sintéticas (`tests/fixtures/replay/<alvo>/`). O subprocesso não lê `.env` nem
+`artefatos_local/` e não abre rede. É evidência técnica de equivalência numa
+mudança estrutural, não aceite institucional. Hoje cobre o I02.
+
+```powershell
+python -m tools.replay_producao --alvo I02 --referencia git:HEAD --candidato . --data-execucao 2026-09-13
+```
+
 ## Estrutura
 
 ```
@@ -49,7 +63,9 @@ tests/
   unit/                           testes de funções puras, sem I/O externo
   regression/                     regressão de bugs históricos + sanidade de docs
   integration/                    reservado para testes contra Denodo real (skip por padrão)
+  replay/                         replay A1 referência × candidato, com controles negativos
   fixtures/
+    replay/<alvo>/                linhas congeladas e estrutura organizacional sintéticas
     csv_bons/                     CSVs sintéticos válidos
     csv_corrompidos/               CSVs sintéticos com defeitos propositais
     docs_sql_sinteticos/           docs .md sintéticos para lib/docs_sql.py
