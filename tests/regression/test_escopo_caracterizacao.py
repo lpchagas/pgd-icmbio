@@ -183,7 +183,7 @@ def test_scopespec_de_lib_escopos_nao_tem_uso_em_producao():
 
     importados: set[str] = set()
     # Só as pastas de código versionado; nunca percorre junctions privadas da raiz.
-    codigo = [arquivo for pasta in ("lib", "ocde", "gestao", "mgi", "tools") for arquivo in (RAIZ / pasta).rglob("*.py")]
+    codigo = [arquivo for pasta in ("lib", "ocde", "relatorios", "gestao", "mgi", "tools") for arquivo in (RAIZ / pasta).rglob("*.py")]
     assert codigo
     for arquivo in codigo:
         try:

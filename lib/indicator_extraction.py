@@ -27,7 +27,7 @@ from .csv_utils import PROJECT_ROOT, indicator_csv_dir
 from .escopos import slug
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
 from .validation_contracts import TARGETS, ocde_artifact
-from ocde.relatorios.escopo import filter_rows, load_unit_profiles, scope_from_values
+from relatorios.escopo import filter_rows, load_unit_profiles, scope_from_values
 
 
 INDICATORS: tuple[tuple[str, str, str, int], ...] = tuple(

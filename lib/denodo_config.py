@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+from .caminhos import PROJECT_ROOT  # raiz única (L4a)
 ENV_PATH = PROJECT_ROOT / ".env"
 
 _URL = re.compile(r"^jdbc:denodo://(?P<host>[^/:?;#%\s]+):(?P<port>\d+)/(?P<database>[^/?;#%\s]+)$", re.IGNORECASE)

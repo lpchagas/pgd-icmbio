@@ -40,7 +40,7 @@ def test_rl2_01_ponte_que_carrega_dependencia_de_outra_arvore_e_erro(tmp_path):
     candidato = _copia(tmp_path, "candidato")
     outra = _copia(tmp_path, "outra-arvore")
     ponte = candidato / "ocde" / "relatorios" / "privacidade.py"
-    origem_externa = outra / "ocde" / "relatorios" / "privacidade.py"
+    origem_externa = outra / "relatorios" / "privacidade.py"  # implementação real (L4a)
     # Ponte que entrega a implementação de outra árvore com o mesmo nome de módulo:
     # produtos e consultas ficam iguais aos da referência.
     ponte.write_text(
@@ -62,7 +62,7 @@ def test_rl2_01_alias_com_outro_nome_tambem_e_detectado(tmp_path):
     candidato = _copia(tmp_path, "candidato")
     outra = _copia(tmp_path, "outra-arvore")
     ponte = candidato / "ocde" / "relatorios" / "textos_execucao.py"
-    origem_externa = outra / "ocde" / "relatorios" / "textos_execucao.py"
+    origem_externa = outra / "relatorios" / "textos_execucao.py"  # implementação real (L4a)
     ponte.write_text(
         "import importlib.util\n"
         f"_spec = importlib.util.spec_from_file_location('_implementacao_externa', {str(origem_externa)!r})\n"

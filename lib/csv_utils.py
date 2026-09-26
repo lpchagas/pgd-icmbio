@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Iterable, Sequence
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+from .caminhos import PROJECT_ROOT  # raiz única (L4a); reexportada para os A1
 INDICATOR_OUTPUT_BASE_ENV = "PGD_INDICATOR_OUTPUT_BASE"
 
 

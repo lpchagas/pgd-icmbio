@@ -230,6 +230,8 @@ def _ativar() -> None:
             if not isinstance(arquivo, str) or not arquivo:
                 continue
             origem = fisico(arquivo)
+            if origem == fisico(__file__):
+                continue  # o próprio shim não é dependência do A1
             if dentro(origem, raiz_fisica):
                 relativo = os.path.relpath(origem, raiz_fisica).replace(os.sep, "/")
                 modulos[relativo] = _sha256(Path(arquivo).read_bytes())

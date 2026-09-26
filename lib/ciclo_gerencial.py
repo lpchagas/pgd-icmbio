@@ -14,7 +14,7 @@ from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
 from .validation_contracts import TARGETS, artifact_indicator_number
-from ocde.relatorios.escopo import scope_from_values
+from relatorios.escopo import scope_from_values
 
 
 STAGES = (
@@ -238,7 +238,7 @@ def run(argv: list[str] | None = None) -> dict:
         return manifest
 
     report_python = args.denodo_python if args.consultar_denodo else sys.executable
-    report_cmd = [report_python, "-m", "ocde.relatorios.relatorio_v2", "--data-execucao", args.data_execucao,
+    report_cmd = [report_python, "-m", "relatorios.relatorio_v2", "--data-execucao", args.data_execucao,
                   "--produto", args.produto, "--lente", args.lente, *scope_args]
     validation_dir = PROJECT_ROOT / "artefatos_local" / "validacao" / window.mes_execucao / "escopos" / scope.key
     validation_manifests = sorted(validation_dir.glob("manifesto_validacao_*.json"), key=lambda path: path.stat().st_mtime_ns)
@@ -257,7 +257,7 @@ def run(argv: list[str] | None = None) -> dict:
         return manifest
 
     def security() -> dict:
-        from ocde.relatorios.privacidade import scan_file
+        from relatorios.privacidade import scan_file
         output_dir = PROJECT_ROOT / "artefatos_local" / "ocde" / "relatorios_v2" / window.mes_execucao / "escopos" / scope.key
         findings = {
             path.name: scan_file(path)

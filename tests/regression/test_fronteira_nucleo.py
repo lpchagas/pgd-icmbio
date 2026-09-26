@@ -1,6 +1,6 @@
 """Fronteira de arquitetura (plano de reorganização, §8; ADR-009).
 
-O núcleo analítico (lib, ocde, gestao, mgi) não importa o agente nem as
+O núcleo analítico (lib, ocde, relatorios, gestao, mgi) não importa o agente nem as
 dependências exclusivas dele (MySQL e API de modelo). O agente pode usar o
 núcleo, nunca o contrário.
 """
@@ -13,7 +13,7 @@ import pytest
 
 pytestmark = pytest.mark.regression
 ROOT = Path(__file__).resolve().parents[2]
-NUCLEO = ("lib", "ocde", "gestao", "mgi")
+NUCLEO = ("lib", "ocde", "relatorios", "gestao", "mgi")
 PROIBIDOS = ("agente", "pymysql", "anthropic", "db")
 
 

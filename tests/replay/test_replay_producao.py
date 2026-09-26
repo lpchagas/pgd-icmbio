@@ -355,23 +355,23 @@ def test_produto_compartilhavel_nao_traz_identificacao_pessoal(tmp_path, alvo):
 
 def test_controle_negativo_supressao_k_do_g01_em_modulo_que_muda_de_lugar(tmp_path):
     raiz = _copia(tmp_path)
-    _alterar(raiz / "ocde" / "relatorios" / "privacidade.py", "K_MIN = 5", "K_MIN = 6")
+    _alterar(raiz / "relatorios" / "privacidade.py", "K_MIN = 5", "K_MIN = 6")
 
     relatorio = rp.replay("G01-compartilhavel", REFERENCIA, str(raiz), DATA)
 
     assert relatorio["status"] == "divergente"
-    assert relatorio["dependencias"]["hash_alterado"] == ["ocde/relatorios/privacidade.py"]
+    assert relatorio["dependencias"]["hash_alterado"] == ["relatorios/privacidade.py"]
     assert relatorio["dependencias"]["a1_alterado"] is False
 
 
 def test_controle_negativo_sanitizacao_do_g02_em_modulo_que_muda_de_lugar(tmp_path):
     raiz = _copia(tmp_path)
-    _alterar(raiz / "ocde" / "relatorios" / "textos_execucao.py",
+    _alterar(raiz / "relatorios" / "textos_execucao.py",
              r'_EMAIL = re.compile(r"\b[A-Z0-9._%+-]+@', r'_EMAIL = re.compile(r"(?!)\b[A-Z0-9._%+-]+@')
 
     relatorio = rp.replay("G02-restrito", REFERENCIA, str(raiz), DATA)
 
     assert relatorio["status"] == "divergente"
-    assert relatorio["dependencias"]["hash_alterado"] == ["ocde/relatorios/textos_execucao.py"]
+    assert relatorio["dependencias"]["hash_alterado"] == ["relatorios/textos_execucao.py"]
     arquivos = {d.get("arquivo", "") for d in relatorio["diferencas"]}
     assert any("historico" in a for a in arquivos) and any("entregas" in a for a in arquivos)
