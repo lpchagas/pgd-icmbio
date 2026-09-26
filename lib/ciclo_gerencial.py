@@ -14,6 +14,7 @@ from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
 from .validation_contracts import TARGETS, artifact_indicator_number
+from lib.liberacao import LiberacaoRecusada, execucao_autorizada
 from relatorios.escopo import scope_from_values
 
 
@@ -146,6 +147,14 @@ def run(argv: list[str] | None = None) -> dict:
         mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
         lista_unidades=args.lista_unidades,
     )
+    # Gate de liberação (L5): no dry-run a decisão é só registrada; na execução,
+    # recusa antes de qualquer etapa.
+    liberacao = execucao_autorizada(
+        "lib.ciclo_gerencial", scope, "compartilhavel" if args.produto != "restrito" else "restrito",
+        capacidades=("RELATORIO_V2", *TARGETS), final=not args.rascunho,
+    )
+    if not liberacao.autorizada and not args.dry_run:
+        raise LiberacaoRecusada(f"lib.ciclo_gerencial: execução recusada para o escopo {scope.key}: {liberacao.motivo}")
     final_path = indicator_csv_dir(window.mes_execucao) / "escopos" / scope.key / "manifesto_ciclo_gerencial.json"
     manifest = {
         "tipo": "ciclo_gerencial_mensal",
@@ -154,11 +163,13 @@ def run(argv: list[str] | None = None) -> dict:
         "produto": args.produto,
         "lente": args.lente,
         "etapas": {},
+        "liberacao": liberacao.as_dict(),
         "status_global": "em_execucao",
     }
     if args.retomar and final_path.exists():
         manifest = json.loads(final_path.read_text(encoding="utf-8"))
         manifest["status_global"] = "em_execucao"
+        manifest["liberacao"] = liberacao.as_dict()
     if args.dry_run:
         manifest["status_global"] = "dry-run"
         manifest["plano_execucao"] = list(STAGES)

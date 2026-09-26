@@ -18,6 +18,13 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Os documentos do agente estão em `docs/agente/`, `docs/decisoes/`, `docs/governanca-projeto/`, `docs/projeto/` e `docs/dados-petrvs/`.
 - As fichas S01–S24 e os protótipos estão em `capacidades/`, com o `CATALOGO.md` (L4c).
 
+### Escopo e pilotos (L5)
+
+- A resolução de escopo é única (`relatorios.escopo`) nos cinco pontos oficiais. Regional sem estrutura, unidade inexistente e sigla ambígua passaram a ser erro; as chaves `tipo_unidade-…` e `lista_unidades-<hash>` são as mesmas em todos os pontos (a de lista não depende mais do nome do arquivo).
+- `lib.escopos` só normaliza; o `ScopeSpec` duplicado foi retirado.
+- Cadastro das três unidades piloto em `config/unidades-piloto.json` e gate de liberação (`lib/liberacao.py`): fora dos pilotos, produto final ou compartilhável exige três aceites da mesma identidade e deliberação de expansão. O relatório cumulativo e o V2 compartilhável no escopo nacional passam a ser recusados até lá.
+- Novas CLIs: `tools/executar_pilotos.py` e `tools/registrar_aceite_piloto.py`. Fluxo em `docs/projeto/fluxo-unidades-piloto.md`.
+
 ### Pontes temporárias
 
 | Ponte | Destino | Criada | Retirada |

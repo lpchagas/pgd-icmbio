@@ -131,6 +131,19 @@ def copia_com_dados_sinteticos(tmp_path_factory):
         for caminho in execucao["arquivos"].values():
             shutil.copy2(caminho, mes / caminho.name)
             shutil.copy2(caminho, por_escopo / caminho.name)
+            (mes / "escopos" / "regional-gr2").mkdir(exist_ok=True)
+            shutil.copy2(caminho, mes / "escopos" / "regional-gr2" / caminho.name)
+    # Estrutura sintética: as unidades dos A2 sintéticos ficam sob a GR2, piloto do gate (L5).
+    estrutura = copia / "artefatos_local" / "ocde" / "diagnosticos" / "ICMBIO_estrutura.csv"
+    estrutura.parent.mkdir(parents=True, exist_ok=True)
+    estrutura.write_text(
+        '{"schema":"estrutura sintetica das pontes"}\n'
+        "icmbio_id,id_mae,sigla,uorg_nome,uorg_nome-completo,mesogrupo,tipo,macroprocesso,microgrupo,status\n"
+        "10,,GR2,GR2 sintetica,GR2 sintetica,GR2,Gerência Regional,,,Ativo\n"
+        "11,10,CGSIN,Unidade sintetica,Unidade sintetica,UC na GR2,UC,,,Ativo\n"
+        "12,10,NGI-SINT,NGI sintetico,NGI sintetico,UC na GR2,NGI,,,Ativo\n",
+        encoding="utf-8",
+    )
     return copia
 
 
@@ -142,7 +155,7 @@ def _cli(copia: Path, modulo: str, *argumentos: str) -> subprocess.CompletedProc
 
 
 def test_cli_do_cumulativo_antiga_e_nova_geram_o_mesmo_relatorio(copia_com_dados_sinteticos):
-    argumentos = ("--data-execucao", "2026-09-13", "--escopo", "nacional")
+    argumentos = ("--data-execucao", "2026-09-13", "--regional", "GR2")
     antiga = _cli(copia_com_dados_sinteticos, "ocde.relatorios.relatorio_cumulativo", *argumentos)
     nova = _cli(copia_com_dados_sinteticos, "relatorios.relatorio_cumulativo", *argumentos)
 
@@ -153,10 +166,23 @@ def test_cli_do_cumulativo_antiga_e_nova_geram_o_mesmo_relatorio(copia_com_dados
     assert "RuntimeWarning" not in antiga.stderr
 
 
+def test_cli_do_cumulativo_antiga_e_nova_recusam_nacional_sem_aceites(copia_com_dados_sinteticos):
+    """Gate do L5 pelos comandos oficiais: a ponte antiga herda a recusa."""
+
+    argumentos = ("--data-execucao", "2026-09-13", "--escopo", "nacional")
+    antiga = _cli(copia_com_dados_sinteticos, "ocde.relatorios.relatorio_cumulativo", *argumentos)
+    nova = _cli(copia_com_dados_sinteticos, "relatorios.relatorio_cumulativo", *argumentos)
+
+    ultima = lambda r: r.stderr.strip().splitlines()[-1]  # noqa: E731
+    assert antiga.returncode == nova.returncode == 1
+    assert ultima(antiga) == ultima(nova) and ultima(nova).startswith("lib.liberacao.LiberacaoRecusada")
+    assert "Relatório Gerencial Cumulativo" not in nova.stdout
+
+
 def test_cli_do_v2_antiga_e_nova_chegam_ao_mesmo_ponto(copia_com_dados_sinteticos):
     """Sem manifesto e dados de gestão, as duas param no mesmo ponto real do main (não em --help)."""
 
-    argumentos = ("--data-execucao", "2026-09-13", "--escopo", "nacional", "--produto", "compartilhavel",
+    argumentos = ("--data-execucao", "2026-09-13", "--regional", "GR2", "--produto", "compartilhavel",
                   "--lente", "acumulada", "--rascunho")
     antiga = _cli(copia_com_dados_sinteticos, "ocde.relatorios.relatorio_v2", *argumentos)
     nova = _cli(copia_com_dados_sinteticos, "relatorios.relatorio_v2", *argumentos)
@@ -165,3 +191,15 @@ def test_cli_do_v2_antiga_e_nova_chegam_ao_mesmo_ponto(copia_com_dados_sintetico
     assert antiga.returncode == nova.returncode == 1
     assert ultima(antiga) == ultima(nova) and "Manifesto de gestão ausente" in ultima(antiga)
     assert "RuntimeWarning" not in antiga.stderr
+
+
+@pytest.mark.parametrize("extra", [(), ("--rascunho",)])
+def test_cli_do_v2_antiga_e_nova_recusam_compartilhavel_nacional_sem_aceites(copia_com_dados_sinteticos, extra):
+    argumentos = ("--data-execucao", "2026-09-13", "--escopo", "nacional", "--produto", "compartilhavel",
+                  "--lente", "acumulada", *extra)
+    antiga = _cli(copia_com_dados_sinteticos, "ocde.relatorios.relatorio_v2", *argumentos)
+    nova = _cli(copia_com_dados_sinteticos, "relatorios.relatorio_v2", *argumentos)
+
+    ultima = lambda r: r.stderr.strip().splitlines()[-1]  # noqa: E731
+    assert antiga.returncode == nova.returncode == 1
+    assert ultima(antiga) == ultima(nova) and ultima(nova).startswith("lib.liberacao.LiberacaoRecusada")

@@ -21,6 +21,7 @@ from relatorios.dados_gerenciais import (
     scoped_data,
     temporal_summary,
 )
+from lib.liberacao import exigir_execucao_autorizada
 from relatorios.escopo import load_unit_profiles, scope_from_values
 from relatorios.pdf_export import export_pdf
 from relatorios.privacidade import K_MIN, assert_safe_outputs
@@ -34,6 +35,8 @@ from relatorios.gestao_report import (
 
 INPUT_BASE = PROJECT_ROOT / "artefatos_local" / "ocde" / "entregas"
 OUTPUT_BASE = PROJECT_ROOT / "artefatos_local" / "ocde" / "relatorios_v2"
+# Capacidades cuja elegibilidade o gate exige fora dos pilotos (L5).
+CAPACIDADES_V2 = ("RELATORIO_V2", *TARGETS)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -317,6 +320,10 @@ def run(argv: list[str] | None = None) -> list[Path]:
         mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
         lista_unidades=args.lista_unidades,
     )
+    liberacao = exigir_execucao_autorizada(
+        "relatorios.relatorio_v2", scope, "compartilhavel" if args.produto != "restrito" else "restrito",
+        capacidades=CAPACIDADES_V2, final=not args.rascunho,
+    )
     validation_manifest, validation_results = _validation_gate(args.manifesto_validacao, window, scope, args.rascunho)
     month_dir = INPUT_BASE / window.mes_execucao / "escopos" / scope.key
     output_dir = OUTPUT_BASE / window.mes_execucao / "escopos" / scope.key
@@ -396,6 +403,7 @@ def run(argv: list[str] | None = None) -> list[Path]:
             "manifesto_gestao": {"arquivo": f"manifesto_gestao_{product}.json", "sha256": sha256(management_dir / f"manifesto_gestao_{product}.json")},
             "manifesto_validacao": {"arquivo": args.manifesto_validacao.name if args.manifesto_validacao else "", "sha256": sha256(args.manifesto_validacao) if args.manifesto_validacao else "", "run_id": validation_manifest.get("run_id", "")},
             "rascunho": args.rascunho,
+            "liberacao": liberacao,
             "aprovado": False,
             "relatorio_execucao_entregas": delivery_md.name,
         }

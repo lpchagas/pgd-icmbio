@@ -24,9 +24,9 @@ from zoneinfo import ZoneInfo
 
 from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
-from .escopos import slug
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
 from .validation_contracts import TARGETS, ocde_artifact
+from lib.liberacao import exigir_execucao_autorizada
 from relatorios.escopo import filter_rows, load_unit_profiles, scope_from_values
 
 
@@ -157,9 +157,15 @@ def run(argv: list[str] | None = None) -> dict:
         mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
         lista_unidades=args.lista_unidades,
     )
-    scope_key = f"{slug(scope.kind)}-{slug(scope.value)}"
+    scope_key = scope.key
     output_dir = indicator_csv_dir(window.mes_execucao) / "escopos" / scope_key
     selected = [item for item in INDICATORS if only in (None, item[0])]
+    # Gate de liberação (L5): o A2 é produto intermediário e restrito; a decisão fica
+    # registrada no manifesto. Produtos finais são barrados nos relatórios.
+    liberacao = exigir_execucao_autorizada(
+        "lib.indicator_extraction", scope, "intermediario",
+        capacidades=[f"I{item[0]}" for item in selected], final=False,
+    )
     started = datetime.now(ZoneInfo(ANALYSIS_TIMEZONE))
     run_fingerprint = hashlib.sha256(
         json.dumps({"window": window.as_dict(), "selected": [item[0] for item in selected]}, sort_keys=True).encode("utf-8")
@@ -260,6 +266,7 @@ def run(argv: list[str] | None = None) -> dict:
             "falha" if failures else "dry-run" if args.dry_run else "sucesso" if full_cycle else "parcial"
         ),
         "escopo": {**scope.as_dict(), "chave": scope_key},
+        "liberacao": liberacao,
         "resultados": results,
     }
     if args.salvar_manifesto and not args.dry_run:

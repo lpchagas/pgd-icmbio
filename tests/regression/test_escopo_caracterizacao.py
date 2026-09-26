@@ -1,16 +1,18 @@
-"""Caracterização da seleção por escopo antes da unificação (plano de reorganização, §7.1, L5).
+"""Seleção por escopo depois da unificação (plano de reorganização, §7.1, L5).
 
-Hoje há dois caminhos de seleção:
+Até o L4 havia dois caminhos de seleção: A (``relatorios.escopo``, extração OCDE,
+relatórios e ciclo) e B (``OrganizationStructure.select`` repetido no
+``gestao.runner`` e no ``lib.validation_runner``). O L2 caracterizou onde eles
+coincidiam e onde divergiam; o L5 unificou a resolução em
+``relatorios.escopo.scope_from_values`` e trocou cada divergência de forma
+deliberada:
 
-- A: ``ocde.relatorios.escopo`` (``scope_from_values`` + ``filter_rows``), usado pela
-  extração OCDE, pelos relatórios V2/cumulativo e pelo ciclo gerencial;
-- B: ``OrganizationStructure.select`` via ``gestao.runner._scope_units`` (o
-  ``lib.validation_runner`` repete o mesmo código).
-
-Os testes fixam onde A e B coincidem — inclusive nos três pilotos decididos na H4
-(GR2 regional; CGOV e COCAGE sem subordinadas) — e registram as divergências atuais
-como estão. A unificação do L5 deve manter as coincidências e resolver cada
-divergência de forma deliberada, trocando o teste correspondente.
+- ESC-01 regional sem estrutura: erro (antes A caía no rótulo de mesogrupo);
+- ESC-02 unidade inexistente: erro (antes A gerava produto vazio);
+- ESC-03 sigla ambígua: erro, salvo ligação explícita no dicionário CGOV;
+- ESC-04/05 chaves canônicas iguais nos três pontos (``tipo_unidade-…``,
+  ``lista_unidades-<hash12>``), sem o caminho do arquivo;
+- ESC-06 ``lib.escopos`` só normaliza (o ``ScopeSpec`` duplicado saiu).
 
 Estrutura 100% sintética em ``tests/fixtures/escopo/``.
 """
@@ -24,8 +26,7 @@ import pytest
 
 import gestao.runner as runner_gestao
 import lib.validation_runner as runner_validacao
-import ocde.relatorios.escopo as escopo
-from lib.escopos import slug
+import relatorios.escopo as escopo
 from lib.estrutura_organizacional import OrganizationStructure, load_organization_structure
 
 pytestmark = pytest.mark.regression
@@ -35,8 +36,18 @@ ESTRUTURA = RAIZ / "tests" / "fixtures" / "escopo" / "ICMBIO_estrutura.csv"
 
 
 @pytest.fixture
-def estrutura() -> OrganizationStructure:
+def estrutura_ambigua() -> OrganizationStructure:
+    """Estrutura completa: UC-DUP existe sob a GR2 (id 21) e sob a GR1 (id 22)."""
+
     return load_organization_structure(ESTRUTURA, ESTRUTURA.parent / "sem-dicionario.csv")
+
+
+@pytest.fixture
+def estrutura(estrutura_ambigua) -> OrganizationStructure:
+    """A mesma estrutura sem a homônima da GR1, para as equivalências dos pilotos."""
+
+    unidades = {i: u for i, u in estrutura_ambigua.units_by_id.items() if i != "22"}
+    return OrganizationStructure(unidades, dict(estrutura_ambigua.petrvs_to_id))
 
 
 def _linhas(estrutura: OrganizationStructure) -> list[dict]:
@@ -45,24 +56,27 @@ def _linhas(estrutura: OrganizationStructure) -> list[dict]:
                      {"unidade_sigla": "N.I.", "mesogrupo": "Não mapeado", "id": "ni"}]
 
 
+def _usar(monkeypatch, estrutura: OrganizationStructure) -> None:
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda: estrutura)
+
+
 def caminho_a(monkeypatch, estrutura, linhas, **seletor) -> tuple[list[str], str]:
     """Linhas mantidas (sigla#id) e chave do escopo, como na extração OCDE."""
 
-    monkeypatch.setattr(escopo, "load_organization_structure", lambda: estrutura)
+    _usar(monkeypatch, estrutura)
     spec = escopo.scope_from_values(**seletor)
     mantidas = escopo.filter_rows(linhas, spec, escopo.load_unit_profiles(ESTRUTURA))
     return sorted(f"{linha['unidade_sigla']}#{linha['id']}" for linha in mantidas), spec.key
 
 
 def caminho_b(monkeypatch, estrutura, modulo=runner_gestao, **seletor) -> tuple[list[str], str]:
-    """Siglas selecionadas e chave do escopo, como no gestao.runner."""
+    """Siglas selecionadas e chave do escopo, como no gestao.runner/validation_runner."""
 
-    monkeypatch.setattr(modulo, "load_organization_structure", lambda: estrutura)
+    _usar(monkeypatch, estrutura)
     argumentos = argparse.Namespace(escopo=None, regional=None, unidade=None, mesogrupo=None,
                                     tipo_unidade=None, lista_unidades=None)
     vars(argumentos).update(seletor)
-    rotulo, unidades = modulo._scope_units(argumentos)
-    chave = "-".join(slug(parte) for parte in rotulo.split(":", 1))
+    _rotulo, unidades, chave = modulo._scope_units(argumentos)
     return sorted(unidades), chave
 
 
@@ -70,19 +84,19 @@ def _siglas(selecao_a: list[str]) -> list[str]:
     return sorted({item.split("#")[0].upper() for item in selecao_a})
 
 
-# --- Coincidências que a unificação precisa preservar ------------------------------------
+# --- Coincidências preservadas ------------------------------------------------------------
 
 @pytest.mark.parametrize("seletor, esperado, chave", [
     ({"regional": "GR2"}, ["CT-X", "GR2", "NGI-A", "UC-A1", "UC-A2", "UC-DUP"], "regional-gr2"),
     ({"unidade": "CGOV"}, ["CGOV"], "unidade-cgov"),
     ({"unidade": "COCAGE"}, ["COCAGE"], "unidade-cocage"),
 ])
-def test_pilotos_h4_mesmas_unidades_e_mesma_chave_nos_dois_caminhos(monkeypatch, estrutura, seletor, esperado, chave):
+def test_pilotos_h4_mesmas_unidades_e_mesma_chave_nos_tres_pontos(monkeypatch, estrutura, seletor, esperado, chave):
     selecao_a, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), **seletor)
     selecao_b, chave_b = caminho_b(monkeypatch, estrutura, **seletor)
     selecao_c, chave_c = caminho_b(monkeypatch, estrutura, runner_validacao, **seletor)
 
-    assert _siglas(selecao_a) == selecao_b == [s.upper() for s in selecao_c] == esperado
+    assert _siglas(selecao_a) == selecao_b == selecao_c == esperado
     assert chave_a == chave_b == chave_c == chave
 
 
@@ -93,6 +107,14 @@ def test_regional_segue_id_mae_em_qualquer_profundidade_e_ignora_rotulo(monkeypa
     for selecao in (_siglas(selecao_a), selecao_b):
         assert {"UC-A2", "CT-X"} <= set(selecao)   # profundidade 3; rótulo divergente
         assert "UC-FORA" not in selecao             # rotulada GR2, subordinada à GR1
+
+
+def test_regional_registra_ids_resolvidos_com_a_raiz_primeiro(monkeypatch, estrutura):
+    _usar(monkeypatch, estrutura)
+    spec = escopo.scope_from_values(regional="GR2")
+
+    assert spec.ids[0] == "10"
+    assert set(spec.ids) == {"10", "11", "12", "13", "14", "21"}
 
 
 def test_unidade_nao_inclui_subordinadas(monkeypatch, estrutura):
@@ -118,69 +140,88 @@ def test_mudanca_de_estrutura_altera_os_dois_caminhos_igualmente(monkeypatch, es
     assert _siglas(selecao_a) == selecao_b == ["CT-X", "GR2", "NGI-A", "UC-DUP"]
 
 
-# --- Divergências e defeitos atuais (registrados, não corrigidos no L2) ------------------
+# --- Divergências resolvidas no L5 (antes registradas pelo L2) ------------------------------
 
-def test_divergencia_regional_sem_estrutura_cai_no_rotulo_com_a_mesma_chave(monkeypatch, estrutura):
-    """A usa outro critério em silêncio (rótulo de mesogrupo) e mantém a chave; B recusa.
-
-    O plano (§7.1) exige erro. O L5 deve fazer o caminho A falhar sem a estrutura.
-    """
-
-    linhas = _linhas(estrutura)
-    selecao_a, chave_a = caminho_a(monkeypatch, OrganizationStructure({}, {}), linhas, regional="GR2")
-
-    assert chave_a == "regional-gr2"
-    assert _siglas(selecao_a) == ["GR2", "NGI-A", "UC-A1", "UC-A2", "UC-DUP", "UC-FORA"]
-    with pytest.raises(FileNotFoundError):
-        caminho_b(monkeypatch, OrganizationStructure({}, {}), regional="GR2")
+@pytest.mark.parametrize("modulo", [None, runner_gestao, runner_validacao])
+def test_esc01_regional_sem_estrutura_e_erro_nos_tres_pontos(monkeypatch, estrutura, modulo):
+    vazia = OrganizationStructure({}, {})
+    with pytest.raises(escopo.EscopoInvalido, match="exige a estrutura"):
+        if modulo is None:
+            caminho_a(monkeypatch, vazia, _linhas(estrutura), regional="GR2")
+        else:
+            caminho_b(monkeypatch, vazia, modulo, regional="GR2")
 
 
-def test_divergencia_unidade_inexistente_vira_produto_vazio_no_caminho_a(monkeypatch, estrutura):
-    """A devolve zero linhas sem erro; B recusa. O plano (§7.1) exige erro."""
-
-    selecao_a, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), unidade="INEXISTENTE")
-
-    assert (selecao_a, chave_a) == ([], "unidade-inexistente")
-    with pytest.raises(ValueError, match="não localizada"):
-        caminho_b(monkeypatch, estrutura, unidade="INEXISTENTE")
+def test_esc01_regional_sem_unidades_resolvidas_nao_cai_no_rotulo():
+    linhas = [{"unidade_sigla": "GR2", "mesogrupo": "GR2"}]
+    with pytest.raises(escopo.EscopoInvalido):
+        escopo.filter_rows(linhas, escopo.ScopeSpec("regional", "GR2"))
 
 
-def test_defeito_sigla_duplicada_vaza_unidade_de_outra_regional(monkeypatch, estrutura):
-    """Nenhum caminho trata sigla ambígua como erro (exigido no §7.1).
-
-    A mantém as duas UC-DUP (ids 21 e 22) no escopo da GR2; B lista a sigla, e o filtro
-    posterior por sigla traz as duas também.
-    """
-
-    selecao_a, _ = caminho_a(monkeypatch, estrutura, _linhas(estrutura), regional="GR2")
-    selecao_b, _ = caminho_b(monkeypatch, estrutura, regional="GR2")
-
-    assert {"UC-DUP#21", "UC-DUP#22"} <= set(selecao_a)
-    assert "UC-DUP" in selecao_b
+@pytest.mark.parametrize("modulo", [None, runner_gestao, runner_validacao])
+def test_esc02_unidade_inexistente_e_erro_nos_tres_pontos(monkeypatch, estrutura, modulo):
+    with pytest.raises(escopo.EscopoInvalido, match="não localizada"):
+        if modulo is None:
+            caminho_a(monkeypatch, estrutura, _linhas(estrutura), unidade="INEXISTENTE")
+        else:
+            caminho_b(monkeypatch, estrutura, modulo, unidade="INEXISTENTE")
 
 
-def test_divergencia_chave_de_tipo_de_unidade(monkeypatch, estrutura):
+@pytest.mark.parametrize("seletor", [{"regional": "GR2"}, {"regional": "GR1"}, {"unidade": "UC-DUP"}])
+def test_esc03_sigla_ambigua_e_erro_nos_tres_pontos(monkeypatch, estrutura_ambigua, seletor):
+    for modulo in (None, runner_gestao, runner_validacao):
+        with pytest.raises(escopo.EscopoInvalido, match="ambígua"):
+            if modulo is None:
+                caminho_a(monkeypatch, estrutura_ambigua, _linhas(estrutura_ambigua), **seletor)
+            else:
+                caminho_b(monkeypatch, estrutura_ambigua, modulo, **seletor)
+
+
+def test_esc03_dicionario_cgov_desfaz_a_homonimia(monkeypatch, estrutura_ambigua):
+    ligada = OrganizationStructure(dict(estrutura_ambigua.units_by_id), {"UC-DUP": "21"})
+    _usar(monkeypatch, ligada)
+
+    assert escopo.scope_from_values(unidade="UC-DUP").ids == ("21",)
+    assert "UC-DUP" in escopo.scope_from_values(regional="GR2").units
+
+
+def test_esc04_chave_de_tipo_de_unidade_e_canonica(monkeypatch, estrutura):
     _, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), tipo_unidade="UC")
     _, chave_b = caminho_b(monkeypatch, estrutura, tipo_unidade="UC")
+    _, chave_c = caminho_b(monkeypatch, estrutura, runner_validacao, tipo_unidade="UC")
 
-    assert (chave_a, chave_b) == ("tipo_unidade-uc", "tipo-unidade-uc")
+    assert chave_a == chave_b == chave_c == "tipo_unidade-uc"
 
 
-def test_divergencia_chave_de_lista_depende_do_caminho_do_arquivo_no_caminho_b(monkeypatch, estrutura, tmp_path):
+def test_esc05_chave_de_lista_depende_so_das_siglas(monkeypatch, estrutura, tmp_path):
     lista = tmp_path / "lista-pilotos.txt"
-    lista.write_text("CGOV\nCOCAGE\n", encoding="utf-8")
+    lista.write_text("# pilotos\nCGOV\nCOCAGE\n", encoding="utf-8")
+    outra = tmp_path / "outro-nome.csv"
+    outra.write_text("sigla\ncocage\ncgov\n", encoding="utf-8")
 
     _, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), lista_unidades=lista)
     selecao_b, chave_b = caminho_b(monkeypatch, estrutura, lista_unidades=lista)
+    _, chave_c = caminho_b(monkeypatch, estrutura, runner_validacao, lista_unidades=outra)
 
-    assert chave_a == "lista_unidades-lista_fornecida"
-    assert chave_b.startswith("lista-unidades-") and "lista-pilotos" in chave_b
+    assert chave_a == chave_b == chave_c
+    assert chave_a.startswith("lista_unidades-") and len(chave_a) == len("lista_unidades-") + 12
+    assert "pilotos" not in chave_a
     assert selecao_b == ["CGOV", "COCAGE"]
 
 
-def test_scopespec_de_lib_escopos_nao_tem_uso_em_producao():
-    """Só ``slug`` é importado de lib.escopos; o ScopeSpec de lá é código sem consumidor."""
+def test_esc05_lista_com_sigla_inexistente_e_erro(monkeypatch, estrutura, tmp_path):
+    lista = tmp_path / "lista.txt"
+    lista.write_text("CGOV\nNAO-EXISTE\n", encoding="utf-8")
+    with pytest.raises(escopo.EscopoInvalido, match="não localizada"):
+        caminho_b(monkeypatch, estrutura, lista_unidades=lista)
 
+
+def test_esc06_lib_escopos_so_normaliza():
+    """``lib.escopos`` não tem mais ScopeSpec; o único é o de ``relatorios.escopo``."""
+
+    import lib.escopos as modulo
+
+    assert not hasattr(modulo, "ScopeSpec")
     importados: set[str] = set()
     # Só as pastas de código versionado; nunca percorre junctions privadas da raiz.
     codigo = [arquivo for pasta in ("lib", "ocde", "relatorios", "gestao", "mgi", "tools") for arquivo in (RAIZ / pasta).rglob("*.py")]
@@ -194,4 +235,4 @@ def test_scopespec_de_lib_escopos_nao_tem_uso_em_producao():
             if isinstance(no, ast.ImportFrom) and no.module == "lib.escopos":
                 importados |= {alias.name for alias in no.names}
 
-    assert importados == {"slug"}
+    assert importados <= {"slug", "normalize"}

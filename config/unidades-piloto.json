@@ -1,0 +1,39 @@
+{
+  "versao": 1,
+  "politica": "pilotos-v1",
+  "decisao": "H4 (26/09/2026): GR2 como regional; CGOV e COCAGE sem subordinadas",
+  "conferencia": "id_petrvs é conferido na fonte no início do L7; até lá, execução real de piloto é recusada",
+  "estrutura": {
+    "arquivo": "ICMBIO_estrutura.csv",
+    "sha256": null
+  },
+  "unidades": [
+    {
+      "sigla": "CGOV",
+      "id_petrvs": null,
+      "conferido": false,
+      "seletor": "unidade",
+      "incluir_raiz": true,
+      "incluir_subordinadas": false,
+      "profundidade": 0
+    },
+    {
+      "sigla": "COCAGE",
+      "id_petrvs": null,
+      "conferido": false,
+      "seletor": "unidade",
+      "incluir_raiz": true,
+      "incluir_subordinadas": false,
+      "profundidade": 0
+    },
+    {
+      "sigla": "GR2",
+      "id_petrvs": null,
+      "conferido": false,
+      "seletor": "regional",
+      "incluir_raiz": true,
+      "incluir_subordinadas": true,
+      "profundidade": null
+    }
+  ]
+}

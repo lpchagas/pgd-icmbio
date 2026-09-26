@@ -1,15 +1,40 @@
-"""Seleção mutuamente exclusiva de escopos organizacionais do relatório."""
+"""Seleção mutuamente exclusiva de escopos organizacionais (resolução única, L5).
+
+É o único caminho de resolução para os seletores ``regional``, ``unidade`` e
+``lista_unidades``, usado pela extração OCDE, pelos relatórios, pelo ciclo
+gerencial, pelo ``gestao.runner`` e pelo ``validation_runner``. Regras (plano §7.1):
+
+- a subordinação segue exclusivamente o ``id_mae`` da estrutura; sem a
+  estrutura, esses seletores são **erro** (nunca outro critério em silêncio);
+- unidade inexistente é **erro** (nunca produto vazio);
+- sigla ambígua na estrutura (duas unidades com a mesma sigla) é **erro**,
+  salvo quando o dicionário CGOV liga a sigla PETRVS a uma unidade específica;
+- ``mesogrupo`` e ``tipo_unidade`` são seletores por rótulo, por definição.
+
+A chave do escopo é ``<tipo>-<valor>``; a de lista usa o hash das siglas, nunca o
+caminho do arquivo.
+"""
 from __future__ import annotations
 
 import csv
+import hashlib
 import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping
 
-from lib.estrutura_organizacional import DEFAULT_ESTRUTURA_CSV, load_organization_structure
+from lib.estrutura_organizacional import (
+    DEFAULT_ESTRUTURA_CSV,
+    OrganizationStructure,
+    OrganizationUnit,
+    load_organization_structure,
+)
 from lib.escopos import slug
+
+
+class EscopoInvalido(ValueError):
+    """Seletor que não pode ser resolvido sem usar outro critério em silêncio."""
 
 
 def normalize(value: object) -> str:
@@ -29,9 +54,15 @@ class ScopeSpec:
     kind: str
     value: str
     units: frozenset[str] = frozenset()
+    # Escopo resolvido (plano §7.1): ids da estrutura em ordem (raiz primeiro, depois
+    # descendentes em largura). Vazio para nacional e para seletores por rótulo.
+    ids: tuple[str, ...] = ()
 
     @property
     def key(self) -> str:
+        if self.kind == "lista_unidades":
+            resumo = hashlib.sha256("\n".join(sorted(self.units)).encode("utf-8")).hexdigest()[:12]
+            return f"{slug(self.kind)}-{resumo}"
         return f"{slug(self.kind)}-{slug(self.value)}"
 
     @property
@@ -73,7 +104,7 @@ def load_unit_profiles(path: Path = DEFAULT_ESTRUTURA_CSV) -> dict[str, UnitProf
 
 
 def load_unit_list(path: Path) -> frozenset[str]:
-    """Aceita TXT (uma sigla por linha) ou CSV; ignora cabeçalho conhecido."""
+    """Aceita TXT (uma sigla por linha) ou CSV; ignora cabeçalho conhecido e linhas '#'."""
     if not path.exists():
         raise FileNotFoundError(f"Lista de unidades não encontrada: {path}")
     values: set[str] = set()
@@ -82,7 +113,7 @@ def load_unit_list(path: Path) -> frozenset[str]:
         stream.seek(0)
         delimiter = ";" if sample.count(";") > sample.count(",") else ","
         for row in csv.reader(stream, delimiter=delimiter):
-            if not row:
+            if not row or row[0].lstrip().startswith("#"):
                 continue
             value = normalize(row[0])
             if value and value not in {"SIGLA", "UNIDADE", "UNIDADE_SIGLA"}:
@@ -115,18 +146,54 @@ def scope_from_values(
     kind, value = selected[0]
     if kind == "nacional" and normalize(value) != "NACIONAL":
         raise ValueError("O único valor aceito por --escopo é 'nacional'.")
-    units = load_unit_list(Path(value)) if kind == "lista_unidades" else frozenset()
+    if kind in ("nacional", "mesogrupo", "tipo_unidade"):
+        return ScopeSpec(kind, normalize(value))
+
+    estrutura = load_organization_structure()
+    if not estrutura.units_by_id:
+        raise EscopoInvalido(
+            f"O seletor '{kind}' exige a estrutura organizacional (ICMBIO_estrutura.csv); "
+            "sem ela não há outro critério aceito."
+        )
     if kind == "regional":
-        structure = load_organization_structure()
-        root = structure.unit_for_sigla(str(value))
-        if root:
-            units = frozenset(
-                normalize(unit.sigla)
-                for unit in structure.descendants(root.icmbio_id)
-                if unit.sigla
-            )
+        raiz = _unidade_unica(estrutura, str(value))
+        selecionadas = estrutura.descendants(raiz.icmbio_id)
+    elif kind == "unidade":
+        selecionadas = [_unidade_unica(estrutura, str(value))]
+    else:  # lista_unidades
+        selecionadas = [_unidade_unica(estrutura, sigla) for sigla in sorted(load_unit_list(Path(value)))]
+    siglas = frozenset(normalize(unidade.sigla) for unidade in selecionadas if unidade.sigla)
+    _recusar_siglas_ambiguas(estrutura, siglas)
     safe_value = "LISTA_FORNECIDA" if kind == "lista_unidades" else normalize(value)
-    return ScopeSpec(kind, safe_value, units)
+    return ScopeSpec(kind, safe_value, siglas, tuple(unidade.icmbio_id for unidade in selecionadas))
+
+
+def _homonimas(estrutura: OrganizationStructure, sigla: str) -> list[OrganizationUnit]:
+    alvo = normalize(sigla)
+    return [unidade for unidade in estrutura.units_by_id.values() if normalize(unidade.sigla) == alvo]
+
+
+def _unidade_unica(estrutura: OrganizationStructure, sigla: str) -> OrganizationUnit:
+    """Unidade da sigla; o dicionário CGOV (sigla PETRVS -> id) desfaz homonímia."""
+
+    mapeada = estrutura.petrvs_to_id.get(normalize(sigla)) or estrutura.petrvs_to_id.get(sigla)
+    if mapeada and mapeada in estrutura.units_by_id:
+        return estrutura.units_by_id[mapeada]
+    candidatas = _homonimas(estrutura, sigla)
+    if not candidatas:
+        raise EscopoInvalido(f"Unidade não localizada na estrutura: {normalize(sigla)}")
+    if len(candidatas) > 1:
+        raise EscopoInvalido(f"Sigla ambígua na estrutura: {normalize(sigla)} ({len(candidatas)} unidades)")
+    return candidatas[0]
+
+
+def _recusar_siglas_ambiguas(estrutura: OrganizationStructure, siglas: frozenset[str]) -> None:
+    """O filtro dos produtos é por sigla: uma sigla com duas unidades misturaria escopos."""
+
+    # Sigla ligada pelo dicionário CGOV a uma unidade específica não é ambígua.
+    ambiguas = sorted(s for s in siglas if len(_homonimas(estrutura, s)) > 1 and s not in estrutura.petrvs_to_id)
+    if ambiguas:
+        raise EscopoInvalido(f"Sigla(s) ambígua(s) no escopo: {', '.join(ambiguas)}")
 
 
 def unit_matches(
@@ -148,15 +215,11 @@ def unit_matches(
     if scope.kind == "tipo_unidade":
         return profile is not None and normalize(profile.tipo) == scope.value
     if scope.kind == "regional":
-        # Fonte normativa de subordinação: grafo id_mae. Mesogrupo é apenas
-        # fallback para ambientes sem as tabelas privadas de estrutura.
-        if scope.units:
-            return sigla in scope.units
-        return (
-            sigla == scope.value
-            or mesogrupo in {scope.value, f"UC NA {scope.value}"}
-            or (profile is not None and normalize(profile.mesogrupo) in {scope.value, f"UC NA {scope.value}"})
-        )
+        # Subordinação só pelo grafo id_mae, resolvido em scope_from_values; sem ele,
+        # não há fallback por rótulo de mesogrupo (ESC-01, plano §7.1).
+        if not scope.units:
+            raise EscopoInvalido(f"Escopo regional {scope.value} sem unidades resolvidas pela estrutura.")
+        return sigla in scope.units
     raise ValueError(f"Tipo de escopo desconhecido: {scope.kind}")
 
 
@@ -166,3 +229,38 @@ def filter_rows(
     profiles: Mapping[str, UnitProfile] | None = None,
 ) -> list[dict[str, object]]:
     return [dict(row) for row in rows if unit_matches(row, scope, profiles)]
+
+
+def resolver_para_runner(
+    *,
+    escopo: str | None = None,
+    regional: str | None = None,
+    unidade: str | None = None,
+    mesogrupo: str | None = None,
+    tipo_unidade: str | None = None,
+    lista_unidades: str | Path | None = None,
+) -> tuple[str, list[str] | None, str]:
+    """(rótulo, siglas ou None para nacional, chave) para gestao.runner e validation_runner.
+
+    regional, unidade e lista usam a resolução única (scope_from_values). mesogrupo e
+    tipo_unidade selecionam pela estrutura (rótulos da própria estrutura), como antes.
+    A chave é sempre a canônica de ScopeSpec (L5, ESC-04/05).
+    """
+
+    if escopo == "nacional" or not any((regional, unidade, mesogrupo, tipo_unidade, lista_unidades)):
+        return "nacional", None, ScopeSpec("nacional", "NACIONAL").key
+    if regional or unidade or lista_unidades:
+        spec = scope_from_values(regional=regional, unidade=unidade, lista_unidades=lista_unidades)
+        rotulo = {"regional": f"regional:{regional}", "unidade": f"unidade:{unidade}",
+                  "lista_unidades": "lista-unidades:LISTA_FORNECIDA"}[spec.kind]
+        return rotulo, sorted(spec.units), spec.key
+    estrutura = load_organization_structure()
+    if not estrutura.units_by_id:
+        raise EscopoInvalido("O seletor solicitado exige a estrutura organizacional (ICMBIO_estrutura.csv).")
+    kind, valor = ("mesogrupo", mesogrupo) if mesogrupo else ("tipo_unidade", tipo_unidade)
+    unidades = estrutura.select(mesogrupo=mesogrupo, tipo_unidade=tipo_unidade)
+    siglas = sorted({unidade.sigla.upper() for unidade in unidades if unidade.sigla})
+    if not siglas:
+        raise EscopoInvalido("O seletor de escopo não encontrou unidades.")
+    rotulo = f"{'mesogrupo' if mesogrupo else 'tipo-unidade'}:{valor}"
+    return rotulo, siglas, ScopeSpec(kind, normalize(valor)).key

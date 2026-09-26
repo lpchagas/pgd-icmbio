@@ -24,6 +24,8 @@ from relatorios.dados_gerenciais import (
     scoped_data,
     temporal_summary,
 )
+from lib.liberacao import exigir_execucao_autorizada
+from lib.validation_contracts import TARGETS
 from relatorios.escopo import ScopeSpec, load_unit_profiles, scope_from_values
 from relatorios.expansao import load_state, register_execution, save_state
 from relatorios.pdf_export import export_pdf
@@ -237,6 +239,12 @@ def main(argv: list[str] | None = None) -> int:
         escopo=args.escopo, regional=args.regional, unidade=args.unidade,
         mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
         lista_unidades=args.lista_unidades,
+    )
+    # Produto agregado e anonimizado, portanto compartilhável: fora dos pilotos exige
+    # elegibilidade (L5). A comparação nacional interna é referência, não escopo.
+    exigir_execucao_autorizada(
+        "relatorios.relatorio_cumulativo", scope, "compartilhavel",
+        capacidades=("RELATORIO_CUMULATIVO", *(code for code in TARGETS if code.startswith("I"))), final=True,
     )
     temporary_source = None
     if args.reextrair:

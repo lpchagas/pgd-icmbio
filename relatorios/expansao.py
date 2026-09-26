@@ -1,4 +1,9 @@
-"""Marco obrigatório GR2 → nacional → seletores e critério final de conclusão."""
+"""Marco obrigatório GR2 → nacional → seletores e critério final de conclusão.
+
+Registro histórico da política ``gr2-v1``. Desde o L5 a liberação além dos pilotos é
+decidida por ``lib.liberacao`` (três aceites e deliberação); estes registros ficam
+marcados com a política de origem, sem reinterpretação.
+"""
 from __future__ import annotations
 
 import json
@@ -9,10 +14,12 @@ from zoneinfo import ZoneInfo
 
 
 TIMEZONE = ZoneInfo("America/Sao_Paulo")
+POLITICA = "gr2-v1"
 
 
 def initial_state() -> dict[str, Any]:
     return {
+        "politica": POLITICA,
         "fase": "piloto_gr2",
         "projeto_concluido": False,
         "gr2": {"execucao_tecnica": False, "revisao_gerencial": False, "revisao_lgpd": False},
@@ -35,7 +42,11 @@ def load_state(path: Path) -> dict[str, Any]:
     base = initial_state()
     base["fase"] = stored.get("fase", base["fase"])
     base["projeto_concluido"] = stored.get("projeto_concluido", False)
-    base["historico_execucoes"] = list(stored.get("historico_execucoes", []))
+    base["politica"] = stored.get("politica", POLITICA)
+    base["historico_execucoes"] = [
+        {"politica": POLITICA, **item} if isinstance(item, dict) else item
+        for item in stored.get("historico_execucoes", [])
+    ]
     base["gr2"].update(stored.get("gr2", {}))
     base["nacional"].update(stored.get("nacional", {}))
     base["seletores_validados"].update(stored.get("seletores_validados", {}))
@@ -61,6 +72,7 @@ def register_execution(
             "tipo_escopo": scope_kind,
             "valor_escopo": scope_value,
             "validacao_tecnica": technical_ok,
+            "politica": POLITICA,
         }
     )
     if scope_kind == "regional" and scope_value == "GR2":
