@@ -243,3 +243,34 @@ def test_cadastro_conferido_permite_piloto_so_com_id(tmp_path):
     cadastro = liberacao.carregar_cadastro()
     piloto = replace(cadastro.pilotos[0], conferido=True, id_petrvs="123")
     liberacao._validar_piloto(piloto)
+
+
+def test_referencia_aceita_acervo_privado_que_e_juncao(acervo, tmp_path_factory):
+    """artefatos_local é junção para o OneDrive: a referência não pode seguir o link."""
+
+    import os
+
+    externo = tmp_path_factory.mktemp("onedrive") / "artefatos_local"
+    (externo / "validacao").mkdir(parents=True)
+    (externo / "validacao" / "ato.pdf").write_bytes(b"%PDF-1.4 ato")
+    link = acervo / "artefatos_local"
+    try:
+        if os.name == "nt":
+            import _winapi
+            _winapi.CreateJunction(str(externo), str(link))
+        else:
+            os.symlink(externo, link, target_is_directory=True)
+    except OSError:
+        pytest.skip("sem permissão para criar junção/link")
+
+    ref = liberacao.referencia_arquivo(link / "validacao" / "ato.pdf")
+    assert ref["caminho"] == "artefatos_local/validacao/ato.pdf"
+
+
+def test_referencia_com_ponto_ponto_para_area_publica_e_recusada(acervo):
+    publico = acervo / "docs" / "ato.md"
+    publico.parent.mkdir(parents=True)
+    publico.write_text("ato", encoding="utf-8")
+    (acervo / "artefatos_local").mkdir(exist_ok=True)
+    with pytest.raises(ValueError, match="área privada"):
+        liberacao.referencia_arquivo(acervo / "artefatos_local" / ".." / "docs" / "ato.md")

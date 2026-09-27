@@ -25,6 +25,7 @@ from __future__ import annotations
 import ast
 import hashlib
 import json
+import os
 import subprocess
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -293,11 +294,13 @@ def referencia_arquivo(caminho: Path) -> dict[str, str]:
 
     from tools.security_audit import is_private_path
 
-    absoluto = caminho.resolve()
+    # Sem resolve(): artefatos_local é junção para o OneDrive, e seguir o link poria o
+    # arquivo fora da raiz. abspath normaliza ".." sem seguir junções nem symlinks.
+    absoluto = Path(os.path.abspath(caminho))
     if not absoluto.is_file():
         raise ValueError(f"Arquivo de evidência inexistente: {caminho.name}")
     try:
-        relativo = absoluto.relative_to(PROJECT_ROOT.resolve()).as_posix()
+        relativo = absoluto.relative_to(Path(os.path.abspath(PROJECT_ROOT))).as_posix()
     except ValueError as exc:
         raise ValueError("A evidência deve estar no acervo privado do projeto.") from exc
     if not is_private_path(relativo):
