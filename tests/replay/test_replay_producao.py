@@ -245,13 +245,32 @@ def test_extrator_le_colunas_e_categorias_da_sql():
     assert gf.categorias(sql, "volume_ok") == ["1", "0"]
 
 
-def test_erro_engolido_pelo_a1_torna_o_replay_nao_conclusivo(tmp_path):
+def test_falha_de_periodo_encerra_o_a1_e_o_replay_e_erro(tmp_path):
+    """D33: a falha de um período encerra o A1 (antes era engolida — DP-L2-01)."""
+
     raiz = _copia(tmp_path)
     _alterar(raiz / "ocde" / "indicadores" / "IND_OCDE_04.1_run.py",
              "                columns, rows = query_rows(conn, sql)\n",
              "                columns, rows = query_rows(conn, sql)\n"
              "                if label == 'T4-2025':\n"
              "                    raise RuntimeError('falha simulada')\n")
+
+    relatorio = rp.replay("I04", str(raiz), str(raiz), DATA)
+
+    assert relatorio["status"] == "erro"
+    assert "terminou com código" in relatorio["erro"]
+
+
+def test_erro_engolido_pelo_a1_torna_o_replay_nao_conclusivo(tmp_path):
+    """O harness continua pegando um A1 que imprime ERRO e segue (comportamento anterior à D33)."""
+
+    raiz = _copia(tmp_path)
+    _alterar(raiz / "ocde" / "indicadores" / "IND_OCDE_04.1_run.py",
+             "                columns, rows = query_rows(conn, sql)\n",
+             "                columns, rows = query_rows(conn, sql)\n"
+             "                if label == 'T4-2025':\n"
+             "                    print('  ERRO: falha simulada')\n"
+             "                    continue\n")
 
     relatorio = rp.replay("I04", str(raiz), str(raiz), DATA)
 
