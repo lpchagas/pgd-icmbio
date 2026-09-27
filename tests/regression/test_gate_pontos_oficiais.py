@@ -56,35 +56,89 @@ def test_extracao_registra_liberacao_do_a2_intermediario():
     assert manifesto["liberacao"]["produto"] == "intermediario"
 
 
-def test_executor_recusa_modo_real_sem_cadastro_conferido(capsys):
+SINTETICOS = {"CGOV": "p-cgov", "COCAGE": "p-cocage", "GR2": "p-gr2"}
+CARREGAR_CADASTRO = liberacao.carregar_cadastro  # original, antes de qualquer monkeypatch
+
+
+def _cadastro(conferido: bool = True, ids: dict[str, str] | None = None):
+    base = CARREGAR_CADASTRO()
+    return replace(base, pilotos=tuple(replace(p, conferido=conferido, id_petrvs=(ids or SINTETICOS)[p.sigla])
+                                       for p in base.pilotos))
+
+
+def test_executor_recusa_modo_real_sem_cadastro_conferido(monkeypatch, capsys):
+    monkeypatch.setattr(liberacao, "carregar_cadastro", lambda *a: _cadastro(conferido=False))
     assert executar_pilotos.main(["--capacidade", "I02", "--data-execucao", DATA, "--modo", "real"]) == 1
     assert "não conferido" in capsys.readouterr().out
 
 
-def test_executor_dry_run_separa_resultados_por_piloto_sem_agregado(monkeypatch):
+def test_executor_recusa_modo_real_com_cadastro_divergente_da_hierarquia(capsys):
+    # O cadastro versionado traz os ids reais; na hierarquia sintética eles não existem.
+    assert executar_pilotos.main(["--capacidade", "I02", "--data-execucao", DATA, "--modo", "real"]) == 1
+    assert "difere da unidade resolvida" in capsys.readouterr().out
+
+
+def test_executor_gestao_separa_resultados_por_piloto_sem_agregado(monkeypatch):
     chamadas = []
-    monkeypatch.setattr(executar_pilotos, "_executar", lambda linha: chamadas.append(linha) or {
-        "returncode": 0, "status": "dry-run", "liberacao": None, "manifesto": "", "erro": ""})
+    monkeypatch.setattr(executar_pilotos, "_rodar",
+                        lambda linha: chamadas.append(linha) or (0, {"status_global": "dry-run"}, ""))
     registro = executar_pilotos.run(["--capacidade", "G01", "--data-execucao", DATA])
 
     assert [r["piloto"] for r in registro["resultados_por_piloto"]] == ["CGOV", "COCAGE", "GR2"]
-    assert registro["total_agregado"] is None
+    assert registro["total_agregado"] is None and registro["aquisicao_unica"] is None
     assert [linha[-3:] for linha in chamadas] == [["--unidade", "CGOV", "--dry-run"], ["--unidade", "COCAGE", "--dry-run"],
                                                   ["--regional", "GR2", "--dry-run"]]
     assert all("status-pt" in linha for linha in chamadas)
 
 
-def test_executor_ocde_declara_aquisicao_nacional(monkeypatch):
-    monkeypatch.setattr(executar_pilotos, "_executar", lambda linha: {
-        "returncode": 0, "status": "dry-run", "liberacao": None, "manifesto": "", "erro": ""})
-    registro = executar_pilotos.run(["--capacidade", "I05", "--data-execucao", DATA, "--piloto", "cgov"])
-
-    (resultado,) = registro["resultados_por_piloto"]
-    assert resultado["escopo_aquisicao"].startswith("nacional") and resultado["escopo_entrega"] == "unidade-cgov"
-    assert "--so" in resultado["comando"] and "I05" in resultado["comando"]
+def _saida_pilotos(*chaves):
+    return {"run_id": "r1", "status_global": "dry-run",
+            "manifestos_por_piloto": [{"escopo": {"chave": c}, "status_global": "dry-run"} for c in chaves]}
 
 
-def test_registro_recusa_aceite_com_cadastro_nao_conferido(tmp_path, capsys):
+def test_executor_ocde_faz_uma_unica_aquisicao_para_os_tres(monkeypatch):
+    chamadas = []
+    monkeypatch.setattr(executar_pilotos, "_rodar", lambda linha: chamadas.append(linha) or (
+        0, _saida_pilotos("unidade-cgov", "unidade-cocage", "regional-gr2"), ""))
+    registro = executar_pilotos.run(["--capacidade", "I05", "--data-execucao", DATA])
+
+    (linha,) = chamadas
+    assert "--pilotos" in linha and linha[linha.index("--so") + 1] == "I05" and "--dry-run" in linha
+    assert registro["aquisicao_unica"]["run_id"] == "r1"
+    assert [(r["piloto"], r["escopo_entrega"], r["returncode"]) for r in registro["resultados_por_piloto"]] == [
+        ("CGOV", "unidade-cgov", 0), ("COCAGE", "unidade-cocage", 0), ("GR2", "regional-gr2", 0)]
+    assert all(r["escopo_aquisicao"].startswith("nacional única") for r in registro["resultados_por_piloto"])
+
+
+def test_executor_ocde_sem_entrega_de_um_piloto_e_falha(monkeypatch):
+    monkeypatch.setattr(executar_pilotos, "_rodar", lambda linha: (0, _saida_pilotos("unidade-cgov", "unidade-cocage"), ""))
+    registro = executar_pilotos.run(["--capacidade", "ocde", "--data-execucao", DATA])
+
+    assert registro["status_global"] == "falha"
+    assert [r["returncode"] for r in registro["resultados_por_piloto"]] == [0, 0, 1]
+
+
+def test_executor_ocde_recusa_subconjunto_de_pilotos(capsys):
+    assert executar_pilotos.main(["--capacidade", "I05", "--data-execucao", DATA, "--piloto", "CGOV"]) == 1
+    assert "aquisição única" in capsys.readouterr().out
+
+
+def test_executor_validar_so_no_modo_real(capsys):
+    assert executar_pilotos.main(["--capacidade", "G01", "--data-execucao", DATA, "--validar"]) == 1
+    assert "só se aplica ao modo real" in capsys.readouterr().out
+
+
+def test_registro_recusa_aceite_com_cadastro_divergente(tmp_path, capsys):
+    manifesto = tmp_path / "m.json"
+    manifesto.write_text("{}", encoding="utf-8")
+    codigo = registrar_aceite_piloto.main(["aceite", "--capacidade", "I02", "--piloto", "CGOV", "--manifesto", str(manifesto),
+                                           "--evidencia", str(manifesto), "--papel-aprovador", "CGOV"])
+    assert codigo == 1 and "divergente" in capsys.readouterr().out
+    assert not liberacao.ARQUIVO_ACEITES.exists()
+
+
+def test_registro_recusa_aceite_com_cadastro_nao_conferido(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(liberacao, "carregar_cadastro", lambda *a: _cadastro(conferido=False))
     manifesto = tmp_path / "m.json"
     manifesto.write_text("{}", encoding="utf-8")
     codigo = registrar_aceite_piloto.main(["aceite", "--capacidade", "I02", "--piloto", "CGOV", "--manifesto", str(manifesto),
@@ -94,9 +148,7 @@ def test_registro_recusa_aceite_com_cadastro_nao_conferido(tmp_path, capsys):
 
 
 def test_registro_recusa_candidato_com_alteracoes_locais(tmp_path, monkeypatch, capsys):
-    cadastro = liberacao.carregar_cadastro()
-    conferido = replace(cadastro, pilotos=tuple(replace(p, conferido=True, id_petrvs="1") for p in cadastro.pilotos))
-    monkeypatch.setattr(liberacao, "carregar_cadastro", lambda *a: conferido)
+    monkeypatch.setattr(liberacao, "carregar_cadastro", lambda *a: _cadastro())
     monkeypatch.setattr(liberacao, "identidade_candidato", lambda c, cad=None: {"alteracoes_locais": True})
     codigo = registrar_aceite_piloto.main(["aceite", "--capacidade", "I02", "--piloto", "CGOV", "--manifesto", "x",
                                            "--evidencia", "x", "--papel-aprovador", "CGOV"])

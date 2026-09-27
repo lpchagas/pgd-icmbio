@@ -1,25 +1,31 @@
-"""Seleção por escopo depois da unificação (plano de reorganização, §7.1, L5).
+"""Seleção por escopo depois da unificação (plano de reorganização, §7.1, L5/L7).
 
 Até o L4 havia dois caminhos de seleção: A (``relatorios.escopo``, extração OCDE,
 relatórios e ciclo) e B (``OrganizationStructure.select`` repetido no
-``gestao.runner`` e no ``lib.validation_runner``). O L2 caracterizou onde eles
-coincidiam e onde divergiam; o L5 unificou a resolução em
-``relatorios.escopo.scope_from_values`` e trocou cada divergência de forma
-deliberada:
+``gestao.runner`` e no ``lib.validation_runner``). O L5 unificou a resolução em
+``relatorios.escopo.scope_from_values`` e resolveu cada divergência do L2:
 
-- ESC-01 regional sem estrutura: erro (antes A caía no rótulo de mesogrupo);
+- ESC-01 regional sem a hierarquia: erro (antes A caía no rótulo de mesogrupo);
 - ESC-02 unidade inexistente: erro (antes A gerava produto vazio);
-- ESC-03 sigla ambígua: erro, salvo ligação explícita no dicionário CGOV;
+- ESC-03 sigla repetida: erro quando as homônimas ficam dos dois lados do recorte;
 - ESC-04/05 chaves canônicas iguais nos três pontos (``tipo_unidade-…``,
   ``lista_unidades-<hash12>``), sem o caminho do arquivo;
 - ESC-06 ``lib.escopos`` só normaliza (o ``ScopeSpec`` duplicado saiu).
 
-Estrutura 100% sintética em ``tests/fixtures/escopo/``.
+No L7 (decisão de 26/09/2026, provisória até a Q1 da CGOV), a subordinação passou do
+``id_mae`` da estrutura oficial para a hierarquia do **PETRVS** (``unidade_pai_id``):
+na estrutura real, a maior parte das unidades da GR2 não tem sigla, e o produto
+"GR2" certificado cobria só a própria regional.
+
+Hierarquia 100% sintética em ``tests/fixtures/escopo/PETRVS_unidades.csv`` (aplicada
+a todos os testes pelo ``conftest``); a estrutura sintética continua servindo aos
+seletores por rótulo.
 """
 from __future__ import annotations
 
 import argparse
 import ast
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
@@ -27,7 +33,8 @@ import pytest
 import gestao.runner as runner_gestao
 import lib.validation_runner as runner_validacao
 import relatorios.escopo as escopo
-from lib.estrutura_organizacional import OrganizationStructure, load_organization_structure
+from lib.estrutura_organizacional import load_organization_structure
+from lib.unidades_petrvs import HierarquiaPetrvs, UnidadePetrvs
 
 pytestmark = pytest.mark.regression
 
@@ -35,44 +42,33 @@ RAIZ = Path(__file__).resolve().parents[2]
 ESTRUTURA = RAIZ / "tests" / "fixtures" / "escopo" / "ICMBIO_estrutura.csv"
 
 
-@pytest.fixture
-def estrutura_ambigua() -> OrganizationStructure:
-    """Estrutura completa: UC-DUP existe sob a GR2 (id 21) e sob a GR1 (id 22)."""
-
-    return load_organization_structure(ESTRUTURA, ESTRUTURA.parent / "sem-dicionario.csv")
-
-
-@pytest.fixture
-def estrutura(estrutura_ambigua) -> OrganizationStructure:
-    """A mesma estrutura sem a homônima da GR1, para as equivalências dos pilotos."""
-
-    unidades = {i: u for i, u in estrutura_ambigua.units_by_id.items() if i != "22"}
-    return OrganizationStructure(unidades, dict(estrutura_ambigua.petrvs_to_id))
-
-
-def _linhas(estrutura: OrganizationStructure) -> list[dict]:
-    linhas = [{"unidade_sigla": u.sigla, "mesogrupo": u.mesogrupo, "id": u.icmbio_id} for u in estrutura.units_by_id.values()]
+def _linhas(hierarquia: HierarquiaPetrvs) -> list[dict]:
+    linhas = [{"unidade_sigla": u.sigla, "mesogrupo": "", "id": u.id} for u in hierarquia.unidades.values()]
     return linhas + [{"unidade_sigla": "cgov", "mesogrupo": "Sede", "id": "caixa-baixa"},
                      {"unidade_sigla": "N.I.", "mesogrupo": "Não mapeado", "id": "ni"}]
 
 
-def _usar(monkeypatch, estrutura: OrganizationStructure) -> None:
-    monkeypatch.setattr(escopo, "load_organization_structure", lambda: estrutura)
+def _usar(monkeypatch, hierarquia: HierarquiaPetrvs) -> None:
+    monkeypatch.setattr(escopo, "carregar_hierarquia", lambda *a: hierarquia)
 
 
-def caminho_a(monkeypatch, estrutura, linhas, **seletor) -> tuple[list[str], str]:
+def _com(hierarquia: HierarquiaPetrvs, *unidades: UnidadePetrvs, trocar: dict[str, str] | None = None) -> HierarquiaPetrvs:
+    base = {i: (replace(u, unidade_pai_id=trocar[i]) if trocar and i in trocar else u) for i, u in hierarquia.unidades.items()}
+    base.update({u.id: u for u in unidades})
+    return HierarquiaPetrvs(base, "outra")
+
+
+def caminho_a(linhas, **seletor) -> tuple[list[str], str]:
     """Linhas mantidas (sigla#id) e chave do escopo, como na extração OCDE."""
 
-    _usar(monkeypatch, estrutura)
     spec = escopo.scope_from_values(**seletor)
     mantidas = escopo.filter_rows(linhas, spec, escopo.load_unit_profiles(ESTRUTURA))
     return sorted(f"{linha['unidade_sigla']}#{linha['id']}" for linha in mantidas), spec.key
 
 
-def caminho_b(monkeypatch, estrutura, modulo=runner_gestao, **seletor) -> tuple[list[str], str]:
+def caminho_b(modulo=runner_gestao, **seletor) -> tuple[list[str], str]:
     """Siglas selecionadas e chave do escopo, como no gestao.runner/validation_runner."""
 
-    _usar(monkeypatch, estrutura)
     argumentos = argparse.Namespace(escopo=None, regional=None, unidade=None, mesogrupo=None,
                                     tipo_unidade=None, lista_unidades=None)
     vars(argumentos).update(seletor)
@@ -91,65 +87,69 @@ def _siglas(selecao_a: list[str]) -> list[str]:
     ({"unidade": "CGOV"}, ["CGOV"], "unidade-cgov"),
     ({"unidade": "COCAGE"}, ["COCAGE"], "unidade-cocage"),
 ])
-def test_pilotos_h4_mesmas_unidades_e_mesma_chave_nos_tres_pontos(monkeypatch, estrutura, seletor, esperado, chave):
-    selecao_a, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), **seletor)
-    selecao_b, chave_b = caminho_b(monkeypatch, estrutura, **seletor)
-    selecao_c, chave_c = caminho_b(monkeypatch, estrutura, runner_validacao, **seletor)
+def test_pilotos_h4_mesmas_unidades_e_mesma_chave_nos_tres_pontos(hierarquia_petrvs_sintetica, seletor, esperado, chave):
+    selecao_a, chave_a = caminho_a(_linhas(hierarquia_petrvs_sintetica), **seletor)
+    selecao_b, chave_b = caminho_b(**seletor)
+    selecao_c, chave_c = caminho_b(runner_validacao, **seletor)
 
     assert _siglas(selecao_a) == selecao_b == selecao_c == esperado
     assert chave_a == chave_b == chave_c == chave
 
 
-def test_regional_segue_id_mae_em_qualquer_profundidade_e_ignora_rotulo(monkeypatch, estrutura):
-    selecao_a, _ = caminho_a(monkeypatch, estrutura, _linhas(estrutura), regional="GR2")
-    selecao_b, _ = caminho_b(monkeypatch, estrutura, regional="GR2")
+def test_regional_segue_a_hierarquia_do_petrvs_em_qualquer_profundidade(hierarquia_petrvs_sintetica):
+    selecao_a, _ = caminho_a(_linhas(hierarquia_petrvs_sintetica), regional="GR2")
+    selecao_b, _ = caminho_b(regional="GR2")
 
     for selecao in (_siglas(selecao_a), selecao_b):
-        assert {"UC-A2", "CT-X"} <= set(selecao)   # profundidade 3; rótulo divergente
-        assert "UC-FORA" not in selecao             # rotulada GR2, subordinada à GR1
+        assert {"UC-A2", "CT-X"} <= set(selecao)   # profundidade 3; rótulo divergente na estrutura
+        assert "UC-FORA" not in selecao             # rotulada GR2 na estrutura, filha da GR1 no PETRVS
 
 
-def test_regional_registra_ids_resolvidos_com_a_raiz_primeiro(monkeypatch, estrutura):
-    _usar(monkeypatch, estrutura)
+def test_regional_registra_ids_do_petrvs_com_a_raiz_primeiro():
     spec = escopo.scope_from_values(regional="GR2")
 
-    assert spec.ids[0] == "10"
-    assert set(spec.ids) == {"10", "11", "12", "13", "14", "21"}
+    assert spec.ids[0] == "p-gr2"
+    assert set(spec.ids) == {"p-gr2", "p-ngi", "p-uca1", "p-uca2", "p-ctx", "p-dup1", "p-dup2"}
 
 
-def test_unidade_nao_inclui_subordinadas(monkeypatch, estrutura):
+def test_homonimas_todas_dentro_do_recorte_sao_aceitas(hierarquia_petrvs_sintetica):
+    selecao_a, _ = caminho_a(_linhas(hierarquia_petrvs_sintetica), regional="GR2")
+    assert {"UC-DUP#p-dup1", "UC-DUP#p-dup2"} <= set(selecao_a)
+
+
+def test_unidade_nao_inclui_subordinadas(hierarquia_petrvs_sintetica):
     for sigla, subordinada in (("CGOV", "DIV-CGOV"), ("COCAGE", "SEC-COCAGE")):
-        selecao_a, _ = caminho_a(monkeypatch, estrutura, _linhas(estrutura), unidade=sigla)
-        selecao_b, _ = caminho_b(monkeypatch, estrutura, unidade=sigla)
+        selecao_a, _ = caminho_a(_linhas(hierarquia_petrvs_sintetica), unidade=sigla)
+        selecao_b, _ = caminho_b(unidade=sigla)
         assert subordinada not in _siglas(selecao_a) and subordinada not in selecao_b
 
 
-def test_caminho_a_normaliza_caixa_da_sigla_nas_linhas(monkeypatch, estrutura):
-    selecao_a, _ = caminho_a(monkeypatch, estrutura, _linhas(estrutura), unidade="CGOV")
+def test_caminho_a_normaliza_caixa_da_sigla_nas_linhas(hierarquia_petrvs_sintetica):
+    selecao_a, _ = caminho_a(_linhas(hierarquia_petrvs_sintetica), unidade="CGOV")
 
-    assert selecao_a == ["CGOV#2", "cgov#caixa-baixa"]
+    assert selecao_a == ["CGOV#p-cgov", "cgov#caixa-baixa"]
 
 
-def test_mudanca_de_estrutura_altera_os_dois_caminhos_igualmente(monkeypatch, estrutura):
-    unidade = estrutura.units_by_id["12"]  # UC-A1 (e UC-A2 abaixo dela) passa para a GR1
-    estrutura.units_by_id["12"] = type(unidade)(**{**unidade.__dict__, "parent_id": "20"})
+def test_mudanca_de_hierarquia_altera_os_dois_caminhos_igualmente(monkeypatch, hierarquia_petrvs_sintetica):
+    # UC-A1 (e UC-A2 abaixo dela) passa para a GR1
+    _usar(monkeypatch, _com(hierarquia_petrvs_sintetica, trocar={"p-uca1": "p-gr1"}))
 
-    selecao_a, _ = caminho_a(monkeypatch, estrutura, _linhas(estrutura), regional="GR2")
-    selecao_b, _ = caminho_b(monkeypatch, estrutura, regional="GR2")
+    selecao_a, _ = caminho_a(_linhas(hierarquia_petrvs_sintetica), regional="GR2")
+    selecao_b, _ = caminho_b(regional="GR2")
 
     assert _siglas(selecao_a) == selecao_b == ["CT-X", "GR2", "NGI-A", "UC-DUP"]
 
 
-# --- Divergências resolvidas no L5 (antes registradas pelo L2) ------------------------------
+# --- Divergências resolvidas no L5 e fonte da hierarquia no L7 --------------------------------
 
 @pytest.mark.parametrize("modulo", [None, runner_gestao, runner_validacao])
-def test_esc01_regional_sem_estrutura_e_erro_nos_tres_pontos(monkeypatch, estrutura, modulo):
-    vazia = OrganizationStructure({}, {})
-    with pytest.raises(escopo.EscopoInvalido, match="exige a estrutura"):
+def test_esc01_regional_sem_hierarquia_e_erro_nos_tres_pontos(monkeypatch, hierarquia_petrvs_sintetica, modulo):
+    _usar(monkeypatch, HierarquiaPetrvs({}))
+    with pytest.raises(escopo.EscopoInvalido, match="cadastro de unidades do PETRVS"):
         if modulo is None:
-            caminho_a(monkeypatch, vazia, _linhas(estrutura), regional="GR2")
+            caminho_a(_linhas(hierarquia_petrvs_sintetica), regional="GR2")
         else:
-            caminho_b(monkeypatch, vazia, modulo, regional="GR2")
+            caminho_b(modulo, regional="GR2")
 
 
 def test_esc01_regional_sem_unidades_resolvidas_nao_cai_no_rotulo():
@@ -159,49 +159,52 @@ def test_esc01_regional_sem_unidades_resolvidas_nao_cai_no_rotulo():
 
 
 @pytest.mark.parametrize("modulo", [None, runner_gestao, runner_validacao])
-def test_esc02_unidade_inexistente_e_erro_nos_tres_pontos(monkeypatch, estrutura, modulo):
+def test_esc02_unidade_inexistente_e_erro_nos_tres_pontos(hierarquia_petrvs_sintetica, modulo):
     with pytest.raises(escopo.EscopoInvalido, match="não localizada"):
         if modulo is None:
-            caminho_a(monkeypatch, estrutura, _linhas(estrutura), unidade="INEXISTENTE")
+            caminho_a(_linhas(hierarquia_petrvs_sintetica), unidade="INEXISTENTE")
         else:
-            caminho_b(monkeypatch, estrutura, modulo, unidade="INEXISTENTE")
+            caminho_b(modulo, unidade="INEXISTENTE")
 
 
-@pytest.mark.parametrize("seletor", [{"regional": "GR2"}, {"regional": "GR1"}, {"unidade": "UC-DUP"}])
-def test_esc03_sigla_ambigua_e_erro_nos_tres_pontos(monkeypatch, estrutura_ambigua, seletor):
+@pytest.mark.parametrize("seletor, trecho", [
+    ({"regional": "GR2"}, "homônimas fora do recorte: X-DUP"),
+    ({"regional": "GR1"}, "homônimas fora do recorte: X-DUP"),
+    ({"unidade": "X-DUP"}, "Sigla ambígua no PETRVS"),
+    ({"unidade": "UC-DUP"}, "Sigla ambígua no PETRVS"),
+])
+def test_esc03_homonimas_divididas_pelo_recorte_sao_erro_nos_tres_pontos(monkeypatch, hierarquia_petrvs_sintetica, seletor, trecho):
+    dividida = _com(hierarquia_petrvs_sintetica,
+                    UnidadePetrvs("p-x1", "31", "X-DUP", "Homonima sob a GR2", "p-gr2"),
+                    UnidadePetrvs("p-x2", "32", "X-DUP", "Homonima sob a GR1", "p-gr1"))
+    _usar(monkeypatch, dividida)
     for modulo in (None, runner_gestao, runner_validacao):
-        with pytest.raises(escopo.EscopoInvalido, match="ambígua"):
+        with pytest.raises(escopo.EscopoInvalido, match=trecho):
             if modulo is None:
-                caminho_a(monkeypatch, estrutura_ambigua, _linhas(estrutura_ambigua), **seletor)
+                caminho_a(_linhas(dividida), **seletor)
             else:
-                caminho_b(monkeypatch, estrutura_ambigua, modulo, **seletor)
+                caminho_b(modulo, **seletor)
 
 
-def test_esc03_dicionario_cgov_desfaz_a_homonimia(monkeypatch, estrutura_ambigua):
-    ligada = OrganizationStructure(dict(estrutura_ambigua.units_by_id), {"UC-DUP": "21"})
-    _usar(monkeypatch, ligada)
-
-    assert escopo.scope_from_values(unidade="UC-DUP").ids == ("21",)
-    assert "UC-DUP" in escopo.scope_from_values(regional="GR2").units
-
-
-def test_esc04_chave_de_tipo_de_unidade_e_canonica(monkeypatch, estrutura):
-    _, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), tipo_unidade="UC")
-    _, chave_b = caminho_b(monkeypatch, estrutura, tipo_unidade="UC")
-    _, chave_c = caminho_b(monkeypatch, estrutura, runner_validacao, tipo_unidade="UC")
+def test_esc04_chave_de_tipo_de_unidade_e_canonica(monkeypatch, hierarquia_petrvs_sintetica):
+    estrutura = load_organization_structure(ESTRUTURA, ESTRUTURA.parent / "sem-dicionario.csv")
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda: estrutura)
+    _, chave_a = caminho_a(_linhas(hierarquia_petrvs_sintetica), tipo_unidade="UC")
+    _, chave_b = caminho_b(tipo_unidade="UC")
+    _, chave_c = caminho_b(runner_validacao, tipo_unidade="UC")
 
     assert chave_a == chave_b == chave_c == "tipo_unidade-uc"
 
 
-def test_esc05_chave_de_lista_depende_so_das_siglas(monkeypatch, estrutura, tmp_path):
+def test_esc05_chave_de_lista_depende_so_das_siglas(hierarquia_petrvs_sintetica, tmp_path):
     lista = tmp_path / "lista-pilotos.txt"
     lista.write_text("# pilotos\nCGOV\nCOCAGE\n", encoding="utf-8")
     outra = tmp_path / "outro-nome.csv"
     outra.write_text("sigla\ncocage\ncgov\n", encoding="utf-8")
 
-    _, chave_a = caminho_a(monkeypatch, estrutura, _linhas(estrutura), lista_unidades=lista)
-    selecao_b, chave_b = caminho_b(monkeypatch, estrutura, lista_unidades=lista)
-    _, chave_c = caminho_b(monkeypatch, estrutura, runner_validacao, lista_unidades=outra)
+    _, chave_a = caminho_a(_linhas(hierarquia_petrvs_sintetica), lista_unidades=lista)
+    selecao_b, chave_b = caminho_b(lista_unidades=lista)
+    _, chave_c = caminho_b(runner_validacao, lista_unidades=outra)
 
     assert chave_a == chave_b == chave_c
     assert chave_a.startswith("lista_unidades-") and len(chave_a) == len("lista_unidades-") + 12
@@ -209,11 +212,11 @@ def test_esc05_chave_de_lista_depende_so_das_siglas(monkeypatch, estrutura, tmp_
     assert selecao_b == ["CGOV", "COCAGE"]
 
 
-def test_esc05_lista_com_sigla_inexistente_e_erro(monkeypatch, estrutura, tmp_path):
+def test_esc05_lista_com_sigla_inexistente_e_erro(tmp_path):
     lista = tmp_path / "lista.txt"
     lista.write_text("CGOV\nNAO-EXISTE\n", encoding="utf-8")
     with pytest.raises(escopo.EscopoInvalido, match="não localizada"):
-        caminho_b(monkeypatch, estrutura, lista_unidades=lista)
+        caminho_b(lista_unidades=lista)
 
 
 def test_esc06_lib_escopos_so_normaliza():

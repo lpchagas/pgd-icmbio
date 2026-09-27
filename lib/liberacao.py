@@ -31,7 +31,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from lib.caminhos import PROJECT_ROOT
-from lib.estrutura_organizacional import DEFAULT_ESTRUTURA_CSV
+from lib.unidades_petrvs import carregar_hierarquia
 
 CADASTRO = PROJECT_ROOT / "config" / "unidades-piloto.json"
 ARQUIVO_ACEITES = PROJECT_ROOT / "artefatos_local" / "validacao" / "pilotos" / "aceites.json"
@@ -69,7 +69,7 @@ class Cadastro:
     versao: int
     politica: str
     pilotos: tuple[Piloto, ...]
-    estrutura_sha256: str | None
+    hierarquia_sha256: str | None
 
     @property
     def conferido(self) -> bool:
@@ -102,8 +102,8 @@ def carregar_cadastro(caminho: Path | None = None) -> Cadastro:
     siglas = [piloto.sigla for piloto in pilotos]
     if len(pilotos) != 3 or len(set(siglas)) != 3:
         raise ValueError("O cadastro deve ter exatamente três unidades piloto distintas.")
-    estrutura = dados.get("estrutura") or {}
-    return Cadastro(dados["versao"], dados["politica"].strip(), tuple(pilotos), estrutura.get("sha256"))
+    hierarquia = dados.get("hierarquia") or {}
+    return Cadastro(dados["versao"], dados["politica"].strip(), tuple(pilotos), hierarquia.get("sha256"))
 
 
 def _validar_piloto(piloto: Piloto) -> None:
@@ -120,6 +120,26 @@ def _validar_piloto(piloto: Piloto) -> None:
         valido = False
     if not valido:
         raise ValueError(f"Configuração de escopo sem suporte no piloto {piloto.sigla}.")
+
+
+def problemas_cadastro(cadastro: Cadastro) -> list[str]:
+    """Conferência do cadastro na hierarquia atual: o id_petrvs é a raiz resolvida?"""
+
+    from relatorios.escopo import EscopoInvalido, scope_from_values
+
+    problemas = []
+    for piloto in cadastro.pilotos:
+        if not piloto.conferido:
+            problemas.append(f"{piloto.sigla}: id_petrvs não conferido na fonte")
+            continue
+        try:
+            raiz = scope_from_values(**{piloto.seletor: piloto.sigla}).ids[0]
+        except EscopoInvalido as exc:
+            problemas.append(f"{piloto.sigla}: {exc}")
+            continue
+        if raiz != piloto.id_petrvs:
+            problemas.append(f"{piloto.sigla}: id_petrvs do cadastro difere da unidade resolvida no PETRVS")
+    return problemas
 
 
 def piloto_do_escopo(escopo: Any, cadastro: Cadastro) -> Piloto | None:
@@ -232,14 +252,14 @@ def fingerprint_candidato(capacidade: str) -> dict[str, Any]:
 
 
 def escopo_resolvido(piloto: Piloto) -> dict[str, Any]:
-    """Lista ordenada de ids (raiz primeiro) e identidade da estrutura usada."""
+    """Lista ordenada de ids do PETRVS (raiz primeiro) e identidade da hierarquia usada."""
 
     from relatorios.escopo import scope_from_values
 
     spec = scope_from_values(**{piloto.seletor: piloto.sigla})
-    estrutura = _sha256(DEFAULT_ESTRUTURA_CSV) if DEFAULT_ESTRUTURA_CSV.is_file() else None
+    hierarquia = carregar_hierarquia().sha256 or None
     return {"sigla": piloto.sigla, "seletor": piloto.seletor, "chave": spec.key,
-            "ids": list(spec.ids), "estrutura_sha256": estrutura}
+            "ids": list(spec.ids), "hierarquia_sha256": hierarquia}
 
 
 def identidade_candidato(capacidade: str, cadastro: Cadastro | None = None) -> dict[str, Any]:
@@ -364,8 +384,8 @@ def elegivel_para_liberacao(
                 if atual is None:
                     atual = escopo_resolvido(piloto)
                 esperado = aceite.get("escopo_resolvido") or {}
-                if esperado.get("ids") != atual["ids"] or esperado.get("estrutura_sha256") != atual["estrutura_sha256"]:
-                    problema = "escopo resolvido mudou (estrutura ou subordinação)"
+                if esperado.get("ids") != atual["ids"] or esperado.get("hierarquia_sha256") != atual["hierarquia_sha256"]:
+                    problema = "escopo resolvido mudou (hierarquia ou subordinação)"
             problema = problema or _problema_referencia(aceite.get("evidencia"), "evidência")
             problema = problema or _problema_referencia(aceite.get("manifesto"), "manifesto")
             if problema is None and aceite.get("manifesto"):

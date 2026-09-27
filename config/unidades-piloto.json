@@ -1,17 +1,18 @@
 {
-  "versao": 1,
+  "versao": 2,
   "politica": "pilotos-v1",
   "decisao": "H4 (26/09/2026): GR2 como regional; CGOV e COCAGE sem subordinadas",
-  "conferencia": "id_petrvs é conferido na fonte no início do L7; até lá, execução real de piloto é recusada",
-  "estrutura": {
-    "arquivo": "ICMBIO_estrutura.csv",
+  "conferencia": "id_petrvs conferido em 26/09/2026 na view petrvs_icmbio_unidades (sigla única, registro ativo); a subordinação segue a hierarquia do PETRVS (decisão de 26/09/2026, provisória até a Q1 da CGOV)",
+  "hierarquia": {
+    "fonte": "petrvs_icmbio_unidades (unidade_pai_id)",
+    "arquivo": "PETRVS_unidades.csv",
     "sha256": null
   },
   "unidades": [
     {
       "sigla": "CGOV",
-      "id_petrvs": null,
-      "conferido": false,
+      "id_petrvs": "cec443d9-6251-40f7-a50b-bd86edf5aa40",
+      "conferido": true,
       "seletor": "unidade",
       "incluir_raiz": true,
       "incluir_subordinadas": false,
@@ -19,8 +20,8 @@
     },
     {
       "sigla": "COCAGE",
-      "id_petrvs": null,
-      "conferido": false,
+      "id_petrvs": "b8550e8c-e5c8-4a0f-ad51-6b83d19b5179",
+      "conferido": true,
       "seletor": "unidade",
       "incluir_raiz": true,
       "incluir_subordinadas": false,
@@ -28,8 +29,8 @@
     },
     {
       "sigla": "GR2",
-      "id_petrvs": null,
-      "conferido": false,
+      "id_petrvs": "8fbee7ad-cec0-4d7a-bbfd-91a0faf597c3",
+      "conferido": true,
       "seletor": "regional",
       "incluir_raiz": true,
       "incluir_subordinadas": true,

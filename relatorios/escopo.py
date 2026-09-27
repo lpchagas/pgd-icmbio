@@ -1,18 +1,20 @@
-"""Seleção mutuamente exclusiva de escopos organizacionais (resolução única, L5).
+"""Seleção mutuamente exclusiva de escopos organizacionais (resolução única, L5/L7).
 
 É o único caminho de resolução para os seletores ``regional``, ``unidade`` e
 ``lista_unidades``, usado pela extração OCDE, pelos relatórios, pelo ciclo
 gerencial, pelo ``gestao.runner`` e pelo ``validation_runner``. Regras (plano §7.1):
 
-- a subordinação segue exclusivamente o ``id_mae`` da estrutura; sem a
-  estrutura, esses seletores são **erro** (nunca outro critério em silêncio);
+- a subordinação segue a hierarquia do **PETRVS** (``unidade_pai_id``), lida do
+  retrato local ``PETRVS_unidades.csv`` (decisão de 26/09/2026, provisória até a
+  deliberação da Q1 pela CGOV); sem o retrato, esses seletores são **erro**;
 - unidade inexistente é **erro** (nunca produto vazio);
-- sigla ambígua na estrutura (duas unidades com a mesma sigla) é **erro**,
-  salvo quando o dicionário CGOV liga a sigla PETRVS a uma unidade específica;
-- ``mesogrupo`` e ``tipo_unidade`` são seletores por rótulo, por definição.
+- sigla repetida no PETRVS é **erro** quando as homônimas ficam dos dois lados do
+  recorte (o filtro dos produtos é por sigla e não conseguiria separá-las); quando
+  todas ficam dentro, o recorte é exato;
+- ``mesogrupo`` e ``tipo_unidade`` são seletores por rótulo da estrutura oficial.
 
 A chave do escopo é ``<tipo>-<valor>``; a de lista usa o hash das siglas, nunca o
-caminho do arquivo.
+caminho do arquivo. ``ScopeSpec.ids`` traz os ``id`` do PETRVS, raiz primeiro.
 """
 from __future__ import annotations
 
@@ -24,13 +26,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping
 
-from lib.estrutura_organizacional import (
-    DEFAULT_ESTRUTURA_CSV,
-    OrganizationStructure,
-    OrganizationUnit,
-    load_organization_structure,
-)
+from lib.estrutura_organizacional import DEFAULT_ESTRUTURA_CSV, load_organization_structure
 from lib.escopos import slug
+from lib.unidades_petrvs import HierarquiaPetrvs, UnidadePetrvs, carregar_hierarquia
 
 
 class EscopoInvalido(ValueError):
@@ -54,7 +52,7 @@ class ScopeSpec:
     kind: str
     value: str
     units: frozenset[str] = frozenset()
-    # Escopo resolvido (plano §7.1): ids da estrutura em ordem (raiz primeiro, depois
+    # Escopo resolvido (plano §7.1): ids do PETRVS em ordem (raiz primeiro, depois
     # descendentes em largura). Vazio para nacional e para seletores por rótulo.
     ids: tuple[str, ...] = ()
 
@@ -149,51 +147,44 @@ def scope_from_values(
     if kind in ("nacional", "mesogrupo", "tipo_unidade"):
         return ScopeSpec(kind, normalize(value))
 
-    estrutura = load_organization_structure()
-    if not estrutura.units_by_id:
+    hierarquia = carregar_hierarquia()
+    if not hierarquia.unidades:
         raise EscopoInvalido(
-            f"O seletor '{kind}' exige a estrutura organizacional (ICMBIO_estrutura.csv); "
-            "sem ela não há outro critério aceito."
+            f"O seletor '{kind}' exige o cadastro de unidades do PETRVS (PETRVS_unidades.csv; "
+            "gere com tools/atualizar_unidades_petrvs.py); sem ele não há outro critério aceito."
         )
     if kind == "regional":
-        raiz = _unidade_unica(estrutura, str(value))
-        selecionadas = estrutura.descendants(raiz.icmbio_id)
+        raiz = _unidade_unica(hierarquia, str(value))
+        selecionadas = hierarquia.descendentes(raiz.id)
     elif kind == "unidade":
-        selecionadas = [_unidade_unica(estrutura, str(value))]
+        selecionadas = [_unidade_unica(hierarquia, str(value))]
     else:  # lista_unidades
-        selecionadas = [_unidade_unica(estrutura, sigla) for sigla in sorted(load_unit_list(Path(value)))]
+        selecionadas = [_unidade_unica(hierarquia, sigla) for sigla in sorted(load_unit_list(Path(value)))]
+    _recusar_siglas_divididas(hierarquia, selecionadas)
     siglas = frozenset(normalize(unidade.sigla) for unidade in selecionadas if unidade.sigla)
-    _recusar_siglas_ambiguas(estrutura, siglas)
     safe_value = "LISTA_FORNECIDA" if kind == "lista_unidades" else normalize(value)
-    return ScopeSpec(kind, safe_value, siglas, tuple(unidade.icmbio_id for unidade in selecionadas))
+    return ScopeSpec(kind, safe_value, siglas, tuple(unidade.id for unidade in selecionadas))
 
 
-def _homonimas(estrutura: OrganizationStructure, sigla: str) -> list[OrganizationUnit]:
-    alvo = normalize(sigla)
-    return [unidade for unidade in estrutura.units_by_id.values() if normalize(unidade.sigla) == alvo]
-
-
-def _unidade_unica(estrutura: OrganizationStructure, sigla: str) -> OrganizationUnit:
-    """Unidade da sigla; o dicionário CGOV (sigla PETRVS -> id) desfaz homonímia."""
-
-    mapeada = estrutura.petrvs_to_id.get(normalize(sigla)) or estrutura.petrvs_to_id.get(sigla)
-    if mapeada and mapeada in estrutura.units_by_id:
-        return estrutura.units_by_id[mapeada]
-    candidatas = _homonimas(estrutura, sigla)
+def _unidade_unica(hierarquia: HierarquiaPetrvs, sigla: str) -> UnidadePetrvs:
+    candidatas = hierarquia.por_sigla(sigla)
     if not candidatas:
-        raise EscopoInvalido(f"Unidade não localizada na estrutura: {normalize(sigla)}")
+        raise EscopoInvalido(f"Unidade não localizada no cadastro do PETRVS: {normalize(sigla)}")
     if len(candidatas) > 1:
-        raise EscopoInvalido(f"Sigla ambígua na estrutura: {normalize(sigla)} ({len(candidatas)} unidades)")
+        raise EscopoInvalido(f"Sigla ambígua no PETRVS: {normalize(sigla)} ({len(candidatas)} unidades)")
     return candidatas[0]
 
 
-def _recusar_siglas_ambiguas(estrutura: OrganizationStructure, siglas: frozenset[str]) -> None:
-    """O filtro dos produtos é por sigla: uma sigla com duas unidades misturaria escopos."""
+def _recusar_siglas_divididas(hierarquia: HierarquiaPetrvs, selecionadas: list[UnidadePetrvs]) -> None:
+    """O filtro dos produtos é por sigla: homônimas fora do recorte vazariam para dentro."""
 
-    # Sigla ligada pelo dicionário CGOV a uma unidade específica não é ambígua.
-    ambiguas = sorted(s for s in siglas if len(_homonimas(estrutura, s)) > 1 and s not in estrutura.petrvs_to_id)
-    if ambiguas:
-        raise EscopoInvalido(f"Sigla(s) ambígua(s) no escopo: {', '.join(ambiguas)}")
+    dentro = {unidade.id for unidade in selecionadas}
+    divididas = sorted({
+        normalize(unidade.sigla) for unidade in selecionadas
+        if any(homonima.id not in dentro for homonima in hierarquia.por_sigla(unidade.sigla))
+    })
+    if divididas:
+        raise EscopoInvalido(f"Sigla(s) ambígua(s) no escopo, com homônimas fora do recorte: {', '.join(divididas)}")
 
 
 def unit_matches(
@@ -215,10 +206,10 @@ def unit_matches(
     if scope.kind == "tipo_unidade":
         return profile is not None and normalize(profile.tipo) == scope.value
     if scope.kind == "regional":
-        # Subordinação só pelo grafo id_mae, resolvido em scope_from_values; sem ele,
+        # Subordinação só pela hierarquia resolvida em scope_from_values; sem ela,
         # não há fallback por rótulo de mesogrupo (ESC-01, plano §7.1).
         if not scope.units:
-            raise EscopoInvalido(f"Escopo regional {scope.value} sem unidades resolvidas pela estrutura.")
+            raise EscopoInvalido(f"Escopo regional {scope.value} sem unidades resolvidas pela hierarquia.")
         return sigla in scope.units
     raise ValueError(f"Tipo de escopo desconhecido: {scope.kind}")
 

@@ -18,7 +18,7 @@ IDENTIDADE = {"capacidade": "I02", "versao": "2.0.0", "fingerprint": "f" * 64, "
 
 def _escopo(piloto: liberacao.Piloto) -> dict:
     return {"sigla": piloto.sigla, "seletor": piloto.seletor, "chave": f"{piloto.seletor}-{piloto.sigla.lower()}",
-            "ids": [piloto.sigla], "estrutura_sha256": "e" * 64}
+            "ids": [piloto.sigla], "hierarquia_sha256": "e" * 64}
 
 
 @pytest.fixture
@@ -58,17 +58,28 @@ def _registro(raiz: Path, cadastro: liberacao.Cadastro, **mudancas) -> dict:
 
 # --- Cadastro -----------------------------------------------------------------------------
 
-def test_cadastro_versionado_tem_os_tres_pilotos_da_h4_e_nao_esta_conferido():
+def test_cadastro_versionado_tem_os_tres_pilotos_da_h4_conferidos():
     cadastro = liberacao.carregar_cadastro()
 
     assert [(p.sigla, p.seletor, p.incluir_subordinadas) for p in cadastro.pilotos] == [
         ("CGOV", "unidade", False), ("COCAGE", "unidade", False), ("GR2", "regional", True)]
-    assert not cadastro.conferido and all(p.id_petrvs is None for p in cadastro.pilotos)
+    assert cadastro.conferido and all(p.id_petrvs for p in cadastro.pilotos)
+
+
+def test_conferencia_do_cadastro_contra_a_hierarquia():
+    cadastro = liberacao.carregar_cadastro()
+    # Na hierarquia sintética os ids são outros: a conferência aponta cada divergência.
+    assert [m.split(":")[0] for m in liberacao.problemas_cadastro(cadastro)] == ["CGOV", "COCAGE", "GR2"]
+    sinteticos = {"CGOV": "p-cgov", "COCAGE": "p-cocage", "GR2": "p-gr2"}
+    conferido = replace(cadastro, pilotos=tuple(replace(p, id_petrvs=sinteticos[p.sigla]) for p in cadastro.pilotos))
+    assert liberacao.problemas_cadastro(conferido) == []
+    pendente = replace(cadastro, pilotos=(replace(cadastro.pilotos[0], conferido=False), *conferido.pilotos[1:]))
+    assert liberacao.problemas_cadastro(pendente) == ["CGOV: id_petrvs não conferido na fonte"]
 
 
 @pytest.mark.parametrize("mudanca", [
     {"incluir_subordinadas": True},             # unidade com subordinadas: recorte sem suporte
-    {"conferido": True},                        # conferido sem id_petrvs
+    {"id_petrvs": None},                        # conferido sem id_petrvs
     {"seletor": "mesogrupo"},
 ])
 def test_cadastro_invalido_e_erro(tmp_path, mudanca):
@@ -176,7 +187,7 @@ def test_recusa_candidato_diferente(acervo):
 def test_recusa_escopo_resolvido_diferente_sem_heranca(acervo):
     registro = _registro(acervo, liberacao.carregar_cadastro())
     registro["aceites"][2]["escopo_resolvido"] = {**registro["aceites"][2]["escopo_resolvido"], "ids": ["GR2", "UC-NOVA"]}
-    assert _motivos(acervo, registro) == ["GR2: escopo resolvido mudou (estrutura ou subordinação)"]
+    assert _motivos(acervo, registro) == ["GR2: escopo resolvido mudou (hierarquia ou subordinação)"]
 
 
 def test_recusa_sem_deliberacao(acervo):

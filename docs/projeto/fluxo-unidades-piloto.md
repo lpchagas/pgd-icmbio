@@ -12,22 +12,40 @@ define as três unidades e o recorte de cada uma:
 | --- | --- | --- |
 | CGOV | `--unidade CGOV` | não |
 | COCAGE | `--unidade COCAGE` | não |
-| GR2 | `--regional GR2` | sim, pela estrutura (`id_mae`), em qualquer profundidade |
+| GR2 | `--regional GR2` | sim, pela hierarquia do PETRVS, em qualquer profundidade |
 
 `--regional CGOV` não é o piloto CGOV: o recorte precisa ser exatamente o
-cadastrado. O `id_petrvs` de cada piloto é conferido na fonte antes da primeira
-execução real; até lá, o executor recusa o modo real e o registro de aceites.
+cadastrado.
+
+O `id_petrvs` de cada piloto foi conferido na fonte em 26/09/2026. Antes de cada
+execução real e de cada registro de aceite, o cadastro é conferido de novo contra a
+hierarquia atual: se o id não for a unidade resolvida, a operação é recusada.
 
 ## Escopo resolvido
 
 A seleção por escopo tem um único caminho (`relatorios.escopo`), usado pela
 extração OCDE, pelos relatórios, pelo ciclo gerencial, pelo `gestao.runner` e pelo
-`validation_runner`. São erro, nunca outro critério em silêncio:
+`validation_runner`.
 
-- `--regional`, `--unidade` ou `--lista-unidades` sem a estrutura organizacional;
+**Qual hierarquia vale:** a subordinação segue a hierarquia do próprio **PETRVS**
+(`unidade_pai_id`), de onde vêm os PE e os PT. A decisão é de 26/09/2026 e é
+provisória até a CGOV deliberar a Q1 (fonte primária da taxonomia).
+
+- O motivo: na estrutura oficial, a maior parte das unidades subordinadas à GR2 não
+  tem sigla. Como os produtos são filtrados pela sigla, o recorte "GR2" certificado
+  antes disso cobria só a própria regional.
+- A hierarquia é lida de um retrato local e privado, gerado por
+  `python -m tools.atualizar_unidades_petrvs`. O hash do arquivo identifica a
+  hierarquia usada.
+- A estrutura oficial continua servindo aos seletores por rótulo (`--mesogrupo` e
+  `--tipo-unidade`).
+
+São erro, nunca outro critério em silêncio:
+
+- `--regional`, `--unidade` ou `--lista-unidades` sem o retrato da hierarquia;
 - unidade inexistente;
-- sigla ambígua (duas unidades com a mesma sigla), salvo ligação explícita no
-  dicionário CGOV.
+- sigla repetida no PETRVS com homônimas dos dois lados do recorte. Quando todas as
+  homônimas ficam dentro do recorte, ele é exato.
 
 A chave do escopo (pasta dos artefatos) é a mesma nos cinco pontos:
 `regional-gr2`, `unidade-cgov`, `tipo_unidade-uc`, e `lista_unidades-<hash>` para

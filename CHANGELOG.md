@@ -25,6 +25,13 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Cadastro das três unidades piloto em `config/unidades-piloto.json` e gate de liberação (`lib/liberacao.py`): fora dos pilotos, produto final ou compartilhável exige três aceites da mesma identidade e deliberação de expansão. O relatório cumulativo e o V2 compartilhável no escopo nacional passam a ser recusados até lá.
 - Novas CLIs: `tools/executar_pilotos.py` e `tools/registrar_aceite_piloto.py`. Fluxo em `docs/projeto/fluxo-unidades-piloto.md`.
 
+### Pilotos e hierarquia do PETRVS (L7)
+
+- Os seletores `--regional`, `--unidade` e `--lista-unidades` passam a seguir a hierarquia do PETRVS (`unidade_pai_id`), lida do retrato privado gerado por `tools/atualizar_unidades_petrvs.py` (`lib/unidades_petrvs.py`). Decisão de 26/09/2026, provisória até a Q1 da CGOV. **Efeito:** o recorte GR2 passa de 3 unidades (só a regional; as subordinadas não têm sigla na estrutura oficial) para 124 siglas do PETRVS. Sigla repetida só é erro quando as homônimas ficam dos dois lados do recorte.
+- Aquisição única dos pilotos (H8-a): `lib.indicator_extraction --pilotos` roda cada A1 uma vez sobre o universo nacional (staging descartado) e entrega o A2 filtrado para cada piloto; `tools/executar_pilotos.py --capacidade ocde` usa esse modo, e `--validar` roda a validação integrada por piloto.
+- Trava da suíte: com `PGD_BLOQUEAR_DENODO=1` (definida pelo `conftest`) `lib.denodo_config.connect` recusa qualquer conexão, também nos A1 em subprocesso.
+- `config/unidades-piloto.json` versão 2: `id_petrvs` de CGOV, COCAGE e GR2 conferidos na fonte; execução real e aceite conferem o cadastro contra a hierarquia atual.
+
 ### Ambiente local e banco do agente (L6)
 
 - Caminho local de trabalho congelado em `C:\Projetos\pgd-icmbio` (clone novo; o caminho antigo fica como rollback até o L8), com `.venv` nativo do Windows.

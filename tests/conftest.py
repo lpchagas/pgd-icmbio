@@ -27,3 +27,34 @@ def project_root() -> Path:
 @pytest.fixture
 def fixtures_dir() -> Path:
     return FIXTURES_DIR
+
+
+HIERARQUIA_SINTETICA = FIXTURES_DIR / "escopo" / "PETRVS_unidades.csv"
+
+
+@pytest.fixture(autouse=True)
+def bloquear_denodo(monkeypatch):
+    """Nenhum teste abre o Denodo, nem em subprocesso (lib.denodo_config.connect recusa).
+
+    Motivo (L7): um teste do executor de pilotos chegou ao modo real quando o cadastro
+    passou a estar conferido e extraiu dados reais para o acervo privado.
+    """
+    monkeypatch.setenv("PGD_BLOQUEAR_DENODO", "1")
+
+
+@pytest.fixture(autouse=True)
+def hierarquia_petrvs_sintetica(monkeypatch):
+    """Todo teste resolve escopos pela hierarquia sintética do PETRVS (L7).
+
+    Sem isto, testes passariam localmente lendo o retrato privado
+    (artefatos_local/.../PETRVS_unidades.csv) e falhariam num clone limpo.
+    Testes que precisam de outra hierarquia sobrescrevem o mesmo ponto.
+    """
+    import relatorios.escopo as escopo
+    from lib import liberacao
+    from lib.unidades_petrvs import carregar_hierarquia
+
+    hierarquia = carregar_hierarquia(HIERARQUIA_SINTETICA)
+    monkeypatch.setattr(escopo, "carregar_hierarquia", lambda *a: hierarquia)
+    monkeypatch.setattr(liberacao, "carregar_hierarquia", lambda *a: hierarquia)
+    return hierarquia

@@ -179,6 +179,7 @@ def test_driver_ausente_e_placeholder_sao_recusados(env):
 
 
 def test_connect_nao_reinicia_jvm_ja_iniciada(monkeypatch):
+    monkeypatch.delenv("PGD_BLOQUEAR_DENODO")  # jpype falso abaixo: nenhuma conexão real
     chamadas = []
     jpype = types.ModuleType("jpype")
     jpype.isJVMStarted = lambda: True
@@ -200,3 +201,12 @@ def test_connect_nao_reinicia_jvm_ja_iniciada(monkeypatch):
 
     assert dc.connect(config) == ("conexao", "jdbc:denodo://h:1/b", ["password", "user"])
     assert chamadas == []
+
+
+def test_trava_da_suite_recusa_conexao_real():
+    """PGD_BLOQUEAR_DENODO=1 (conftest) impede qualquer conexão, antes de iniciar a JVM."""
+
+    from lib.denodo_config import connect
+
+    with pytest.raises(RuntimeError, match="PGD_BLOQUEAR_DENODO"):
+        connect(object())

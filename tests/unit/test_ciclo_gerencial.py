@@ -1,22 +1,7 @@
-from pathlib import Path
-
-import pytest
-
-import relatorios.escopo as escopo
 from lib.ciclo_gerencial import STAGES, run
-from lib.estrutura_organizacional import OrganizationStructure, load_organization_structure
 from lib.indicator_extraction import _manifest_filename
 
-ESTRUTURA = Path(__file__).resolve().parents[1] / "fixtures" / "escopo" / "ICMBIO_estrutura.csv"
-
-
-@pytest.fixture(autouse=True)
-def estrutura_sintetica(monkeypatch):
-    """Estrutura sintética sem a homônima UC-DUP da GR1: o teste não depende do acervo privado."""
-
-    completa = load_organization_structure(ESTRUTURA, ESTRUTURA.parent / "sem-dicionario.csv")
-    unidades = {i: u for i, u in completa.units_by_id.items() if i != "22"}
-    monkeypatch.setattr(escopo, "load_organization_structure", lambda: OrganizationStructure(unidades, {}))
+# GR2 e CGOV resolvem pela hierarquia sintética do PETRVS (conftest), nunca pelo acervo privado.
 
 
 def test_cycle_dry_run_has_all_gates():

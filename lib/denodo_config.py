@@ -171,6 +171,10 @@ def get_config(require_credentials: bool = True) -> DenodoConfig:
 
 
 def connect(config: DenodoConfig):
+    # Trava da suíte de testes (L7): com PGD_BLOQUEAR_DENODO=1 nenhuma conexão real é
+    # aberta, nem nos A1 chamados em subprocesso (o ambiente mínimo repassa PGD_*).
+    if os.environ.get("PGD_BLOQUEAR_DENODO") == "1":
+        raise RuntimeError("Conexão Denodo bloqueada neste ambiente (PGD_BLOQUEAR_DENODO=1).")
     import jpype
     import jpype.imports  # noqa: F401
 

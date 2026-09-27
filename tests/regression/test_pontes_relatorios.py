@@ -133,15 +133,14 @@ def copia_com_dados_sinteticos(tmp_path_factory):
             shutil.copy2(caminho, por_escopo / caminho.name)
             (mes / "escopos" / "regional-gr2").mkdir(exist_ok=True)
             shutil.copy2(caminho, mes / "escopos" / "regional-gr2" / caminho.name)
-    # Estrutura sintética: as unidades dos A2 sintéticos ficam sob a GR2, piloto do gate (L5).
-    estrutura = copia / "artefatos_local" / "ocde" / "diagnosticos" / "ICMBIO_estrutura.csv"
-    estrutura.parent.mkdir(parents=True, exist_ok=True)
-    estrutura.write_text(
-        '{"schema":"estrutura sintetica das pontes"}\n'
-        "icmbio_id,id_mae,sigla,uorg_nome,uorg_nome-completo,mesogrupo,tipo,macroprocesso,microgrupo,status\n"
-        "10,,GR2,GR2 sintetica,GR2 sintetica,GR2,Gerência Regional,,,Ativo\n"
-        "11,10,CGSIN,Unidade sintetica,Unidade sintetica,UC na GR2,UC,,,Ativo\n"
-        "12,10,NGI-SINT,NGI sintetico,NGI sintetico,UC na GR2,NGI,,,Ativo\n",
+    # Hierarquia sintética do PETRVS: as unidades dos A2 sintéticos ficam sob a GR2, piloto do gate.
+    hierarquia = copia / "artefatos_local" / "ocde" / "diagnosticos" / "PETRVS_unidades.csv"
+    hierarquia.parent.mkdir(parents=True, exist_ok=True)
+    hierarquia.write_text(
+        "id|codigo|sigla|nome|unidade_pai_id\n"
+        "p-gr2|10|GR2|GR2 sintetica|\n"
+        "p-cgsin|11|CGSIN|Unidade sintetica|p-gr2\n"
+        "p-ngi|12|NGI-SINT|NGI sintetico|p-gr2\n",
         encoding="utf-8",
     )
     return copia

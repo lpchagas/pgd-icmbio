@@ -81,6 +81,9 @@ def registrar_aceite(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError(f"Piloto fora do cadastro: {args.piloto}")
     if not piloto.conferido:
         raise ValueError(f"Cadastro do piloto {piloto.sigla} não conferido na fonte (id_petrvs): aceite recusado até o L7.")
+    problemas = [m for m in liberacao.problemas_cadastro(cadastro) if m.startswith(f"{piloto.sigla}:")]
+    if problemas:
+        raise ValueError("Cadastro divergente da hierarquia atual: " + "; ".join(problemas))
     identidade = _identidade_sem_alteracoes(args.capacidade, cadastro)
     escopo = liberacao.escopo_resolvido(piloto)
     problema = liberacao.problema_manifesto(args.manifesto, args.capacidade, escopo["chave"])
