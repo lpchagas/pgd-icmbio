@@ -14,21 +14,27 @@
 .secrets.baseline
 
 # -----------------------------------------------------------------------------
-# Instruções e memória dos agentes locais (contêm credenciais e contexto privado)
+# Instruções dos assistentes (H1, L4d): CLAUDE.md, AGENTS.md e PROJECT.md da RAIZ
+# são versionados (núcleo comum público; tools/sincronizar_instrucoes.py). Os
+# aninhados (ex.: agente/AGENTS.md) continuam fora do Git.
 # -----------------------------------------------------------------------------
-CLAUDE.md
-AGENTS.md
+**/CLAUDE.md
+**/AGENTS.md
+**/PROJECT.md
+!/CLAUDE.md
+!/AGENTS.md
+!/PROJECT.md
+
+# -----------------------------------------------------------------------------
+# Memória, skills e configuração locais dos assistentes (Claude Code, Codex,
+# Antigravity): links para a pasta privada, nunca versionados
+# -----------------------------------------------------------------------------
 .claude
 .claude/
 .codex
 .codex/
-
-# -----------------------------------------------------------------------------
-# Antigravity Desktop — agentes e metadados do projeto (uso local)
-# -----------------------------------------------------------------------------
 .agents
 .agents/
-PROJECT.md
 
 # -----------------------------------------------------------------------------
 # Skills locais (desenvolvimento interno — não sincronizar com GitHub)

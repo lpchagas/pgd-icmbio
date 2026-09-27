@@ -223,18 +223,19 @@ def test_history_finds_removed_secret_and_commit_message(tmp_path):
 
 def test_tree_ref_snapshot_is_scanned_without_commits(tmp_path):
     repo = _repo(tmp_path, {"lib/a.py": "A = 1\n"})
-    (repo / "AGENTS.md").write_text(f"chave {AWS_KEY}\n", encoding="utf-8")
-    _git(repo, "add", "-f", "AGENTS.md")
+    (repo / "agente").mkdir()
+    (repo / "agente" / "AGENTS.md").write_text(f"chave {AWS_KEY}\n", encoding="utf-8")
+    _git(repo, "add", "-f", "agente/AGENTS.md")
     tree = _git(repo, "write-tree")
     _git(repo, "update-ref", "refs/codex/checkpoint", tree)
-    _git(repo, "rm", "-q", "--cached", "AGENTS.md")
+    _git(repo, "rm", "-q", "--cached", "agente/AGENTS.md")
     report = security_audit.audit(repo, ("historico", "proibidos"), env_paths=[_env(tmp_path)],
                                   refs=["refs/codex/checkpoint"])
     history = report["alvos"]["historico"]
     assert history["refs"]["refs/codex/checkpoint"]["tipo"] == "tree"
     assert (history["commits_examinados"], history["instantaneos_examinados"]) == (0, 1)
-    assert _rules(report, "historico") == [("AGENTS.md", "detect-secrets:AWS Access Key")]
-    assert ("AGENTS.md", "instrucao_privada_ate_h1") in _rules(report, "proibidos")
+    assert _rules(report, "historico") == [("agente/AGENTS.md", "detect-secrets:AWS Access Key")]
+    assert ("agente/AGENTS.md", "instrucao_aninhada") in _rules(report, "proibidos")
 
 
 def test_unknown_ref_makes_history_incomplete(tmp_path):
@@ -302,7 +303,10 @@ def test_rl1_01_parent_directory_link_is_not_followed(tmp_path, monkeypatch):
 @pytest.mark.parametrize(("link", "target", "reason"), [
     ("docs/atalho", "../cgov/x", "symlink_para_caminho_proibido:area_privada"),
     ("docs/atalho", "../.env", "symlink_para_caminho_proibido:credencial_env"),
-    ("docs/atalho", "../AGENTS.md", "symlink_para_caminho_proibido:instrucao_privada_ate_h1"),
+    ("docs/atalho", "../AGENTS.md", "symlink_para_instrucao"),                 # instrução da raiz só como arquivo
+    ("docs/atalho", "sub/CLAUDE.md", "symlink_para_caminho_proibido:instrucao_aninhada"),
+    ("CLAUDE.md", "docs/instrucoes.md", "instrucao_como_link"),
+    ("agente/AGENTS.md", "../AGENTS.md", "instrucao_como_link"),
     ("docs/atalho", "../../fora", "symlink_fora_da_raiz"),
     ("docs/atalho", "/mnt/c/projetos/x", "symlink_absoluto"),
     ("docs/atalho", "C:\\Users\\x", "symlink_absoluto"),
@@ -551,9 +555,12 @@ def test_rl1_05_binary_is_recorded_and_not_counted_as_scanned(tmp_path):
     (".env.example", "pre-merge", None),
     ("docs/.env.example", "pre-merge", None),
     ("config/pgd_agente_root.cnf", "pre-merge", "credencial_cnf"),
-    ("AGENTS.md", "pre-merge", "instrucao_privada_ate_h1"),
-    ("docs/agente/AGENTS.md", "pre-merge", "instrucao_privada_ate_h1"),
-    ("agente/CLAUDE.md", "monorepo", "instrucao_privada_ate_h1"),
+    ("AGENTS.md", "pre-merge", None),                                   # H1/L4d: raiz comum versionada
+    ("CLAUDE.md", "monorepo", None),
+    ("PROJECT.md", "monorepo", None),
+    ("docs/agente/AGENTS.md", "pre-merge", "instrucao_aninhada"),
+    ("agente/CLAUDE.md", "monorepo", "instrucao_aninhada"),              # raiz de componente não é a raiz comum
+    ("agente/PROJECT.md", "pre-merge", "instrucao_aninhada"),
     ("x/.claude/y.md", "pre-merge", "area_privada"),
     ("docs/artefatos_local/z.md", "pre-merge", "area_privada"),
     ("artefatos_local/ocde/x.md", "pre-merge", "area_privada"),
@@ -725,6 +732,9 @@ def test_rl1v2_03_link_through_intermediate_link_escaping_root_is_reported():
     ({"docs/c": "d", "docs/d": "c"}, "docs/c", "symlink_ciclo"),
     ({"docs/bridge": "/etc", "docs/link": "bridge/x"}, "docs/link", "symlink_absoluto"),
     ({"a/b": "../c", "c/d": "../a/b/../z"}, "c/d", None),
+    ({"docs/a": "../AGENTS.md"}, "docs/a", "symlink_para_instrucao"),
+    ({"docs/bridge": "..", "docs/link": "bridge/PROJECT.md"}, "docs/link", "symlink_para_instrucao"),
+    ({"CLAUDE.md": "docs/x.md"}, "CLAUDE.md", "instrucao_como_link"),
 ])
 def test_rl1v2_03_sequential_resolution_table(links, start, reason):
     assert security_audit.link_chain_reason(start, links.get) == reason
@@ -923,8 +933,9 @@ def test_rl1v3_02_leitura_parcial_com_crlf_continua_incompleta(tmp_path, monkeyp
 
 
 @pytest.mark.parametrize(("path", "perfil", "reason"), [
-    ("docs/AGENTS.md/info.txt", "pre-merge", "instrucao_privada_ate_h1"),   # nome de instrução como pasta
-    ("docs/sub/CLAUDE.md", "pre-merge", "instrucao_privada_ate_h1"),
+    ("docs/AGENTS.md/info.txt", "pre-merge", "instrucao_aninhada"),         # nome de instrução como pasta
+    ("CLAUDE.md/info.txt", "monorepo", "instrucao_aninhada"),               # pasta na raiz também
+    ("docs/sub/CLAUDE.md", "pre-merge", "instrucao_aninhada"),
     ("agente/.github/skills/a.py", "monorepo", "area_privada"),              # raiz de componente
     ("agente/.github/skills/a.py", "pre-merge", None),                       # antes do merge, agente/ não é componente
     (".github/skills/a.py", "monorepo", "area_privada"),
@@ -952,3 +963,6 @@ def test_rl1v2_06_verificador_e_teste_documental_usam_a_mesma_politica():
         assert verificar_links._privado(tuple(caminho.split("/"))) is esperado, caminho
         assert security_audit.is_private_path(caminho) is esperado, caminho
     assert not security_audit.is_private_path("relatorio.csv")  # não versionável, mas não é área privada
+    # L4d: links públicos para as instruções da raiz são aceitos; para as aninhadas, não.
+    assert not any(security_audit.is_private_path(nome, "monorepo") for nome in ("CLAUDE.md", "AGENTS.md", "PROJECT.md"))
+    assert security_audit.is_private_path("agente/AGENTS.md", "monorepo")

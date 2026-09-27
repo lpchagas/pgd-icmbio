@@ -29,14 +29,25 @@ scripts/
 **Não** devem ser publicadas:
 
 ```text
-.env
-CLAUDE.md
+.env e .env.* (exceto .env.example)
+*.cnf
+.agents/
 .claude/
+.codex/
+instruções de assistente fora da raiz (ex.: agente/AGENTS.md)
 artefatos_local/
+cgov/
+setup/
 *.csv
 *.pdf
-*.ipynb
+*.ipynb (exceto consultas_denodo_template.ipynb)
 ```
+
+`CLAUDE.md`, `AGENTS.md` e `PROJECT.md` **da raiz** são públicos desde a
+reorganização: têm um núcleo comum sem segredos, dados pessoais ou estado volátil,
+mantido por `tools/sincronizar_instrucoes.py`
+([sincronia das instruções](../governanca-projeto/sincronia-instrucoes.md)). Precisam
+ser arquivos regulares, nunca links para a pasta privada.
 
 > As pastas legadas `Tabelas CSV/` e `Testes PETRVS/` foram migradas para
 > `artefatos_local/historico/` em 17.06.2026 e permanecem no `.gitignore`
@@ -44,13 +55,29 @@ artefatos_local/
 
 ## 3. Busca obrigatória por segredos
 
-Rode a busca abaixo antes de publicar:
+**Antes de commit:** rode `detect-secrets` nos arquivos alterados.
+
+**Antes de push**, rode a auditoria completa, com o `.env` local e o perfil do
+monorepo:
+
+```powershell
+python -m tools.security_audit --alvos todos --perfil monorepo --env .env --out artefatos_local/auditoria/pre-push.json
+```
+
+- Só se publica com status **`completo_sem_ocorrencia`** (saída 0).
+- `completo_com_ocorrencia` (saída 1) e `incompleto` (saída 2) bloqueiam a
+  publicação.
+- Sem `--env`, o modo de valor exato fica `incompleto`.
+- O relatório não contém segredos, mas lista caminhos e linhas: por isso fica no
+  acervo privado.
+
+Como checagem rápida e complementar, rode também:
 
 ```powershell
 rg -n --hidden "PASS|PASSWORD|SENHA|CPF|DENODO_USER|DENODO_PASSWORD|[0-9]{11}|jdbc:denodo" README.md docs scripts .env.example
 ```
 
-Resultados esperados:
+Resultados esperados da checagem rápida:
 
 - `DENODO_USER` e `DENODO_PASSWORD` podem aparecer em instruções e em
   `.env.example`, desde que estejam como placeholders.
@@ -67,8 +94,12 @@ git status --short
 git diff --name-only
 ```
 
-Se aparecer qualquer arquivo em `artefatos_local/`, `.env`, `.claude/`,
-`*.csv`, `*.pdf` ou `*.ipynb`, não publique.
+Se aparecer qualquer arquivo em `artefatos_local/`, `cgov/`, `setup/`, `.env`,
+`.agents/`, `.claude/`, `.codex/`, `*.cnf`, `*.csv`, `*.pdf` ou `*.ipynb`, ou
+instrução de assistente fora da raiz, não publique.
+
+Se `CLAUDE.md`, `AGENTS.md` ou `PROJECT.md` estiverem na lista, confira a sincronia:
+`python -m tools.sincronizar_instrucoes verificar` precisa terminar em estado 1.
 
 ## 5. Regras para scripts públicos
 
@@ -93,8 +124,8 @@ DENODO_DRIVER_PATH=C:/Users/SEU_USUARIO/AppData/...
 JAVA_HOME=C:/Program Files/DBeaver/jre
 ```
 
-Não cole trechos de `CLAUDE.md`, scripts locais, relatórios de validação ou
-CSVs operacionais na documentação pública.
+Não cole trechos de scripts locais, relatórios de validação, documentos do acervo
+privado ou CSVs operacionais na documentação pública.
 
 ## 7. Ação em caso de vazamento
 

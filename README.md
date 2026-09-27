@@ -224,6 +224,9 @@ A tabela abaixo descreve **todas as pastas de primeiro nível** do repositório 
 | [16-skills-e-relatorio-gerencial-v2.md](docs/relatorios/relatorio-v2-ciclo-gerencial.md) | Arquitetura das skills, extrações automatizadas e Relatório Gerencial V2 |
 | `docs/ocde/` | As **fichas técnicas dos 12 indicadores** (uma por indicador) + 4 fichas de eixo + o índice geral [06-indicadores-ocde-denodo.md](docs/ocde/06-indicadores-ocde-denodo.md) |
 | `docs/gestao/` | Fichas técnicas dos indicadores de gestão — [G01](docs/gestao/IND_GEST_01-situacao-planos-trabalho.md) e [G02](docs/gestao/IND_GEST_02-execucao-entregas.md) |
+| [licoes-tecnicas.md](docs/indicadores/licoes-tecnicas.md) | Erros já corrigidos nos indicadores (para não repetir) e achados de semântica que explicam as fórmulas |
+| [registro-decisoes-projeto.md](docs/decisoes/registro-decisoes-projeto.md) | Decisões de estrutura da reorganização, com data, e as ADRs (009 arquitetura, 010 sincronia das instruções, 011 pilotos, 012 Denodo) |
+| [sincronia-instrucoes.md](docs/governanca-projeto/sincronia-instrucoes.md) | Como editar `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` mantendo o núcleo comum sincronizado |
 
 > Cadernos metodológicos e registros de decisão da CGOV **não ficam em `docs/`**:
 > são documentos deliberativos internos. A numeração 17 e 18, antes usada por eles,

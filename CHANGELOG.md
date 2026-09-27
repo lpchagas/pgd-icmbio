@@ -18,6 +18,42 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Os documentos do agente estão em `docs/agente/`, `docs/decisoes/`, `docs/governanca-projeto/`, `docs/projeto/` e `docs/dados-petrvs/`.
 - As fichas S01–S24 e os protótipos estão em `capacidades/`, com o `CATALOGO.md` (L4c).
 
+### Instruções dos assistentes (L4d)
+
+- `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` da raiz passam a ser versionados. Os três
+  têm um **núcleo comum idêntico**, sem segredos, dados pessoais ou estado volátil,
+  seguido de um bloco curto de cada ferramenta (ADR-010). Instruções aninhadas
+  continuam proibidas.
+- **Sincronizador `tools/sincronizar_instrucoes.py`:**
+  - modos `verificar` (inclusive `--staged`), `sincronizar`, `recuperar` e `importar`;
+  - lock do núcleo em `config/instrucoes.lock.json`;
+  - diário de operação, compare-and-swap, lock de exclusão e recusa de links e
+    hardlinks.
+  - Guia: `docs/governanca-projeto/sincronia-instrucoes.md`.
+- **Auditor de segurança** (regras `2026.09.27-l4d`):
+  - as três instruções da raiz são versionáveis;
+  - instrução aninhada, ou como pasta, sai como `instrucao_aninhada`;
+  - link para instrução, ou instrução que seja link, é recusado.
+  - O `.gitignore` acompanha: `**/<nome>` com exceção `!/<nome>`.
+- **Skills no Windows:**
+  - `tools/skills_manager.py install` cria um link por skill escolhido pela plataforma
+    (junção no Windows, symlink no Linux e no WSL) e identifica link pela etiqueta de
+    reparse, porque pastas do OneDrive também têm atributo de reparse;
+  - links antigos são trocados sem tocar o destino.
+- **`tools/bootstrap_skills.py`:**
+  - pontos de entrada em `relatorios.*`, sem as pontes;
+  - catálogo alinhado ao manifesto vigente;
+  - não regrava arquivo igual nem sobrescreve `SKILL.md` ou manifesto que evoluíram
+    (só com `--forcar`).
+- **Documentos novos:**
+  - ADR-009 (arquitetura integrada), ADR-010 (sincronia das instruções), ADR-011
+    (unidades piloto) e ADR-012 (configuração Denodo);
+  - `docs/decisoes/registro-decisoes-projeto.md`;
+  - `docs/indicadores/licoes-tecnicas.md`.
+  - Os guias `organizacao-publico-privado.md` e `seguranca-publicacao.md` foram
+    corrigidos: as instruções são públicas, as junções são só de pastas, e a auditoria
+    completa com `--env` e resultado `completo_sem_ocorrencia` é o gate de publicação.
+
 ### Escopo e pilotos (L5)
 
 - A resolução de escopo é única (`relatorios.escopo`) nos cinco pontos oficiais. Regional sem estrutura, unidade inexistente e sigla ambígua passaram a ser erro; as chaves `tipo_unidade-…` e `lista_unidades-<hash>` são as mesmas em todos os pontos (a de lista não depende mais do nome do arquivo).

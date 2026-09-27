@@ -47,7 +47,7 @@ TEXT_SUFFIXES = {
 }
 
 # ─── Auditoria completa ──────────────────────────────────────────────────────
-RULES_VERSION = "2026.09.26-prel3"
+RULES_VERSION = "2026.09.27-l4d"
 DETECT_SECRETS_VERSION = "1.5.0"
 ALL_TARGETS = ("arquivos", "indice", "historico", "proibidos")
 MAX_BYTES = 20 * 1024 * 1024
@@ -74,8 +74,9 @@ PLACEHOLDER_PATTERN = re.compile(
 )
 # Fonte única da política de caminhos privados: o teste documental e o
 # tools/verificar_links.py consultam forbidden_reason com PRIVACY_REASONS.
-# Instruções: privadas em qualquer componente até a H1.
-PRIVATE_INSTRUCTIONS = {"agents.md", "claude.md", "project.md"}
+# Instruções (H1, L4d): versionadas só como arquivos regulares da raiz comum; aninhadas
+# (inclusive na raiz de agente/), como pasta ou por link continuam recusadas.
+INSTRUCTIONS = {"agents.md", "claude.md", "project.md"}
 PRIVATE_ANY_DEPTH = {".agents", ".claude", ".codex", "artefatos_local"}
 # Privados na raiz de cada componente do repositório (ver PERFIS).
 PRIVATE_COMPONENT_DIRS = {"cgov", "setup", "data", "testes_cgov"}
@@ -94,7 +95,7 @@ PERFIS = {
 DEFAULT_PERFIL = "pre-merge"
 # Motivos de forbidden_reason que significam conteúdo privado (não só não versionável).
 PRIVACY_REASONS = frozenset({
-    "area_privada", "instrucao_privada_ate_h1", "credencial_env", "credencial_cnf", "acervo_referencias_privado",
+    "area_privada", "instrucao_aninhada", "credencial_env", "credencial_cnf", "acervo_referencias_privado",
 })
 
 
@@ -256,9 +257,9 @@ def forbidden_reason(path: str, perfil: str = DEFAULT_PERFIL) -> str | None:
         resto = lower[len(raiz):] if lower.startswith(raiz) else None
         if resto is not None and (resto.split("/", 1)[0] in PRIVATE_COMPONENT_DIRS or resto.startswith(".github/skills/")):
             return "area_privada"
-    # RL1v2-06: nome de instrução é privado em qualquer componente (arquivo ou pasta).
-    if set(parts) & PRIVATE_INSTRUCTIONS:
-        return "instrucao_privada_ate_h1"
+    # RL1v2-06 e L4d: nome de instrução só é versionável como arquivo da raiz comum.
+    if set(parts) & INSTRUCTIONS and not (len(parts) == 1 and name in INSTRUCTIONS):
+        return "instrucao_aninhada"
     if name.startswith(".env") and name != ".env.example":
         return "credencial_env"
     if suffix == ".cnf":
@@ -295,11 +296,21 @@ def _lexical_target(link_path: str, target: str) -> tuple[str | None, str | None
 def symlink_reason(link_path: str, target: str, perfil: str = DEFAULT_PERFIL) -> str | None:
     """Motivo de recusa de um salto de link: absoluto, fora da raiz ou para caminho proibido."""
 
+    if _is_instruction(link_path):
+        return "instrucao_como_link"
     resolved, reason = _lexical_target(link_path, target)
     if reason:
         return reason
     forbidden = forbidden_reason(resolved, perfil)
-    return f"symlink_para_caminho_proibido:{forbidden}" if forbidden else None
+    if forbidden:
+        return f"symlink_para_caminho_proibido:{forbidden}"
+    return "symlink_para_instrucao" if _is_instruction(resolved) else None
+
+
+def _is_instruction(path: str) -> bool:
+    """Arquivo de instrução pelo nome: ele próprio não pode ser link nem alvo de link."""
+
+    return PurePosixPath(path.replace("\\", "/")).name.lower() in INSTRUCTIONS
 
 
 def link_chain_reason(link_path: str, lookup, perfil: str = DEFAULT_PERFIL) -> str | None:
@@ -313,6 +324,8 @@ def link_chain_reason(link_path: str, lookup, perfil: str = DEFAULT_PERFIL) -> s
 
     if lookup(link_path) is None:
         return None
+    if _is_instruction(link_path):
+        return "instrucao_como_link"
     pending = deque(link_path.replace("\\", "/").split("/"))
     resolved: list[str] = []
     hops = 0
@@ -333,6 +346,8 @@ def link_chain_reason(link_path: str, lookup, perfil: str = DEFAULT_PERFIL) -> s
                 forbidden = forbidden_reason(candidate, perfil)
                 if forbidden:
                     return f"symlink_para_caminho_proibido:{forbidden}"
+                if _is_instruction(candidate):
+                    return "symlink_para_instrucao"
             continue
         hops += 1
         if hops > MAX_LINK_HOPS:

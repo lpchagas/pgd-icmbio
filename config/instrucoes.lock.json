@@ -1,0 +1,10 @@
+{
+  "versao": 1,
+  "algoritmo": "sha256 do núcleo normalizado (UTF-8 sem BOM, LF, sem espaço no fim da linha, uma quebra final)",
+  "arquivos": [
+    "CLAUDE.md",
+    "AGENTS.md",
+    "PROJECT.md"
+  ],
+  "nucleo": "sha256:b386f5dc1277d6006f3ad00146444c424c34ada104418719cd8f1378859f3648"
+}

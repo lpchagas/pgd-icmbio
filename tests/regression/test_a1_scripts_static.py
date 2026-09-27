@@ -2,7 +2,7 @@
 
 Não executa nenhum script — lê o texto-fonte e aplica asserções regex.
 Cada caso aqui corresponde a um bug histórico real, documentado em
-CLAUDE.md §11 ("Bugs históricos corrigidos — não repetir"), que já
+docs/indicadores/licoes-tecnicas.md ("Erros corrigidos — não repetir"), que já
 aconteceu neste projeto e foi corrigido silenciosamente uma vez.
 
 IMPORTANTE: as asserções positivas (padrão correto presente) são checadas

@@ -28,6 +28,10 @@ def _ignorado(caminho: str) -> bool:
     "docs/referencias-pgd/README.md",
     ".env.example",
     "requirements-agente.txt",
+    "CLAUDE.md",                                     # H1/L4d: instruções da raiz são versionadas
+    "AGENTS.md",
+    "PROJECT.md",
+    "config/instrucoes.lock.json",
 ])
 def test_versionaveis(caminho):
     assert not _ignorado(caminho)
@@ -46,8 +50,12 @@ def test_versionaveis(caminho):
     "agente/testes_cgov/s01.md",
     ".env",
     "agente/.env",
-    "CLAUDE.md",
-    "agente/AGENTS.md",
+    "agente/AGENTS.md",                              # instruções aninhadas continuam fora
+    "agente/CLAUDE.md",
+    "docs/sub/PROJECT.md",
+    ".claude/settings.json",
+    ".agents/skills/x/SKILL.md",
+    ".codex/config.toml",
 ])
 def test_recusados(caminho):
     assert _ignorado(caminho)

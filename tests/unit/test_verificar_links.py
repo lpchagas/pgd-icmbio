@@ -73,7 +73,7 @@ def test_crases_placeholder_planejado_e_inexistente(tmp_path):
 def test_areas_privadas_exigem_rotulo_e_nunca_sao_lidas(tmp_path):
     arquivos = _repo(tmp_path, {
         "docs/p.md": "[a](../artefatos_local/x.md)\n"
-                     "`CLAUDE.md` fica fora do Git (privado)\n"
+                     "`agente/CLAUDE.md` fica fora do Git (privado)\n"
                      "`cgov/analises/run.py`\n"
                      "`docs/cgov/README.md` é pública\n",
         "docs/cgov/README.md": "# CGOV\n",
@@ -82,7 +82,7 @@ def test_areas_privadas_exigem_rotulo_e_nunca_sao_lidas(tmp_path):
     classes = _classes(vl.verificar(arquivos, raiz=tmp_path))
 
     assert classes == {
-        "../artefatos_local/x.md": "privado_sem_rotulo", "CLAUDE.md": "privado",
+        "../artefatos_local/x.md": "privado_sem_rotulo", "agente/CLAUDE.md": "privado",
         "cgov/analises/run.py": "privado_sem_rotulo", "docs/cgov/README.md": "ok",
     }
 
