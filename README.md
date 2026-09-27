@@ -143,7 +143,7 @@ A versão vigente de cada fórmula está no contrato (`lib/validation_contracts.
 | [`docs/relatorios/`](docs/relatorios/relatorio-v2-ciclo-gerencial.md) | Relatório V2, ciclo gerencial e relatório cumulativo |
 | [`docs/agente/`](docs/agente/README.md) | Proposta, metodologia e recursos do agente de gestão |
 | [`docs/decisoes/`](docs/decisoes/registro-decisoes-projeto.md) | Registro de decisões do projeto e ADRs |
-| [`docs/governanca-projeto/`](docs/governanca-projeto/riscos.md) | Riscos, fontes institucionais, validação do modelo comum, sincronia das instruções |
+| [`docs/governanca-projeto/`](docs/governanca-projeto/riscos.md) | Riscos, fontes institucionais, validação do modelo comum, sincronia das instruções, cobertura dos requisitos do agente |
 
 > Cadernos metodológicos, atas e registros de decisão da CGOV **não ficam em `docs/`**: são documentos deliberativos, mantidos no acervo privado. A documentação pública cita só o identificador da decisão (D01, D02…) e o efeito técnico.
 

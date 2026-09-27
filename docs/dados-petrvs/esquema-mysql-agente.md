@@ -4,8 +4,9 @@
 **Série:** AT (Tecnologia) — governança de artefatos da proposta v3, §5.1
 **Insumo histórico incorporado em:** `docs/agente/projeto-v6/00_proposta-projeto-v6.md` e ADR-006
 **Fontes:** introspecção JDBC do banco `petrvs_icmbio` via Denodo (documentada em
-`docs/dados-petrvs/estrutura-banco-dados.md`, 24.05.2026); artefato
-`03_especificacao-funcional-skills_v2.md`, §5 e §16.2; síntese vigente na proposta v6.
+`docs/dados-petrvs/estrutura-banco-dados.md`, 24.05.2026); especificação funcional do
+agente, v2, §5 e §16.2 (retirada da árvore no L4f; ver
+[cobertura dos requisitos](../governanca-projeto/cobertura-requisitos.md)); síntese vigente na proposta v6.
 
 ---
 

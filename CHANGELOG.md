@@ -18,6 +18,21 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Os documentos do agente estão em `docs/agente/`, `docs/decisoes/`, `docs/governanca-projeto/`, `docs/projeto/` e `docs/dados-petrvs/`.
 - As fichas S01–S24 e os protótipos estão em `capacidades/`, com o `CATALOGO.md` (L4c).
 
+### Exclusões com cobertura (L4f)
+
+- Retirados da árvore os nove documentos intermediários vindos do repositório do agente:
+  os documentos de trabalho `01_` a `05_` das skills, o portal antigo, o resumo do projeto
+  analítico, a página de histórico de evolução e o prompt de planejamento inicial. Todos
+  continuam recuperáveis no histórico do Git.
+- `docs/governanca-projeto/cobertura-requisitos.md`:
+  - destino de cada regra RN-01 a RN-36 (catálogo S01–S24, §11), com a capacidade e a
+    fonte normativa (D1–D9);
+  - trechos sem destino na v6, apontados como histórico classificado, com a revisão do
+    Git para consulta;
+  - destino dos documentos de apoio.
+- O verificador de links fica sem nenhuma exceção (`config/verificar-links-excecoes.json`
+  vazio).
+
 ### Revisão da documentação e gates (L4e)
 
 - **Auditoria de segurança** (regras `2026.09.27-l4e`):

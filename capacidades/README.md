@@ -16,7 +16,7 @@ substituir — estão versionados em
 | Fichas S01–S24 | [`especificacoes/`](especificacoes/README.md) | especificações operacionais vigentes | principal |
 | Catálogo de estado | [`CATALOGO.md`](CATALOGO.md) | estado de cada capacidade (especificado, testado, homologado…) | principal |
 | Componentes metodológicos (`00_skill-*.md`) | [`docs/agente/metodologia/`](../docs/agente/metodologia/00_skill-plano-entregas-v1.md) | componentes metodológicos originais | fonte histórica/metodológica |
-| Análise, matriz, especificação inicial, backlog e plano de execução/avaliação (`01_` a `05_`) | `agente/skills/` (intermediário) | insumos da proposta v6 | histórico; o conteúdo vigente foi incorporado à v6. Esses cinco documentos serão retirados depois de a cobertura dos requisitos RN-01 a RN-36 estar registrada |
+| Análise, matriz, especificação inicial, backlog e plano de execução/avaliação (`01_` a `05_`) | retirados da árvore no L4f; recuperáveis no histórico do Git | insumos da proposta v6 | histórico; destino de cada regra e trecho na [cobertura dos requisitos](../docs/governanca-projeto/cobertura-requisitos.md) |
 
 Ao revisar uma skill, atualize a ficha, o catálogo e, se houver impacto, cronograma,
 riscos, regras e testes.

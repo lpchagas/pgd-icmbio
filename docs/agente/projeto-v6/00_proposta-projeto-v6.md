@@ -36,7 +36,9 @@ operação estão no [portal da v6](README.md).
 5. Especificações de `capacidades/especificacoes/`.
 6. Anexos técnicos aprovados.
 7. Registros ativos de fontes, riscos, validações, testes e atas.
-8. Artefatos metodológicos anteriores da pasta `agente/skills/`.
+8. Artefatos metodológicos anteriores (componentes em `docs/agente/metodologia/`; documentos de trabalho
+   retirados da árvore, recuperáveis no histórico — ver
+   [cobertura dos requisitos](../../governanca-projeto/cobertura-requisitos.md)).
 
 Em caso de conflito, norma prevalece sobre regra institucional; regra institucional sobre
 recomendação; e recomendação sobre exemplo. O conflito é registrado em
