@@ -15,6 +15,11 @@
 *.yml   text eol=lf
 *.ipynb text eol=lf
 
+# Hooks do Git e scripts sh: sempre LF, também na cópia local do Windows
+# (um hook com CRLF quebra no sh)
+.githooks/* text eol=lf
+*.sh        text eol=lf
+
 # Arquivos binarios — nunca alterar
 *.png   binary
 *.jpg   binary
