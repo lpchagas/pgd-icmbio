@@ -112,7 +112,7 @@ Uma unidade pode ter I02 = 80% (2 entregas nao concluidas) mas I04 = 95% (essas 
 
 **Sinal de atencao:** se poucos servidores concentram a maioria das entregas, ha risco de gargalo (o que acontece se essas pessoas se afastarem?).
 
-**Exemplo de resultado:**
+**Exemplo de resultado (nomes fictícios):**
 
 | unidade | servidor | entregas | media unidade | posicao |
 |---|---|---|---|---|
