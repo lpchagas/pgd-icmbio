@@ -253,9 +253,13 @@ def _validar_execucao(lado: str, execucao: dict, fixtures: Path) -> None:
         if not c.get("variantes") or variante in c["variantes"]
     ]
     identificar = lambda c: (c.get("inicio") or "", c.get("fim") or "", c.get("nome", ""))  # noqa: E731
-    esperadas = sorted(map(identificar, fixture))
+    # Entrada "opcional" (ex.: alerta D22 do I03 3.0.0) só é emitida por algumas versões
+    # do A1: pode ser servida zero ou uma vez, nunca repetida. As demais são obrigatórias.
+    opcionais = {identificar(c) for c in fixture if c.get("opcional")}
+    esperadas = sorted(identificar(c) for c in fixture if not c.get("opcional"))
     servidas = sorted(map(identificar, registro["consultas"]))
-    if servidas != esperadas:
+    servidas_opcionais = [s for s in servidas if s in opcionais]
+    if [s for s in servidas if s not in opcionais] != esperadas or len(servidas_opcionais) != len(set(servidas_opcionais)):
         raise ReplayError(f"{lado}: consultas feitas diferem das fixtures (faltam, sobram ou se repetem)")
     if not execucao["arquivos"]:
         raise ReplayError(f"{lado}: nenhum artefato gerado")

@@ -28,7 +28,9 @@ from .validation_contracts import (
 from .validation_extractors import SQL as ATOMIC_SQL, extract_atomic
 from .validation_diagnostics import diagnose_atomic
 from .validation_drift import assess_drift
-from .validation_oracles import calculate, independent_analysis_window, invariant_findings
+from .validation_oracles import (
+    calculate, independent_analysis_window, invariant_findings, verificar_supressao_compartilhavel,
+)
 
 
 VALIDATION_OUTPUT_BASE_ENV = "PGD_VALIDATION_OUTPUT_BASE"
@@ -460,6 +462,15 @@ def _validate_target(
         )
         if mode == "fixture":
             findings.extend(_compare(target, contract, expected_for_view, oracle))
+        elif target.code == "G02" and product == "compartilhavel":
+            # D27: o compartilhável é validado pelas propriedades da supressão e pelos
+            # valores das células visíveis.
+            producao = production_by_view.get(contract.view, [])
+            esperado, achados_supressao = verificar_supressao_compartilhavel(
+                producao, oracle, atomic, contract.business_keys
+            )
+            findings.extend(achados_supressao)
+            findings.extend(_compare(target, contract, producao, esperado))
         else:
             findings.extend(_compare(target, contract, production_by_view.get(contract.view, []), oracle))
         oracle_view = oracle if contract.view == "entregas" else [row for row in oracle if row.get("visao", contract.view) == contract.view]

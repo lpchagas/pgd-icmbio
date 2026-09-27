@@ -28,8 +28,13 @@ extração OCDE, pelos relatórios, pelo ciclo gerencial, pelo `gestao.runner` e
 `validation_runner`.
 
 **Qual hierarquia vale:** a subordinação segue a hierarquia do próprio **PETRVS**
-(`unidade_pai_id`), de onde vêm os PE e os PT. A decisão é de 26/09/2026 e é
-provisória até a CGOV deliberar a Q1 (fonte primária da taxonomia).
+(`unidade_pai_id`), de onde vêm os PE e os PT (decisão CGOV D19).
+
+**Trava de divergência (D19):** o recorte regional é recusado quando uma unidade
+mapeada no dicionário CGOV cai em regionais diferentes no PETRVS e na estrutura
+oficial, até a conciliação constar de
+[`config/conciliacoes-unidades.json`](../../config/conciliacoes-unidades.json)
+(D20). Unidades sem mapeamento seguem o PETRVS e só são contadas.
 
 - O motivo: na estrutura oficial, a maior parte das unidades subordinadas à GR2 não
   tem sigla. Como os produtos são filtrados pela sigla, o recorte "GR2" certificado

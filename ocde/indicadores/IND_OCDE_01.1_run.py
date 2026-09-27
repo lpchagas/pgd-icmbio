@@ -38,6 +38,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.arredondamento import arredondar  # D24: meio para cima
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
@@ -184,7 +185,7 @@ def main() -> None:
         # V1 — visao institucional
         for mod in sorted(by_mode, key=lambda m: -len(by_mode[m])):
             n   = len(by_mode[mod])
-            pct = round(n * 100.0 / total, 2) if total else 0.0
+            pct = arredondar(n * 100.0 / total, 2) if total else 0.0
             v1_rows.append(
                 [kind, label, str(p_ini), str(scheduled_end), str(p_fim), status, dur, mod, n, pct]
             )
@@ -199,7 +200,7 @@ def main() -> None:
             }
             for mod in sorted(unit_modes, key=lambda m: -len(unit_modes[m])):
                 n   = len(unit_modes[mod])
-                pct = round(n * 100.0 / denom, 2) if denom else 0.0
+                pct = arredondar(n * 100.0 / denom, 2) if denom else 0.0
                 v2_rows.append(
                     [kind, label, str(p_ini), str(scheduled_end), str(p_fim), status, dur,
                      sig, nom, mod, n, pct]

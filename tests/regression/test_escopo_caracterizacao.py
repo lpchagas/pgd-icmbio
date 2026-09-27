@@ -12,7 +12,7 @@ relatórios e ciclo) e B (``OrganizationStructure.select`` repetido no
   ``lista_unidades-<hash12>``), sem o caminho do arquivo;
 - ESC-06 ``lib.escopos`` só normaliza (o ``ScopeSpec`` duplicado saiu).
 
-No L7 (decisão de 26/09/2026, provisória até a Q1 da CGOV), a subordinação passou do
+No L7 (decisão CGOV D19, com trava de divergência e conciliação D20), a subordinação passou do
 ``id_mae`` da estrutura oficial para a hierarquia do **PETRVS** (``unidade_pai_id``):
 na estrutura real, a maior parte das unidades da GR2 não tem sigla, e o produto
 "GR2" certificado cobria só a própria regional.
@@ -239,3 +239,57 @@ def test_esc06_lib_escopos_so_normaliza():
                 importados |= {alias.name for alias in no.names}
 
     assert importados <= {"slug", "normalize"}
+
+
+# --- Trava de divergência (D19) e conciliação (D20) ------------------------------------------
+
+def _estrutura_com_dicionario(**mapa):
+    from lib.estrutura_organizacional import OrganizationStructure
+
+    base = escopo.load_organization_structure()
+    return OrganizationStructure(dict(base.units_by_id), mapa)
+
+
+def test_d19_unidade_mapeada_em_outra_regional_trava_o_recorte(monkeypatch):
+    # UC-A1 está sob a GR2 no PETRVS, mas o dicionário a liga à UC-FORA (id 15), da GR1.
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda *a, e=_estrutura_com_dicionario(**{"UC-A1": "15"}): e)
+    monkeypatch.setattr(escopo, "carregar_conciliacoes", lambda *a: {})
+    with pytest.raises(escopo.EscopoInvalido, match="trava de divergência.*UC-A1"):
+        escopo.scope_from_values(regional="GR2")
+
+
+def test_d19_unidade_da_regional_na_estrutura_mas_fora_no_petrvs_trava(monkeypatch):
+    # UC-FORA existe no PETRVS sob a GR1; o dicionário a liga ao id 12 (UC-A1, na GR2).
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda *a, e=_estrutura_com_dicionario(**{"UC-FORA": "12"}): e)
+    monkeypatch.setattr(escopo, "carregar_conciliacoes", lambda *a: {})
+    with pytest.raises(escopo.EscopoInvalido, match="UC-FORA"):
+        escopo.scope_from_values(regional="GR2")
+
+
+def test_d20_conciliacao_registrada_libera_e_fica_no_escopo(monkeypatch):
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda *a, e=_estrutura_com_dicionario(**{"UC-A1": "15"}): e)
+    monkeypatch.setattr(escopo, "carregar_conciliacoes", lambda *a: {"GR2": {"UC-A1"}})
+    spec = escopo.scope_from_values(regional="GR2")
+    assert spec.conciliadas == ("UC-A1",) and "UC-A1" in spec.units
+
+
+def test_d19_sem_mapeamento_segue_o_petrvs_e_e_contado():
+    spec = escopo.scope_from_values(regional="GR2")
+    assert "UC-A2" in spec.units and "UC-A2" in spec.sem_mapeamento
+
+
+def test_d19_sigla_do_dicionario_inexistente_no_petrvs_nao_trava(monkeypatch):
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda *a, e=_estrutura_com_dicionario(**{"SIGLA-VELHA": "12"}): e)
+    assert escopo.scope_from_values(regional="GR2").ids[0] == "p-gr2"
+
+
+def test_d19_regional_sem_estrutura_oficial_e_erro(monkeypatch):
+    from lib.estrutura_organizacional import OrganizationStructure
+
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda *a: OrganizationStructure({}, {}))
+    with pytest.raises(escopo.EscopoInvalido, match="exige a estrutura oficial"):
+        escopo.scope_from_values(regional="GR2")
+
+
+def test_d20_registro_versionado_concilia_as_tres_ucs_da_gr2():
+    assert escopo.carregar_conciliacoes()["GR2"] == {"PARNAABROLHOS", "RESEXCASSURUBA", "PARNAMONPASCOAL"}

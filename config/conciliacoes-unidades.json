@@ -1,0 +1,25 @@
+{
+  "versao": 1,
+  "decisao": "D20 (27/09/2026)",
+  "regra": "Unidade mapeada no dicionário CGOV que cai em regionais diferentes no PETRVS e na estrutura oficial só entra no recorte regional depois de conciliada aqui (trava da D19).",
+  "conciliacoes": [
+    {
+      "sigla_petrvs": "PARNAABROLHOS",
+      "regional": "GR2",
+      "segue": "petrvs",
+      "observacao": "fora da GR2 na estrutura oficial; correção da estrutura solicitada"
+    },
+    {
+      "sigla_petrvs": "RESEXCASSURUBA",
+      "regional": "GR2",
+      "segue": "petrvs",
+      "observacao": "fora da GR2 na estrutura oficial; correção da estrutura solicitada"
+    },
+    {
+      "sigla_petrvs": "PARNAMONPASCOAL",
+      "regional": "GR2",
+      "segue": "petrvs",
+      "observacao": "no dicionário CGOV a sigla está desatualizada (PARNAMONTEPAS); correção solicitada"
+    }
+  ]
+}

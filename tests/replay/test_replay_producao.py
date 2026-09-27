@@ -201,8 +201,11 @@ def test_replay_de_alvo_gerado_e_equivalente_e_nao_vazio(alvo):
     relatorio = rp.replay(alvo, REFERENCIA, REFERENCIA, DATA)
 
     assert relatorio["status"] == "equivalente", relatorio.get("erro")
-    periodos = json.loads((rp.FIXTURES_DIR / alvo / "consultas.json").read_text(encoding="utf-8"))["consultas"]
-    assert relatorio["referencia"]["consultas"] == len(periodos)
+    entradas = json.loads((rp.FIXTURES_DIR / alvo / "consultas.json").read_text(encoding="utf-8"))["consultas"]
+    periodos = {(entrada["inicio"], entrada["fim"]) for entrada in entradas}
+    # Uma consulta por período, mais as consultas com marcador (ex.: alerta D22 do I03),
+    # que só as versões que as emitem consomem.
+    assert len(periodos) <= relatorio["referencia"]["consultas"] <= len(entradas)
     assert relatorio["referencia"]["arquivos"]
 
 

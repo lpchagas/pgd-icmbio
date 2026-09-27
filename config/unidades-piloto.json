@@ -2,7 +2,7 @@
   "versao": 2,
   "politica": "pilotos-v1",
   "decisao": "H4 (26/09/2026): GR2 como regional; CGOV e COCAGE sem subordinadas",
-  "conferencia": "id_petrvs conferido em 26/09/2026 na view petrvs_icmbio_unidades (sigla única, registro ativo); a subordinação segue a hierarquia do PETRVS (decisão de 26/09/2026, provisória até a Q1 da CGOV)",
+  "conferencia": "id_petrvs conferido em 26/09/2026 na view petrvs_icmbio_unidades (sigla única, registro ativo); a subordinação segue a hierarquia do PETRVS (decisão CGOV D19, com trava de divergência; conciliações em config/conciliacoes-unidades.json, D20)",
   "hierarquia": {
     "fonte": "petrvs_icmbio_unidades (unidade_pai_id)",
     "arquivo": "PETRVS_unidades.csv",

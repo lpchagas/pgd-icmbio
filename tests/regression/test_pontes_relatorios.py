@@ -143,6 +143,14 @@ def copia_com_dados_sinteticos(tmp_path_factory):
         "p-ngi|12|NGI-SINT|NGI sintetico|p-gr2\n",
         encoding="utf-8",
     )
+    # Estrutura oficial sintética mínima: a trava de divergência (D19) exige a estrutura
+    # no recorte regional; sem dicionário, não há unidade mapeada nem conflito.
+    (hierarquia.parent / "ICMBIO_estrutura.csv").write_text(
+        '{"schema":"estrutura sintetica das pontes"}\n'
+        "icmbio_id,id_mae,sigla,uorg_nome,uorg_nome-completo,mesogrupo,tipo,macroprocesso,microgrupo,status\n"
+        "10,,GR2,GR2 sintetica,GR2 sintetica,GR2,Gerência Regional,,,Ativo\n",
+        encoding="utf-8",
+    )
     return copia
 
 

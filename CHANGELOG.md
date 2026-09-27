@@ -25,9 +25,17 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Cadastro das três unidades piloto em `config/unidades-piloto.json` e gate de liberação (`lib/liberacao.py`): fora dos pilotos, produto final ou compartilhável exige três aceites da mesma identidade e deliberação de expansão. O relatório cumulativo e o V2 compartilhável no escopo nacional passam a ser recusados até lá.
 - Novas CLIs: `tools/executar_pilotos.py` e `tools/registrar_aceite_piloto.py`. Fluxo em `docs/projeto/fluxo-unidades-piloto.md`.
 
+### Versão coordenada D35 (decisões CGOV D19–D35, 27/09/2026)
+
+- **Recorte (D19/D20):** trava de divergência no recorte regional (unidade mapeada no dicionário CGOV em regionais diferentes no PETRVS e na estrutura oficial é recusada até constar de `config/conciliacoes-unidades.json`); `ScopeSpec` registra as conciliações aplicadas e as unidades sem mapeamento.
+- **Fórmulas:** I03 3.0.0 (entrega só com plano sobreposto ao período, D22); I07 e I08 3.1.0 (vínculo plano de trabalho × entrega conta uma vez, D25; calendário com pontos facultativos federais das portarias do MGI e com o feriado de 20/11, que faltava, D29); I11 3.1.0 (rótulo "Uso baixo da nota máxima" e faixas só com volume suficiente, D31); I01 2.0.1 e I05 3.0.1 (arredondamento meio para cima em empates, D24). Quebra de série nos indicadores com mudança de versão maior ou menor.
+- **Falha dos A1 (D33):** falha na consulta de qualquer período encerra o A1 com erro, sem gravar A2 parcial (fecha o DP-L2-01).
+- **Validação:** oracle com arredondamento meio para cima (D24) e sem linha para unidade sem entrega no ciclo (D23); datas invertidas no G01 viram alerta (D26); validação independente do G02 compartilhável por propriedades da supressão (D27).
+- **Errata:** o commit `714de22` e o CHANGELOG do L7 chamaram a escolha da hierarquia de "provisória até a Q1". A Q1 do caderno trata da fonte da taxonomia OCDE; a hierarquia é a decisão D19.
+
 ### Pilotos e hierarquia do PETRVS (L7)
 
-- Os seletores `--regional`, `--unidade` e `--lista-unidades` passam a seguir a hierarquia do PETRVS (`unidade_pai_id`), lida do retrato privado gerado por `tools/atualizar_unidades_petrvs.py` (`lib/unidades_petrvs.py`). Decisão de 26/09/2026, provisória até a Q1 da CGOV. **Efeito:** o recorte GR2 passa de 3 unidades (só a regional; as subordinadas não têm sigla na estrutura oficial) para 124 siglas do PETRVS. Sigla repetida só é erro quando as homônimas ficam dos dois lados do recorte.
+- Os seletores `--regional`, `--unidade` e `--lista-unidades` passam a seguir a hierarquia do PETRVS (`unidade_pai_id`), lida do retrato privado gerado por `tools/atualizar_unidades_petrvs.py` (`lib/unidades_petrvs.py`). Decisão de 26/09/2026, ratificada como D19 (ver errata acima). **Efeito:** o recorte GR2 passa de 3 unidades (só a regional; as subordinadas não têm sigla na estrutura oficial) para 124 siglas do PETRVS. Sigla repetida só é erro quando as homônimas ficam dos dois lados do recorte.
 - Aquisição única dos pilotos (H8-a): `lib.indicator_extraction --pilotos` roda cada A1 uma vez sobre o universo nacional (staging descartado) e entrega o A2 filtrado para cada piloto; `tools/executar_pilotos.py --capacidade ocde` usa esse modo, e `--validar` roda a validação integrada por piloto.
 - Trava da suíte: com `PGD_BLOQUEAR_DENODO=1` (definida pelo `conftest`) `lib.denodo_config.connect` recusa qualquer conexão, também nos A1 em subprocesso.
 - `config/unidades-piloto.json` versão 2: `id_petrvs` de CGOV, COCAGE e GR2 conferidos na fonte; execução real e aceite conferem o cadastro contra a hierarquia atual.

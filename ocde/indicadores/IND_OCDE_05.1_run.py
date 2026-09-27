@@ -25,6 +25,7 @@ import sys
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.arredondamento import arredondar  # D24: meio para cima
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
@@ -152,11 +153,11 @@ def distribuicao_estatistica(
         )
         linhas.append(list(chave) + [
             total,
-            round(sum(ordenados) / total, 2),
-            round(mediana, 2),
-            round(_quantil(ordenados, 0.25), 2),
-            round(_quantil(ordenados, 0.75), 2),
-            round(100.0 * zerados / total, 2),
+            arredondar(sum(ordenados) / total, 2),
+            arredondar(mediana, 2),
+            arredondar(_quantil(ordenados, 0.25), 2),
+            arredondar(_quantil(ordenados, 0.75), 2),
+            arredondar(100.0 * zerados / total, 2),
         ])
     linhas.sort(key=lambda linha: (linha[1], linha[n_meta]))
     return meta_cols + COLUNAS_V2, linhas
@@ -183,8 +184,8 @@ def main() -> None:
             try:
                 columns, rows = query_rows(conn, sql)
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I05 {label}: {exc}") from exc
             if all_cols is None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1

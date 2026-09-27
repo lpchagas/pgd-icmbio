@@ -30,6 +30,7 @@ def fixtures_dir() -> Path:
 
 
 HIERARQUIA_SINTETICA = FIXTURES_DIR / "escopo" / "PETRVS_unidades.csv"
+ESTRUTURA_SINTETICA = FIXTURES_DIR / "escopo" / "ICMBIO_estrutura.csv"
 
 
 @pytest.fixture(autouse=True)
@@ -54,7 +55,12 @@ def hierarquia_petrvs_sintetica(monkeypatch):
     from lib import liberacao
     from lib.unidades_petrvs import carregar_hierarquia
 
+    from lib.estrutura_organizacional import load_organization_structure
+
     hierarquia = carregar_hierarquia(HIERARQUIA_SINTETICA)
     monkeypatch.setattr(escopo, "carregar_hierarquia", lambda *a: hierarquia)
     monkeypatch.setattr(liberacao, "carregar_hierarquia", lambda *a: hierarquia)
+    # Trava D19: a estrutura oficial também é sintética (sem dicionário = sem conflito).
+    estrutura = load_organization_structure(ESTRUTURA_SINTETICA, ESTRUTURA_SINTETICA.parent / "sem-dicionario.csv")
+    monkeypatch.setattr(escopo, "load_organization_structure", lambda *a: estrutura)
     return hierarquia

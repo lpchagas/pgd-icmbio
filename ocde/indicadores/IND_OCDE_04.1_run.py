@@ -150,8 +150,8 @@ def main() -> None:
             try:
                 columns, rows = query_rows(conn, sql)
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I04 {label}: {exc}") from exc
             if all_cols is None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1

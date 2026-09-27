@@ -5,8 +5,12 @@
 gerencial, pelo ``gestao.runner`` e pelo ``validation_runner``. Regras (plano §7.1):
 
 - a subordinação segue a hierarquia do **PETRVS** (``unidade_pai_id``), lida do
-  retrato local ``PETRVS_unidades.csv`` (decisão de 26/09/2026, provisória até a
-  deliberação da Q1 pela CGOV); sem o retrato, esses seletores são **erro**;
+  retrato local ``PETRVS_unidades.csv`` (decisão CGOV D19); sem o retrato, esses
+  seletores são **erro**;
+- **trava de divergência (D19):** o recorte regional é recusado quando uma unidade
+  mapeada no dicionário CGOV cai em regionais diferentes no PETRVS e na estrutura
+  oficial, até a conciliação constar de ``config/conciliacoes-unidades.json`` (D20).
+  Unidades sem mapeamento seguem o PETRVS e só são contadas (cobertura);
 - unidade inexistente é **erro** (nunca produto vazio);
 - sigla repetida no PETRVS é **erro** quando as homônimas ficam dos dois lados do
   recorte (o filtro dos produtos é por sigla e não conseguiria separá-las); quando
@@ -20,13 +24,17 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import json
 import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Mapping
 
-from lib.estrutura_organizacional import DEFAULT_ESTRUTURA_CSV, load_organization_structure
+from lib.caminhos import PROJECT_ROOT
+from lib.estrutura_organizacional import (
+    DEFAULT_ESTRUTURA_CSV, OrganizationStructure, load_organization_structure,
+)
 from lib.escopos import slug
 from lib.unidades_petrvs import HierarquiaPetrvs, UnidadePetrvs, carregar_hierarquia
 
@@ -55,6 +63,10 @@ class ScopeSpec:
     # Escopo resolvido (plano §7.1): ids do PETRVS em ordem (raiz primeiro, depois
     # descendentes em largura). Vazio para nacional e para seletores por rótulo.
     ids: tuple[str, ...] = ()
+    # D19/D20 (só regional): siglas conciliadas aplicadas e unidades sem mapeamento
+    # no dicionário CGOV (seguem o PETRVS; entram no relatório de cobertura).
+    conciliadas: tuple[str, ...] = ()
+    sem_mapeamento: tuple[str, ...] = ()
 
     @property
     def key(self) -> str:
@@ -163,7 +175,66 @@ def scope_from_values(
     _recusar_siglas_divididas(hierarquia, selecionadas)
     siglas = frozenset(normalize(unidade.sigla) for unidade in selecionadas if unidade.sigla)
     safe_value = "LISTA_FORNECIDA" if kind == "lista_unidades" else normalize(value)
-    return ScopeSpec(kind, safe_value, siglas, tuple(unidade.id for unidade in selecionadas))
+    conciliadas: tuple[str, ...] = ()
+    sem_mapeamento: tuple[str, ...] = ()
+    if kind == "regional":
+        conciliadas, sem_mapeamento = _trava_de_divergencia(normalize(value), hierarquia, siglas)
+    return ScopeSpec(kind, safe_value, siglas, tuple(unidade.id for unidade in selecionadas),
+                     conciliadas, sem_mapeamento)
+
+
+CONCILIACOES = PROJECT_ROOT / "config" / "conciliacoes-unidades.json"
+
+
+def carregar_conciliacoes(caminho: Path | None = None) -> dict[str, set[str]]:
+    """{regional: siglas PETRVS conciliadas} do registro versionado (D20)."""
+
+    caminho = caminho or CONCILIACOES
+    if not caminho.is_file():
+        return {}
+    dados = json.loads(caminho.read_text(encoding="utf-8"))
+    resultado: dict[str, set[str]] = {}
+    for item in dados.get("conciliacoes", []):
+        resultado.setdefault(normalize(item["regional"]), set()).add(normalize(item["sigla_petrvs"]))
+    return resultado
+
+
+def _trava_de_divergencia(
+    regional: str, hierarquia: HierarquiaPetrvs, siglas: frozenset[str],
+    estrutura: OrganizationStructure | None = None,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    """D19: recusa o recorte regional com unidade mapeada em regionais diferentes.
+
+    Conflito é uma unidade ligada pelo dicionário CGOV a um ``icmbio_id`` que está
+    de um lado do recorte no PETRVS e do outro na estrutura oficial. Siglas do
+    dicionário que não existem no PETRVS não geram conflito (não têm dados).
+    """
+
+    estrutura = estrutura or load_organization_structure()
+    if not estrutura.units_by_id:
+        raise EscopoInvalido(
+            "A trava de divergência (D19) exige a estrutura oficial (ICMBIO_estrutura.csv) "
+            "para o recorte regional."
+        )
+    raiz = estrutura.unit_for_sigla(regional)
+    if raiz is None:
+        raise EscopoInvalido(f"Regional {regional} não localizada na estrutura oficial (trava D19).")
+    dentro_estrutura = {unidade.icmbio_id for unidade in estrutura.descendants(raiz.icmbio_id)}
+    mapa = {normalize(sigla): identificador for sigla, identificador in estrutura.petrvs_to_id.items()}
+    existentes = {normalize(u.sigla) for u in hierarquia.unidades.values() if u.sigla}
+    conflitos = {sigla for sigla in siglas if sigla in mapa and mapa[sigla] not in dentro_estrutura}
+    conflitos |= {
+        sigla for sigla, identificador in mapa.items()
+        if identificador in dentro_estrutura and sigla in existentes and sigla not in siglas
+    }
+    conciliadas = carregar_conciliacoes().get(regional, set())
+    pendentes = sorted(conflitos - conciliadas)
+    if pendentes:
+        raise EscopoInvalido(
+            f"Recorte {regional} recusado pela trava de divergência (D19): unidade(s) em regionais "
+            f"diferentes no PETRVS e na estrutura oficial, sem conciliação registrada: {', '.join(pendentes)}"
+        )
+    return tuple(sorted(conflitos & conciliadas)), tuple(sorted(s for s in siglas if s not in mapa))
 
 
 def _unidade_unica(hierarquia: HierarquiaPetrvs, sigla: str) -> UnidadePetrvs:

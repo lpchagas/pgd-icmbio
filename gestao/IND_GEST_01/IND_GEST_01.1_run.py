@@ -386,6 +386,16 @@ def main() -> None:
     cols, rows = cols[1:], [row[1:] for row in rows]
 
     idx = {name: i for i, name in enumerate(cols)}
+    # D26: plano com fim anterior ao início é dado inválido na origem. O G01 não usa
+    # essas datas em nenhuma métrica (a duração vem da trilha de status); o registro
+    # segue no painel e é contado como alerta para correção no PETRVS.
+    invertidos = sum(
+        1 for row in rows
+        if row[idx["plano_inicio"]] and row[idx["plano_fim"]]
+        and str(row[idx["plano_fim"]])[:10] < str(row[idx["plano_inicio"]])[:10]
+    )
+    if invertidos:
+        print(f"  ALERTA_QUALIDADE (D26): {invertidos} plano(s) com data de fim anterior à de início.")
     derivadas = ["status_negocio", "data_ultima_mudanca_status", "origem_data_status",
                  "dias_no_status_atual", "acao_sugerida"]
     personal_columns = {"id_servidor", "servidor_nome", "status_alterado_por"}

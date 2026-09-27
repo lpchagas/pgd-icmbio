@@ -23,7 +23,7 @@
           "21",
           "12",
           "97.95",
-          "Destaque pontual",
+          "Desempenho diferenciado",
           "0"
         ],
         [
@@ -33,27 +33,27 @@
           "10",
           "9",
           "96.41",
-          "Reconhecimento elevado",
+          "Uso baixo da nota máxima",
           "1"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
+          "19",
           "16",
           "16",
-          "2",
           "",
-          "Destaque pontual",
-          "1"
+          "Desempenho diferenciado",
+          "0"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
+          "5",
           "19",
           "22",
-          "19",
-          "84.86",
-          "Destaque pontual",
+          "71.13",
+          "Desempenho diferenciado",
           "1"
         ]
       ]
@@ -80,7 +80,7 @@
           "15",
           "9",
           "",
-          "Escala subutilizada",
+          "Destaque pontual",
           "1"
         ],
         [
@@ -90,7 +90,7 @@
           "15",
           "20",
           "40.67",
-          "Desempenho diferenciado",
+          "Reconhecimento elevado",
           "1"
         ],
         [
@@ -100,7 +100,7 @@
           "23",
           "22",
           "11.41",
-          "Reconhecimento elevado",
+          "Amostra insuficiente",
           "0"
         ],
         [
@@ -110,7 +110,7 @@
           "6",
           "8",
           "30.06",
-          "Reconhecimento elevado",
+          "Uso baixo da nota máxima",
           "1"
         ]
       ]
@@ -133,41 +133,41 @@
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
+          "16",
           "23",
           "4",
-          "2",
-          "44.71",
-          "Escala subutilizada",
+          "",
+          "Destaque pontual",
           "0"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
+          "23",
+          "14",
           "22",
-          "5",
-          "6",
-          "45.72",
-          "Escala subutilizada",
+          "69.71",
+          "Destaque pontual",
           "0"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
+          "21",
           "5",
           "3",
-          "4",
-          "62.51",
-          "Escala subutilizada",
+          "81.25",
+          "Uso baixo da nota máxima",
           "0"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
+          "8",
           "2",
           "7",
-          "23",
-          "63.14",
-          "Desempenho diferenciado",
+          "40.26",
+          "Amostra insuficiente",
           "1"
         ]
       ]
@@ -190,42 +190,42 @@
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
+          "6",
+          "11",
           "24",
-          "19",
-          "18",
-          "",
-          "Escala subutilizada",
-          "1"
+          "6.03",
+          "Uso baixo da nota máxima",
+          "0"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
+          "12",
           "16",
           "18",
-          "22",
-          "33.66",
-          "Reconhecimento elevado",
-          "0"
+          "40.18",
+          "Desempenho diferenciado",
+          "1"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
+          "3",
+          "6",
           "14",
-          "7",
-          "9",
-          "",
-          "Escala subutilizada",
+          "93.02",
+          "Amostra insuficiente",
           "0"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
+          "12",
           "0",
           "10",
-          "11",
-          "50.98",
-          "Escala subutilizada",
-          "1"
+          "42.42",
+          "Amostra insuficiente",
+          "0"
         ]
       ]
     },
@@ -247,41 +247,41 @@
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
-          "6",
-          "3",
-          "7",
-          "11.54",
-          "Reconhecimento elevado",
-          "0"
+          "4",
+          "10",
+          "13",
+          "88.51",
+          "Amostra insuficiente",
+          "1"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
-          "6",
-          "7",
-          "24",
-          "51.32",
-          "Desempenho diferenciado",
+          "3",
+          "15",
+          "0",
+          "29.71",
+          "Reconhecimento elevado",
           "1"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
-          "0",
-          "22",
-          "0",
-          "58.64",
-          "Escala subutilizada",
+          "16",
+          "4",
+          "19",
+          "82.68",
+          "Amostra insuficiente",
           "1"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
-          "3",
-          "8",
-          "12",
-          "39.02",
-          "Desempenho diferenciado",
+          "18",
+          "0",
+          "14",
+          "20.17",
+          "Amostra insuficiente",
           "1"
         ]
       ]
@@ -304,42 +304,42 @@
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
-          "8",
           "12",
           "5",
-          "82.06",
-          "Escala subutilizada",
-          "1"
+          "12",
+          "0.61",
+          "Reconhecimento elevado",
+          "0"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
-          "6",
           "10",
-          "3",
-          "24.84",
-          "Escala subutilizada",
+          "14",
+          "16",
+          "86.27",
+          "Amostra insuficiente",
           "1"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
-          "18",
-          "3",
-          "21",
-          "36.80",
-          "Escala subutilizada",
+          "8",
+          "7",
+          "6",
+          "2.79",
+          "Uso baixo da nota máxima",
           "1"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
-          "8",
-          "25",
-          "5",
-          "53.36",
+          "11",
+          "15",
+          "17",
+          "15.27",
           "Desempenho diferenciado",
-          "0"
+          "1"
         ]
       ]
     },
@@ -361,42 +361,42 @@
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
-          "12",
-          "6",
-          "23",
-          "15.17",
+          "4",
+          "22",
+          "5",
+          "74.31",
           "Destaque pontual",
           "0"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
-          "15",
-          "8",
-          "9",
-          "26.12",
+          "6",
+          "23",
+          "21",
+          "93.81",
           "Desempenho diferenciado",
-          "1"
+          "0"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
-          "10",
-          "4",
-          "2",
-          "60.80",
-          "Escala subutilizada",
+          "15",
+          "8",
+          "9",
+          "26.12",
+          "Reconhecimento elevado",
           "1"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
-          "3",
-          "4",
           "10",
-          "77.64",
+          "4",
+          "2",
+          "60.80",
           "Destaque pontual",
-          "0"
+          "1"
         ]
       ]
     },
@@ -418,42 +418,42 @@
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
-          "6",
-          "8",
-          "6",
-          "",
-          "Destaque pontual",
-          "1"
+          "3",
+          "4",
+          "10",
+          "77.64",
+          "Uso baixo da nota máxima",
+          "0"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
-          "2",
-          "22",
-          "19",
-          "68.78",
-          "Destaque pontual",
+          "4",
+          "6",
+          "8",
+          "22.21",
+          "Desempenho diferenciado",
           "1"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
-          "4",
-          "7",
-          "7",
-          "0.98",
-          "Escala subutilizada",
-          "0"
+          "2",
+          "22",
+          "19",
+          "68.78",
+          "Desempenho diferenciado",
+          "1"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
-          "15",
-          "16",
-          "23",
-          "",
-          "Desempenho diferenciado",
-          "1"
+          "4",
+          "7",
+          "7",
+          "0.98",
+          "Destaque pontual",
+          "0"
         ]
       ]
     },
@@ -475,41 +475,41 @@
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
-          "25",
-          "11",
-          "0",
-          "44.37",
-          "Escala subutilizada",
-          "0"
+          "15",
+          "16",
+          "23",
+          "",
+          "Uso baixo da nota máxima",
+          "1"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
-          "0",
-          "24",
-          "9",
-          "10.33",
-          "Escala subutilizada",
+          "6",
+          "18",
+          "25",
+          "29.14",
+          "Destaque pontual",
           "0"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
-          "3",
+          "8",
+          "0",
           "24",
-          "22",
-          "73.20",
-          "Desempenho diferenciado",
+          "78.11",
+          "Reconhecimento elevado",
           "1"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
-          "23",
-          "23",
-          "12",
-          "93.13",
-          "Destaque pontual",
+          "9",
+          "22",
+          "1",
+          "77.02",
+          "Reconhecimento elevado",
           "0"
         ]
       ]

@@ -1,7 +1,7 @@
 """Hierarquia das unidades do PETRVS (``unidade_pai_id``) para resolver escopos (L7).
 
-Decisão do responsável (26/09/2026, provisória até a CGOV deliberar a Q1 — fonte
-primária da taxonomia): os seletores ``regional``, ``unidade`` e ``lista_unidades``
+Decisão CGOV D19 (27/09/2026), com trava de divergência e conciliação registrada
+(D20): os seletores ``regional``, ``unidade`` e ``lista_unidades``
 seguem a hierarquia do próprio PETRVS, de onde vêm os PE e os PT. A estrutura
 oficial (``ICMBIO_estrutura.csv``) continua servindo aos rótulos de mesogrupo e tipo.
 

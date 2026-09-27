@@ -214,13 +214,25 @@ def gerar(alvo: str, data_execucao: str = DATA_EXECUCAO) -> dict:
             linhas.append(linha)
         if alvo == "I07":
             _ajustar_i07(linhas, rng, inicio, fim)
-        consultas.append({
+        principal = {
             "periodo": rotulo,
             "inicio": inicio.isoformat(),
             "fim": fim.isoformat(),
             "colunas": colunas,
             "linhas": [[linha[c] for c in colunas] for linha in linhas],
-        })
+        }
+        if alvo == "I03":
+            # D22 (3.0.0): consulta de contagem do alerta no mesmo período; o marcador
+            # separa as duas consultas (a referência anterior só emite a principal).
+            principal["nao_contem"] = ["AS qtd"]
+        consultas.append(principal)
+        if alvo == "I03":
+            consultas.append({
+                "periodo": rotulo, "nome": "alerta_d22", "opcional": True,
+                "inicio": inicio.isoformat(), "fim": fim.isoformat(),
+                "contem": ["AS qtd"], "colunas": ["qtd"],
+                "linhas": [["0" if quantidade == 0 else "2"]],
+            })
     return {
         "descricao": (f"Linhas congeladas sintéticas do {alvo} para o replay offline (data de execução "
                       f"{data_execucao}). Geradas por tools/gerar_fixtures_replay.py. Sem dados reais."),

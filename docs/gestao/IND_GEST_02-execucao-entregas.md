@@ -1,5 +1,10 @@
 # G02 — Execução das Entregas
 
+> **Decisão CGOV D27 (27.09.2026).** O produto compartilhável passa a ter validação
+> independente: toda célula visível tem k≥5, nenhuma célula abaixo de k aparece, a
+> supressão complementar é conferida por unidade e os valores visíveis batem com o
+> oracle. A fórmula continua na 1.0.0.
+
 | Campo | Definição |
 | --- | --- |
 | Código/namespace | `G02` / `IND_GEST_02` |

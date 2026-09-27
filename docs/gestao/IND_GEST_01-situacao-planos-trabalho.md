@@ -1,5 +1,10 @@
 # G01 — Situação dos Planos de Trabalho
 
+> **Decisão CGOV D26 (27.09.2026).** Plano de trabalho com data de fim anterior à de
+> início é dado inválido na origem: segue no painel, é contado num alerta de
+> qualidade e deixa de bloquear a validação. O G01 não usa essas datas em nenhuma
+> métrica (a duração vem da trilha de status); a fórmula continua na 4.0.0.
+
 | Campo | Valor |
 | --- | --- |
 | Código lógico | `G01` (até 13.09.2026: `PT_STATUS`, ainda aceito como alias na CLI) |

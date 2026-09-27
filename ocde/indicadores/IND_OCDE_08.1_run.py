@@ -54,6 +54,7 @@ import sys
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.arredondamento import arredondar  # D24: meio para cima
 from lib.calendario import dias_uteis
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
@@ -225,9 +226,15 @@ def _agregar_visao(
     sigla_col: str,
     nome_col: str,
 ) -> list[list]:
-    """Agrega horas por (unidade, entrega) sob uma das duas perspectivas da D10."""
+    """Agrega horas por (unidade, entrega) sob uma das duas perspectivas da D10.
+
+    D25: o vínculo plano de trabalho × entrega conta uma vez; vínculos repetidos no
+    PETRVS são ignorados no cálculo e contados como alerta de qualidade.
+    """
 
     acumulado: dict[tuple[str, str, str, str], float] = {}
+    vistos: set[tuple] = set()
+    duplicados = 0
     for row in rows:
         registro = dict(zip(columns, row))
         chave = (
@@ -236,15 +243,22 @@ def _agregar_visao(
             str(registro.get("id_entrega", "")),
             str(registro.get("nome_entrega", "N.I.")),
         )
+        vinculo = (chave, str(registro.get("plano_trabalho_id")))
+        if vinculo in vistos:
+            duplicados += 1
+            continue
+        vistos.add(vinculo)
         acumulado[chave] = acumulado.get(chave, 0.0) + horas_alocadas(registro)
+    if duplicados:
+        print(f"  ALERTA_QUALIDADE (D25): {duplicados} vínculo(s) plano de trabalho × entrega repetido(s) ignorado(s) na visão {sigla_col}.")
 
     agregadas = []
     for (sigla, nome, id_entrega, nome_entrega), horas in acumulado.items():
         disponivel = capacidade.get(sigla, 0.0)
         agregadas.append([
             sigla, nome, id_entrega, nome_entrega,
-            round(horas, 2), round(disponivel, 2),
-            round(100.0 * horas / disponivel, 2) if disponivel else 0.0,
+            arredondar(horas, 2), arredondar(disponivel, 2),
+            arredondar(100.0 * horas / disponivel, 2) if disponivel else 0.0,
         ])
     agregadas.sort(key=lambda linha: (linha[0], -linha[6]))
     return agregadas
@@ -278,8 +292,8 @@ def main() -> None:
                     conn, SQL_I08.replace("{ini}", str(start)).replace("{fim}", str(end))
                 )
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I08 {label}: {exc}") from exc
 
             capacidade = capacidades(cap_cols, cap_rows)
             meta = [kind, label, str(start), str(scheduled_end), str(end), status,
