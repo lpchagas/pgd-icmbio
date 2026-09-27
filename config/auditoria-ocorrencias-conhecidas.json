@@ -1,0 +1,494 @@
+{
+  "versao": 1,
+  "descricao": "Ocorrências da auditoria de segurança já revisadas (falsos positivos, fixtures sintéticas e caminhos que existem só no histórico mantido). Valor exato, CPF válido e dump nunca entram aqui. Acrescentar um item exige revisão na PR.",
+  "revisado_em": "2026-09-27",
+  "ocorrencias": [
+    {
+      "alvo": "historico",
+      "arquivo": "docs/06.1.1-i01.md",
+      "blob": "git:6c12d5368fbb",
+      "linha": 433,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/06.1.1-i01.md",
+      "blob": "git:6c12d5368fbb",
+      "linha": 442,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/06.1.1-i01.md",
+      "blob": "git:bf7783fe3cca",
+      "linha": 401,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/06.1.1-i01.md",
+      "blob": "git:bf7783fe3cca",
+      "linha": 410,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:76edc0f374ce",
+      "linha": 434,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:76edc0f374ce",
+      "linha": 443,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:9be337cd7f9a",
+      "linha": 200,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:9be337cd7f9a",
+      "linha": 209,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:a09cadbab2f0",
+      "linha": 204,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:a09cadbab2f0",
+      "linha": 213,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:f893d12965d9",
+      "linha": 200,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "docs/ocde/06.1.1-i01.md",
+      "blob": "git:f893d12965d9",
+      "linha": 209,
+      "regra": "detect-secrets:Artifactory Credentials",
+      "justificativa": "Sigla de unidade (APA...) em título de exemplo, confundida com token do Artifactory; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_privacidade.py",
+      "blob": "git:68e6dbfdb7fe",
+      "linha": 33,
+      "regra": "detect-secrets:Hex High Entropy String",
+      "justificativa": "Digest sintético de fixture de teste; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_privacidade.py",
+      "blob": "git:7ea517ff339e",
+      "linha": 30,
+      "regra": "detect-secrets:Hex High Entropy String",
+      "justificativa": "Digest sintético de fixture de teste; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_privacidade.py",
+      "blob": "git:85e868492b14",
+      "linha": 34,
+      "regra": "detect-secrets:Hex High Entropy String",
+      "justificativa": "Digest sintético de fixture de teste; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_privacidade.py",
+      "blob": "git:eb7f5d0c5b59",
+      "linha": 33,
+      "regra": "detect-secrets:Hex High Entropy String",
+      "justificativa": "Digest sintético de fixture de teste; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:91b330b8cb2e",
+      "linha": 695,
+      "regra": "detect-secrets:Base64 High Entropy String",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:91b330b8cb2e",
+      "linha": 696,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:91b330b8cb2e",
+      "linha": 697,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:91b330b8cb2e",
+      "linha": 698,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:9cd76069c647",
+      "linha": 15,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:9cd76069c647",
+      "linha": 33,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:fbc17d1ffb5b",
+      "linha": 695,
+      "regra": "detect-secrets:Base64 High Entropy String",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:fbc17d1ffb5b",
+      "linha": 696,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:fbc17d1ffb5b",
+      "linha": 697,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "historico",
+      "arquivo": "tests/unit/test_security_audit.py",
+      "blob": "git:fbc17d1ffb5b",
+      "linha": 698,
+      "regra": "detect-secrets:Secret Keyword",
+      "justificativa": "Valor sintético de fixture dos testes do auditor; falso positivo"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I01_proporcao_regime_trabalho.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I02_taxa_cumprimento_entregas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I03_taxa_cumprimento_metas_por_entrega.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I04_indice_atingimento_metas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I05_distribuicao_entregas_servidores.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I06_grau_responsabilidade_entregas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I07_horas_por_entrega_absoluto.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I08_proporcao_horas_por_entrega.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I09_media_avaliacao_pt_por_unidade.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I10_perc_avaliacoes_inadequadas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I11_perc_avaliacoes_excepcionais.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/I12_coerencia_avaliacoes_pt_pe.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/indicadores_ocde_pgd_icmbio_mysql_direto.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "Consultas SQL/indicadores_ocde_pgd_icmbio_mysql_guiado.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "cgov/README.md",
+      "origem": [
+        "historico"
+      ],
+      "regra": "area_privada",
+      "justificativa": "Área privada presente só no histórico antigo; conteúdo revisado (só placeholders); histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "cgov/analises/objetivos_processos/README.md",
+      "origem": [
+        "historico"
+      ],
+      "regra": "area_privada",
+      "justificativa": "Área privada presente só no histórico antigo; conteúdo revisado (só placeholders); histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I01_proporcao_regime_trabalho.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I02_taxa_cumprimento_entregas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I03_taxa_cumprimento_metas_por_entrega.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I04_indice_atingimento_metas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I05_distribuicao_entregas_servidores.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I06_grau_responsabilidade_entregas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I07_horas_por_entrega_absoluto.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I08_proporcao_horas_por_entrega.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I09_media_avaliacao_pt_por_unidade.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I10_perc_avaliacoes_inadequadas.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I11_perc_avaliacoes_excepcionais.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "consultas_SQL_usoDBeaver/I12_coerencia_avaliacoes_pt_pe.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Consulta SQL legada dos indicadores, só no histórico e sem credenciais; histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "setup/configurar_env.ps1",
+      "origem": [
+        "historico"
+      ],
+      "regra": "area_privada",
+      "justificativa": "Área privada presente só no histórico antigo; conteúdo revisado (só placeholders); histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "setup/criar_links_privados.ps1",
+      "origem": [
+        "historico"
+      ],
+      "regra": "area_privada",
+      "justificativa": "Área privada presente só no histórico antigo; conteúdo revisado (só placeholders); histórico mantido (H9)"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "src/dados/schema.sql",
+      "origem": [
+        "historico"
+      ],
+      "regra": "sql_fora_da_excecao",
+      "justificativa": "Schema do agente antes da mudança para agente/dados (L3); só no histórico"
+    }
+  ]
+}

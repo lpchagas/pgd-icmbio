@@ -20,10 +20,10 @@ Nunca publicar:
 Podem ser publicadas, após revisão:
 
 ```text
-README.md
+README.md, CHANGELOG.md, CLAUDE.md, AGENTS.md, PROJECT.md
 .env.example
-docs/
-scripts/
+docs/ capacidades/ config/
+lib/ ocde/ gestao/ mgi/ relatorios/ agente/ tools/ tests/
 ```
 
 **Não** devem ser publicadas:
@@ -68,13 +68,14 @@ python -m tools.security_audit --alvos todos --perfil monorepo --env .env --out 
 - `completo_com_ocorrencia` (saída 1) e `incompleto` (saída 2) bloqueiam a
   publicação.
 - Sem `--env`, o modo de valor exato fica `incompleto`.
+- Ocorrências **já revisadas** (falsos positivos, fixtures sintéticas e caminhos que só existem no histórico mantido) ficam em `config/auditoria-ocorrencias-conhecidas.json`, com justificativa, e não contam para o status. Valor exato do `.env`, CPF válido e dump nunca podem entrar nessa lista. Acrescentar um item exige revisão na PR; o relatório aponta os itens que deixaram de aparecer.
 - O relatório não contém segredos, mas lista caminhos e linhas: por isso fica no
   acervo privado.
 
 Como checagem rápida e complementar, rode também:
 
 ```powershell
-rg -n --hidden "PASS|PASSWORD|SENHA|CPF|DENODO_USER|DENODO_PASSWORD|[0-9]{11}|jdbc:denodo" README.md docs scripts .env.example
+rg -n --hidden "PASS|PASSWORD|SENHA|CPF|DENODO_USER|DENODO_PASSWORD|[0-9]{11}|jdbc:denodo" README.md docs lib ocde gestao relatorios tools agente .env.example
 ```
 
 Resultados esperados da checagem rápida:
@@ -103,11 +104,11 @@ Se `CLAUDE.md`, `AGENTS.md` ou `PROJECT.md` estiverem na lista, confira a sincro
 
 ## 5. Regras para scripts públicos
 
-Scripts em `scripts/` devem:
+Scripts em `lib/`, `ocde/`, `gestao/`, `relatorios/`, `tools/` e `agente/` devem:
 
 - ler credenciais somente de `.env` via `lib/denodo_config.py`;
 - usar helpers de `lib/`;
-- salvar saídas em `artefatos_local/` (nunca em `scripts/`);
+- salvar saídas em `artefatos_local/` (nunca em pastas versionadas);
 - aceitar `--dry-run` para validar configuração sem conectar ao Denodo;
 - não conter CPF, senha ou caminho local pessoal;
 - não incorporar linhas reais de CSV ou exemplos com dados pessoais.

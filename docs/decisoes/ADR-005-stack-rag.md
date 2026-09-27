@@ -50,5 +50,5 @@ A stack permanece vigente, mas “documentos oficiais” não significa indexar 
 O acervo passou a ter 55 conteúdos únicos, incluindo duplicatas físicas, normas alteradas,
 manuais dependentes de versão, transcrições com nomes e evidências individuais. A allowlist,
 as camadas de autoridade, o saneamento e as exclusões obrigatórias estão definidos em
-[`../fontes-institucionais.md`](../governanca-projeto/fontes-institucionais.md). I03 bruto, P01–P08,
+[`docs/governanca-projeto/fontes-institucionais.md`](../governanca-projeto/fontes-institucionais.md). I03 bruto, P01–P08,
 R01–R09 e C02 ficam fora do RAG; normas em PDF de imagem exigem OCR revisado.

@@ -49,7 +49,7 @@ Para testes, use `requirements-dev.txt`.
 Prévia sem gravação e sem Denodo:
 
 ```bash
-.venv/bin/python -m ocde.relatorios.relatorio_cumulativo \
+.venv/bin/python -m relatorios.relatorio_cumulativo \
   --data-execucao 2026-09-11 --regional GR2
 ```
 
@@ -57,7 +57,7 @@ Execução completa, reextraindo do Denodo e gerando Markdown, CSVs, manifesto e
 PDF:
 
 ```bash
-.venv/bin/python -m ocde.relatorios.relatorio_cumulativo \
+.venv/bin/python -m relatorios.relatorio_cumulativo \
   --data-execucao 2026-09-11 --regional GR2 --reextrair --salvar --pdf
 ```
 
@@ -138,7 +138,7 @@ para `expansao_nacional_obrigatoria`; não conclui o projeto.
 Depois, executar e reconciliar o nacional:
 
 ```bash
-.venv/bin/python -m ocde.relatorios.relatorio_cumulativo \
+.venv/bin/python -m relatorios.relatorio_cumulativo \
   --data-execucao 2026-09-11 --escopo nacional --reextrair --salvar --pdf \
   --aprovar-nacional --reconciliar-nacional
 ```

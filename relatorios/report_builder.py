@@ -97,5 +97,5 @@ def rodape(mes_label: str, unidade: Optional[str]) -> str:
         f"_Relatório gerado automaticamente a partir dos CSVs em "
         f"`artefatos_local/ocde/entregas/{mes_label}/`. "
         f"Escopo: {escopo}. "
-        f"Para dúvidas sobre metodologia, consultar `docs/06-indicadores-ocde-mysql.md`._\n"
+        f"Para dúvidas sobre metodologia, consultar `docs/ocde/06-indicadores-ocde-denodo.md`._\n"
     )

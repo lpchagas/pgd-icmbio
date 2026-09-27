@@ -37,5 +37,5 @@ O peso 0,33 por período sempre esteve correto; o rótulo é que não.
 O calendário também foi decidido em 14.09.2026 (C-01 / RP20 / Q17): as datas
 acima são definitivas e **o Q2 termina sempre em 31/08**. A página da CGGE, com
 faixas inconsistentes, não é usada — ver
-[`../05_plano-skills-execucao-avaliacao_v1.md`](../../agente/skills/05_plano-skills-execucao-avaliacao_v1.md),
+[`agente/skills/05_plano-skills-execucao-avaliacao_v1.md`](../../agente/skills/05_plano-skills-execucao-avaliacao_v1.md),
 seção de conflitos.

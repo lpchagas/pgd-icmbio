@@ -134,6 +134,17 @@ Causa mais provável: o IP da sua máquina não está liberado no Denodo. Verifi
 
 O Denodo não é um banco convencional — o DBeaver baixa o driver na primeira conexão. Se o download falhar, verifique o acesso à internet e tente novamente. O driver também pode ser baixado manualmente em [community.denodo.com/drivers/jdbc/9](https://community.denodo.com/drivers/jdbc/9/denodo-vdp-jdbcdriver).
 
+### Os scripts Python não encontram o driver (`.jar`)
+
+Os scripts (JPype/JDBC) usam o mesmo driver que o DBeaver baixou, mas o DBeaver o grava **sem extensão**. Crie uma cópia com extensão `.jar` — e repita depois de cada atualização do driver pelo DBeaver:
+
+```powershell
+$dir = "$env:APPDATA\DBeaverData\drivers\remote\drivers\jdbc\9"
+Copy-Item "$dir\denodo-vdp-jdbcdriver" "$dir\denodo-vdp-jdbcdriver.jar" -Force
+```
+
+O caminho da cópia vai para `DENODO_DRIVER_PATH` no `.env` (o `setup\configurar_env.ps1`, privado, detecta-o automaticamente).
+
 ### Erro de autenticação (usuário/senha inválidos)
 
 Confirme com o gestor responsável se suas credenciais estão ativas. Credenciais do Denodo são individuais e fornecidas pelo responsável do projeto em cada órgão.

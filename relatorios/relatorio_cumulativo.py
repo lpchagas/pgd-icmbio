@@ -232,6 +232,21 @@ Janela analítica {window_text} · edição {window.mes_execucao} · conteúdo a
 """
 
 
+def reextrair_indicadores(window) -> None:
+    """``--reextrair``: roda os A1 OCDE do contrato na área de saída já apontada por
+    ``PGD_INDICATOR_OUTPUT_BASE`` (temporária, em memória).
+
+    Antes do L4e, chamava um driver de skill privado e inexistente no repositório.
+    Falha de qualquer A1 interrompe o relatório (D33).
+    """
+    for target in TARGETS.values():
+        if target.family != "ocde":
+            continue
+        command = [sys.executable, str(target.production_entrypoint),
+                   "--data-execucao", window.data_execucao.isoformat(), "--month", window.mes_execucao]
+        subprocess.run(command, cwd=PROJECT_ROOT, env=os.environ.copy(), check=True)
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     window = configure_execution_context(args.data_execucao)
@@ -253,10 +268,7 @@ def main(argv: list[str] | None = None) -> int:
             raise RuntimeError("A reextração anonimizada exige uma área temporária em memória (/dev/shm ou PGD_VOLATILE_TMP).")
         temporary_source = tempfile.TemporaryDirectory(prefix="pgd-relatorio-", dir=memory_root)
         os.environ["PGD_INDICATOR_OUTPUT_BASE"] = temporary_source.name
-        driver = PROJECT_ROOT / ".codex" / "skills" / "extrair-indicadores" / "driver.py"
-        command = [sys.executable, str(driver), "--mes", window.mes_execucao,
-                   "--data-execucao", window.data_execucao.isoformat()]
-        subprocess.run(command, cwd=PROJECT_ROOT, env=os.environ.copy(), check=True)
+        reextrair_indicadores(window)
 
     month_dir = (
         Path(temporary_source.name) / window.mes_execucao

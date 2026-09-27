@@ -59,4 +59,4 @@ para a Fase 3 (`/p4-gerar-a4`) — diagnóstico técnico e elaboração do
 relatório A5 (`IND_OCDE_XX.5_relatorio_validacao_DD.MM.AAAA.md` em
 `artefatos_local/validacao/`). **Um indicador só deve ser marcado ✅ em
 o registro institucional de homologação depois que o A5 correspondente existir nessa
-pasta** — ver `tests/regression/test_claude_md_consistency.py`.
+pasta** — ver o [protocolo de validação](../indicadores/protocolo-validacao.md).

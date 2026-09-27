@@ -63,7 +63,7 @@ bloqueante. Seu anexo nominal é exclusivo do produto restrito.
 ## 4. Como executar
 
 ```powershell
-cd "C:\Projetos\pgd-ocde-icmbio"
+cd "C:\Projetos\pgd-icmbio"
 
 # Todos os indicadores de gestão registrados, com manifesto
 python -m gestao.runner --analise todas --data-execucao 2026-09-13 --regional GR2 --produto restrito
@@ -83,7 +83,7 @@ As saídas ficam em `artefatos_local/gestao/AAAA-MM/escopos/<scope-key>/`, que n
 
 | Antes de 13.09.2026 | Depois |
 | --- | --- |
-| `gestao/PT_STATUS.1_run.py` | `gestao/IND_GEST_01/IND_GEST_01.1_run.py` |
+| `PT_STATUS.1_run.py` (nome antigo, na pasta `gestao/`) | `gestao/IND_GEST_01/IND_GEST_01.1_run.py` |
 | `PT_STATUS.2_detalhe_*` / `PT_STATUS.2_painel_*` | `IND_GEST_01.2_detalhe_*` / `IND_GEST_01.2_painel_*` |
 | `--alvo PT_STATUS` | `--alvo G01` (`PT_STATUS` e `IND_GEST_01` seguem aceitos) |
 | `TARGETS["PT_STATUS"]` | `TARGETS["G01"]` |

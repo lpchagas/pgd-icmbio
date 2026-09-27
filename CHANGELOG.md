@@ -18,6 +18,38 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 - Os documentos do agente estão em `docs/agente/`, `docs/decisoes/`, `docs/governanca-projeto/`, `docs/projeto/` e `docs/dados-petrvs/`.
 - As fichas S01–S24 e os protótipos estão em `capacidades/`, com o `CATALOGO.md` (L4c).
 
+### Revisão da documentação e gates (L4e)
+
+- **Auditoria de segurança** (regras `2026.09.27-l4e`):
+  - lista versionada de ocorrências já revisadas (`config/auditoria-ocorrencias-conhecidas.json`,
+    com justificativa em cada item);
+  - o status passa a contar só as ocorrências novas, e o histórico mantido deixa de
+    impedir `completo_sem_ocorrencia`;
+  - valor exato, CPF válido e dump nunca entram na lista;
+  - um caminho proibido revisado no histórico não esconde o mesmo caminho de volta ao
+    índice.
+- **Verificador de links:**
+  - fonte e destino são classificados antes de qualquer leitura, e o que passa por
+    link ou área privada não é aberto (RL2-03);
+  - passa a ser **bloqueante** no CI, com exceções só por arquivo e com justificativa
+    (`config/verificar-links-excecoes.json`).
+- **Código:**
+  - o rodapé dos relatórios cita `docs/ocde/06-indicadores-ocde-denodo.md`;
+  - o `--reextrair` do relatório cumulativo roda os A1 do contrato, e não mais um
+    driver privado inexistente.
+- **Documentação:**
+  - README reescrito para o monorepo;
+  - marcos do projeto em `docs/projeto/visao-geral.md`;
+  - mesogrupo e avisos pós-CSV em `estrutura-banco-dados.md`;
+  - cópia do driver `.jar` no guia do DBeaver;
+  - comandos pelas pontes `ocde.relatorios.*` trocados por `relatorios.*`;
+  - caminho local antigo atualizado;
+  - atas passam a ser citadas no acervo privado;
+  - ADR-007 e 008 como aprovadas na proposta v6 (H5);
+  - removida a página pública de apresentação da CGOV (README da pasta docs/cgov), que
+    repetia o guia de organização público-privado;
+  - menções a assinaturas individuais de ferramentas de IA neutralizadas.
+
 ### Instruções dos assistentes (L4d)
 
 - `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` da raiz passam a ser versionados. Os três

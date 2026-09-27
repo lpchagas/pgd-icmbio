@@ -2,13 +2,20 @@
 
 ## Para quem é este documento
 
-Este documento é para **qualquer perfil** — gestores, analistas ou equipe técnica. Se você é gestor e quer entender os indicadores sem SQL, comece pelo [08-guia-rapido-gestores.md](../indicadores/guia-rapido-gestores.md).
+Este documento é para **qualquer perfil** — gestores, analistas ou equipe técnica. Se você é gestor e quer entender os indicadores sem SQL, comece pelo [guia rápido para gestores](../indicadores/guia-rapido-gestores.md).
 
 ---
 
-## 1. O que é o pgd-ocde-icmbio
+## 1. O que é o PGD-ICMBio
 
-Este projeto é um conjunto de **consultas SQL e documentação** para calcular os **indicadores OCDE/PGD do ICMBio** diretamente dos dados originais do PETRVS, sem nenhuma transformação intermediária.
+Este projeto (`pgd-icmbio`; no GitHub, `pgd-ocde-icmbio` até a renomeação) reúne as **consultas, os scripts e a documentação** para calcular e validar os **indicadores do PGD do ICMBio** diretamente dos dados originais do PETRVS, sem nenhuma transformação intermediária:
+
+- os **12 indicadores OCDE/PGD** (I01–I12);
+- os **indicadores de gestão** para as chefias (G01 e G02);
+- os **relatórios gerenciais** que os apresentam;
+- a base e as especificações do **agente de gestão** (S01–S24), incorporado do projeto `pgd-agente-icmbio`.
+
+Cada indicador passa por validação independente (protocolo A1–A5) antes de virar dado oficial.
 
 **Em linguagem simples:** imagine que o PETRVS é um grande arquivo de tabelas de dados. Este projeto é o conjunto de fórmulas e instruções para extrair as métricas que você precisa dessas tabelas, sem criar cópias ou versões modificadas dos dados.
 
@@ -97,7 +104,7 @@ No banco de dados, isso fica em:
 
 ## 6. Os 12 indicadores OCDE/PGD
 
-O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice navegável completo está em [06-indicadores-ocde-denodo.md](../ocde/06-indicadores-ocde-denodo.md).
+O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice navegável completo está em [índice dos indicadores OCDE](../ocde/06-indicadores-ocde-denodo.md). Os indicadores de gestão (G01 e G02) têm [índice próprio](../gestao/README.md).
 
 | Eixo | Indicadores | Foco |
 | --- | --- | --- |
@@ -122,8 +129,29 @@ O projeto cobre quatro eixos de análise, totalizando 12 indicadores. O índice 
 
 ---
 
-## 8. Próximo passo
+## 8. Marcos
 
-- **Para configurar o acesso:** [03-acesso-direto-denodo-dbeaver.md](../ambiente/acesso-denodo-dbeaver.md)
-- **Para entender os indicadores sem SQL:** [08-guia-rapido-gestores.md](../indicadores/guia-rapido-gestores.md)
-- **Para executar as consultas:** [06-indicadores-ocde-denodo.md](../ocde/06-indicadores-ocde-denodo.md)
+Evolução pública do projeto. Deliberações da CGOV são citadas só pelo identificador (Dnn) e pelo efeito técnico; o detalhe das mudanças está no [CHANGELOG](../../CHANGELOG.md) e nas fichas.
+
+| Data | Marco |
+| --- | --- |
+| 14.05.2026 | Fim do dump MySQL local: os indicadores passam a ler o PETRVS em tempo real via Denodo |
+| 14–19.06.2026 | Periodicidade oficial dos planos de entregas e de trabalho; reescrita dos scripts dos eixos 2, 3 e 4 |
+| 24.07.2026 | Guias de execução via Jupyter, um por indicador |
+| 05.08.2026 | Coluna `mesogrupo` (agrupador organizacional) nos 12 CSVs; correção dos avisos de qualidade deslocados pela nova coluna |
+| 21.08.2026 | Documentação de como o status dos planos é obtido; correção da escala de notas (só I09 e I12 invertem a nota) |
+| 08.09.2026 | Família de gestão (`gestao/`), com a primeira análise da situação dos Planos de Trabalho (hoje G01); descoberta das duas camadas de status |
+| 11–12.09.2026 | Relatório cumulativo anonimizado; protocolo de validação A1–A5 automatizado, com oráculos independentes |
+| 13.09.2026 | Ciclo gerencial retomável e Relatório Gerencial V2; decisões D01–D14 implementadas; namespace `IND_GEST_` (D17) |
+| 14.09.2026 | G02 — Execução das Entregas (D18); indicadores certificados na regional GR2 |
+| 23.09.2026 | Início da reorganização em monorepo (`pgd-icmbio`) |
+| 26.09.2026 | Agente de gestão incorporado com histórico; relatórios em `relatorios/`; documentação por assunto; política das unidades piloto; ambiente local migrado |
+| 27.09.2026 | Recortes pela hierarquia do PETRVS (D19); versão coordenada das decisões D19–D35; pilotos CGOV, COCAGE e GR2 validados e aceitos; instruções dos assistentes versionadas com núcleo comum |
+
+---
+
+## 9. Próximo passo
+
+- **Para configurar o acesso:** [acesso ao Denodo e DBeaver](../ambiente/acesso-denodo-dbeaver.md)
+- **Para entender os indicadores sem SQL:** [guia rápido para gestores](../indicadores/guia-rapido-gestores.md)
+- **Para executar as consultas:** [índice dos indicadores OCDE](../ocde/06-indicadores-ocde-denodo.md)

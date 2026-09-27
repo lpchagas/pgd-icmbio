@@ -407,7 +407,7 @@ Documento gerado a partir do projeto `pgd-agente-icmbio` (ICMBio), com base em: 
 (B01–B04), `agente/skills/02_matriz-desenvolvimento-skills_v2.md`, `skills/03_especificacao-funcional-
 skills_v2.md`, `agente/skills/04_backlog-mvp-skills_v2.md`, `skills/05_plano-skills-execucao-
 avaliacao_v1.md`, `docs/agente/projeto-v6/00_proposta-projeto-v6.md`, `agente/docs/tecnologia/referencia-pgd-ocde-icmbio.md` e
-`docs/gestao/decisoes/ADR-002` e `ADR-006`.
+`docs/decisoes/ADR-002-denodo-somente-leitura.md` e `docs/decisoes/ADR-006-persistencia-mysql.md`.
 
 Para atualizar: revisar esta versão sempre que a metodologia do PGD, a IN nº 24/2023 ou os
 normativos internos do ICMBio mudarem, e sempre que novas skills forem formalizadas no projeto

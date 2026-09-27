@@ -1135,3 +1135,18 @@ Todos os quatro leem `tan.sequencia` (1–5) de `tipos_avaliacoes_notas`, mas ne
 | Proporcionalização por dias de overlap | I07, I08 | Não é status — é rateio de horas entre períodos que um PT atravessa |
 | CTE separada substituindo window function | I05, I06, I08 | `AVG()/SUM() OVER (PARTITION BY)` falha via JDBC Denodo; resolvido com CTE + `GROUP BY` + `JOIN` |
 | Aviso de qualidade pós-CSV (Python) | I05–I12 | Checagens adicionais sobre os dados já extraídos (ex.: unidades com <5 avaliações, %>100, concentração de responsável único) — fora da SQL, camada de auditoria |
+
+---
+
+## 13. Mesogrupo e avisos de qualidade pós-CSV
+
+O **mesogrupo** é o agrupador organizacional intermediário (por exemplo, "Presidência" ou uma diretoria) acrescentado **depois** da consulta, em Python, a todos os CSVs de indicadores. Ele não vem do PETRVS: resulta do cruzamento com duas planilhas mantidas pela CGOV no acervo privado (`artefatos_local/ocde/diagnosticos/`, fora do Git). Implementação: `lib/estrutura_organizacional.py`.
+
+| Planilha (privada) | Particularidade |
+| --- | --- |
+| Estrutura organizacional oficial (`ICMBIO_estrutura.csv`, privado) | Exportação do SharePoint; a linha 1 é metadado, a linha 2 é o cabeçalho; vírgula; UTF-8 com BOM |
+| Dicionário PETRVS × estrutura (`dicionario_petrvs_digiteca_v2.csv`, privado) | Ponto e vírgula; **cp1252** (não é UTF-8); `match = 1` indica validação manual da CGOV |
+
+**Cadeia de resolução**, na ordem: sigla do PETRVS → dicionário (`match = 1`) → `icmbio_id` → mesogrupo; senão, sigla direta na estrutura; senão, nome normalizado (sem acento); senão, `NAO_MAPEADO`. Unidades extintas no dicionário ficam como não mapeadas.
+
+**Avisos de qualidade pós-CSV:** os scripts A1 emitem avisos (por exemplo, unidades com valores atípicos) lendo as colunas pelo nome. Nunca use posições fixas: a coluna `mesogrupo`, acrescentada depois, deslocava os avisos (erro corrigido em I05–I12). Os scripts mantêm variáveis separadas para os avisos (colunas da consulta) e para a escrita do CSV (com `mesogrupo`). Ver [lições técnicas](../indicadores/licoes-tecnicas.md).

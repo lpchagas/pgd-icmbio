@@ -112,7 +112,7 @@ parágrafo, seção ou página — e não somente o chunk.
 
 ## 4. Matriz de decisão por conjunto
 
-Os nomes completos de cada código estão no catálogo ([`referencias-pgd/README.md`](../referencias-pgd/README.md) §4); esta tabela traz somente as colunas de decisão, para não duplicar a descrição.
+Os nomes completos de cada código estão no catálogo ([`docs/referencias-pgd/README.md`](../referencias-pgd/README.md) §4); esta tabela traz somente as colunas de decisão, para não duplicar a descrição.
 
 | Códigos | `tipo_documento` | Regras deriváveis | Cadastro | RAG | Proposta para Q5 |
 | --- | --- | --- | --- | --- | --- |
@@ -173,7 +173,7 @@ Os nomes completos de cada código estão no catálogo ([`referencias-pgd/README
 | Confirmação de origem e versão | Arquivos presentes, mas nem todos têm URL/edição registrada no nome | ficha fonte a fonte com URL, data e responsável |
 | OCR de N03, N05, N06 e N07 | PDFs são imagens; inspeção visual concluída | texto revisado contra as 22 páginas e ligado ao hash do original |
 | Privacidade de I03 e P01–P08 | Originais contêm contatos, nomes ou fala livre; P01–P08 estão fora da área restrita | arquivos segregados e decisão sobre derivados |
-| Aprovação humana | Não realizada | ata em `docs/gestao/atas/` |
+| Aprovação humana | Não realizada | ata no acervo privado (`artefatos_local/validacao/`) |
 
 ### 6.2 Prioridade um para versionamento e qualidade
 
@@ -206,7 +206,7 @@ Os nomes completos de cada código estão no catálogo ([`referencias-pgd/README
 
 ### Evidência de encerramento
 
-- [ ] Registrar ata real em `docs/gestao/atas/`.
+- [ ] Registrar a ata real no acervo privado (`artefatos_local/validacao/`); a documentação pública cita só a decisão e o efeito.
 - [ ] Alterar este documento de “proposta” para “aprovado”, citando a ata.
 - [ ] Atualizar o índice do acervo e o checklist do I0.
 - [ ] Somente após a ata, promover fontes para `vigente` e marcar

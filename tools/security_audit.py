@@ -17,6 +17,12 @@ segredo, seu hash, trechos vizinhos ou mensagens brutas de erro. A auditoria
 completa termina em ``completo_sem_ocorrencia``, ``completo_com_ocorrencia`` ou
 ``incompleto``; ``incompleto`` nunca é sucesso. Nenhum modo de auditoria altera
 arquivos; só ``--remediate`` (legado) o faz.
+
+Ocorrências conhecidas (L4e): o histórico foi mantido (H9) e guarda falsos positivos
+e fixtures sintéticas já revisados. Eles ficam em
+``config/auditoria-ocorrencias-conhecidas.json``, com justificativa, e são separados
+em ``ocorrencias_conhecidas``; o status só considera as ocorrências **não revisadas**.
+Valor exato, CPF válido e dump por conteúdo nunca podem ser declarados conhecidos.
 """
 from __future__ import annotations
 
@@ -47,7 +53,10 @@ TEXT_SUFFIXES = {
 }
 
 # ─── Auditoria completa ──────────────────────────────────────────────────────
-RULES_VERSION = "2026.09.27-l4d"
+RULES_VERSION = "2026.09.27-l4e"
+KNOWN_FILE = ROOT / "config" / "auditoria-ocorrencias-conhecidas.json"
+# Regras que indicam dado real: nunca aceitas na lista de conhecidas.
+NEVER_KNOWN = ("valor_exato", "cpf_valido", "dump_sql_por_conteudo")
 DETECT_SECRETS_VERSION = "1.5.0"
 ALL_TARGETS = ("arquivos", "indice", "historico", "proibidos")
 MAX_BYTES = 20 * 1024 * 1024
@@ -1100,6 +1109,75 @@ def _run_target(report: dict, name: str, action) -> None:
         report["alvos"][name] = failed.as_dict()
 
 
+def _known_key(entry: dict) -> tuple:
+    # A origem entra na chave: um caminho proibido revisado só no histórico não esconde
+    # o mesmo caminho se ele voltar ao índice ou à árvore.
+    # Na lista, o blob é gravado como "git:<hex>": o hexadecimal puro seria tomado pelo
+    # detect-secrets como segredo de alta entropia.
+    origem = entry.get("origem")
+    blob = entry.get("blob")
+    blob = blob.removeprefix("git:") if isinstance(blob, str) else blob
+    return (entry.get("alvo"), entry.get("arquivo"), blob, entry.get("linha"), entry.get("regra"),
+            tuple(sorted(origem)) if isinstance(origem, list) else None)
+
+
+def load_known(path: Path) -> list[dict]:
+    """Lê e valida a lista de ocorrências conhecidas; qualquer defeito é ``AuditError``."""
+
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise AuditError("conhecidas_ilegivel") from exc
+    if not isinstance(data, dict) or data.get("versao") != 1 or not isinstance(data.get("ocorrencias"), list):
+        raise AuditError("conhecidas_formato")
+    entries = data["ocorrencias"]
+    seen: set[tuple] = set()
+    for entry in entries:
+        if not isinstance(entry, dict) or entry.get("alvo") not in ALL_TARGETS:
+            raise AuditError("conhecidas_formato")
+        if not all(isinstance(entry.get(field), str) and entry[field].strip()
+                   for field in ("arquivo", "regra", "justificativa")):
+            raise AuditError("conhecidas_sem_justificativa")
+        if entry["regra"].startswith(NEVER_KNOWN):
+            raise AuditError("conhecidas_regra_proibida")
+        if entry.get("linha") is not None and not isinstance(entry["linha"], int):
+            raise AuditError("conhecidas_formato")
+        if entry.get("blob") is not None and not re.fullmatch(r"git:[0-9a-f]{12}", str(entry["blob"])):
+            raise AuditError("conhecidas_formato")
+        origem = entry.get("origem")
+        if origem is not None and not (isinstance(origem, list) and origem
+                                       and all(item in ("arquivos", "indice", "historico") for item in origem)):
+            raise AuditError("conhecidas_formato")
+        key = _known_key(entry)
+        if key in seen:
+            raise AuditError("conhecidas_duplicada")
+        seen.add(key)
+    return entries
+
+
+def apply_known(report: dict, entries: list[dict]) -> None:
+    """Separa as ocorrências revisadas; o status de cada alvo passa a contar só as novas."""
+
+    known = {_known_key(entry) for entry in entries}
+    used: set[tuple] = set()
+    for data in report["alvos"].values():
+        new, matched = [], []
+        for occurrence in data["ocorrencias"]:
+            key = _known_key(occurrence)
+            (matched if key in known else new).append(occurrence)
+            if key in known:
+                used.add(key)
+        data["ocorrencias"] = new
+        data["ocorrencias_conhecidas"] = matched
+        if data["status"] != "incompleto":
+            data["status"] = "completo_com_ocorrencia" if new else "completo_sem_ocorrencia"
+    report["conhecidas"]["aplicadas"] = len(used)
+    report["conhecidas"]["nao_encontradas"] = [
+        {field: entry.get(field) for field in ("alvo", "arquivo", "blob", "linha", "regra", "origem")}
+        for entry in entries if _known_key(entry) not in used
+    ]
+
+
 def audit(
     root: Path = ROOT,
     targets: tuple[str, ...] = ALL_TARGETS,
@@ -1107,6 +1185,7 @@ def audit(
     refs: list[str] | None = None,
     keys: tuple[str, ...] = DEFAULT_KEYS,
     perfil: str = DEFAULT_PERFIL,
+    known_path: Path | None = None,
 ) -> dict:
     """Executa a auditoria completa e devolve um relatório sem valores sensíveis."""
 
@@ -1176,6 +1255,17 @@ def audit(
 
         _run_target(report, "proibidos", forbidden)
 
+    if known_path is not None:
+        report["conhecidas"] = {"arquivo": known_path.name}
+        try:
+            entries = load_known(known_path)
+            report["conhecidas"].update(sha256=hashlib.sha256(known_path.read_bytes()).hexdigest(),
+                                        entradas=len(entries))
+            apply_known(report, entries)
+        except (AuditError, OSError) as exc:
+            reasons.append("lista_conhecidas_invalida")
+            report["conhecidas"]["erro"] = _safe_error(exc)
+
     for target in targets:
         if target not in report["alvos"]:
             reasons.append(f"alvo_nao_executado:{target}")
@@ -1187,7 +1277,8 @@ def audit(
     )
     report["motivos_incompleto"] = sorted(set(reasons))
     report["resumo"] = {
-        target: {"status": data["status"], "ocorrencias": len(data["ocorrencias"])}
+        target: {"status": data["status"], "ocorrencias": len(data["ocorrencias"]),
+                 "conhecidas": len(data.get("ocorrencias_conhecidas", []))}
         for target, data in report["alvos"].items()
     }
     return report
@@ -1205,16 +1296,26 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--ref", action="append", default=[], help="Ref do histórico (repetível). Padrão: HEAD.")
     parser.add_argument("--perfil", choices=sorted(PERFIS), default=DEFAULT_PERFIL,
                         help="Regras de caminho: pre-merge (layout atual) ou monorepo (obrigatório a partir do L3).")
+    parser.add_argument("--conhecidas", type=Path, default=None,
+                        help="Lista de ocorrências conhecidas. Padrão: config/auditoria-ocorrencias-conhecidas.json "
+                             "da raiz auditada, se existir.")
+    parser.add_argument("--sem-conhecidas", action="store_true", help="Não aplica a lista de ocorrências conhecidas.")
     args = parser.parse_args(argv)
     if args.alvos:
         if args.remediate:
             parser.error("--remediate só existe no modo legado")
         targets = ALL_TARGETS if args.alvos == "todos" else tuple(t.strip() for t in args.alvos.split(",") if t.strip())
+        known = None
+        if not args.sem_conhecidas:
+            padrao = args.root.resolve() / "config" / KNOWN_FILE.name
+            known = args.conhecidas.resolve() if args.conhecidas else (padrao if padrao.is_file() else None)
         try:
-            result = audit(args.root, targets, [p.resolve() for p in args.env or []], args.ref, perfil=args.perfil)
+            result = audit(args.root, targets, [p.resolve() for p in args.env or []], args.ref, perfil=args.perfil,
+                           known_path=known)
             result["implementacao"]["argumentos"] = {
                 "alvos": list(targets), "refs": args.ref or ["HEAD"], "perfil": args.perfil,
                 "arquivos_env": len(args.env or []), "raiz": args.root.resolve().name,
+                "conhecidas": known.name if known else None,
             }
         except Exception as exc:  # rede de segurança: nunca traceback nem mensagem bruta
             result = {"tipo": "auditoria_segredos", "versao_regras": RULES_VERSION, "status": "incompleto",

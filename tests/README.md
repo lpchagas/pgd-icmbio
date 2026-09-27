@@ -1,4 +1,4 @@
-# Suíte de testes automatizados — pgd-ocde-icmbio
+# Suíte de testes automatizados — pgd-icmbio
 
 Protocolo de verificação de código complementar ao processo humano CGOV
 (`docs/indicadores/protocolo-validacao.md`). Ver seção "Divisão de
@@ -7,7 +7,7 @@ responsabilidade" abaixo.
 ## Como rodar
 
 ```powershell
-cd C:\Projetos\pgd-ocde-icmbio
+cd C:\Projetos\pgd-icmbio
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # uma vez
 .venv\Scripts\python.exe -m pytest tests/ -v --tb=short
 ```
@@ -18,7 +18,7 @@ Ou via skill: `/verificar-consistencia`.
 
 | Marcador | O que cobre | Depende de rede/Denodo? |
 | --- | --- | --- |
-| `unit` | Funções puras de `lib/` e `ocde/relatorios/` — períodos, CSV, semáforos, métricas | Não |
+| `unit` | Funções puras de `lib/` e `relatorios/` — períodos, CSV, semáforos, métricas | Não |
 | `regression` | Bugs históricos documentados (escala Eixo 4, unidade I07/I08) + sanidade de documentação | Não |
 | `integration` | Execução real contra o Denodo (não existe hoje — reservado) | Sim — **skip por padrão** (`addopts = "not integration"`) |
 

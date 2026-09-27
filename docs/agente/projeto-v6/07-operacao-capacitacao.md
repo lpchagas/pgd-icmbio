@@ -102,7 +102,7 @@ Pipeline futuro:
 
 Quando a suíte existir, executar testes unitários, contrato e integração conforme o
 README técnico. Testes com banco devem usar base de teste ou rollback. Resultados de QA
-vão para `docs/testes/` sem dados pessoais.
+vão para `docs/testes/` (pasta planejada) sem dados pessoais.
 
 ## 11. T9 — backup e restauração
 

@@ -49,7 +49,7 @@ Aguarde a instalação terminar. Isso precisa ser feito apenas uma vez.
 
 > **O que é o arquivo `.env`?** É um arquivo de texto simples que guarda suas credenciais de acesso ao banco Denodo. Ele fica **apenas no seu computador** — nunca vai para o GitHub ou para qualquer outro lugar. É o equivalente a guardar sua senha no cofre da sua mesa, em vez de escrevê-la no quadro branco da sala.
 
-**Passo 1** — Na pasta do projeto (`C:\Projetos\pgd-ocde-icmbio`), localize o arquivo:
+**Passo 1** — Na pasta do projeto (`C:\Projetos\pgd-icmbio`), localize o arquivo:
 
 ```
 .env.example
@@ -88,7 +88,7 @@ DENODO_PASSWORD=sua_senha_aqui
 **Passo 1** — No VS Code, vá ao menu **File > Open Folder** e selecione a pasta do projeto:
 
 ```
-C:\Projetos\pgd-ocde-icmbio
+C:\Projetos\pgd-icmbio
 ```
 
 **Passo 2** — No painel lateral (Explorer), localize e clique no arquivo:
@@ -327,7 +327,7 @@ As células executam na ordem de cima para baixo automaticamente.
 
 O notebook não localizou o arquivo `.env` ou ele está sem conteúdo. Verifique:
 
-1. O arquivo `.env` existe na pasta `C:\Projetos\pgd-ocde-icmbio`? (não `.env.example`, mas `.env`)
+1. O arquivo `.env` existe na pasta `C:\Projetos\pgd-icmbio`? (não `.env.example`, mas `.env`)
 2. Os campos `DENODO_USER` e `DENODO_PASSWORD` estão preenchidos com seus dados?
 3. O VS Code foi aberto com a pasta correta do projeto (File > Open Folder)?
 

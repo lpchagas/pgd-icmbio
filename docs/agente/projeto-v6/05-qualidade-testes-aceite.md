@@ -16,7 +16,7 @@ ainda não estar aprovada. Regras de negócio são aceitas por pessoas competent
 | 4. Desenhar testes | analista+desenvolvedor | casos identificados | esperado verificável |
 | 5. Implementar | desenvolvedor | código e migração quando necessária | revisão e testes unitários |
 | 6. Integrar | desenvolvedor | fluxo ponta a ponta | contrato, persistência e falhas validados |
-| 7. Aceitar | negócio+técnica | registro em `docs/testes/` | critérios e pendências registrados |
+| 7. Aceitar | negócio+técnica | registro em `docs/testes/` (pasta planejada) | critérios e pendências registrados |
 
 ## 3. Definição de pronto
 

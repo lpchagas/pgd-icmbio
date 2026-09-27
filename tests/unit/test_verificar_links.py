@@ -1,6 +1,8 @@
 """Verificador de links e referências da documentação (tools/verificar_links.py)."""
 from __future__ import annotations
 
+import json
+import os
 import subprocess
 from pathlib import Path
 
@@ -123,3 +125,65 @@ def test_listagem_pelo_git_nao_inclui_area_privada():
     assert arquivos
     relativos = [arquivo.relative_to(vl.PROJECT_ROOT).parts for arquivo in arquivos]
     assert not [partes for partes in relativos if vl._privado(partes)]
+
+
+# ─── RL2-03 (L4e): fonte e alvo classificados antes de qualquer leitura ──────
+
+
+def _link_dir(link: Path, alvo: Path) -> None:
+    """Junção no Windows (sem privilégio); symlink de diretório no POSIX."""
+    if os.name == "nt":
+        import _winapi
+
+        _winapi.CreateJunction(str(alvo), str(link))
+    else:
+        link.symlink_to(alvo, target_is_directory=True)
+
+
+def test_rl2_03_fonte_e_alvo_por_link_nao_sao_lidos(tmp_path, monkeypatch):
+    raiz = tmp_path / "repo"
+    fora = tmp_path / "fora"
+    fora.mkdir()
+    (fora / "segredo.md").write_text("# Segredo\n", encoding="utf-8")
+    arquivos = _repo(raiz, {"docs/a.md": "[x](atalho/segredo.md#segredo)\n"})
+    _link_dir(raiz / "docs" / "atalho", fora)
+    lidos: list[Path] = []
+    original = Path.read_text
+
+    def registrar_leitura(self, *args, **kwargs):
+        lidos.append(self)
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", registrar_leitura)
+
+    referencias = vl.verificar([*arquivos, raiz / "docs" / "atalho" / "segredo.md"], raiz=raiz)
+
+    assert _classes(referencias) == {"atalho/segredo.md#segredo": "alvo_por_link",
+                                     "docs/atalho/segredo.md": "fonte_por_link"}
+    assert [p.name for p in lidos] == ["a.md"]
+
+
+def test_rl2_03_fonte_em_area_privada_nao_e_lida(tmp_path, monkeypatch):
+    raiz = tmp_path / "repo"
+    arquivos = _repo(raiz, {"artefatos_local/nota.md": "# Nota\n", "docs/b.md": "# B\n"})
+    lidos: list[Path] = []
+    original = Path.read_text
+    monkeypatch.setattr(Path, "read_text", lambda self, *a, **k: (lidos.append(self), original(self, *a, **k))[1])
+
+    referencias = vl.verificar(arquivos, raiz=raiz)
+
+    assert _classes(referencias) == {"artefatos_local/nota.md": "fonte_privada"}
+    assert [p.name for p in lidos] == ["b.md"]
+    assert vl.resumir(referencias)["total_problemas"] == 1
+
+
+def test_repositorio_passa_no_modo_bloqueante(capsys):
+    """Gate do L4e: nenhum problema nos .md versionados (exceções só por arquivo, com justificativa)."""
+    if subprocess.run(["git", "-C", str(vl.PROJECT_ROOT), "rev-parse"], capture_output=True).returncode:
+        pytest.skip("listagem exige o repositório Git")
+
+    codigo = vl.main(["--bloqueante"])
+
+    assert codigo == 0, capsys.readouterr().out
+    excecoes = json.loads(vl.EXCECOES_PADRAO.read_text(encoding="utf-8"))
+    assert all(str(j).strip() for j in excecoes.values())

@@ -340,8 +340,9 @@ regras institucionais sem fonte continuam visíveis no
 
 **I0 — Fundação, em andamento.** Concluídos: MySQL 8.4.9, migração `001`, 21 tabelas,
 6 triggers, serviço de versões, teste de imutabilidade, backup diário, espelhos Denodo e
-ADRs 001–006. Pendentes: Q5, validação humana do glossário/modelo, ata real, ADR-007,
-ADR-008 e preparação da fundação do agente.
+ADRs 001–008 (a ADR-007 aprovada como decisão de planejamento; as regras institucionais
+continuam sujeitas a validação). Pendentes: Q5, validação humana do glossário/modelo, ata
+real e preparação da fundação do agente.
 
 O próximo incremento técnico é I1: consulta metodológica inicial, primeiro indicador por
 ferramenta e API local. O avanço não transforma automaticamente o protótipo em serviço
@@ -362,11 +363,10 @@ institucional.
 ## 17. Próximas ações
 
 1. Concluir a Trilha N do I0 e manter Q5 pendente até ata real.
-2. Revisar e aprovar ADR-007 e ADR-008.
-3. Implementar a fundação técnica de oito semanas.
-4. Especificar S01 e S02 usando as fichas v6.
-5. Criar conjuntos sintéticos e testes de contrato.
-6. Replanejar a cada oito semanas com horas reais.
+2. Implementar a fundação técnica de oito semanas.
+3. Especificar S01 e S02 usando as fichas v6.
+4. Criar conjuntos sintéticos e testes de contrato.
+5. Replanejar a cada oito semanas com horas reais.
 
 ## 18. Capítulos e anexos vinculantes
 

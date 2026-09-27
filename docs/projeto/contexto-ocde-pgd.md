@@ -183,7 +183,7 @@ Os dados abaixo foram extraídos do banco PETRVS (dump de fevereiro/2026) e apre
 | 12 documentos técnicos individuais (um por indicador) com SQL + interpretação | Concluído |
 | Arquivo único `indicadores_ocde_pgd_icmbio_mysql_direto.sql` (todas as queries) | Concluído |
 | Manual técnico estruturado por eixo: `docs/06.X-eixoX.md` + `docs/06.X.X-iXX.md` | Concluído |
-| Mapa de 130+ tabelas do PETRVS + 6 tabelas críticas para os indicadores | Concluído (`docs/07-estrutura-banco-dados.md`) |
+| Mapa de 130+ tabelas do PETRVS + 6 tabelas críticas para os indicadores | Concluído (`docs/dados-petrvs/estrutura-banco-dados.md`) |
 | Guia para gestores sem SQL | Concluído (`docs/indicadores/guia-rapido-gestores.md`) |
 | Protocolo de validação manual (comparação SQL ↔ PETRVS online) | Concluído (`docs/indicadores/protocolo-validacao.md`) |
 | I02 validado — critério OCDE vs. fluxo formal documentado | Evidência histórica mantida na área privada de validação |

@@ -161,7 +161,7 @@ print(f"Exportado: {output_path}")
 O exemplo genérico do notebook (`sql_i02` na seção "3. Exemplos de indicadores")
 usa `sep=";"` e salva em `Tabelas CSV\` — **não use esse padrão**; siga o
 `sep="|"` + `utf-8-sig` + `artefatos_local/ocde/entregas/YYYY-MM/` acima,
-conforme a seção 4 do CLAUDE.md.
+conforme a regra de CSV do projeto (regra 15 das instruções comuns em `CLAUDE.md`).
 
 ## 7. Observações e pontos críticos
 

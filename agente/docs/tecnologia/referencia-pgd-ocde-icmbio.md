@@ -5,7 +5,7 @@
 institucionais do PGD
 
 Este documento sintetiza, para uso no `pgd-agente-icmbio`, os padrões relevantes já validados no
-projeto de indicadores `pgd-ocde-icmbio` (`C:\Projetos\pgd-ocde-icmbio`, tratado como referência
+projeto de indicadores `pgd-ocde-icmbio` (`C:\Projetos\pgd-icmbio`, tratado como referência
 somente leitura). Cada informação abaixo cita o arquivo de origem. **Nenhuma credencial, senha,
 host real ou string de conexão foi copiada** — apenas nomes de variáveis de ambiente e padrões de
 código. As credenciais reais do projeto antigo residem exclusivamente no seu `CLAUDE.md` (arquivo
@@ -13,8 +13,8 @@ gitignored, não replicado aqui); o `pgd-agente-icmbio` deve configurar as suas 
 local, seguindo o mesmo padrão de nomes.
 
 Para normas, guias e orientações de negócio, use o catálogo em
-[`referencias-pgd/README.md`](../../../docs/referencias-pgd/README.md). Para a decisão de cadastro e RAG,
-use [`gestao/fontes-institucionais.md`](../../../docs/governanca-projeto/fontes-institucionais.md).
+[`docs/referencias-pgd/README.md`](../../../docs/referencias-pgd/README.md). Para a decisão de cadastro e RAG,
+use [`docs/governanca-projeto/fontes-institucionais.md`](../../../docs/governanca-projeto/fontes-institucionais.md).
 
 ---
 

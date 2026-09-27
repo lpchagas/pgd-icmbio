@@ -252,7 +252,7 @@ leitura.
 ## 7. Como executar
 
 ```powershell
-cd "C:\Projetos\pgd-ocde-icmbio"
+cd "C:\Projetos\pgd-icmbio"
 
 # Pelo runner da família (valida o registro, aplica o seletor de escopo, gera manifesto)
 python -m gestao.runner --analise status-pt --data-execucao 2026-09-13 --regional GR2 --produto restrito
@@ -323,7 +323,7 @@ Gerado apenas nos produtos `operacional` e `restrito`.
 **Supressão complementar (D17/F11).** Quando, numa unidade, uma única célula é
 ocultada por k<5, a menor célula visível da mesma unidade também é ocultada. Sem
 isso, qualquer total da unidade divulgado em outro produto revelaria a célula por
-subtração. Implementação: `ocde.relatorios.privacidade.apply_complementary_suppression`.
+subtração. Implementação: `relatorios.privacidade.apply_complementary_suppression`.
 
 **Minimização (D14).** Só nome e identificador do servidor. CPF, e-mail e matrícula
 não são lidos nem persistidos. O `servidor_email`, que a consulta selecionava antes

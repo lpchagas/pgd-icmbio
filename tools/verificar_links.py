@@ -28,6 +28,7 @@ import argparse
 import json
 import os
 import re
+import stat
 import subprocess
 import sys
 from collections import Counter, defaultdict
@@ -41,7 +42,9 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from tools.security_audit import DEFAULT_PERFIL, is_private_path  # noqa: E402
 
-PROBLEMAS = ("link_quebrado", "ancora_quebrada", "crase_inexistente", "privado_sem_rotulo", "fora_da_raiz")
+EXCECOES_PADRAO = PROJECT_ROOT / "config" / "verificar-links-excecoes.json"
+PROBLEMAS = ("link_quebrado", "ancora_quebrada", "crase_inexistente", "privado_sem_rotulo", "fora_da_raiz",
+             "fonte_privada", "fonte_por_link", "alvo_por_link")
 
 _LINK = re.compile(r"!?\[[^\]]*\]\(([^)\s]+(?:\s+\"[^\"]*\")?)\)")
 _CRASE = re.compile(r"(?<!`)`([^`\n]+)`(?!`)")
@@ -108,6 +111,41 @@ def _privado(partes: tuple[str, ...], perfil: str = DEFAULT_PERFIL) -> bool:
     return bool(partes) and is_private_path("/".join(partes), perfil)
 
 
+# Etiquetas de reparse que são link (junção, symlink, symlink do WSL). O atributo de
+# reparse sozinho não serve: pastas de nuvem (OneDrive) também o têm.
+_LINK_TAGS = {0xA0000003, 0xA000000C, 0xA000001D}
+
+
+def _eh_link(caminho: Path) -> bool:
+    try:
+        info = os.lstat(caminho)
+    except OSError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or getattr(info, "st_reparse_tag", 0) in _LINK_TAGS
+
+
+def _barreira(raiz: Path, partes: tuple[str, ...]) -> str | None:
+    """RL2-03: classifica um caminho **antes** de lê-lo.
+
+    Recusa sem abrir: componente privado pelo caminho lexical, qualquer componente que
+    seja link (o conteúdo poderia vir da área privada) e destino físico fora da raiz ou
+    privado.
+    """
+    if _privado(partes):
+        return "privado"
+    atual = raiz
+    for parte in partes:
+        atual = atual / parte
+        if _eh_link(atual):
+            return "por_link"
+    try:
+        fisico = raiz.joinpath(*partes).resolve()
+        relativo = fisico.relative_to(raiz.resolve())
+    except (OSError, ValueError):
+        return "fora_da_raiz"
+    return "privado" if _privado(relativo.parts) else None
+
+
 def verificar(arquivos: list[Path], raiz: Path = PROJECT_ROOT, excecoes: dict[str, str] | None = None) -> list[Referencia]:
     excecoes = excecoes or {}
     cache: dict[Path, set[str]] = {}
@@ -120,12 +158,18 @@ def verificar(arquivos: list[Path], raiz: Path = PROJECT_ROOT, excecoes: dict[st
     referencias: list[Referencia] = []
     for arquivo in arquivos:
         relativo = arquivo.relative_to(raiz).as_posix()
-        texto = arquivo.read_text(encoding="utf-8", errors="replace")
 
         def registrar(numero: int, tipo: str, alvo: str, classe: str) -> None:
             if classe in PROBLEMAS and relativo in excecoes:
                 classe = "excecao"
             referencias.append(Referencia(relativo, numero, tipo, alvo, classe))
+
+        barreira = _barreira(raiz, arquivo.relative_to(raiz).parts)
+        if barreira:  # a fonte não é lida
+            registrar(0, "fonte", relativo, {"privado": "fonte_privada", "por_link": "fonte_por_link"}.get(
+                barreira, "fora_da_raiz"))
+            continue
+        texto = arquivo.read_text(encoding="utf-8", errors="replace")
 
         for numero, linha in _linhas_fora_de_codigo(texto):
             planejado = bool(_ROTULO_PLANEJADO.search(linha))
@@ -153,7 +197,12 @@ def verificar(arquivos: list[Path], raiz: Path = PROJECT_ROOT, excecoes: dict[st
                     registrar(numero, "link", alvo, "privado" if rotulo_privado else "privado_sem_rotulo")
                     continue
                 destino = raiz.joinpath(*partes)
-                if destino.exists() and not destino.resolve().is_relative_to(raiz.resolve()):
+                barreira = _barreira(raiz, partes) if os.path.lexists(destino) else None
+                if barreira == "privado":
+                    registrar(numero, "link", alvo, "privado" if rotulo_privado else "privado_sem_rotulo")
+                elif barreira == "por_link":  # o destino não é lido (nem para âncoras)
+                    registrar(numero, "link", alvo, "alvo_por_link")
+                elif barreira == "fora_da_raiz":
                     registrar(numero, "link", alvo, "fora_da_raiz")
                 elif not destino.exists():
                     registrar(numero, "link", alvo, "planejado" if planejado else "link_quebrado")
@@ -198,11 +247,13 @@ def resumir(referencias: list[Referencia]) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Relatório de links e referências dos .md versionados.")
-    parser.add_argument("--excecoes", type=Path, help='JSON {"arquivo.md": "justificativa"}')
+    parser.add_argument("--excecoes", type=Path, default=None,
+                        help='JSON {"arquivo.md": "justificativa"}. Padrão: config/verificar-links-excecoes.json, se existir.')
     parser.add_argument("--saida-json", type=Path)
-    parser.add_argument("--bloqueante", action="store_true", help="sai 1 se houver problema (uso a partir do L4e)")
+    parser.add_argument("--bloqueante", action="store_true", help="sai 1 se houver problema (gate do CI a partir do L4e)")
     args = parser.parse_args(argv)
-    excecoes = json.loads(args.excecoes.read_text(encoding="utf-8")) if args.excecoes else {}
+    arquivo_excecoes = args.excecoes or (EXCECOES_PADRAO if EXCECOES_PADRAO.is_file() else None)
+    excecoes = json.loads(arquivo_excecoes.read_text(encoding="utf-8")) if arquivo_excecoes else {}
     if any(not str(j).strip() for j in excecoes.values()):
         parser.error("toda exceção precisa de justificativa")
     arquivos = listar_markdown()

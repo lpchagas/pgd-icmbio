@@ -8,8 +8,8 @@
 > analistas — terceiro item da pendência de **Trilha N** do Incremento I0. Este documento
 > **não substitui a ata de validação**: é o insumo que permite à reunião ser objetiva, campo a
 > campo, em vez de uma leitura corrida do esquema. Feche o item do checklist de aceite do I0
-> ("Ata de aprovação formal do modelo pelos analistas") registrando a ata em
-> `docs/gestao/atas/` depois da reunião.
+> ("Ata de aprovação formal do modelo pelos analistas") registrando a ata no
+> acervo privado (`artefatos_local/validacao/`) depois da reunião.
 >
 > **Bases comparadas:** o esquema de `docs/dados-petrvs/esquema-mysql-agente.md`
 > §5 (= `agente/dados/schema.sql`, 21 tabelas) contra o vocabulário consolidado em

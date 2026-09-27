@@ -966,3 +966,102 @@ def test_rl1v2_06_verificador_e_teste_documental_usam_a_mesma_politica():
     # L4d: links públicos para as instruções da raiz são aceitos; para as aninhadas, não.
     assert not any(security_audit.is_private_path(nome, "monorepo") for nome in ("CLAUDE.md", "AGENTS.md", "PROJECT.md"))
     assert security_audit.is_private_path("agente/AGENTS.md", "monorepo")
+
+
+# ─── L4e — ocorrências conhecidas (histórico mantido, H9) ────────────────────
+
+
+def _conhecidas(tmp_path: Path, entradas: list[dict]) -> Path:
+    arquivo = tmp_path / "conhecidas.json"
+    arquivo.write_text(json.dumps({"versao": 1, "ocorrencias": entradas}), encoding="utf-8")
+    return arquivo
+
+
+def _entrada(ocorrencia: dict, justificativa: str = "fixture sintética revisada") -> dict:
+    entrada = {**{k: ocorrencia.get(k) for k in ("alvo", "arquivo", "blob", "linha", "regra")},
+               "justificativa": justificativa}
+    if entrada["blob"]:
+        entrada["blob"] = f"git:{entrada['blob']}"
+    return entrada
+
+
+def test_l4e_conhecida_separada_e_status_so_conta_novas(tmp_path):
+    repo = _repo(tmp_path, {"docs/a.md": f"chave = \"{AWS_KEY}\"\n", "docs/b.md": "# ok\n"})
+    base = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)])
+    [ocorrencia] = base["alvos"]["arquivos"]["ocorrencias"]
+
+    report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)],
+                                  known_path=_conhecidas(tmp_path, [_entrada(ocorrencia)]))
+
+    alvo = report["alvos"]["arquivos"]
+    assert report["status"] == "completo_sem_ocorrencia" and alvo["ocorrencias"] == []
+    assert [o["arquivo"] for o in alvo["ocorrencias_conhecidas"]] == ["docs/a.md"]
+    assert report["conhecidas"]["aplicadas"] == 1 and report["conhecidas"]["nao_encontradas"] == []
+    assert report["resumo"]["arquivos"] == {"status": "completo_sem_ocorrencia", "ocorrencias": 0, "conhecidas": 1}
+
+
+def test_l4e_ocorrencia_nova_continua_bloqueando(tmp_path):
+    repo = _repo(tmp_path, {"docs/a.md": f"chave = \"{AWS_KEY}\"\n"})
+    [ocorrencia] = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)])["alvos"]["arquivos"]["ocorrencias"]
+    (repo / "docs" / "a.md").write_text(f"\nchave = \"{AWS_KEY}\"\n", encoding="utf-8")  # mudou de linha
+
+    report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)],
+                                  known_path=_conhecidas(tmp_path, [_entrada(ocorrencia)]))
+
+    assert report["status"] == "completo_com_ocorrencia"
+    assert report["conhecidas"]["nao_encontradas"][0]["linha"] == ocorrencia["linha"]
+
+
+@pytest.mark.parametrize(("entrada", "erro"), [
+    ({"alvo": "arquivos", "arquivo": "a.md", "linha": 1, "regra": "valor_exato:DENODO_PASSWORD",
+      "justificativa": "não"}, "conhecidas_regra_proibida"),
+    ({"alvo": "arquivos", "arquivo": "a.md", "linha": 1, "regra": "cpf_valido", "justificativa": "não"},
+     "conhecidas_regra_proibida"),
+    ({"alvo": "arquivos", "arquivo": "a.md", "linha": 1, "regra": "detect-secrets:X", "justificativa": " "},
+     "conhecidas_sem_justificativa"),
+    ({"alvo": "outro", "arquivo": "a.md", "regra": "detect-secrets:X", "justificativa": "x"}, "conhecidas_formato"),
+    ({"alvo": "historico", "arquivo": "a.md", "blob": "XYZ", "regra": "detect-secrets:X", "justificativa": "x"},
+     "conhecidas_formato"),
+])
+def test_l4e_lista_invalida_torna_a_auditoria_incompleta(tmp_path, entrada, erro):
+    repo = _repo(tmp_path, {"docs/b.md": "# ok\n"})
+
+    report = security_audit.audit(repo, ("arquivos",), env_paths=[_env(tmp_path)],
+                                  known_path=_conhecidas(tmp_path, [entrada]))
+
+    assert report["status"] == "incompleto" and "lista_conhecidas_invalida" in report["motivos_incompleto"]
+    assert report["conhecidas"]["erro"] == erro
+
+
+def test_l4e_lista_duplicada_ou_ilegivel(tmp_path):
+    entrada = {"alvo": "arquivos", "arquivo": "a.md", "linha": 1, "regra": "detect-secrets:X", "justificativa": "x"}
+    with pytest.raises(security_audit.AuditError, match="conhecidas_duplicada"):
+        security_audit.load_known(_conhecidas(tmp_path, [entrada, dict(entrada)]))
+    ruim = tmp_path / "ruim.json"
+    ruim.write_text("[]", encoding="utf-8")
+    with pytest.raises(security_audit.AuditError, match="conhecidas_formato"):
+        security_audit.load_known(ruim)
+
+
+def test_l4e_lista_do_repositorio_e_valida_e_sem_regras_proibidas():
+    entradas = security_audit.load_known(security_audit.KNOWN_FILE)
+    assert entradas and not [e for e in entradas if e["regra"].startswith(security_audit.NEVER_KNOWN)]
+
+
+def test_l4e_proibido_revisado_no_historico_nao_esconde_o_indice(tmp_path):
+    repo = _repo(tmp_path, {"setup/configurar_env.ps1": "# placeholder\n", "lib/a.py": "A = 1\n"})
+    _git(repo, "rm", "-q", "setup/configurar_env.ps1")  # sai do índice e do disco; fica no histórico
+    _git(repo, "commit", "-q", "-m", "remove")
+    entrada = {"alvo": "proibidos", "arquivo": "setup/configurar_env.ps1", "regra": "area_privada",
+               "origem": ["historico"], "justificativa": "só placeholders; histórico mantido"}
+    conhecidas = _conhecidas(tmp_path, [entrada])
+
+    so_historico = security_audit.audit(repo, ("proibidos",), env_paths=[_env(tmp_path)], known_path=conhecidas)
+    assert so_historico["status"] == "completo_sem_ocorrencia"
+
+    (repo / "setup").mkdir(exist_ok=True)
+    (repo / "setup" / "configurar_env.ps1").write_text("# placeholder\n", encoding="utf-8")
+    _git(repo, "add", "-f", "setup/configurar_env.ps1")  # volta ao índice
+    de_novo = security_audit.audit(repo, ("proibidos",), env_paths=[_env(tmp_path)], known_path=conhecidas)
+    assert de_novo["status"] == "completo_com_ocorrencia"
+    assert _rules(de_novo, "proibidos") == [("setup/configurar_env.ps1", "area_privada")]

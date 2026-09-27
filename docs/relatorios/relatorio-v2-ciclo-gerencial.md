@@ -15,11 +15,11 @@ fonte indispensável nem gate da integração contínua.
 - `gestao/registry.py`: registro explícito de análises de gestão homologadas.
 - `gestao/runner.py`: execução por lente, escopo e produto.
 - `lib/ciclo_gerencial.py`: ciclo retomável com gates bloqueantes.
-- `ocde/relatorios/analisar_execucao_pgd.py`: leitura somente local/Denodo de
+- `relatorios/analisar_execucao_pgd.py`: leitura somente local/Denodo de
   PE, PT e atividades, preservando unidade dona e executora.
-- `ocde/relatorios/textos_execucao.py`: sanitização local de nomes e dados
+- `relatorios/textos_execucao.py`: sanitização local de nomes e dados
   pessoais e regras transparentes de prioridade.
-- `ocde/relatorios/relatorio_v2.py`: relatório restrito e compartilhável,
+- `relatorios/relatorio_v2.py`: relatório restrito e compartilhável,
   evidências, riscos, tendências, apêndice I01–I12 e capítulo dinâmico de gestão.
 - `gestao/IND_GEST_02/IND_GEST_02.1_run.py`: G02 e seus produtos; o renderizador
   consome A2/manifestos certificados e não repete consultas nem fórmulas.
@@ -50,7 +50,7 @@ do resultado do PE.
 ```text
 python -m lib.indicator_extraction --data-execucao 2026-09-13 --regional GR2 --salvar-manifesto
 python -m gestao.runner --analise todas --data-execucao 2026-09-13 --lente ambas --regional GR2 --produto restrito
-python -m ocde.relatorios.relatorio_v2 --data-execucao 2026-09-13 --regional GR2 --produto ambos --lente ambas --manifesto-validacao <manifesto.json> --salvar --pdf
+python -m relatorios.relatorio_v2 --data-execucao 2026-09-13 --regional GR2 --produto ambos --lente ambas --manifesto-validacao <manifesto.json> --salvar --pdf
 python -m lib.ciclo_gerencial --data-execucao 2026-09-13 --regional GR2 --produto ambos --lente ambas --retomar --salvar --pdf
 ```
 
@@ -61,15 +61,19 @@ Python com pytest; o preflight bloqueia o ciclo se qualquer dependência faltar.
 
 ## Gates e conclusão
 
-O ciclo só recebe sucesso se todas as etapas concluírem. A aprovação da GR2 abre
-apenas o piloto CGOV; a expansão nacional continua suspensa até o aceite formal
-desse piloto. A edição final exige todos os alvos ativos certificados, com data e
+O ciclo só recebe sucesso se todas as etapas concluírem. Os produtos finais e
+compartilháveis são liberados só nas unidades piloto (CGOV, COCAGE e GR2); além
+delas, o gate de liberação exige aceites e deliberação de expansão, hoje suspensa
+(D16) — ver o [fluxo das unidades piloto](../projeto/fluxo-unidades-piloto.md). A edição final exige todos os alvos ativos certificados, com data e
 escopo coerentes. `--rascunho` continua reservado a material privado não homologado;
 não pode ser registrado como edição final. A certificação local do catálogo de assistentes só recebe estado `certificado`
 quando as ferramentas configuradas estiverem disponíveis e produzirem
 descoberta/hash equivalentes. Esse controle local não participa dos checks da PR.
 
-## Estado operacional em 14.09.2026
+## Registro histórico: estado operacional em 14.09.2026
+
+> Fotografia da primeira edição final (GR2, sede regional). A situação atual está no
+> [catálogo de capacidades](../../capacidades/CATALOGO.md) e no [CHANGELOG](../../CHANGELOG.md).
 
 - A extração I01–I12 foi concluída com a janela `01/07/2025–31/08/2026`.
 - O manifesto integrado vigente é `20260914T071359-f2e1a481`, com data de execução

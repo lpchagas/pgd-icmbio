@@ -9,17 +9,14 @@ Os protótipos que hoje operam no Cowork da CGOV — e que S21–S24 pretendem
 substituir — estão versionados em
 [`capacidades/prototipos-cowork/`](prototipos-cowork/README.md).
 
-## Artefatos desta pasta
+## Onde estão os artefatos das skills
 
-| Grupo | Papel | Precedência |
-| --- | --- | --- |
-| `specs/SKILL_S01..S24.md` | especificações operacionais vigentes | principal |
-| `00_skill-*.md` | componentes metodológicos originais | fonte histórica/metodológica |
-| `01_analise-skills_v1.md` | análise exploratória | histórico |
-| `02_matriz-desenvolvimento-skills_v2.md` | matriz que originou S01–S20 | insumo; divergência é resolvida pela v6 |
-| `03_especificacao-funcional-skills_v2.md` | detalhamento inicial S01–S10 | insumo |
-| `04_backlog-mvp-skills_v2.md` | estimativas de equipe | histórico; não usar como cronograma individual |
-| `05_plano-skills-execucao-avaliacao_v1.md` | origem de S21–S24 e RN-01–RN-36 | insumo; conteúdo vigente foi incorporado à v6 |
+| Grupo | Local | Papel | Precedência |
+| --- | --- | --- | --- |
+| Fichas S01–S24 | [`especificacoes/`](especificacoes/README.md) | especificações operacionais vigentes | principal |
+| Catálogo de estado | [`CATALOGO.md`](CATALOGO.md) | estado de cada capacidade (especificado, testado, homologado…) | principal |
+| Componentes metodológicos (`00_skill-*.md`) | [`docs/agente/metodologia/`](../docs/agente/metodologia/00_skill-plano-entregas-v1.md) | componentes metodológicos originais | fonte histórica/metodológica |
+| Análise, matriz, especificação inicial, backlog e plano de execução/avaliação (`01_` a `05_`) | `agente/skills/` (intermediário) | insumos da proposta v6 | histórico; o conteúdo vigente foi incorporado à v6. Esses cinco documentos serão retirados depois de a cobertura dos requisitos RN-01 a RN-36 estar registrada |
 
 Ao revisar uma skill, atualize a ficha, o catálogo e, se houver impacto, cronograma,
 riscos, regras e testes.

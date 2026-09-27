@@ -173,7 +173,7 @@ Abra o **PowerShell** (tecla Windows → "PowerShell" → Enter), cole o bloco a
 e pressione Enter. Aguarde de 5 a 15 minutos dependendo da conexão com o Dataprev:
 
 ```powershell
-cd "C:\Projetos\pgd-ocde-icmbio"
+cd "C:\Projetos\pgd-icmbio"
 
 $indicadores = @(
     @{script="IND_OCDE_01.1_run.py"; nome="I01 - Regime de trabalho"},
@@ -267,7 +267,7 @@ Use quando precisar gerar ou re-executar apenas um indicador. Primeiro navegue
 até a raiz do projeto:
 
 ```powershell
-cd "C:\Projetos\pgd-ocde-icmbio"
+cd "C:\Projetos\pgd-icmbio"
 ```
 
 Depois execute o indicador desejado:
