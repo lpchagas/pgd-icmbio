@@ -167,3 +167,29 @@ def test_registro_revoga_e_verifica(tmp_path, monkeypatch, capsys):
     capsys.readouterr()
     assert registrar_aceite_piloto.main(["verificar", "--capacidade", "I02"]) == 1
     assert json.loads(capsys.readouterr().out)["elegivel"] is False
+
+
+@pytest.mark.parametrize("texto, esperado", [
+    ('{"status_global": "sucesso"}', {"status_global": "sucesso"}),
+    ('JVM iniciada.\n{\n  "status_global": "pendente"\n}\n', {"status_global": "pendente"}),
+    ("Traceback sem JSON", {}),
+    ("JVM iniciada.\n{ quebrado", {}),
+])
+def test_executor_le_o_json_depois_do_ruido_da_jvm(texto, esperado):
+    assert executar_pilotos.ler_json_da_saida(texto) == esperado
+
+
+def test_executor_validacao_pendente_aguarda_homologacao_e_nao_e_falha(monkeypatch):
+    liberado = _cadastro()
+    monkeypatch.setattr(liberacao, "carregar_cadastro", lambda *a: liberado)
+
+    def rodar(linha):
+        if "lib.validation_runner" in linha:
+            return 1, {"status_global": "pendente", "resultados": [{"alvo": "G01", "status": "pendente"}]}, ""
+        return 0, {"status_global": "sucesso"}, ""
+
+    monkeypatch.setattr(executar_pilotos, "_rodar", rodar)
+    registro = executar_pilotos.run(["--capacidade", "G01", "--data-execucao", DATA, "--modo", "real", "--validar"])
+
+    assert registro["status_global"] == "aguardando_homologacao"
+    assert {r["validacao"]["alvos"]["G01"] for r in registro["resultados_por_piloto"]} == {"pendente"}

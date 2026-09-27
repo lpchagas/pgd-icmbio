@@ -84,11 +84,19 @@ def _rodar(linha: list[str]) -> tuple[int, dict[str, Any], str]:
     concluido = subprocess.run(linha, cwd=PROJECT_ROOT, capture_output=True, text=True,
                                encoding="utf-8", errors="replace",
                                env={**minimal_subprocess_env(), "PYTHONIOENCODING": "utf-8"})
+    return concluido.returncode, ler_json_da_saida(concluido.stdout), redact_log(concluido.stderr[-1000:]) if concluido.returncode else ""
+
+
+def ler_json_da_saida(texto: str) -> dict[str, Any]:
+    """JSON final do runner; ignora linhas anteriores (ex.: 'JVM iniciada.' do adaptador Denodo)."""
+
+    inicio = 0 if texto.startswith("{") else texto.find("\n{") + 1
+    if inicio == 0 and not texto.startswith("{"):
+        return {}
     try:
-        saida = json.loads(concluido.stdout)
+        return json.loads(texto[inicio:])
     except json.JSONDecodeError:
-        saida = {}
-    return concluido.returncode, saida, redact_log(concluido.stderr[-1000:]) if concluido.returncode else ""
+        return {}
 
 
 def _resumo(codigo: int, manifesto: dict[str, Any], erro: str) -> dict[str, Any]:
@@ -161,8 +169,10 @@ def run(argv: list[str] | None = None) -> dict[str, Any]:
             resultado["validacao"] = {**_resumo(codigo, saida, erro),
                                       "alvos": {r.get("alvo"): r.get("status") for r in saida.get("resultados", [])}}
 
-    falhou = any(r["returncode"] for r in resultados) or any(
-        r.get("validacao", {}).get("status") not in (None, "sucesso") for r in resultados if "validacao" in r)
+    validacoes = [r["validacao"].get("status") for r in resultados if "validacao" in r]
+    # "pendente" = A1 e oracle coerentes, mas o escopo ainda não tem baseline homologada
+    # (HOMOLOGACAO_INICIAL_PENDENTE): é o aceite humano do piloto, não falha técnica.
+    falhou = any(r["returncode"] for r in resultados) or any(s not in ("sucesso", "pendente") for s in validacoes)
     registro = {
         "tipo": "execucao_pilotos",
         "capacidade": capacidade,
@@ -175,7 +185,10 @@ def run(argv: list[str] | None = None) -> dict[str, Any]:
         "aquisicao_unica": execucao_unica,
         "resultados_por_piloto": resultados,
         "total_agregado": None,
-        "status_global": "falha" if falhou else args.modo if not real else "sucesso",
+        "status_global": (
+            "falha" if falhou else args.modo if not real
+            else "aguardando_homologacao" if "pendente" in validacoes else "sucesso"
+        ),
     }
     if args.salvar:
         SAIDA.mkdir(parents=True, exist_ok=True)
