@@ -424,7 +424,7 @@ TARGETS.update({
         ("total_avaliacoes_pt", "total_planos_com_avaliacao", "media_nota_pt"),
         period="pt",
         # D11: média das médias por plano de trabalho.
-        formula_version="3.0.0",
+        formula_version="3.0.1",
     ),
     "I10": _indicator(
         "10", "Percentual de avaliações inadequadas", "avaliacoes_pt",
@@ -437,7 +437,7 @@ TARGETS.update({
         ("total_avaliacoes_pt", "qtd_inadequado", "perc_inadequado"),
         period="pt",
         # D12: volumetria exportada como limitador analítico.
-        formula_version="3.0.0",
+        formula_version="3.0.1",
     ),
     "I11": _indicator(
         "11", "Percentual de avaliações excepcionais", "avaliacoes_pt",
@@ -450,7 +450,7 @@ TARGETS.update({
         ("total_avaliacoes_pt", "qtd_excepcional", "perc_excepcional"),
         period="pt",
         # D12: volumetria exportada como limitador analítico.
-        formula_version="3.1.0",
+        formula_version="3.1.1",
     ),
     "I12": _indicator(
         "12", "Coerência entre avaliação PT e PE", ("avaliacoes_pt", "avaliacoes_pe"),
@@ -462,6 +462,7 @@ TARGETS.update({
         ),
         ("periodo", "unidade_sigla"),
         ("media_nota_pt", "media_nota_pe", "diferenca_absoluta", "diferenca_direcional"),
+        formula_version="2.0.1",
     ),
 })
 

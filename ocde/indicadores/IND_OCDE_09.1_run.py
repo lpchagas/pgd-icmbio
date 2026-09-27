@@ -72,6 +72,7 @@ avaliacoes_pt AS (
     CROSS JOIN parametros p
     WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND (p.incluir_excluidos = 1 OR ptc.deleted_at IS NULL)  -- soft-delete da consolidação (regra §2.4)
       AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio

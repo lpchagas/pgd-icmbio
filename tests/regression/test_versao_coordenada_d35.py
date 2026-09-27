@@ -202,3 +202,13 @@ def test_d31_i11_rotulo_neutro_e_faixa_so_com_volume():
     assert "Escala subutilizada" not in sql
     assert "'Uso baixo da nota máxima'" in sql
     assert sql.index("'Amostra insuficiente'") < sql.index("'Reconhecimento elevado'")
+
+
+# --- Soft-delete da consolidação (correção na revalidação) ----------------------------------------
+
+@pytest.mark.parametrize("numero, variavel", [("09", "SQL_I09"), ("10", "SQL_I10"), ("11", "SQL_I11"), ("12", "SQL_I12")])
+def test_avaliacoes_de_pt_filtram_consolidacao_excluida(numero, variavel):
+    fonte = (RAIZ / "ocde" / "indicadores" / f"IND_OCDE_{numero}.1_run.py").read_text(encoding="utf-8")
+    sql = re.search(variavel + r'\s*=\s*"""(.*?)"""', fonte, re.DOTALL).group(1)
+    assert "consolidacoes ptc" in sql
+    assert "ptc.deleted_at IS NULL" in sql
