@@ -1,0 +1,200 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I02 para o replay offline (data de execução 2026-09-13). Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "total_vence_no_periodo",
+        "proporcao_vence_no_periodo_perc",
+        "total_concluidas",
+        "taxa_cumprimento_perc",
+        "total_em_plano_avaliado",
+        "concluidas_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "12",
+          "10",
+          "8",
+          "80.0",
+          "10",
+          "100.00",
+          "10",
+          "10",
+          "A — Alto desempenho",
+          "ciclo avaliado"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "9",
+          "8",
+          "4",
+          "50.0",
+          "6",
+          "75.00",
+          "5",
+          "4",
+          "B — Bom desempenho",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "4",
+          "3",
+          "3",
+          "100.0",
+          "0",
+          "0.00",
+          "0",
+          "0",
+          "D — Baixo desempenho",
+          "atencao: ha entregas em planos nao avaliados"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "total_vence_no_periodo",
+        "proporcao_vence_no_periodo_perc",
+        "total_concluidas",
+        "taxa_cumprimento_perc",
+        "total_em_plano_avaliado",
+        "concluidas_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "20",
+          "14",
+          "10",
+          "71.4",
+          "8",
+          "57.14",
+          "14",
+          "8",
+          "C — Desempenho intermediario",
+          "ciclo avaliado"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "11",
+          "11",
+          "11",
+          "100.0",
+          "10",
+          "90.91",
+          "11",
+          "10",
+          "A — Alto desempenho",
+          "ciclo avaliado"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q1-2026",
+      "inicio": "2026-01-01",
+      "fim": "2026-04-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "total_vence_no_periodo",
+        "proporcao_vence_no_periodo_perc",
+        "total_concluidas",
+        "taxa_cumprimento_perc",
+        "total_em_plano_avaliado",
+        "concluidas_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "7",
+          "7",
+          "7",
+          "100.0",
+          "7",
+          "100.00",
+          "7",
+          "7",
+          "A — Alto desempenho",
+          "ciclo avaliado"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "15",
+          "15",
+          "5",
+          "33.3",
+          "11",
+          "73.33",
+          "12",
+          "9",
+          "B — Bom desempenho",
+          "atencao: ha entregas em planos nao avaliados"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "6",
+          "6",
+          "6",
+          "100.0",
+          "3",
+          "50.00",
+          "6",
+          "3",
+          "C — Desempenho intermediario",
+          "ciclo avaliado"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q2-2026",
+      "inicio": "2026-05-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_cadastradas",
+        "total_no_ciclo",
+        "total_vence_no_periodo",
+        "proporcao_vence_no_periodo_perc",
+        "total_concluidas",
+        "taxa_cumprimento_perc",
+        "total_em_plano_avaliado",
+        "concluidas_em_plano_avaliado",
+        "grupo_performance",
+        "alerta_avaliacao"
+      ],
+      "linhas": []
+    }
+  ]
+}

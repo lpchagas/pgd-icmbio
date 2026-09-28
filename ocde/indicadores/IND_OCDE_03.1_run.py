@@ -40,6 +40,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.arredondamento import arredondar  # D24: meio para cima
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
@@ -80,6 +81,9 @@ entregas_base AS (
         ON u.id = pe.unidade_id
     CROSS JOIN parametros p
     WHERE CAST(pee.data_fim AS DATE) BETWEEN p.data_inicio AND p.data_fim
+      -- D22 (3.0.0): o plano de entregas precisa se sobrepor ao período analisado
+      AND CAST(pe.data_inicio AS DATE) <= p.data_fim
+      AND CAST(pe.data_fim AS DATE) >= p.data_inicio
       AND (p.incluir_excluidos = 1 OR pe.deleted_at  IS NULL)
       AND (p.incluir_excluidos = 1 OR pee.deleted_at IS NULL)
       AND pee.progresso_esperado IS NOT NULL
@@ -130,6 +134,22 @@ FROM entregas_com_taxa
 ORDER BY unidade_sigla, taxa_atingimento_perc DESC
 """
 
+# D22: entregas que vencem no período mas cujo plano de entregas não se sobrepõe a
+# ele (prazo além do fim do plano, inclusive de ciclos excluídos). Saem do cálculo
+# e são contadas como alerta de qualidade para correção no PETRVS.
+ALERTA_D22_FORA_DO_PLANO_SQL = """
+SELECT COUNT(*) AS qtd
+FROM petrvs_icmbio_planos_entregas pe
+JOIN petrvs_icmbio_planos_entregas_entregas pee
+    ON pee.plano_entrega_id = pe.id
+WHERE CAST(pee.data_fim AS DATE) BETWEEN CAST('{ini}' AS DATE) AND CAST('{fim}' AS DATE)
+  AND pe.deleted_at IS NULL
+  AND pee.deleted_at IS NULL
+  AND pee.progresso_esperado > 0
+  AND (CAST(pe.data_inicio AS DATE) > CAST('{fim}' AS DATE)
+       OR CAST(pe.data_fim AS DATE) < CAST('{ini}' AS DATE))
+"""
+
 EXTRA_COLS = ["taxa_meta_integral_perc", "status_meta_integral", "tipo_meta"]
 
 
@@ -172,7 +192,7 @@ def parse_meta_integral(
             return "", "N.D.", "N.D."
         if meta_val <= 0:
             return "", "N.D.", tipo
-        taxa = round(real_val / meta_val * 100, 2)
+        taxa = arredondar(real_val / meta_val * 100, 2)
         return str(taxa), classify_status(taxa), tipo
     except (ValueError, TypeError, KeyError, json.JSONDecodeError):
         return "", "N.D.", "N.D."
@@ -212,8 +232,17 @@ def main() -> None:
             try:
                 columns, rows = query_rows(conn, sql)
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I03 {label}: {exc}") from exc
+            try:
+                _, fora = query_rows(
+                    conn, ALERTA_D22_FORA_DO_PLANO_SQL.replace("{ini}", str(start)).replace("{fim}", str(end))
+                )
+            except Exception as exc:
+                raise SystemExit(f"ERRO: I03 {label} (alerta D22): {exc}") from exc
+            qtd_fora = int(float(fora[0][0])) if fora and fora[0] and fora[0][0] not in ("", None) else 0
+            if qtd_fora:
+                print(f"  ALERTA_QUALIDADE (D22): {qtd_fora} entrega(s) vencem no período com plano fora dele — excluídas.")
 
             if all_cols is None:
                 all_cols = meta_cols + columns + EXTRA_COLS

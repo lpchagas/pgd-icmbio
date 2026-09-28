@@ -1,0 +1,12 @@
+# Dependências do agente de gestão (agente/), grupo "agente" (plano §8).
+# Instalar: pip install -r requirements-agente.txt (não é necessário para a suíte offline).
+
+# Camada de dados (I0) — MySQL local + Denodo via JDBC
+PyMySQL>=1.2
+python-dotenv>=1.2
+JPype1>=1.7
+
+# Núcleo conversacional e API (I1) — Tutoriais T3/T6
+anthropic>=0.40
+fastapi>=0.115
+uvicorn>=0.30

@@ -1,0 +1,534 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I10 para o replay offline (data de execução 2026-09-13). Geradas por tools/gerar_fixtures_replay.py. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "2",
+          "4",
+          "9",
+          "18.58",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "7",
+          "11",
+          "18",
+          "16.39",
+          "Baixa prevalencia",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "18",
+          "9",
+          "16",
+          "8.46",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "24",
+          "17",
+          "0",
+          "2.38",
+          "Observacao",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "13",
+          "13",
+          "15",
+          "",
+          "Atencao moderada",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "13",
+          "23",
+          "10",
+          "1.20",
+          "Atencao critica",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "1",
+          "8",
+          "23",
+          "59.50",
+          "Observacao",
+          "1"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "11",
+          "0",
+          "20",
+          "2.93",
+          "Atencao critica",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M01-2026",
+      "inicio": "2026-01-01",
+      "fim": "2026-01-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "24",
+          "3",
+          "5",
+          "87.73",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "16",
+          "2",
+          "25",
+          "",
+          "Atencao moderada",
+          "1"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "5",
+          "7",
+          "5",
+          "48.62",
+          "Atencao critica",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "2",
+          "4",
+          "0",
+          "49.42",
+          "Baixa prevalencia",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M02-2026",
+      "inicio": "2026-02-01",
+      "fim": "2026-02-28",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "5",
+          "0",
+          "25",
+          "19.54",
+          "Atencao critica",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "12",
+          "14",
+          "18",
+          "25.64",
+          "Atencao moderada",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "19",
+          "16",
+          "14",
+          "36.03",
+          "Atencao critica",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "13",
+          "21",
+          "16",
+          "17.00",
+          "Atencao moderada",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M03-2026",
+      "inicio": "2026-03-01",
+      "fim": "2026-03-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "19",
+          "22",
+          "0",
+          "14.46",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "2",
+          "1",
+          "18",
+          "2.64",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "20",
+          "12",
+          "25",
+          "75.53",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "3",
+          "8",
+          "7",
+          "49.72",
+          "Atencao critica",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "M04-2026",
+      "inicio": "2026-04-01",
+      "fim": "2026-04-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "3",
+          "15",
+          "10",
+          "11.68",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "3",
+          "14",
+          "18",
+          "41.90",
+          "Baixa prevalencia",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "8",
+          "6",
+          "21",
+          "89.57",
+          "Observacao",
+          "1"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "19",
+          "17",
+          "4",
+          "37.88",
+          "Baixa prevalencia",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M05-2026",
+      "inicio": "2026-05-01",
+      "fim": "2026-05-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "18",
+          "3",
+          "5",
+          "3.19",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "6",
+          "19",
+          "18",
+          "",
+          "Atencao moderada",
+          "1"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "8",
+          "6",
+          "13",
+          "92.53",
+          "Atencao moderada",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "18",
+          "18",
+          "10",
+          "14.32",
+          "Observacao",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M06-2026",
+      "inicio": "2026-06-01",
+      "fim": "2026-06-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "0",
+          "9",
+          "24",
+          "80.75",
+          "Atencao moderada",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "1",
+          "17",
+          "16",
+          "66.07",
+          "Atencao moderada",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "19",
+          "0",
+          "6",
+          "20.63",
+          "Baixa prevalencia",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "1",
+          "21",
+          "22",
+          "14.46",
+          "Baixa prevalencia",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "M07-2026",
+      "inicio": "2026-07-01",
+      "fim": "2026-07-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "19",
+          "20",
+          "21",
+          "77.96",
+          "Atencao moderada",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "7",
+          "12",
+          "0",
+          "20.31",
+          "Atencao critica",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "4",
+          "24",
+          "5",
+          "20.84",
+          "Atencao critica",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "25",
+          "22",
+          "17",
+          "87.18",
+          "Observacao",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "M08-2026",
+      "inicio": "2026-08-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_inadequado",
+        "perc_inadequado",
+        "nivel_alerta",
+        "volume_suficiente"
+      ],
+      "linhas": []
+    }
+  ]
+}

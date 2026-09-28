@@ -29,5 +29,11 @@ jobs:
       - name: Executar testes offline
         run: python -m pytest -q
 
+      - name: Verificar núcleo comum das instruções (ADR-010)
+        run: python -m tools.sincronizar_instrucoes verificar
+
+      - name: Verificar links da documentação (bloqueante)
+        run: python -m tools.verificar_links --bloqueante
+
       - name: Auditar credenciais incorporadas
         run: python tools/security_audit.py

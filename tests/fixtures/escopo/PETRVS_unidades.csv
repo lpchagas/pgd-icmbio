@@ -1,0 +1,15 @@
+id|codigo|sigla|nome|unidade_pai_id
+p-sede|1|SEDE-S|Sede Sintetica|
+p-cgov|2|CGOV|Coordenacao de Governanca Sintetica|p-sede
+p-div|3|DIV-CGOV|Divisao Subordinada a CGOV|p-cgov
+p-cocage|4|COCAGE|Coordenacao Sintetica COCAGE|p-sede
+p-sec|5|SEC-COCAGE|Servico Subordinado a COCAGE|p-cocage
+p-gr2|10|GR2|Gerencia Regional Sintetica 2|p-sede
+p-ngi|11|NGI-A|Nucleo Sintetico A|p-gr2
+p-uca1|12|UC-A1|Unidade Sintetica A1|p-ngi
+p-uca2|13|UC-A2|Unidade Sintetica A2 (profundidade 3)|p-uca1
+p-ctx|14|CT-X|Centro com rotulo divergente na estrutura|p-gr2
+p-dup1|21|UC-DUP|Homonima 1, sob a GR2|p-gr2
+p-dup2|22|UC-DUP|Homonima 2, sob o NGI-A (tambem na GR2)|p-ngi
+p-gr1|20|GR1|Gerencia Regional Sintetica 1|p-sede
+p-fora|15|UC-FORA|UC rotulada GR2 na estrutura mas filha da GR1 no PETRVS|p-gr1

@@ -17,7 +17,6 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 from .csv_utils import PROJECT_ROOT
-from .estrutura_organizacional import load_organization_structure
 from .periodos import ANALYSIS_TIMEZONE, AnalysisWindow, configure_execution_context
 from .validation_contracts import (
     OutputContract,
@@ -27,10 +26,11 @@ from .validation_contracts import (
     validate_registry,
 )
 from .validation_extractors import SQL as ATOMIC_SQL, extract_atomic
-from .escopos import slug
 from .validation_diagnostics import diagnose_atomic
 from .validation_drift import assess_drift
-from .validation_oracles import calculate, independent_analysis_window, invariant_findings
+from .validation_oracles import (
+    calculate, independent_analysis_window, invariant_findings, verificar_supressao_compartilhavel,
+)
 
 
 VALIDATION_OUTPUT_BASE_ENV = "PGD_VALIDATION_OUTPUT_BASE"
@@ -75,13 +75,6 @@ def _run_id(window: AnalysisWindow, targets: list[ValidationTarget]) -> str:
 def _output_base(window: AnalysisWindow, scope_key: str) -> Path:
     override = os.environ.get(VALIDATION_OUTPUT_BASE_ENV)
     return (Path(override) if override else PROJECT_ROOT / "artefatos_local" / "validacao") / window.mes_execucao / "escopos" / scope_key
-
-
-def _scope_key(label: str) -> str:
-    if label == "nacional":
-        return "nacional-nacional"
-    kind, value = label.split(":", 1)
-    return f"{slug(kind)}-{slug(value)}"
 
 
 def _definition_hash(path: Path, names: set[str]) -> str:
@@ -264,38 +257,16 @@ def _load_fixture(code: str) -> tuple[list[dict[str, Any]], list[dict[str, Any]]
     return atomic, expected
 
 
-def _list_values(path: Path) -> list[str]:
-    values = [line.strip() for line in path.read_text(encoding="utf-8-sig").splitlines()]
-    return [value for value in values if value and not value.startswith("#")]
+def _scope_units(args: argparse.Namespace) -> tuple[str, set[str] | None, str]:
+    """Resolução única de escopo (L5): mesmas regras e chave da extração OCDE e do gestao.runner."""
 
+    from relatorios.escopo import resolver_para_runner
 
-def _scope_units(args: argparse.Namespace) -> tuple[str, set[str] | None]:
-    if args.escopo == "nacional" or not any(
-        (args.regional, args.unidade, args.mesogrupo, args.tipo_unidade, args.lista_unidades)
-    ):
-        return "nacional", None
-    structure = load_organization_structure()
-    if not structure.units_by_id:
-        raise FileNotFoundError("ICMBIO_estrutura.csv é obrigatório para o seletor solicitado.")
-    listed = _list_values(args.lista_unidades) if args.lista_unidades else None
-    selected = structure.select(
-        regional=args.regional,
-        unidade=args.unidade,
-        mesogrupo=args.mesogrupo,
-        tipo_unidade=args.tipo_unidade,
-        lista_unidades=listed,
+    label, units, key = resolver_para_runner(
+        escopo=args.escopo, regional=args.regional, unidade=args.unidade,
+        mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade, lista_unidades=args.lista_unidades,
     )
-    units = {unit.sigla.upper() for unit in selected if unit.sigla}
-    if not units:
-        raise ValueError("O seletor de escopo não encontrou unidades.")
-    label = next(
-        f"{name}:{value}" for name, value in (
-            ("regional", args.regional), ("unidade", args.unidade),
-            ("mesogrupo", args.mesogrupo), ("tipo-unidade", args.tipo_unidade),
-            ("lista-unidades", str(args.lista_unidades) if args.lista_unidades else None),
-        ) if value
-    )
-    return label, units
+    return label, (set(units) if units is not None else None), key
 
 
 def _filter_atomic(records: list[dict[str, Any]], units: set[str] | None, target_code: str = "") -> list[dict[str, Any]]:
@@ -491,6 +462,15 @@ def _validate_target(
         )
         if mode == "fixture":
             findings.extend(_compare(target, contract, expected_for_view, oracle))
+        elif target.code == "G02" and product == "compartilhavel":
+            # D27: o compartilhável é validado pelas propriedades da supressão e pelos
+            # valores das células visíveis.
+            producao = production_by_view.get(contract.view, [])
+            esperado, achados_supressao = verificar_supressao_compartilhavel(
+                producao, oracle, atomic, contract.business_keys
+            )
+            findings.extend(achados_supressao)
+            findings.extend(_compare(target, contract, producao, esperado))
         else:
             findings.extend(_compare(target, contract, production_by_view.get(contract.view, []), oracle))
         oracle_view = oracle if contract.view == "entregas" else [row for row in oracle if row.get("visao", contract.view) == contract.view]
@@ -737,8 +717,7 @@ def run(argv: list[str] | None = None) -> dict[str, Any]:
     targets = selected_targets(args.familia, args.alvo)
     if not targets:
         raise ValueError("Nenhum alvo selecionado.")
-    scope_label, units = _scope_units(args)
-    scope_key = _scope_key(scope_label)
+    scope_label, units, scope_key = _scope_units(args)
     output_dir = _output_base(window, scope_key)
     if args.consolidar_existentes:
         return _consolidate_existing(

@@ -1,0 +1,16 @@
+﻿{"schema":"export sintetico de teste de escopo"}
+icmbio_id,id_mae,sigla,uorg_nome,uorg_nome-completo,mesogrupo,tipo,macroprocesso,microgrupo,status
+1,,SEDE-S,"Sede Sintética","Sede Sintética",Sede,Sede,,,Ativo
+2,1,CGOV,"Coordenação de Governança Sintética","Coordenação de Governança Sintética",Sede,Coordenação-Geral,,,Ativo
+3,2,DIV-CGOV,"Divisão Subordinada à CGOV","Divisão Subordinada à CGOV",Sede,Divisão,,,Ativo
+4,1,COCAGE,"Coordenação Sintética COCAGE","Coordenação Sintética COCAGE",Sede,Coordenação,,,Ativo
+5,4,SEC-COCAGE,"Serviço Subordinado à COCAGE","Serviço Subordinado à COCAGE",Sede,Serviço,,,Ativo
+10,1,GR2,"Gerência Regional Sintética 2","Gerência Regional Sintética 2",GR2,Gerência Regional,,,Ativo
+11,10,NGI-A,"Núcleo Sintético A","Núcleo Sintético A",UC na GR2,NGI,,,Ativo
+12,11,UC-A1,"Unidade Sintética A1","Unidade Sintética A1",UC na GR2,UC,,,Ativo
+13,12,UC-A2,"Unidade Sintética A2 (profundidade 3)","Unidade Sintética A2 (profundidade 3)",UC na GR2,UC,,,Ativo
+14,10,CT-X,"Centro com rótulo divergente","Centro com rótulo divergente",ROTULO-DIVERGENTE,Centro,,,Ativo
+15,20,UC-FORA,"UC rotulada GR2 mas subordinada à GR1","UC rotulada GR2 mas subordinada à GR1",UC na GR2,UC,,,Ativo
+20,1,GR1,"Gerência Regional Sintética 1","Gerência Regional Sintética 1",GR1,Gerência Regional,,,Ativo
+21,10,UC-DUP,"Sigla duplicada sob a GR2","Sigla duplicada sob a GR2",UC na GR2,UC,,,Ativo
+22,20,UC-DUP,"Sigla duplicada sob a GR1","Sigla duplicada sob a GR1",UC na GR1,UC,,,Ativo

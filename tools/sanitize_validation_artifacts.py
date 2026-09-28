@@ -5,7 +5,7 @@ import argparse
 import json
 from pathlib import Path
 
-from ocde.relatorios.privacidade import redact_personal_identifiers, scan_file
+from relatorios.privacidade import redact_personal_identifiers, scan_file
 
 
 def sanitize(directory: Path) -> dict:

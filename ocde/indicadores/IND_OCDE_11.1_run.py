@@ -64,6 +64,7 @@ avaliacoes_pt AS (
     CROSS JOIN parametros p
     WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND (p.incluir_excluidos = 1 OR ptc.deleted_at IS NULL)  -- soft-delete da consolidação (regra §2.4)
       AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
@@ -92,11 +93,13 @@ SELECT
     total_servidores_avaliados,
     qtd_excepcional,
     perc_excepcional,
+    -- D31: faixas só com volume suficiente; rótulo neutro para a faixa baixa.
     CASE
+        WHEN total_avaliacoes_pt < {volume_minimo} THEN 'Amostra insuficiente'
         WHEN perc_excepcional >= 40 THEN 'Reconhecimento elevado'
         WHEN perc_excepcional >= 20 THEN 'Desempenho diferenciado'
         WHEN perc_excepcional >=  5 THEN 'Destaque pontual'
-        ELSE 'Escala subutilizada'
+        ELSE 'Uso baixo da nota máxima'
     END AS nivel_reconhecimento,
     CASE WHEN total_avaliacoes_pt >= {volume_minimo} THEN 1 ELSE 0 END AS volume_suficiente
 FROM proporcao_por_unidade
@@ -133,8 +136,8 @@ def main() -> None:
             try:
                 columns, rows = query_rows(conn, sql)
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I11 {label}: {exc}") from exc
             if all_cols is None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
@@ -175,11 +178,11 @@ def main() -> None:
         print(f"  AVISO: {len(unids)} unidade(s) com perc_excepcional >= 40% em periodos encerrados"
               f" — cruzar com I12 para distinguir excelencia genuina de leniencia avaliativa.")
 
-    # Escala subutilizada: nota maxima praticamente ausente
-    subutilizadas = [r for r in encerrados if r[offset_nivel] == "Escala subutilizada"]
+    # D31: uso baixo da nota máxima (só em unidades com volume suficiente)
+    subutilizadas = [r for r in encerrados if r[offset_nivel] == "Uso baixo da nota máxima"]
     if subutilizadas:
         unids = set(r[offset_unidade] for r in subutilizadas)
-        print(f"  NOTA: {len(unids)} unidade(s) com 'Escala subutilizada' — nota Excepcional quase ausente.")
+        print(f"  NOTA: {len(unids)} unidade(s) com 'Uso baixo da nota máxima' — nota Excepcional quase ausente.")
 
     # Unidades com < 5 avaliacoes (resultado fragil)
     low_count = sum(

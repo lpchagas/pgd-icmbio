@@ -17,6 +17,22 @@ def test_sanitizer_removes_personal_data_and_keeps_business_text():
     assert set(result.redactions) >= {"nome", "email", "cpf", "telefone"}
 
 
+def test_sanitizer_keeps_year_ranges_and_sei_numbers():
+    sanitizer = TextSanitizer(["Maria da Silva"])
+    for text in (
+        "Plano de Integridade do ICMBio 2025-2027 monitorado",
+        "ciclo 2025 – 2027",
+        "Processo SEI nº 02070.020242/2025-88",
+        "Despacho Interlocutório - SEI nº 23687646",
+    ):
+        result = sanitizer.sanitize(text)
+        assert result.text == text
+        assert result.redactions == ()
+    result = sanitizer.sanitize("Maria da Silva, telefone 3333-4444, ciclo 2025-2027")
+    assert result.text == "[NOME_SUPRIMIDO], telefone [DADO_PESSOAL_TELEFONE], ciclo 2025-2027"
+    assert set(result.redactions) == {"nome", "telefone"}
+
+
 def test_pe_priority_uses_own_meta_not_pt_activity_completion():
     assessment = priority_assessment(
         {

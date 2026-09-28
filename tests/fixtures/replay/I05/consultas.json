@@ -1,0 +1,488 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I05 para o replay offline (data de execução 2026-09-13). Geradas por tools/gerar_fixtures_replay.py. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "0",
+          "32.51",
+          "Acima da media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "16",
+          "",
+          "Abaixo da media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "13",
+          "",
+          "Acima da media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "13",
+          "86.68",
+          "Na media"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "12",
+          "60.40",
+          "Abaixo da media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "15",
+          "138.91",
+          "Na media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "16",
+          "87.09",
+          "Abaixo da media"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "20",
+          "147.93",
+          "Na media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M01-2026",
+      "inicio": "2026-01-01",
+      "fim": "2026-01-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "17",
+          "126.21",
+          "Na media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "8",
+          "17.68",
+          "Abaixo da media"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "0",
+          "71.87",
+          "Acima da media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "12",
+          "58.37",
+          "Abaixo da media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M02-2026",
+      "inicio": "2026-02-01",
+      "fim": "2026-02-28",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "0",
+          "55.12",
+          "Na media"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "6",
+          "139.97",
+          "Na media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "14",
+          "143.49",
+          "Acima da media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "1",
+          "52.41",
+          "Acima da media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M03-2026",
+      "inicio": "2026-03-01",
+      "fim": "2026-03-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "1",
+          "70.73",
+          "Abaixo da media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "17",
+          "",
+          "Na media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "14",
+          "95.36",
+          "Abaixo da media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "1",
+          "59.97",
+          "Na media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M04-2026",
+      "inicio": "2026-04-01",
+      "fim": "2026-04-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "25",
+          "102.22",
+          "Abaixo da media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "25",
+          "9.38",
+          "Acima da media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "24",
+          "13.34",
+          "Acima da media"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "20",
+          "100.56",
+          "Na media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M05-2026",
+      "inicio": "2026-05-01",
+      "fim": "2026-05-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "2",
+          "98.97",
+          "Abaixo da media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "0",
+          "59.57",
+          "Abaixo da media"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "12",
+          "134.35",
+          "Abaixo da media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "0",
+          "115.56",
+          "Abaixo da media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M06-2026",
+      "inicio": "2026-06-01",
+      "fim": "2026-06-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "18",
+          "63.58",
+          "Na media"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "1",
+          "112.22",
+          "Abaixo da media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "11",
+          "120.92",
+          "Acima da media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "25",
+          "36.48",
+          "Abaixo da media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M07-2026",
+      "inicio": "2026-07-01",
+      "fim": "2026-07-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-id_servidor-0",
+          "Servidor Sintético 00",
+          "1",
+          "49.98",
+          "Na media"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-id_servidor-1",
+          "Servidor Sintético 01",
+          "13",
+          "13.80",
+          "Na media"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "sint-id_servidor-2",
+          "Servidor Sintético 02",
+          "16",
+          "87.26",
+          "Acima da media"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-id_servidor-3",
+          "Servidor Sintético 03",
+          "19",
+          "142.33",
+          "Abaixo da media"
+        ]
+      ]
+    },
+    {
+      "periodo": "M08-2026",
+      "inicio": "2026-08-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "id_servidor",
+        "nome_servidor",
+        "qtd_entregas_por_servidor",
+        "media_entregas_por_servidor_unidade",
+        "posicao_relativa_media"
+      ],
+      "linhas": []
+    }
+  ]
+}

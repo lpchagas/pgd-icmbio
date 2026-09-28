@@ -5,7 +5,7 @@ import re
 from pathlib import Path
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+from .caminhos import PROJECT_ROOT  # raiz única (L4a)
 
 TABLES = [
     "planos_trabalhos_consolidacoes",

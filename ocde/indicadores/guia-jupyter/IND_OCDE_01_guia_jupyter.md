@@ -12,11 +12,11 @@ Plano de Trabalho (PT) vigente no período.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/ambiente/acesso-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
   **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
-  e a checklist de `docs/12-seguranca-publicacao.md`. Se a célula 2 ainda não tiver usuário/senha
+  e a checklist de `docs/ambiente/seguranca-publicacao.md`. Se a célula 2 ainda não tiver usuário/senha
   preenchidos, edite-a localmente antes de continuar — nunca cole credenciais
   neste `.md`.
 

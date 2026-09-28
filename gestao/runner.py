@@ -13,9 +13,9 @@ from zoneinfo import ZoneInfo
 
 from lib.auditoria import minimal_subprocess_env, redact_log
 from lib.csv_utils import PROJECT_ROOT
-from lib.escopos import slug
-from lib.estrutura_organizacional import load_organization_structure
 from lib.periodos import ANALYSIS_TIMEZONE, configure_execution_context
+from lib.liberacao import exigir_execucao_autorizada
+from relatorios.escopo import resolver_para_runner, scope_from_values
 
 from .registry import REGISTRY, enabled_extractions, validate_registry
 
@@ -58,35 +58,19 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _list_values(path: Path) -> list[str]:
-    values = [line.strip() for line in path.read_text(encoding="utf-8-sig").splitlines()]
-    return [value for value in values if value and not value.startswith("#")]
+def _seletor(args: argparse.Namespace) -> dict:
+    valores = {nome: getattr(args, nome) for nome in ("regional", "unidade", "mesogrupo", "tipo_unidade", "lista_unidades")}
+    valores = {nome: valor for nome, valor in valores.items() if valor}
+    return valores or {"escopo": "nacional"}
 
 
-def _scope_units(args: argparse.Namespace) -> tuple[str, list[str] | None]:
-    if args.escopo == "nacional":
-        return "nacional", None
-    structure = load_organization_structure()
-    if not structure.units_by_id:
-        raise FileNotFoundError("ICMBIO_estrutura.csv é obrigatório para o seletor solicitado.")
-    listed = _list_values(args.lista_unidades) if args.lista_unidades else None
-    units = structure.select(
-        regional=args.regional,
-        unidade=args.unidade,
-        mesogrupo=args.mesogrupo,
-        tipo_unidade=args.tipo_unidade,
-        lista_unidades=listed,
+def _scope_units(args: argparse.Namespace) -> tuple[str, list[str] | None, str]:
+    """Resolução única de escopo (L5): mesmas regras e chave da extração OCDE e dos relatórios."""
+
+    return resolver_para_runner(
+        escopo=args.escopo, regional=args.regional, unidade=args.unidade,
+        mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade, lista_unidades=args.lista_unidades,
     )
-    if not units:
-        raise ValueError("O seletor de escopo não encontrou unidades.")
-    label = next(
-        f"{name}:{value}" for name, value in (
-            ("regional", args.regional), ("unidade", args.unidade),
-            ("mesogrupo", args.mesogrupo), ("tipo-unidade", args.tipo_unidade),
-            ("lista-unidades", str(args.lista_unidades) if args.lista_unidades else None),
-        ) if value
-    )
-    return label, sorted({unit.sigla for unit in units if unit.sigla})
 
 
 def run(argv: list[str] | None = None) -> dict:
@@ -95,10 +79,15 @@ def run(argv: list[str] | None = None) -> dict:
     if registry_problems:
         raise RuntimeError("Registro de gestão inválido: " + "; ".join(registry_problems))
     window = configure_execution_context(args.data_execucao)
-    scope_label, units = _scope_units(args)
-    scope_key = "nacional-nacional" if scope_label == "nacional" else "-".join(slug(part) for part in scope_label.split(":", 1))
-    output_dir = PROJECT_ROOT / "artefatos_local" / "gestao" / window.mes_execucao / "escopos" / scope_key
+    scope_label, units, scope_key = _scope_units(args)
     selected = enabled_extractions() if args.analise == "todas" else [REGISTRY[args.analise]]
+    # Gate de liberação (L5): o produto restrito segue o uso atual; o compartilhável
+    # fora dos pilotos exige elegibilidade das capacidades.
+    liberacao = exigir_execucao_autorizada(
+        "gestao.runner", scope_from_values(**_seletor(args)), args.produto,
+        capacidades=[extraction.code for extraction in selected], final=args.produto == "compartilhavel",
+    )
+    output_dir = PROJECT_ROOT / "artefatos_local" / "gestao" / window.mes_execucao / "escopos" / scope_key
     requested_lenses = {"acumulada", "operacional"} if args.lente == "ambas" else {args.lente}
     results: list[dict] = []
     started = datetime.now(ZoneInfo(ANALYSIS_TIMEZONE))
@@ -176,6 +165,7 @@ def run(argv: list[str] | None = None) -> dict:
         "lentes_solicitadas": sorted(requested_lenses),
         "escopo": {"rotulo": scope_label, "chave": scope_key, "unidades": units or []},
         "produto": args.produto,
+        "liberacao": liberacao,
         "dry_run": args.dry_run,
         "artefatos_existentes_reconciliados": args.usar_existentes,
         "status_global": "falha" if failure else "dry-run" if args.dry_run else "sucesso",

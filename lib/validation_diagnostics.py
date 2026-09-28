@@ -85,7 +85,11 @@ def diagnose_atomic(code: str, rows: list[Row]) -> list[dict[str, str]]:
             start, end = _date(row.get(start_name)), _date(row.get(end_name))
             reversed_dates += int(bool(start and end and start > end))
     if reversed_dates:
-        findings.append(_finding("ANOMALIA_DE_DADOS", f"intervalos com datas invertidas: {reversed_dates}"))
+        # D26: no G01 as datas do plano não entram em nenhuma métrica; o achado é alerta.
+        findings.append(_finding(
+            "ANOMALIA_DE_DADOS", f"intervalos com datas invertidas: {reversed_dates}",
+            "alerta" if code == "G01" else "bloqueante",
+        ))
 
     invalid_sequences = sum(
         (number := _number(row.get("sequencia_nota"))) is not None and not 1 <= number <= 5

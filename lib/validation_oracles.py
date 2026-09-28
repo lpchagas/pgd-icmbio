@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 import re
 from statistics import mean
 from typing import Any, Callable, Iterable
@@ -32,6 +33,12 @@ def _float(value: Any, default: float = 0.0) -> float:
         return float(str(value).replace(",", "."))
     except (TypeError, ValueError):
         return default
+
+
+def _arred(value: float, digits: int = 2) -> float:
+    """D24: meio para cima, como o ROUND do banco (o round() do Python vai para o par)."""
+
+    return float(Decimal(repr(float(value))).quantize(Decimal(1).scaleb(-digits), rounding=ROUND_HALF_UP))
 
 
 def _bool(value: Any, default: bool = False) -> bool:
@@ -103,7 +110,7 @@ def oracle_i01(records: list[Row]) -> list[Row]:
             output.append({
                 "visao": "institucional", "periodo": period, "modalidade": modality,
                 "total_servidores": len(users),
-                "proporcao_perc": round(100 * len(users) / len(all_users), 2) if all_users else 0.0,
+                "proporcao_perc": _arred(100 * len(users) / len(all_users), 2) if all_users else 0.0,
             })
         for (unit,), unit_rows in _group(period_rows, "unidade_sigla").items():
             unit_users = {str(row["id_servidor"]) for row in unit_rows if row.get("id_servidor")}
@@ -113,7 +120,7 @@ def oracle_i01(records: list[Row]) -> list[Row]:
                     "visao": "unidade", "periodo": period, "unidade_sigla": unit,
                     "modalidade": modality, "total_servidores": len(users),
                     "proporcao_na_unidade_perc": (
-                        round(100 * len(users) / len(unit_users), 2) if unit_users else 0.0
+                        _arred(100 * len(users) / len(unit_users), 2) if unit_users else 0.0
                     ),
                 })
     return _sorted(output, ("visao", "periodo", "unidade_sigla", "modalidade"))
@@ -124,6 +131,8 @@ def oracle_i02(records: list[Row]) -> list[Row]:
     for (period, unit), rows in _group(_unique(_active(records), "periodo", "unidade_sigla", "id_entrega"), "periodo", "unidade_sigla").items():
         eligible = [row for row in rows if _float(row.get("meta_planejada")) > 0]
         total = len(eligible)
+        if not total:
+            continue  # D23: denominador zero, taxa indefinida — a unidade é omitida
         completed = sum(
             _float(row.get("meta_executada")) >= _float(row.get("meta_planejada"))
             for row in eligible
@@ -134,7 +143,7 @@ def oracle_i02(records: list[Row]) -> list[Row]:
             "periodo": period, "unidade_sigla": unit,
             "total_no_ciclo": total, "total_vence_no_periodo": due,
             "total_concluidas": completed,
-            "taxa_cumprimento_perc": round(100 * completed / total, 2) if total else 0.0,
+            "taxa_cumprimento_perc": _arred(100 * completed / total, 2) if total else 0.0,
             "total_em_plano_avaliado": len(assessed),
             "concluidas_em_plano_avaliado": sum(
                 _float(row.get("meta_executada")) >= _float(row.get("meta_planejada"))
@@ -172,7 +181,7 @@ def oracle_i03(records: list[Row]) -> list[Row]:
         if planned <= 0:
             continue
         actual = _float(row.get("meta_executada"))
-        rate = round(100 * actual / planned, 2)
+        rate = _arred(100 * actual / planned, 2)
         output.append({
             "periodo": row.get("periodo"), "unidade_sigla": row.get("unidade_sigla", "N.I."),
             "id_entrega": row.get("id_entrega"), "meta_planejada": planned,
@@ -190,9 +199,11 @@ def oracle_i04(records: list[Row]) -> list[Row]:
             abs(_float(row.get("meta_executada"))) / abs(_float(row.get("meta_planejada")))
             for row in rows if _float(row.get("meta_planejada")) > 0
         ]
+        if not ratios:
+            continue  # D23: denominador zero, taxa indefinida — a unidade é omitida
         output.append({
             "periodo": period, "unidade_sigla": unit, "total_no_ciclo": len(ratios),
-            "score_atingimento_perc": round(mean(ratios) * 100, 2) if ratios else 0.0,
+            "score_atingimento_perc": _arred(mean(ratios) * 100, 2) if ratios else 0.0,
         })
     return _sorted(output, ("periodo", "unidade_sigla"))
 
@@ -222,7 +233,7 @@ def oracle_i05(records: list[Row]) -> list[Row]:
         counts: dict[str, int] = {}
         for (user,), rows in _group(unit_rows, "id_servidor").items():
             counts[str(user)] = len({str(row.get("id_entrega")) for row in rows})
-        average = round(mean(counts.values()), 2) if counts else 0.0
+        average = _arred(mean(counts.values()), 2) if counts else 0.0
         for user, count in counts.items():
             output.append({
                 "visao": "nominal",
@@ -245,11 +256,11 @@ def oracle_i05(records: list[Row]) -> list[Row]:
             "periodo": period, "unidade_sigla": unit,
             "total_servidores": total,
             "media_entregas_por_servidor": average,
-            "mediana_entregas_por_servidor": round(median, 2),
-            "p25_entregas_por_servidor": round(_quantile(ordered, 0.25), 2),
-            "p75_entregas_por_servidor": round(_quantile(ordered, 0.75), 2),
+            "mediana_entregas_por_servidor": _arred(median, 2),
+            "p25_entregas_por_servidor": _arred(_quantile(ordered, 0.25), 2),
+            "p75_entregas_por_servidor": _arred(_quantile(ordered, 0.75), 2),
             "pct_servidores_sem_entrega": (
-                round(100 * sum(1 for value in ordered if value == 0) / total, 2)
+                _arred(100 * sum(1 for value in ordered if value == 0) / total, 2)
                 if total else 0.0
             ),
         })
@@ -272,7 +283,7 @@ def oracle_i06(records: list[Row]) -> list[Row]:
                 "periodo": period, "unidade_sigla": unit,
                 "tamanho_grupo_responsavel": category,
                 "total_entregas_na_categoria": count, "total_entregas_unidade": total,
-                "pct_categoria": round(100 * count / total, 1) if total else 0.0,
+                "pct_categoria": _arred(100 * count / total, 1) if total else 0.0,
             })
     return _sorted(output, ("periodo", "unidade_sigla", "tamanho_grupo_responsavel"))
 
@@ -294,16 +305,32 @@ def _pascoa_independente(ano: int) -> date:
 
 
 def _feriados_independentes(ano: int) -> set[date]:
+    """Feriados nacionais de lei (D29): fixos, 20/11 (Lei 14.759/2023) e Paixão."""
+
+    fixos = [(1, 1), (4, 21), (5, 1), (9, 7), (10, 12), (11, 2), (11, 15), (11, 20), (12, 25)]
+    return {date(ano, mes, dia) for mes, dia in fixos} | {_pascoa_independente(ano) - timedelta(days=2)}
+
+
+# D29: pontos facultativos federais de dia inteiro (Portarias MGI nº 9.783/2024 e
+# nº 11.460/2025). Cópia deliberada da tabela de produção, conferida por teste.
+_PONTOS_FACULTATIVOS_INDEPENDENTES: dict[int, set[date]] = {
+    2025: {date(2025, 3, 3), date(2025, 3, 4), date(2025, 6, 19), date(2025, 6, 20), date(2025, 10, 28)},
+    2026: {date(2026, 2, 16), date(2026, 2, 17), date(2026, 4, 20), date(2026, 6, 4),
+           date(2026, 6, 5), date(2026, 10, 28)},
+}
+
+
+def _nao_uteis_independentes(ano: int) -> set[date]:
     domingo = _pascoa_independente(ano)
-    fixos = [(1, 1), (4, 21), (5, 1), (9, 7), (10, 12), (11, 2), (11, 15), (12, 25)]
-    return {date(ano, mes, dia) for mes, dia in fixos} | {
+    facultativos = _PONTOS_FACULTATIVOS_INDEPENDENTES.get(ano) or {
         domingo - timedelta(days=48), domingo - timedelta(days=47),
-        domingo - timedelta(days=2), domingo + timedelta(days=60),
+        domingo + timedelta(days=60), date(ano, 10, 28),
     }
+    return _feriados_independentes(ano) | facultativos
 
 
 def _dias_uteis_independente(inicio: date, fim: date) -> int:
-    """Contagem de dias úteis própria do oracle (decisão CGOV D09).
+    """Contagem de dias úteis própria do oracle (decisões CGOV D09 e D29).
 
     Duplica deliberadamente :mod:`lib.calendario`: importar o módulo de produção
     quebraria a independência exigida por
@@ -315,7 +342,7 @@ def _dias_uteis_independente(inicio: date, fim: date) -> int:
         return 0
     total = 0
     dia = inicio
-    feriados = _feriados_independentes(inicio.year) | _feriados_independentes(fim.year)
+    feriados = set().union(*(_nao_uteis_independentes(ano) for ano in range(inicio.year, fim.year + 1)))
     while dia <= fim:
         if dia.weekday() < 5 and dia not in feriados:
             total += 1
@@ -350,7 +377,7 @@ def oracle_i07(records: list[Row]) -> list[Row]:
         plans = {str(row.get("plano_trabalho_id")) for row in rows}
         output.append({
             "periodo": period, "unidade_sigla": unit, "id_entrega": delivery,
-            "total_horas_planejadas_entrega": round(hours, 2),
+            "total_horas_planejadas_entrega": _arred(hours, 2),
             # D09: a contagem é de planos de trabalho, não de pessoas — um
             # servidor com dois PTs na mesma entrega contava duas vezes sob o
             # nome antigo (num_servidores_alocados).
@@ -406,9 +433,9 @@ def oracle_i08(records: list[Row]) -> list[Row]:
             output.append({
                 "visao": visao, "periodo": period, "unidade_sigla": unit,
                 "id_entrega": delivery,
-                nome_horas: round(hours, 2),
-                nome_capacidade: round(available, 2),
-                nome_perc: round(100 * hours / available, 2) if available else 0.0,
+                nome_horas: _arred(hours, 2),
+                nome_capacidade: _arred(available, 2),
+                nome_perc: _arred(100 * hours / available, 2) if available else 0.0,
             })
     return _sorted(output, ("visao", "periodo", "unidade_sigla", "id_entrega"))
 
@@ -433,8 +460,8 @@ def oracle_i09(records: list[Row]) -> list[Row]:
             "periodo": period, "unidade_sigla": unit, "total_avaliacoes_pt": len(values),
             "total_planos_com_avaliacao": len({str(row.get("plano_trabalho_id")) for row in rows}),
             "total_servidores_avaliados": len({str(row.get("id_servidor")) for row in rows}),
-            "media_nota_pt": round(mean(por_plano), 2),
-            "media_nota_pt_eventos": round(mean(values), 2),
+            "media_nota_pt": _arred(mean(por_plano), 2),
+            "media_nota_pt_eventos": _arred(mean(values), 2),
             "nota_minima": min(values), "nota_maxima": max(values),
         }
         for note in range(1, 6):
@@ -457,7 +484,7 @@ def _category_oracle(records: list[Row], sequence: int, count_name: str, percent
         output.append({
             "periodo": period, "unidade_sigla": unit, "total_avaliacoes_pt": len(rows),
             "total_servidores_avaliados": len({str(row.get("id_servidor")) for row in rows}),
-            count_name: count, percent_name: round(100 * count / len(rows), 2) if rows else 0.0,
+            count_name: count, percent_name: _arred(100 * count / len(rows), 2) if rows else 0.0,
             "volume_suficiente": 1 if len(rows) >= VOLUME_MINIMO_AVALIACOES else 0,
         })
     return _sorted(output, ("periodo", "unidade_sigla"))
@@ -479,9 +506,9 @@ def oracle_i12(records: list[Row]) -> list[Row]:
         pe = [row for row in rows if row.get("instrumento") == "PE"]
         if not pt or not pe:
             continue
-        pt_mean, pe_mean = round(mean(_score(row) for row in pt), 2), round(mean(_score(row) for row in pe), 2)
-        directional = round(pt_mean - pe_mean, 2)
-        absolute = round(abs(directional), 2)
+        pt_mean, pe_mean = _arred(mean(_score(row) for row in pt), 2), _arred(mean(_score(row) for row in pe), 2)
+        directional = _arred(pt_mean - pe_mean, 2)
+        absolute = _arred(abs(directional), 2)
         output.append({
             "periodo": period, "unidade_sigla": unit, "total_avaliacoes_pt": len(pt),
             "total_servidores_avaliados": len({str(row.get("id_servidor")) for row in pt}),
@@ -611,15 +638,15 @@ def oracle_ind_gest_02(records: list[Row]) -> list[Row]:
                     "unidade_executora_sigla": executor, "id_entrega": delivery_id,
                     "nome_entrega": delivery.get("nome_entrega", "N.I."),
                     "meta_planejada": planned, "progresso_historico": actual,
-                    "taxa_atingimento_perc": round(100 * actual / planned, 2) if planned else "",
+                    "taxa_atingimento_perc": _arred(100 * actual / planned, 2) if planned else "",
                     "total_registros_execucao": len(within), "data_ultimo_registro": latest.get("data_progresso", ""),
                     "total_planos_trabalho": len(plan_ids), "total_servidores": len(people),
                     "total_vinculos": len(selected),
-                    "forca_trabalho_media_perc": round(sum(_float(row.get("forca_trabalho")) for row in selected) / len(selected), 2) if selected else 0,
+                    "forca_trabalho_media_perc": _arred(sum(_float(row.get("forca_trabalho")) for row in selected) / len(selected), 2) if selected else 0,
                     "atividades_total": len(acts), "atividades_iniciadas": sum(bool(row.get("data_inicio")) for row in acts),
                     "atividades_concluidas": sum(str(row.get("status") or "").upper() == "CONCLUIDO" for row in acts),
-                    "horas_planejadas": round(sum(_float(row.get("tempo_planejado")) for row in acts), 2),
-                    "horas_despendidas": round(sum(_float(row.get("tempo_despendido")) for row in acts), 2),
+                    "horas_planejadas": _arred(sum(_float(row.get("tempo_planejado")) for row in acts), 2),
+                    "horas_despendidas": _arred(sum(_float(row.get("tempo_despendido")) for row in acts), 2),
                     "situacao_cobertura": "COM_VINCULO_PT" if selected else "SEM_VINCULO_PT",
                     "situacao_reconciliacao": _g02_reconciliation(bool(historical), bool(selected)),
                 })
@@ -643,8 +670,8 @@ def oracle_ind_gest_02(records: list[Row]) -> list[Row]:
             "total_vinculos": 0, "forca_trabalho_media_perc": 0,
             "atividades_total": len(acts), "atividades_iniciadas": sum(bool(row.get("data_inicio")) for row in acts),
             "atividades_concluidas": sum(str(row.get("status") or "").upper() == "CONCLUIDO" for row in acts),
-            "horas_planejadas": round(sum(_float(row.get("tempo_planejado")) for row in acts), 2),
-            "horas_despendidas": round(sum(_float(row.get("tempo_despendido")) for row in acts), 2),
+            "horas_planejadas": _arred(sum(_float(row.get("tempo_planejado")) for row in acts), 2),
+            "horas_despendidas": _arred(sum(_float(row.get("tempo_despendido")) for row in acts), 2),
             "situacao_cobertura": "PT_SEM_ENTREGA", "situacao_reconciliacao": "PT_OU_VINCULO_SEM_ENTREGA_IDENTIFICAVEL",
         })
     orphan_groups: dict[str, list[Row]] = defaultdict(list)
@@ -664,7 +691,7 @@ def oracle_ind_gest_02(records: list[Row]) -> list[Row]:
             "total_registros_execucao": 0, "data_ultimo_registro": "",
             "total_planos_trabalho": len(plan_ids), "total_servidores": len(people),
             "total_vinculos": len(orphan_links),
-            "forca_trabalho_media_perc": round(sum(_float(row.get("forca_trabalho")) for row in orphan_links) / len(orphan_links), 2),
+            "forca_trabalho_media_perc": _arred(sum(_float(row.get("forca_trabalho")) for row in orphan_links) / len(orphan_links), 2),
             "atividades_total": 0, "atividades_iniciadas": 0, "atividades_concluidas": 0,
             "horas_planejadas": 0, "horas_despendidas": 0,
             "situacao_cobertura": "VINCULO_SEM_ENTREGA", "situacao_reconciliacao": "PT_OU_VINCULO_SEM_ENTREGA_IDENTIFICAVEL",
@@ -678,6 +705,62 @@ ORACLES: dict[str, Callable[[list[Row]], list[Row]]] = {
     "I09": oracle_i09, "I10": oracle_i10, "I11": oracle_i11, "I12": oracle_i12,
     "G01": oracle_ind_gest_01, "G02": oracle_ind_gest_02,
 }
+
+
+K_MIN_COMPARTILHAVEL = 5
+
+
+def verificar_supressao_compartilhavel(
+    production: list[Row], oracle_rows: list[Row], records: list[Row],
+    keys: tuple[str, ...], k: int = K_MIN_COMPARTILHAVEL,
+) -> tuple[list[Row], list[dict[str, str]]]:
+    """D27: valida o produto compartilhável do G02 pelas propriedades da supressão.
+
+    Reimplementação independente (não importa o código de produção). Com empates, a
+    escolha da célula complementar é arbitrária; por isso a verificação é por
+    propriedade, não por igualdade de chaves:
+
+    - escopo com menos de ``k`` servidores elegíveis publica nada;
+    - toda célula visível tem ``total_servidores >= k`` e existe no oracle;
+    - nenhuma célula abaixo de ``k`` aparece;
+    - unidade que perdeu células perde também exatamente uma complementar.
+
+    Devolve as linhas do oracle correspondentes às visíveis (para comparar valores)
+    e os achados de supressão.
+    """
+
+    findings: list[dict[str, str]] = []
+    key = lambda row: tuple(str(row.get(name, "")) for name in keys)  # noqa: E731
+    servers = {
+        str(row.get("id_servidor")) for row in records
+        if row.get("_extractor") == "g02_planos" and row.get("id_servidor")
+    }
+    visible_keys = {key(row) for row in production}
+    if len(servers) < k:
+        if production:
+            findings.append({"classe": "BUG_PROVAVEL", "severidade": "bloqueante",
+                             "mensagem": f"compartilhável com linhas em escopo abaixo de k={k}"})
+        return [], findings
+    by_key = {key(row): row for row in oracle_rows}
+    missing = [item for item in visible_keys if item not in by_key]
+    small = [item for item in visible_keys if item in by_key and int(_float(by_key[item].get("total_servidores"))) < k]
+    if missing:
+        findings.append({"classe": "BUG_PROVAVEL", "severidade": "bloqueante",
+                         "mensagem": f"compartilhável com {len(missing)} célula(s) inexistente(s) no oracle"})
+    if small:
+        findings.append({"classe": "BUG_PROVAVEL", "severidade": "bloqueante",
+                         "mensagem": f"compartilhável com {len(small)} célula(s) abaixo de k={k}"})
+    wrong_units = 0
+    for unit in {str(row.get("unidade_sigla")) for row in oracle_rows}:
+        unit_rows = [row for row in oracle_rows if str(row.get("unidade_sigla")) == unit]
+        below = sum(1 for row in unit_rows if int(_float(row.get("total_servidores"))) < k)
+        shown = sum(1 for row in unit_rows if key(row) in visible_keys)
+        expected = len(unit_rows) - below - (1 if below and len(unit_rows) > below else 0)
+        wrong_units += int(shown != expected)
+    if wrong_units:
+        findings.append({"classe": "BUG_PROVAVEL", "severidade": "bloqueante",
+                         "mensagem": f"supressão complementar incoerente em {wrong_units} unidade(s)"})
+    return [by_key[item] for item in visible_keys if item in by_key], findings
 
 
 def calculate(code: str, records: list[Row]) -> list[Row]:

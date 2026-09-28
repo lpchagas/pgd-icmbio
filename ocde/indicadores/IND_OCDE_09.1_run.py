@@ -72,6 +72,7 @@ avaliacoes_pt AS (
     CROSS JOIN parametros p
     WHERE av.plano_trabalho_consolidacao_id IS NOT NULL
       AND (p.incluir_excluidos = 1 OR av.deleted_at IS NULL)
+      AND (p.incluir_excluidos = 1 OR ptc.deleted_at IS NULL)  -- soft-delete da consolidação (regra §2.4)
       AND CAST(av.data_avaliacao AS DATE) BETWEEN p.data_inicio AND p.data_fim
       AND CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
@@ -173,8 +174,8 @@ def main() -> None:
             try:
                 columns, rows = query_rows(conn, sql)
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I09 {label}: {exc}") from exc
             if all_cols is None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1

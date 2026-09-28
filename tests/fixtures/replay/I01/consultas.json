@@ -1,0 +1,108 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I01 (consulta única de planos de trabalho, sem filtro de período; a janela vai de 2025-07-01 ao corte) para o replay offline (data de execução 2026-09-13). Fixture manual. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "janela",
+      "inicio": "2025-07-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "usuario_id",
+        "unidade_sigla",
+        "unidade_nome",
+        "modalidade",
+        "plano_inicio",
+        "plano_fim"
+      ],
+      "linhas": [
+        [
+          "sint-u1",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "Presencial",
+          "2025-07-01",
+          "2025-12-31"
+        ],
+        [
+          "sint-u1",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "Presencial",
+          "2026-01-01",
+          "2026-04-30"
+        ],
+        [
+          "sint-u2",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "Teletrabalho parcial",
+          "2025-06-01",
+          "2026-05-31"
+        ],
+        [
+          "sint-u2",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "Teletrabalho parcial",
+          "2025-10-01",
+          "2025-12-31"
+        ],
+        [
+          "sint-u3",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "Teletrabalho integral",
+          "2025-07-15",
+          "2026-03-31"
+        ],
+        [
+          "sint-u4",
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+          "2025-08-01",
+          "2026-02-28"
+        ],
+        [
+          "sint-u5",
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "N.I.",
+          "2026-02-01",
+          "2026-05-31"
+        ],
+        [
+          "sint-u6",
+          "N.I.",
+          "N.I.",
+          "Presencial",
+          "2026-01-10",
+          "2026-01-20"
+        ],
+        [
+          "sint-u7",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "Presencial",
+          "2026-03-01",
+          "2026-02-01"
+        ],
+        [
+          "sint-u8",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "Presencial",
+          "",
+          "2026-02-01"
+        ],
+        [
+          "",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "Presencial",
+          "2025-09-01",
+          "2025-09-30"
+        ]
+      ]
+    }
+  ]
+}

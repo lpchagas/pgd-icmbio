@@ -4,5 +4,6 @@ markers = [
     "unit: testes unitários de funções puras (sem I/O externo, sem rede)",
     "regression: testes de regressão contra bugs históricos documentados",
     "integration: testes que exigem conexão real ao Denodo (ignorados por padrão)",
+    "mysql: testes que exigem MySQL local de teste; rodar com -m mysql e PGD_MYSQL_TESTE=1 (ignorados por padrão)",
 ]
-addopts = "-ra -m \"not integration\""
+addopts = "-ra -m \"not integration and not mysql\""

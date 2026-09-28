@@ -7,6 +7,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -160,22 +161,73 @@ def _tool_version(client: str, platform: str = "auto") -> dict:
     }
 
 
+# Etiquetas de reparse que são link. Pastas reais do OneDrive também têm atributo de
+# reparse (placeholder de nuvem), por isso o atributo sozinho não identifica link.
+_LINK_TAGS = {
+    getattr(stat, "IO_REPARSE_TAG_MOUNT_POINT", 0xA0000003),  # junção
+    getattr(stat, "IO_REPARSE_TAG_SYMLINK", 0xA000000C),
+    0xA000001D,                                               # symlink criado pelo WSL
+}
+
+
+def link_type() -> str:
+    """Tipo de link de descoberta pela plataforma: junção no Windows, symlink no resto (L4d)."""
+
+    return "juncao" if os.name == "nt" else "symlink"
+
+
+def _is_link(path: Path) -> bool:
+    """Link de qualquer tipo (symlink, junção, link do WSL), sem seguir o destino."""
+
+    try:
+        info = os.lstat(path)
+    except FileNotFoundError:
+        return False
+    return stat.S_ISLNK(info.st_mode) or getattr(info, "st_reparse_tag", 0) in _LINK_TAGS
+
+
+def _create_link(source: Path, target: Path) -> None:
+    if link_type() == "juncao":
+        import _winapi
+
+        _winapi.CreateJunction(str(source.absolute()), str(target))
+    else:
+        target.symlink_to(source, target_is_directory=True)
+
+
+def _points_to(target: Path, source: Path) -> bool:
+    try:
+        return target.resolve(strict=True) == source.resolve(strict=True)
+    except OSError:
+        return False
+
+
 def install(apply: bool = False) -> dict:
+    """Um link por skill em ``.claude/skills`` para ``.agents/skills`` (idempotente).
+
+    Link existente com outro destino (inclusive link do WSL, invisível no Windows) é
+    removido sem seguir o destino. Pasta ou arquivo real vai para o backup.
+    """
     plan: list[dict] = []
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    backup = ROOT / ".agents" / "skill-backups" / stamp
+    backup = CANONICAL.parent / "skill-backups" / stamp
+    tipo = link_type()
     for name in sorted(inventory(CANONICAL)):
         source, target = CANONICAL / name, CLAUDE / name
-        if target.is_symlink() and target.resolve() == source.resolve():
+        link = _is_link(target)
+        if link and _points_to(target, source):
             continue
-        plan.append({"action": "symlink", "source": str(source), "target": str(target)})
+        anterior = "link" if link else ("real" if os.path.lexists(target) else None)
+        plan.append({"action": tipo, "source": str(source), "target": str(target), "anterior": anterior})
         if not apply:
             continue
         CLAUDE.mkdir(parents=True, exist_ok=True)
-        if target.exists() or target.is_symlink():
+        if link:
+            os.unlink(target)  # remove só o link (junção inclusive), nunca o destino
+        elif anterior == "real":
             backup.mkdir(parents=True, exist_ok=True)
             shutil.move(str(target), str(backup / f"claude-{name}"))
-        target.symlink_to(source, target_is_directory=True)
+        _create_link(source, target)
     if CODEX_LEGACY.exists():
         plan.append({"action": "archive", "source": str(CODEX_LEGACY), "target": str(backup / "codex-skills")})
         if apply:

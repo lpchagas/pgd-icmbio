@@ -45,6 +45,7 @@ import sys
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.arredondamento import arredondar  # D24: meio para cima
 from lib.calendario import dias_uteis
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
@@ -163,21 +164,34 @@ def horas_alocadas(registro: dict) -> float:
 
 
 def agregar(columns: list[str], rows: list[list]) -> list[list]:
-    """Agrega as linhas atômicas por entrega, somando horas e contando planos."""
+    """Agrega as linhas atômicas por entrega, somando horas e contando planos.
+
+    D25: o vínculo plano de trabalho × entrega conta uma vez; vínculos repetidos no
+    PETRVS são ignorados no cálculo e contados como alerta de qualidade.
+    """
 
     acumulado: dict[tuple, dict] = {}
+    vistos: set[tuple] = set()
+    duplicados = 0
     for row in rows:
         registro = dict(zip(columns, row))
         chave = tuple(str(registro.get(nome, "")) for nome in CHAVE)
+        vinculo = (chave, str(registro.get("plano_trabalho_id")))
+        if vinculo in vistos:
+            duplicados += 1
+            continue
+        vistos.add(vinculo)
         item = acumulado.setdefault(chave, {"horas": 0.0, "planos": set()})
         item["horas"] += horas_alocadas(registro)
         item["planos"].add(str(registro.get("plano_trabalho_id")))
     agregadas = [
-        [*chave, round(item["horas"], 2), len(item["planos"])]
+        [*chave, arredondar(item["horas"], 2), len(item["planos"])]
         for chave, item in acumulado.items()
     ]
     # Mesma ordenação da versão SQL: unidade, depois horas decrescentes.
     agregadas.sort(key=lambda linha: (linha[0], -linha[7]))
+    if duplicados:
+        print(f"  ALERTA_QUALIDADE (D25): {duplicados} vínculo(s) plano de trabalho × entrega repetido(s) ignorado(s).")
     return agregadas
 
 
@@ -201,8 +215,8 @@ def main() -> None:
             try:
                 columns, rows = query_rows(conn, sql)
             except Exception as exc:
-                print(f"  ERRO: {exc}")
-                continue
+                # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
+                raise SystemExit(f"ERRO: I07 {label}: {exc}") from exc
             agregadas = agregar(columns, rows)
             duration = (end - start).days + 1
             for row in agregadas:

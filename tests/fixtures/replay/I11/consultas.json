@@ -1,0 +1,534 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I11 para o replay offline (data de execução 2026-09-13). Geradas por tools/gerar_fixtures_replay.py. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "19",
+          "21",
+          "12",
+          "97.95",
+          "Desempenho diferenciado",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "19",
+          "10",
+          "9",
+          "96.41",
+          "Uso baixo da nota máxima",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "19",
+          "16",
+          "16",
+          "",
+          "Desempenho diferenciado",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "5",
+          "19",
+          "22",
+          "71.13",
+          "Desempenho diferenciado",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "25",
+          "15",
+          "9",
+          "",
+          "Destaque pontual",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "2",
+          "15",
+          "20",
+          "40.67",
+          "Reconhecimento elevado",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "15",
+          "23",
+          "22",
+          "11.41",
+          "Amostra insuficiente",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "8",
+          "6",
+          "8",
+          "30.06",
+          "Uso baixo da nota máxima",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M01-2026",
+      "inicio": "2026-01-01",
+      "fim": "2026-01-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "16",
+          "23",
+          "4",
+          "",
+          "Destaque pontual",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "23",
+          "14",
+          "22",
+          "69.71",
+          "Destaque pontual",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "21",
+          "5",
+          "3",
+          "81.25",
+          "Uso baixo da nota máxima",
+          "0"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "8",
+          "2",
+          "7",
+          "40.26",
+          "Amostra insuficiente",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M02-2026",
+      "inicio": "2026-02-01",
+      "fim": "2026-02-28",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "6",
+          "11",
+          "24",
+          "6.03",
+          "Uso baixo da nota máxima",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "12",
+          "16",
+          "18",
+          "40.18",
+          "Desempenho diferenciado",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "3",
+          "6",
+          "14",
+          "93.02",
+          "Amostra insuficiente",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "12",
+          "0",
+          "10",
+          "42.42",
+          "Amostra insuficiente",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "M03-2026",
+      "inicio": "2026-03-01",
+      "fim": "2026-03-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "4",
+          "10",
+          "13",
+          "88.51",
+          "Amostra insuficiente",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "3",
+          "15",
+          "0",
+          "29.71",
+          "Reconhecimento elevado",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "16",
+          "4",
+          "19",
+          "82.68",
+          "Amostra insuficiente",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "18",
+          "0",
+          "14",
+          "20.17",
+          "Amostra insuficiente",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M04-2026",
+      "inicio": "2026-04-01",
+      "fim": "2026-04-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "12",
+          "5",
+          "12",
+          "0.61",
+          "Reconhecimento elevado",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "10",
+          "14",
+          "16",
+          "86.27",
+          "Amostra insuficiente",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "8",
+          "7",
+          "6",
+          "2.79",
+          "Uso baixo da nota máxima",
+          "1"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "11",
+          "15",
+          "17",
+          "15.27",
+          "Desempenho diferenciado",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M05-2026",
+      "inicio": "2026-05-01",
+      "fim": "2026-05-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "4",
+          "22",
+          "5",
+          "74.31",
+          "Destaque pontual",
+          "0"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "6",
+          "23",
+          "21",
+          "93.81",
+          "Desempenho diferenciado",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "15",
+          "8",
+          "9",
+          "26.12",
+          "Reconhecimento elevado",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "10",
+          "4",
+          "2",
+          "60.80",
+          "Destaque pontual",
+          "1"
+        ]
+      ]
+    },
+    {
+      "periodo": "M06-2026",
+      "inicio": "2026-06-01",
+      "fim": "2026-06-30",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "3",
+          "4",
+          "10",
+          "77.64",
+          "Uso baixo da nota máxima",
+          "0"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "4",
+          "6",
+          "8",
+          "22.21",
+          "Desempenho diferenciado",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "2",
+          "22",
+          "19",
+          "68.78",
+          "Desempenho diferenciado",
+          "1"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "4",
+          "7",
+          "7",
+          "0.98",
+          "Destaque pontual",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "M07-2026",
+      "inicio": "2026-07-01",
+      "fim": "2026-07-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "15",
+          "16",
+          "23",
+          "",
+          "Uso baixo da nota máxima",
+          "1"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "6",
+          "18",
+          "25",
+          "29.14",
+          "Destaque pontual",
+          "0"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "8",
+          "0",
+          "24",
+          "78.11",
+          "Reconhecimento elevado",
+          "1"
+        ],
+        [
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "9",
+          "22",
+          "1",
+          "77.02",
+          "Reconhecimento elevado",
+          "0"
+        ]
+      ]
+    },
+    {
+      "periodo": "M08-2026",
+      "inicio": "2026-08-01",
+      "fim": "2026-08-31",
+      "colunas": [
+        "unidade_sigla",
+        "unidade_nome",
+        "total_avaliacoes_pt",
+        "total_servidores_avaliados",
+        "qtd_excepcional",
+        "perc_excepcional",
+        "nivel_reconhecimento",
+        "volume_suficiente"
+      ],
+      "linhas": []
+    }
+  ]
+}

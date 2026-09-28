@@ -66,4 +66,4 @@ As saídas vão para `artefatos_local/gestao/AAAA-MM/escopos/<scope-key>/`, que 
    `tests/fixtures/validation/`.
 4. Registrar em `gestao/registry.py`. A chave é o nome da skill, em kebab-case.
 5. Escrever a ficha em `docs/gestao/` e incluir a linha na tabela acima e em
-   `docs/14-status-planos-trabalho-gestores.md`.
+   `docs/gestao/README.md`.

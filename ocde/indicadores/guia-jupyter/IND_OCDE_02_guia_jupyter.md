@@ -12,11 +12,11 @@ Entregas (PE) se **sobrepõe** ao período consultado.
 
 ## 2. Pré-requisitos
 
-- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/03-acesso-direto-denodo-dbeaver.md`).
+- IP da máquina liberado pelo Dataprev; driver JDBC instalado (ver `docs/ambiente/acesso-denodo-dbeaver.md`).
 - Notebook `consultas_denodo.ipynb` (raiz do projeto) aberto no VS Code.
 - Célula 2 (conexão) já configurada localmente com usuário/senha do Denodo —
   **não copie credenciais para este arquivo**; use `.env` local conforme `.env.example`
-  e a checklist de `docs/12-seguranca-publicacao.md`.
+  e a checklist de `docs/ambiente/seguranca-publicacao.md`.
 
 ## 3. Instrumento e periodicidade
 
@@ -161,7 +161,7 @@ print(f"Exportado: {output_path}")
 O exemplo genérico do notebook (`sql_i02` na seção "3. Exemplos de indicadores")
 usa `sep=";"` e salva em `Tabelas CSV\` — **não use esse padrão**; siga o
 `sep="|"` + `utf-8-sig` + `artefatos_local/ocde/entregas/YYYY-MM/` acima,
-conforme a seção 4 do CLAUDE.md.
+conforme a regra de CSV do projeto (regra 15 das instruções comuns em `CLAUDE.md`).
 
 ## 7. Observações e pontos críticos
 

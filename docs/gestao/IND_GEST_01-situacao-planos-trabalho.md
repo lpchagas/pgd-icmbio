@@ -1,5 +1,10 @@
 # G01 — Situação dos Planos de Trabalho
 
+> **Decisão CGOV D26 (27.09.2026).** Plano de trabalho com data de fim anterior à de
+> início é dado inválido na origem: segue no painel, é contado num alerta de
+> qualidade e deixa de bloquear a validação. O G01 não usa essas datas em nenhuma
+> métrica (a duração vem da trilha de status); a fórmula continua na 4.0.0.
+
 | Campo | Valor |
 | --- | --- |
 | Código lógico | `G01` (até 13.09.2026: `PT_STATUS`, ainda aceito como alias na CLI) |
@@ -157,7 +162,7 @@ duas vezes.
 
 `petrvs_icmbio_audits` (Laravel Auditing) também guarda o histórico, mas foi
 descartada como fonte primária: exigiria parse de JSON em LONGVARCHAR, vedado pela
-§6.5 do [07.1](../07.1-estrutura-banco-dados.md), e tem volume muito maior.
+§6.5 do [07.1](../dados-petrvs/estrutura-banco-dados.md), e tem volume muito maior.
 
 ---
 
@@ -247,7 +252,7 @@ leitura.
 ## 7. Como executar
 
 ```powershell
-cd "C:\Projetos\pgd-ocde-icmbio"
+cd "C:\Projetos\pgd-icmbio"
 
 # Pelo runner da família (valida o registro, aplica o seletor de escopo, gera manifesto)
 python -m gestao.runner --analise status-pt --data-execucao 2026-09-13 --regional GR2 --produto restrito
@@ -318,7 +323,7 @@ Gerado apenas nos produtos `operacional` e `restrito`.
 **Supressão complementar (D17/F11).** Quando, numa unidade, uma única célula é
 ocultada por k<5, a menor célula visível da mesma unidade também é ocultada. Sem
 isso, qualquer total da unidade divulgado em outro produto revelaria a célula por
-subtração. Implementação: `ocde.relatorios.privacidade.apply_complementary_suppression`.
+subtração. Implementação: `relatorios.privacidade.apply_complementary_suppression`.
 
 **Minimização (D14).** Só nome e identificador do servidor. CPF, e-mail e matrícula
 não são lidos nem persistidos. O `servidor_email`, que a consulta selecionava antes

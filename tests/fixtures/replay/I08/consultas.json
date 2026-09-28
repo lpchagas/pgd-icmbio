@@ -1,0 +1,419 @@
+{
+  "descricao": "Linhas congeladas sintéticas do I08 (capacidade e vínculos por período) para o replay offline (data de execução 2026-09-13). Fixture manual: cada linha cobre um ramo do cálculo. Sem dados reais.",
+  "consultas": [
+    {
+      "periodo": "T3-2025",
+      "nome": "capacidade",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "nao_contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_sigla",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "sint-pt-1",
+          "40",
+          "HORAS",
+          "2025-06-01",
+          "2025-12-31",
+          "2025-07-01",
+          "2025-09-30"
+        ],
+        [
+          "CGSIN",
+          "sint-pt-1",
+          "40",
+          "HORAS",
+          "2025-06-01",
+          "2025-12-31",
+          "2025-07-01",
+          "2025-09-30"
+        ],
+        [
+          "CGSIN",
+          "sint-pt-2",
+          "5",
+          "DIAS",
+          "2025-07-15",
+          "2025-08-15",
+          "2025-07-15",
+          "2025-08-15"
+        ],
+        [
+          "NGI-SINT",
+          "sint-pt-3",
+          "30",
+          "HORAS",
+          "2025-07-01",
+          "2025-09-30",
+          "2025-07-01",
+          "2025-09-30"
+        ],
+        [
+          "N.I.",
+          "sint-pt-9",
+          "20",
+          "",
+          "2025-07-01",
+          "2025-09-30",
+          "2025-07-01",
+          "2025-09-30"
+        ]
+      ]
+    },
+    {
+      "periodo": "T3-2025",
+      "nome": "vinculos",
+      "inicio": "2025-07-01",
+      "fim": "2025-09-30",
+      "contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_dona_sigla",
+        "unidade_dona_nome",
+        "unidade_executora_sigla",
+        "unidade_executora_nome",
+        "id_entrega",
+        "nome_entrega",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim",
+        "forca_trabalho"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-ent-1",
+          "Relatório anual | consolidado",
+          "sint-pt-1",
+          "40",
+          "HORAS",
+          "2025-06-01",
+          "2025-12-31",
+          "2025-07-01",
+          "2025-09-30",
+          "60.00"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-ent-1",
+          "Relatório anual | consolidado",
+          "sint-pt-3",
+          "30",
+          "HORAS",
+          "2025-07-01",
+          "2025-09-30",
+          "2025-07-01",
+          "2025-09-30",
+          "50.00"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-ent-2",
+          "Plano\nde manejo sintético",
+          "sint-pt-2",
+          "5",
+          "DIAS",
+          "2025-07-15",
+          "2025-08-15",
+          "2025-07-15",
+          "2025-08-15",
+          "100.00"
+        ],
+        [
+          "UNID-NOME",
+          "Unidade Mapeada Pelo Nome",
+          "SEM-MAPA",
+          "Unidade | sem mapa\nquebrada",
+          "sint-ent-3",
+          "Entrega sem capacidade",
+          "sint-pt-4",
+          "20",
+          "HORAS",
+          "2025-07-01",
+          "2025-09-30",
+          "2025-07-01",
+          "2025-09-30",
+          "40.00"
+        ],
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-ent-4",
+          "Entrega superalocada",
+          "sint-pt-3",
+          "30",
+          "HORAS",
+          "2025-07-01",
+          "2025-09-30",
+          "2025-07-01",
+          "2025-09-30",
+          "250.00"
+        ],
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-ent-5",
+          "Plano sem data de início",
+          "sint-pt-5",
+          "40",
+          "HORAS",
+          "",
+          "2025-09-30",
+          "2025-07-01",
+          "2025-09-30",
+          "30.00"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "nome": "capacidade",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "nao_contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_sigla",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "sint-pt-1",
+          "40",
+          "HORAS",
+          "2025-06-01",
+          "2025-12-31",
+          "2025-10-01",
+          "2025-12-31"
+        ],
+        [
+          "NGI-SINT",
+          "sint-pt-6",
+          "40",
+          "HORAS",
+          "2025-10-01",
+          "2026-01-31",
+          "2025-10-01",
+          "2025-12-31"
+        ]
+      ]
+    },
+    {
+      "periodo": "T4-2025",
+      "nome": "vinculos",
+      "inicio": "2025-10-01",
+      "fim": "2025-12-31",
+      "contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_dona_sigla",
+        "unidade_dona_nome",
+        "unidade_executora_sigla",
+        "unidade_executora_nome",
+        "id_entrega",
+        "nome_entrega",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim",
+        "forca_trabalho"
+      ],
+      "linhas": [
+        [
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "CGSIN",
+          "Coordenação-Geral Sintética",
+          "sint-ent-6",
+          "Monitoramento sintético",
+          "sint-pt-1",
+          "40",
+          "HORAS",
+          "2025-06-01",
+          "2025-12-31",
+          "2025-10-01",
+          "2025-12-31",
+          "100.00"
+        ],
+        [
+          "N.I.",
+          "N.I.",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-ent-7",
+          "N.I.",
+          "sint-pt-6",
+          "40",
+          "HORAS",
+          "2025-10-01",
+          "2026-01-31",
+          "2025-10-01",
+          "2025-12-31",
+          "50.00"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q1-2026",
+      "nome": "capacidade",
+      "inicio": "2026-01-01",
+      "fim": "2026-04-30",
+      "nao_contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_sigla",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "sint-pt-6",
+          "40",
+          "HORAS",
+          "2025-10-01",
+          "2026-01-31",
+          "2026-01-01",
+          "2026-01-31"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q1-2026",
+      "nome": "vinculos",
+      "inicio": "2026-01-01",
+      "fim": "2026-04-30",
+      "contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_dona_sigla",
+        "unidade_dona_nome",
+        "unidade_executora_sigla",
+        "unidade_executora_nome",
+        "id_entrega",
+        "nome_entrega",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim",
+        "forca_trabalho"
+      ],
+      "linhas": [
+        [
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "NGI-SINT",
+          "Núcleo Gestor Sintético",
+          "sint-ent-8",
+          "Ação de janeiro",
+          "sint-pt-6",
+          "40",
+          "HORAS",
+          "2025-10-01",
+          "2026-01-31",
+          "2026-01-01",
+          "2026-01-31",
+          "80.00"
+        ]
+      ]
+    },
+    {
+      "periodo": "Q2-2026",
+      "nome": "capacidade",
+      "inicio": "2026-05-01",
+      "fim": "2026-08-31",
+      "nao_contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_sigla",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim"
+      ],
+      "linhas": []
+    },
+    {
+      "periodo": "Q2-2026",
+      "nome": "vinculos",
+      "inicio": "2026-05-01",
+      "fim": "2026-08-31",
+      "contem": [
+        "planos_trabalhos_entregas"
+      ],
+      "colunas": [
+        "unidade_dona_sigla",
+        "unidade_dona_nome",
+        "unidade_executora_sigla",
+        "unidade_executora_nome",
+        "id_entrega",
+        "nome_entrega",
+        "plano_trabalho_id",
+        "carga_horaria",
+        "forma_contagem_carga_horaria",
+        "plano_inicio",
+        "plano_fim",
+        "sobreposicao_inicio",
+        "sobreposicao_fim",
+        "forca_trabalho"
+      ],
+      "linhas": []
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+#!/bin/sh
+# Hook de pre-commit (L4d; ADR-010): SÓ VERIFICA o núcleo comum de CLAUDE.md,
+# AGENTS.md e PROJECT.md nos arquivos preparados (índice). Nunca modifica arquivos.
+# Se falhar: python -m tools.sincronizar_instrucoes sincronizar  e depois  git add.
+#
+# Ativação (uma vez por clone):  git config core.hooksPath .githooks
+
+raiz="$(git rev-parse --show-toplevel)" || exit 1
+alvos="CLAUDE.md AGENTS.md PROJECT.md config/instrucoes.lock.json"
+
+# Branch que ainda não versiona o núcleo (anterior ao L4d): nada a verificar.
+# Remover qualquer um dos alvos do índice NÃO pula a verificação.
+# shellcheck disable=SC2086
+if [ -z "$(git ls-files --cached -- $alvos)" ] && \
+   [ -z "$(git diff --cached --name-only --diff-filter=D -- $alvos)" ]; then
+    exit 0
+fi
+
+py="${PGD_PYTHON:-}"
+if [ -z "$py" ]; then
+    for candidato in "$raiz/.venv/Scripts/python.exe" "$raiz/.venv/bin/python"; do
+        if [ -x "$candidato" ]; then py="$candidato"; break; fi
+    done
+fi
+if [ -z "$py" ]; then
+    echo "pre-commit: Python do projeto não encontrado (.venv). Defina PGD_PYTHON." >&2
+    exit 1
+fi
+
+cd "$raiz" || exit 1
+exec "$py" -m tools.sincronizar_instrucoes --raiz "$raiz" verificar --staged

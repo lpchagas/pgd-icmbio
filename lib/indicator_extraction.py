@@ -24,10 +24,10 @@ from zoneinfo import ZoneInfo
 
 from .auditoria import minimal_subprocess_env, redact_log
 from .csv_utils import PROJECT_ROOT, indicator_csv_dir
-from .escopos import slug
 from .periodos import ANALYSIS_TIMEZONE, configure_execution_context
 from .validation_contracts import TARGETS, ocde_artifact
-from ocde.relatorios.escopo import filter_rows, load_unit_profiles, scope_from_values
+from lib.liberacao import exigir_execucao_autorizada
+from relatorios.escopo import filter_rows, load_unit_profiles, scope_from_values
 
 
 INDICATORS: tuple[tuple[str, str, str, int], ...] = tuple(
@@ -123,6 +123,10 @@ def build_parser() -> argparse.ArgumentParser:
     scope.add_argument("--mesogrupo")
     scope.add_argument("--tipo-unidade")
     scope.add_argument("--lista-unidades", type=Path)
+    scope.add_argument(
+        "--pilotos", action="store_true",
+        help="Aquisição nacional única, entregue separada para cada piloto do cadastro (H8-a).",
+    )
     return parser
 
 
@@ -148,24 +152,46 @@ def _persist_scoped(source: Path, destination: Path, scope) -> bool:
     return True
 
 
-def run(argv: list[str] | None = None) -> dict:
-    args = build_parser().parse_args(argv)
-    only = _normalize_indicator(args.so)
-    window = configure_execution_context(args.data_execucao)
-    scope = scope_from_values(
+def _escopos(args: argparse.Namespace) -> list:
+    if args.pilotos:
+        from lib.liberacao import carregar_cadastro
+
+        return [scope_from_values(**{piloto.seletor: piloto.sigla}) for piloto in carregar_cadastro().pilotos]
+    return [scope_from_values(
         escopo=args.escopo or ("nacional" if not any((args.regional, args.unidade, args.mesogrupo, args.tipo_unidade, args.lista_unidades)) else None), regional=args.regional, unidade=args.unidade,
         mesogrupo=args.mesogrupo, tipo_unidade=args.tipo_unidade,
         lista_unidades=args.lista_unidades,
-    )
-    scope_key = f"{slug(scope.kind)}-{slug(scope.value)}"
-    output_dir = indicator_csv_dir(window.mes_execucao) / "escopos" / scope_key
+    )]
+
+
+def run(argv: list[str] | None = None) -> dict:
+    """Extrai os A1 selecionados e entrega o A2 filtrado por escopo.
+
+    Com ``--pilotos`` (H8-a), cada A1 roda **uma vez** sobre o universo nacional, em
+    staging temporário descartado ao fim, e o resultado é filtrado e persistido para
+    cada piloto, com um manifesto por piloto. Nenhum A2 nacional é persistido.
+    """
+    args = build_parser().parse_args(argv)
+    only = _normalize_indicator(args.so)
+    window = configure_execution_context(args.data_execucao)
+    scopes = _escopos(args)
+    output_dirs = {scope.key: indicator_csv_dir(window.mes_execucao) / "escopos" / scope.key for scope in scopes}
     selected = [item for item in INDICATORS if only in (None, item[0])]
+    # Gate de liberação (L5): o A2 é produto intermediário e restrito; a decisão fica
+    # registrada no manifesto. Produtos finais são barrados nos relatórios.
+    liberacoes = {
+        scope.key: exigir_execucao_autorizada(
+            "lib.indicator_extraction", scope, "intermediario",
+            capacidades=[f"I{item[0]}" for item in selected], final=False,
+        )
+        for scope in scopes
+    }
     started = datetime.now(ZoneInfo(ANALYSIS_TIMEZONE))
     run_fingerprint = hashlib.sha256(
         json.dumps({"window": window.as_dict(), "selected": [item[0] for item in selected]}, sort_keys=True).encode("utf-8")
     ).hexdigest()[:8]
     run_id = f"{started.strftime('%Y%m%dT%H%M%S')}-{run_fingerprint}"
-    results: list[dict] = []
+    results: dict[str, list[dict]] = {scope.key: [] for scope in scopes}
 
     staging_context = tempfile.TemporaryDirectory(prefix="pgd-ocde-a2-")
     staging_base = Path(staging_context.name)
@@ -173,20 +199,21 @@ def run(argv: list[str] | None = None) -> dict:
         script = PROJECT_ROOT / "ocde" / "indicadores" / script_name
         target = TARGETS[f"I{number}"]
         if args.usar_existentes:
-            created: list[Path] = []
-            for contract in target.outputs:
-                if scope.kind != "nacional" and number == "01" and contract.view == "institucional":
-                    continue
-                candidates = sorted(output_dir.glob(contract.pattern), key=lambda path: (path.stat().st_mtime_ns, path.name))
-                if candidates:
-                    created.append(candidates[-1])
-            results.append({
-                "indicador": f"I{number}", "nome": name,
-                "status": "sucesso" if created else "erro_sem_artefato",
-                "formula_version": target.formula_version, "hash_A1": _sha256(script),
-                "hash_sql": _sql_hash(script), "duracao_segundos": 0.0,
-                "arquivos": [asdict(_csv_evidence(path)) for path in created], "erro": "",
-            })
+            for scope in scopes:
+                created: list[Path] = []
+                for contract in target.outputs:
+                    if scope.kind != "nacional" and number == "01" and contract.view == "institucional":
+                        continue
+                    candidates = sorted(output_dirs[scope.key].glob(contract.pattern), key=lambda path: (path.stat().st_mtime_ns, path.name))
+                    if candidates:
+                        created.append(candidates[-1])
+                results[scope.key].append({
+                    "indicador": f"I{number}", "nome": name,
+                    "status": "sucesso" if created else "erro_sem_artefato",
+                    "formula_version": target.formula_version, "hash_A1": _sha256(script),
+                    "hash_sql": _sql_hash(script), "duracao_segundos": 0.0,
+                    "arquivos": [asdict(_csv_evidence(path)) for path in created], "erro": "",
+                })
             continue
         staging_dir = staging_base / window.mes_execucao
         before = _indicator_files(staging_dir, number) if staging_dir.exists() else set()
@@ -216,60 +243,80 @@ def run(argv: list[str] | None = None) -> dict:
         )
         after = _indicator_files(staging_dir, number) if staging_dir.exists() else set()
         staged = sorted(after - before)
-        created = []
-        for source in staged:
-            destination = output_dir / source.name
-            if _persist_scoped(source, destination, scope):
-                created.append(destination)
-        evidence = [asdict(_csv_evidence(path)) for path in created]
-        status = "dry-run" if args.dry_run and completed.returncode == 0 else "sucesso"
-        if completed.returncode != 0:
-            status = "erro"
-        elif not args.dry_run and not created:
-            status = "erro_sem_artefato"
-        results.append(
-            {
-                "indicador": f"I{number}",
-                "nome": name,
-                "status": status,
-                "formula_version": target.formula_version,
-                "hash_A1": _sha256(script),
-                "hash_sql": _sql_hash(script),
-                "duracao_segundos": round(
-                    (datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)) - step_started).total_seconds(), 3
-                ),
-                "arquivos": evidence,
-                "erro": redact_log(completed.stderr[-1000:]) if completed.returncode else "",
-            }
-        )
+        duration = round((datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)) - step_started).total_seconds(), 3)
+        for scope in scopes:
+            created = []
+            for source in staged:
+                destination = output_dirs[scope.key] / source.name
+                if _persist_scoped(source, destination, scope):
+                    created.append(destination)
+            status = "dry-run" if args.dry_run and completed.returncode == 0 else "sucesso"
+            if completed.returncode != 0:
+                status = "erro"
+            elif not args.dry_run and not created:
+                status = "erro_sem_artefato"
+            results[scope.key].append(
+                {
+                    "indicador": f"I{number}",
+                    "nome": name,
+                    "status": status,
+                    "formula_version": target.formula_version,
+                    "hash_A1": _sha256(script),
+                    "hash_sql": _sql_hash(script),
+                    "duracao_segundos": duration,
+                    "arquivos": [asdict(_csv_evidence(path)) for path in created],
+                    "erro": redact_log(completed.stderr[-1000:]) if completed.returncode else "",
+                }
+            )
 
-    failures = [item for item in results if item["status"].startswith("erro")]
     full_cycle = only is None
-    manifest = {
-        "tipo": "extracao_indicadores_ocde",
+    finished = datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)).isoformat(timespec="seconds")
+    acquisition = {
+        "modo": "nacional_unica_por_pilotos" if args.pilotos else "nacional",
+        "descricao": "Os A1 OCDE consultam o universo nacional; o escopo é filtro posterior, e o staging é descartado.",
+        "run_id": run_id,
+        "escopos_entregues": [scope.key for scope in scopes],
+    }
+    manifests = []
+    for scope in scopes:
+        failures = [item for item in results[scope.key] if item["status"].startswith("erro")]
+        manifest = {
+            "tipo": "extracao_indicadores_ocde",
+            "run_id": run_id,
+            **window.as_dict(),
+            "data_hora_inicio": started.isoformat(timespec="seconds"),
+            "data_hora_fim": finished,
+            "fuso_horario": ANALYSIS_TIMEZONE,
+            "reextracao_solicitada": args.reextrair,
+            "artefatos_existentes_reconciliados": args.usar_existentes,
+            "dry_run": args.dry_run,
+            "ciclo_completo": full_cycle,
+            "status_global": (
+                "falha" if failures else "dry-run" if args.dry_run else "sucesso" if full_cycle else "parcial"
+            ),
+            "escopo": {**scope.as_dict(), "chave": scope.key},
+            "aquisicao": acquisition,
+            "liberacao": liberacoes[scope.key],
+            "resultados": results[scope.key],
+        }
+        if args.salvar_manifesto and not args.dry_run:
+            output_dirs[scope.key].mkdir(parents=True, exist_ok=True)
+            path = output_dirs[scope.key] / _manifest_filename(full_cycle, run_id)
+            path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
+            manifest["manifesto"] = str(path)
+        manifests.append(manifest)
+    staging_context.cleanup()
+    if not args.pilotos:
+        return manifests[0]
+    statuses = {manifest["status_global"] for manifest in manifests}
+    return {
+        "tipo": "extracao_indicadores_ocde_pilotos",
         "run_id": run_id,
         **window.as_dict(),
-        "data_hora_inicio": started.isoformat(timespec="seconds"),
-        "data_hora_fim": datetime.now(ZoneInfo(ANALYSIS_TIMEZONE)).isoformat(timespec="seconds"),
-        "fuso_horario": ANALYSIS_TIMEZONE,
-        "reextracao_solicitada": args.reextrair,
-        "artefatos_existentes_reconciliados": args.usar_existentes,
-        "dry_run": args.dry_run,
-        "ciclo_completo": full_cycle,
-        "status_global": (
-            "falha" if failures else "dry-run" if args.dry_run else "sucesso" if full_cycle else "parcial"
-        ),
-        "escopo": {**scope.as_dict(), "chave": scope_key},
-        "resultados": results,
+        "aquisicao": acquisition,
+        "status_global": "falha" if "falha" in statuses else statuses.pop() if len(statuses) == 1 else "parcial",
+        "manifestos_por_piloto": manifests,
     }
-    if args.salvar_manifesto and not args.dry_run:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        manifest_name = _manifest_filename(full_cycle, run_id)
-        path = output_dir / manifest_name
-        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-        manifest["manifesto"] = str(path)
-    staging_context.cleanup()
-    return manifest
 
 
 def main(argv: list[str] | None = None) -> int:
