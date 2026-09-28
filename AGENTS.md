@@ -3,7 +3,7 @@
 <!-- nucleo-comum:inicio -->
 ## Projeto
 
-**PGD-ICMBio** (`pgd-icmbio`; no GitHub, ainda `pgd-ocde-icmbio` até a renomeação)
+**PGD-ICMBio** (`pgd-icmbio`; no GitHub, `lpchagas/pgd-icmbio`, antes `pgd-ocde-icmbio`)
 calcula, valida e documenta indicadores do Programa de Gestão e Desempenho do ICMBio a
 partir do PETRVS, lido via Denodo (MGI/Dataprev), sem ETL nem datamart. Responsável
 técnico: CGOV/ICMBio. Contexto: piloto OCDE/MGI/ICMBio/UFRN (Portaria ICMBio nº

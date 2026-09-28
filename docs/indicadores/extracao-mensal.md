@@ -124,7 +124,7 @@ Nas rodadas seguintes, basta executar os scripts.
 
 ### Configuração do arquivo `.env`
 
-O arquivo `.env` fica na raiz do projeto (`pgd-ocde-icmbio\.env`) e
+O arquivo `.env` fica na raiz do projeto (`pgd-icmbio\.env`) e
 contém as credenciais de acesso ao Denodo. Ele **nunca é publicado no repositório**
 (está no `.gitignore`). Copie o `.env.example` como `.env` e preencha:
 

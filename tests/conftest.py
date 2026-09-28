@@ -1,4 +1,4 @@
-"""Fixtures compartilhadas da suíte de testes do pgd-ocde-icmbio.
+"""Fixtures compartilhadas da suíte de testes do pgd-icmbio.
 
 Nenhum teste desta suíte abre conexão de rede ou JDBC — ver tests/README.md
 para a decisão de não mockar jpype/Denodo.

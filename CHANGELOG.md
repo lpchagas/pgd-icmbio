@@ -3,7 +3,13 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
-## [Não publicado] — reorganização em monorepo (`pgd-icmbio`)
+## 27.09.2026 — reorganização em monorepo (`pgd-icmbio`)
+
+### Publicação (L8)
+
+- Integrada ao `main` por PR única com merge commit (`lpchagas/pgd-icmbio#4`).
+- Repositório renomeado de `pgd-ocde-icmbio` para `pgd-icmbio` no GitHub; o endereço antigo
+  redireciona.
 
 ### Estrutura
 

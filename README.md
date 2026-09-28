@@ -6,7 +6,7 @@ Desenvolvido pela Coordenação de Governança (CGOV/ICMBio) no âmbito do pilot
 
 > **Para outros órgãos da APF:** as consultas e os scripts podem ser reutilizados por qualquer instituição que use o PETRVS e tenha acesso ao Denodo do MGI/Dataprev — basta apontar para o schema do seu órgão.
 
-> **Nome do repositório:** o projeto se chama `pgd-icmbio`. No GitHub, o endereço continua `pgd-ocde-icmbio` até a renomeação, prevista para o fim da reorganização em monorepo.
+> **Nome do repositório:** o projeto se chama `pgd-icmbio` e, desde a conclusão da reorganização em monorepo (27/09/2026), este é também o endereço no GitHub. O endereço antigo, `pgd-ocde-icmbio`, redireciona para cá.
 
 ---
 
@@ -67,7 +67,7 @@ Leia o [guia rápido para gestores](docs/indicadores/guia-rapido-gestores.md): o
 1. Clone o repositório:
 
    ```bash
-   git clone https://github.com/lpchagas/pgd-ocde-icmbio.git
+   git clone https://github.com/lpchagas/pgd-icmbio.git
    ```
 
 2. Copie `.env.example` para `.env` e preencha suas credenciais. O `.env` fica só no seu computador e nunca vai para o GitHub.

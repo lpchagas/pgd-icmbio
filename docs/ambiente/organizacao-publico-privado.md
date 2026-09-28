@@ -19,7 +19,7 @@ A separação garante que:
 
 ## 2. O que fica onde
 
-### Repositório público (GitHub — `pgd-ocde-icmbio`, a ser renomeado para `pgd-icmbio`)
+### Repositório público (GitHub — `pgd-icmbio`, antes `pgd-ocde-icmbio`)
 
 Tudo aqui é **versionado e publicável**. Não contém dados pessoais, senhas nem análises internas.
 
@@ -125,7 +125,7 @@ Ao trabalhar em uma máquina diferente pela primeira vez, siga esta sequência:
 ### Passo 1 — Clonar o repositório
 
 ```powershell
-git clone https://github.com/lpchagas/pgd-ocde-icmbio "C:\Projetos\pgd-icmbio"
+git clone https://github.com/lpchagas/pgd-icmbio "C:\Projetos\pgd-icmbio"
 cd "C:\Projetos\pgd-icmbio"
 ```
 

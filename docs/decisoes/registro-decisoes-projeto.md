@@ -16,7 +16,7 @@ de memória de conversa.
 | ID | Decisão | Data | Efeito |
 | --- | --- | --- | --- |
 | DP-01 | Monorepo, com o histórico do agente preservado por merge | 23.09.2026 | Agente em `agente/`; [ADR-009](ADR-009-arquitetura-integrada.md) |
-| DP-02 | Nome final `pgd-icmbio` | 23.09.2026 | Renomeação no GitHub na etapa final (L8); até lá, `pgd-ocde-icmbio` |
+| DP-02 | Nome final `pgd-icmbio` | 23.09.2026 | Repositório renomeado no GitHub na etapa final (L8), em 27.09.2026; o endereço antigo `pgd-ocde-icmbio` redireciona |
 | DP-03 | `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` como pares sem hierarquia, com regra de sincronia | 23.09.2026 | [ADR-010](ADR-010-sincronia-instrucoes.md) |
 | DP-04 | Unidades piloto: CGOV, COCAGE e GR2 | 23.09.2026 | [ADR-011](ADR-011-unidades-piloto.md); `config/unidades-piloto.json` |
 | DP-05 | Atualizar todos os `.md`, corrigir links e excluir obsoletos | 23.09.2026 | Revisão integral e verificador de links bloqueante |

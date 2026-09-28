@@ -8,7 +8,7 @@ Este documento é para **qualquer perfil** — gestores, analistas ou equipe té
 
 ## 1. O que é o PGD-ICMBio
 
-Este projeto (`pgd-icmbio`; no GitHub, `pgd-ocde-icmbio` até a renomeação) reúne as **consultas, os scripts e a documentação** para calcular e validar os **indicadores do PGD do ICMBio** diretamente dos dados originais do PETRVS, sem nenhuma transformação intermediária:
+Este projeto (`pgd-icmbio`, antes `pgd-ocde-icmbio`) reúne as **consultas, os scripts e a documentação** para calcular e validar os **indicadores do PGD do ICMBio** diretamente dos dados originais do PETRVS, sem nenhuma transformação intermediária:
 
 - os **12 indicadores OCDE/PGD** (I01–I12);
 - os **indicadores de gestão** para as chefias (G01 e G02);
