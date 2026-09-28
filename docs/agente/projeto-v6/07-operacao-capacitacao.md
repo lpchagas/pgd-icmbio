@@ -23,16 +23,16 @@ Estados: `aguardando_dados` pede informação; `aguardando_decisao` pede autorid
 - MySQL84 ativo;
 - credenciais locais no `.env`;
 - acesso Denodo apenas para tutoriais que o exigem;
-- repositório `C:\Projetos\pgd-agente-icmbio`.
+- repositório `C:\Projetos\pgd-icmbio` (monorepo; o agente fica em `agente/`).
 
 ## 3. T1 — preparar ambiente
 
 **Objetivo:** obter uma cópia funcional sem alterar dados.
 
 ```powershell
-cd C:\Projetos\pgd-agente-icmbio
+cd C:\Projetos\pgd-icmbio
 python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python -m pip install -r requirements-agente.txt
 ```
 
 Resultado: ambiente local isolado. Se `.venv` já existir, não o recrie sem necessidade.
