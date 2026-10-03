@@ -13,7 +13,8 @@ pgd_agente``: o sufixo ``_teste`` sozinho não isola nada. Por isso:
 - ``resumo``: tabelas, triggers, versão do schema e uma transação funcional (trigger de
   imutabilidade + ROLLBACK), sem expor dados.
 
-A instância isolada é criada e ligada por ``mysql_isolada.ps1``; as credenciais ficam
+A instância isolada é criada e ligada por ``mysql_isolada.ps1`` (Windows) ou
+``mysql_isolada.sh`` (Linux/WSL); as credenciais ficam
 em ``root.cnf`` e ``teste.cnf`` no diretório dela (fora do Git), nunca impressas.
 """
 from __future__ import annotations
@@ -34,7 +35,10 @@ TESTE = "pgd_agente_teste"
 PORTA_PRINCIPAL = 3306
 PORTA_ISOLADA = 3307
 SCHEMA = Path(__file__).resolve().parent / "schema.sql"
-MYSQL_BIN = Path(os.environ.get("PGD_MYSQL_BIN", r"C:\Program Files\MySQL\MySQL Server 8.4\bin"))
+WINDOWS = os.name == "nt"
+MYSQL_BIN = Path(os.environ.get("PGD_MYSQL_BIN", r"C:\Program Files\MySQL\MySQL Server 8.4\bin" if WINDOWS else "/usr/bin"))
+MYSQL_CLIENTE = "mysql.exe" if WINDOWS else "mysql"
+SCRIPT_ISOLADA = "mysql_isolada.ps1" if WINDOWS else "mysql_isolada.sh"
 
 
 class SQLRecusado(ValueError):
@@ -46,7 +50,11 @@ class ConexaoRecusada(RuntimeError):
 
 
 def diretorio_instancia() -> Path:
-    padrao = Path(os.environ.get("LOCALAPPDATA", Path.home())) / "pgd-icmbio" / "mysql-isolada"
+    if WINDOWS:
+        dados_usuario = Path(os.environ.get("LOCALAPPDATA", Path.home()))
+    else:  # mesmo padrão de mysql_isolada.sh
+        dados_usuario = Path(os.environ.get("XDG_DATA_HOME") or Path.home() / ".local" / "share")
+    padrao = dados_usuario / "pgd-icmbio" / "mysql-isolada"
     return Path(os.environ.get("PGD_MYSQL_ISOLADA_DIR", padrao))
 
 
@@ -136,7 +144,7 @@ class Credencial:
 
 def ler_cnf(arquivo: Path) -> Credencial:
     if not arquivo.is_file():
-        raise ConexaoRecusada(f"Credencial da instância isolada ausente: {arquivo.name} (rode mysql_isolada.ps1 inicializar)")
+        raise ConexaoRecusada(f"Credencial da instância isolada ausente: {arquivo.name} (rode {SCRIPT_ISOLADA} inicializar)")
     parser = configparser.ConfigParser(interpolation=None)
     parser.read(arquivo, encoding="utf-8")
     cliente = parser["client"]
@@ -246,7 +254,7 @@ def restaurar(diretorio: Path, dump: Path) -> dict:
         conn.close()
     with dump.open("rb") as entrada:
         concluido = subprocess.run(
-            [str(MYSQL_BIN / "mysql.exe"), f"--defaults-extra-file={credencial.arquivo}", "--protocol=TCP"],
+            [str(MYSQL_BIN / MYSQL_CLIENTE), f"--defaults-extra-file={credencial.arquivo}", "--protocol=TCP"],
             stdin=entrada, capture_output=True, check=False,
         )
     if concluido.returncode:
