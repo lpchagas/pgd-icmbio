@@ -62,20 +62,22 @@ bloqueante. Seu anexo nominal é exclusivo do produto restrito.
 
 ## 4. Como executar
 
-```powershell
-cd "C:\Projetos\pgd-icmbio"
+```bash
+cd ~/projetos/pgd-icmbio          # Windows: cd "C:\Projetos\pgd-icmbio"
 
 # Todos os indicadores de gestão registrados, com manifesto
 python -m gestao.runner --analise todas --data-execucao 2026-09-13 --regional GR2 --produto restrito
 
 # Um indicador, direto
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas --data-execucao 2026-09-13
 
 # Validação automatizada
 python -m lib.validation_runner --familia gestao --alvo G01,G02 --modo integrado --produto restrito --data-execucao 2026-09-13 --regional GR2
 ```
 
 As saídas ficam em `artefatos_local/gestao/AAAA-MM/escopos/<scope-key>/`, que nunca é versionado.
+Todo comando leva `--data-execucao` (regra 7); a mesma data em todos os comandos do
+ciclo mantém os resultados comparáveis.
 
 ---
 

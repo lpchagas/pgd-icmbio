@@ -44,12 +44,12 @@ ele identifica o indicador, não o arquivo.
 
 ## Como executar
 
-```powershell
+```bash
 # Pelo runner, que valida o registro, aplica o seletor de escopo e gera manifesto
 python -m gestao.runner --analise status-pt --data-execucao 2026-09-13 --regional GR2 --produto restrito
 
 # Diretamente, para uso imediato da chefia
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-subordinadas --data-execucao 2026-09-13
 python -m gestao.runner --analise execucao-entregas --data-execucao 2026-09-13 --regional GR2 --produto restrito
 ```
 

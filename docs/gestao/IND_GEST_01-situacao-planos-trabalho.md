@@ -251,20 +251,26 @@ leitura.
 
 ## 7. Como executar
 
-```powershell
-cd "C:\Projetos\pgd-icmbio"
+```bash
+cd ~/projetos/pgd-icmbio          # Windows: cd "C:\Projetos\pgd-icmbio"
 
 # Pelo runner da família (valida o registro, aplica o seletor de escopo, gera manifesto)
 python -m gestao.runner --analise status-pt --data-execucao 2026-09-13 --regional GR2 --produto restrito
 
 # Diretamente
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --data-execucao 2026-09-13
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade DIPLAN --incluir-subordinadas --niveis 5
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP,DIPLAN
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --produto compartilhavel
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-encerrados
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --dry-run
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade DIPLAN --incluir-subordinadas --niveis 5 --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP,DIPLAN --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --produto compartilhavel --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-encerrados --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --dry-run --data-execucao 2026-09-13
 ```
+
+Sempre informe `--data-execucao` (regra 7): sem ela, a fotografia usa a data do dia
+e o resultado deixa de ser reprodutível. O `--dry-run` mostra a data da fotografia,
+a janela, o produto e o destino sem abrir conexão com o Denodo. `python` é o Python
+do ambiente do projeto (`.venv/bin/python` no WSL; `.venv\Scripts\python.exe` no
+Windows).
 
 Desempenho observado: cerca de 10 segundos para o instituto inteiro.
 
