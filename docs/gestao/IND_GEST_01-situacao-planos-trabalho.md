@@ -261,7 +261,7 @@ python -m gestao.runner --analise status-pt --data-execucao 2026-09-13 --regiona
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --data-execucao 2026-09-13
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade DIPLAN --incluir-subordinadas --niveis 5 --data-execucao 2026-09-13
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP,DIPLAN --data-execucao 2026-09-13
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --produto compartilhavel --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGOV --produto compartilhavel --data-execucao 2026-09-13   # piloto CGOV
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-encerrados --data-execucao 2026-09-13
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --dry-run --data-execucao 2026-09-13
 ```
