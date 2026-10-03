@@ -154,184 +154,118 @@ No Windows, use o bloco "Windows" do `.env.example`
 
 ## 5. Preparação antes de cada rodada
 
-No WSL (terminal do Ubuntu, na raiz do projeto):
+**Data de execução.** Todo comando recebe `--data-execucao AAAA-MM-DD` (regra 7 das
+instruções do projeto): use a data do dia da rodada e repita **a mesma data** em
+todos os comandos do ciclo. A janela de análise vai de 01/07/2025 ao último dia do
+mês anterior a essa data (ex.: `--data-execucao 2026-10-01` analisa até 30/09/2026).
+Nunca rode sem a data: o resultado passaria a depender do dia em que o comando foi
+executado.
+
+Nos comandos abaixo, `python` é o Python do ambiente do projeto: no WSL,
+`.venv/bin/python` (ou ative o ambiente uma vez por terminal com
+`source .venv/bin/activate`); no Windows, `.venv\Scripts\python.exe` (ou
+`.venv\Scripts\Activate.ps1`). Execute sempre na raiz do projeto
+(`~/projetos/pgd-icmbio` no WSL; `C:\Projetos\pgd-icmbio` no Windows).
 
 ```bash
 # 1. Atualizar o repositório local
 git pull
 
 # 2. Verificar que o .env existe (sem exibir as credenciais na tela)
-test -f .env && echo ".env presente"
+test -f .env && echo ".env presente"          # Windows: Test-Path .env
 
-# 3. Testar sem abrir o Denodo
-.venv/bin/python ocde/indicadores/IND_OCDE_02.1_run.py --dry-run
+# 3. Simular o ciclo, sem abrir o Denodo e sem gravar nada
+python -m tools.executar_pilotos --capacidade ocde --data-execucao AAAA-MM-DD
 ```
 
-No Windows (PowerShell):
+A simulação é o modo padrão do `tools.executar_pilotos`: mostra a janela de
+análise, os pilotos do cadastro (`config/unidades-piloto.json`) e o escopo de
+entrega de cada um, e termina com `"status_global": "dry-run"`.
 
-```powershell
-git pull
-Test-Path .env
-.venv\Scripts\python.exe ocde/indicadores/IND_OCDE_02.1_run.py --dry-run
-```
-
-O `--dry-run` mostra o instrumento (PE ou PT), o documento-fonte, a SQL adaptada
-e o destino em `artefatos_local/` sem abrir conexão com o Denodo.
+> **Atenção:** os scripts `IND_OCDE_XX.1_run.py` **não** têm modo de simulação nem
+> ajuda. Chamá-los com `--dry-run` ou `--help` executa a extração **real e
+> nacional**. Para testar, use sempre o comando 3 acima.
 
 ---
 
-## 6. Execução dos scripts
+## 6. Execução
 
-Nos comandos desta seção, `python` é o Python do ambiente do projeto. No WSL, use
-`.venv/bin/python` (ou ative o ambiente uma vez por terminal com
-`source .venv/bin/activate`); no Windows, `.venv\Scripts\python.exe` (ou
-`.venv\Scripts\Activate.ps1`).
+O ciclo oficial roda pelos **pilotos** cadastrados: os A1 consultam o universo
+nacional uma única vez, e o recorte de cada piloto é aplicado depois. Os resultados
+saem separados por piloto, em `artefatos_local/ocde/entregas/AAAA-MM/escopos/<scope-key>/`;
+nunca some taxas entre pilotos. Sem seletor, a extração assume o escopo nacional,
+que está suspenso (D16).
 
-### 6a. Executar todos os 12 indicadores de uma vez (recomendado)
+### 6a. Ciclo completo dos 12 indicadores (recomendado)
 
-Um único bloco gera os 13 CSVs automaticamente, reporta o status de cada
-indicador e lista os que tiveram erro ao final. Aguarde de 5 a 15 minutos
-dependendo da conexão com o Dataprev.
-
-**WSL** — no terminal do Ubuntu, cole o bloco abaixo e pressione Enter:
+Depois da simulação da seção 5, execute (5 a 15 minutos, conforme a conexão com o
+Dataprev):
 
 ```bash
-cd ~/projetos/pgd-icmbio
-
-erros=()
-for n in 01 02 03 04 05 06 07 08 09 10 11 12; do
-    echo -e "\n>>> I$n"
-    .venv/bin/python "ocde/indicadores/IND_OCDE_$n.1_run.py" || erros+=("I$n")
-done
-
-echo "========================================"
-if [ ${#erros[@]} -eq 0 ]; then
-    echo "CONCLUÍDO: todos os indicadores foram gerados com sucesso!"
-else
-    echo "CONCLUÍDO COM ERROS nos seguintes indicadores: ${erros[*]}"
-fi
-echo "Arquivos salvos em: artefatos_local/ocde/entregas/$(date +%Y-%m)"
+python -m tools.executar_pilotos --capacidade ocde --data-execucao AAAA-MM-DD --modo real --validar
 ```
 
-**Windows** — abra o **PowerShell** (tecla Windows → "PowerShell" → Enter), cole
-o bloco abaixo e pressione Enter:
+- `--modo real` faz a aquisição única no Denodo e grava os A2 de cada piloto.
+- `--validar` roda a validação integrada A1–A5 de cada piloto
+  ([protocolo de validação](protocolo-validacao.md)).
+- Acrescente `--salvar` para gravar o registro da execução no acervo privado.
 
-```powershell
-cd "C:\Projetos\pgd-icmbio"
+A saída é um JSON com o resultado por piloto. O ciclo terminou bem quando nenhum
+piloto tem `erro` preenchido; investigue antes de compartilhar qualquer arquivo.
 
-$indicadores = @(
-    @{script="IND_OCDE_01.1_run.py"; nome="I01 - Regime de trabalho"},
-    @{script="IND_OCDE_02.1_run.py"; nome="I02 - Taxa cumprimento entregas"},
-    @{script="IND_OCDE_03.1_run.py"; nome="I03 - Taxa cumprimento por entrega"},
-    @{script="IND_OCDE_04.1_run.py"; nome="I04 - Índice atingimento metas"},
-    @{script="IND_OCDE_05.1_run.py"; nome="I05 - Distribuição entregas servidores"},
-    @{script="IND_OCDE_06.1_run.py"; nome="I06 - Grau responsabilidade"},
-    @{script="IND_OCDE_07.1_run.py"; nome="I07 - Horas por entrega (absoluto)"},
-    @{script="IND_OCDE_08.1_run.py"; nome="I08 - Proporção horas por entrega (%)"},
-    @{script="IND_OCDE_09.1_run.py"; nome="I09 - Média avaliações PT"},
-    @{script="IND_OCDE_10.1_run.py"; nome="I10 - % Avaliações inadequadas"},
-    @{script="IND_OCDE_11.1_run.py"; nome="I11 - % Avaliações excepcionais"},
-    @{script="IND_OCDE_12.1_run.py"; nome="I12 - Coerência PT x PE"}
-)
+### 6b. Um indicador específico
 
-$erros = @()
-foreach ($ind in $indicadores) {
-    Write-Host "`n>>> $($ind.nome)" -ForegroundColor Cyan
-    python "ocde/indicadores/$($ind.script)"
-    if ($LASTEXITCODE -ne 0) {
-        $erros += $ind.nome
-        Write-Host "  ERRO no $($ind.nome)" -ForegroundColor Red
-    }
-}
+Use quando precisar gerar ou refazer apenas um indicador (por exemplo, depois de
+uma correção). Simule e depois execute com a mesma data:
 
-Write-Host "`n========================================" -ForegroundColor Green
-if ($erros.Count -eq 0) {
-    Write-Host "CONCLUÍDO: todos os indicadores foram gerados com sucesso!" -ForegroundColor Green
-} else {
-    Write-Host "CONCLUÍDO COM ERROS nos seguintes indicadores:" -ForegroundColor Yellow
-    $erros | ForEach-Object { Write-Host "  - $_" -ForegroundColor Red }
-}
-Write-Host "Arquivos salvos em: artefatos_local\ocde\entregas\$(Get-Date -Format 'yyyy-MM')" -ForegroundColor Green
+```bash
+python -m tools.executar_pilotos --capacidade I02 --data-execucao AAAA-MM-DD
+python -m tools.executar_pilotos --capacidade I02 --data-execucao AAAA-MM-DD --modo real --validar
 ```
 
-Quando terminar, os CSVs estarão em:
-
-```
-artefatos_local\ocde\entregas\2026-06\
-```
-
-(a pasta muda automaticamente para o mês corrente — ex: `2026-07` em julho)
-
----
-
-### 6b. Meses com só indicadores PT (9 meses no ano)
-
-Execute os 6 indicadores baseados em Plano de Trabalho:
-
-```powershell
-python ocde/indicadores/IND_OCDE_01.1_run.py
-python ocde/indicadores/IND_OCDE_05.1_run.py
-python ocde/indicadores/IND_OCDE_06.1_run.py
-python ocde/indicadores/IND_OCDE_09.1_run.py
-python ocde/indicadores/IND_OCDE_10.1_run.py
-python ocde/indicadores/IND_OCDE_11.1_run.py
-```
-
-### 6c. Meses com todos os indicadores — maio, setembro e janeiro (3 meses no ano)
-
-Execute os 12 indicadores na ordem abaixo (PT primeiro, PE depois):
-
-```powershell
-# PT mensais
-python ocde/indicadores/IND_OCDE_01.1_run.py
-python ocde/indicadores/IND_OCDE_05.1_run.py
-python ocde/indicadores/IND_OCDE_06.1_run.py
-python ocde/indicadores/IND_OCDE_09.1_run.py
-python ocde/indicadores/IND_OCDE_10.1_run.py
-python ocde/indicadores/IND_OCDE_11.1_run.py
-
-# PE quadrimestrais
-python ocde/indicadores/IND_OCDE_02.1_run.py
-python ocde/indicadores/IND_OCDE_03.1_run.py
-python ocde/indicadores/IND_OCDE_04.1_run.py
-python ocde/indicadores/IND_OCDE_07.1_run.py
-python ocde/indicadores/IND_OCDE_08.1_run.py
-python ocde/indicadores/IND_OCDE_12.1_run.py
-```
-
-Para forçar uma pasta de destino específica (útil para retroativos):
-
-```powershell
-python ocde/indicadores/IND_OCDE_02.1_run.py --month 2026-05
-```
-
-### 6d. Executar um indicador específico
-
-Use quando precisar gerar ou re-executar apenas um indicador. Primeiro navegue
-até a raiz do projeto (`cd ~/projetos/pgd-icmbio` no WSL;
-`cd "C:\Projetos\pgd-icmbio"` no Windows).
-
-Depois execute o indicador desejado:
-
-| Indicador | Comando | O que mostra |
+| Indicador | `--capacidade` | O que mostra |
 |-----------|---------|-------------|
-| **I01** | `python ocde/indicadores/IND_OCDE_01.1_run.py` | Gera 2 arquivos: resumo nacional + detalhamento por unidade |
-| **I02** | `python ocde/indicadores/IND_OCDE_02.1_run.py` | % das entregas de cada unidade concluídas no período |
-| **I03** | `python ocde/indicadores/IND_OCDE_03.1_run.py` | Status de cada entrega individual (concluída / em andamento / não iniciada) |
-| **I04** | `python ocde/indicadores/IND_OCDE_04.1_run.py` | Score médio de atingimento das metas por unidade (0 a 100+) |
-| **I05** | `python ocde/indicadores/IND_OCDE_05.1_run.py` | Quantas entregas cada servidor está responsável por unidade |
-| **I06** | `python ocde/indicadores/IND_OCDE_06.1_run.py` | Quantos servidores compartilham cada entrega e com que % de força de trabalho |
-| **I07** | `python ocde/indicadores/IND_OCDE_07.1_run.py` | Total de horas planejadas para cada entrega em cada unidade |
-| **I08** | `python ocde/indicadores/IND_OCDE_08.1_run.py` | % da capacidade total da unidade alocado em cada entrega |
-| **I09** | `python ocde/indicadores/IND_OCDE_09.1_run.py` | Nota média (1 a 5) das avaliações dos servidores por unidade |
-| **I10** | `python ocde/indicadores/IND_OCDE_10.1_run.py` | % das avaliações com nota "Inadequado" por unidade |
-| **I11** | `python ocde/indicadores/IND_OCDE_11.1_run.py` | % das avaliações com nota "Excepcional" por unidade |
-| **I12** | `python ocde/indicadores/IND_OCDE_12.1_run.py` | Se a avaliação individual (PT) está alinhada com a avaliação coletiva (PE) da unidade |
+| **I01** | `I01` | Gera 2 arquivos: resumo nacional + detalhamento por unidade |
+| **I02** | `I02` | % das entregas de cada unidade concluídas no período |
+| **I03** | `I03` | Status de cada entrega individual (concluída / em andamento / não iniciada) |
+| **I04** | `I04` | Score médio de atingimento das metas por unidade (0 a 100+) |
+| **I05** | `I05` | Quantas entregas cada servidor está responsável por unidade |
+| **I06** | `I06` | Quantos servidores compartilham cada entrega e com que % de força de trabalho |
+| **I07** | `I07` | Total de horas planejadas para cada entrega em cada unidade |
+| **I08** | `I08` | % da capacidade total da unidade alocado em cada entrega |
+| **I09** | `I09` | Nota média (1 a 5) das avaliações dos servidores por unidade |
+| **I10** | `I10` | % das avaliações com nota "Inadequado" por unidade |
+| **I11** | `I11` | % das avaliações com nota "Excepcional" por unidade |
+| **I12** | `I12` | Se a avaliação individual (PT) está alinhada com a avaliação coletiva (PE) da unidade |
 
-Quando chamados diretamente, os scripts legados salvam em
-`artefatos_local/ocde/entregas/AAAA-MM/`. No ciclo e no runner oficiais, os A2
-persistidos ficam em `AAAA-MM/escopos/<scope-key>/`; nenhum loader pode selecionar
-silenciosamente um arquivo de outro escopo.
+### 6c. Indicadores PT e PE no calendário
+
+O ciclo da seção 6a sempre executa os 12 indicadores, com a janela definida pela
+data de execução. A cadência da seção 2 continua valendo para a **leitura** dos
+resultados: os indicadores de PT (I01, I05, I06, I09, I10, I11) fecham todo mês; os
+de PE (I02, I03, I04, I07, I08, I12) só fecham um quadrimestre em maio, setembro e
+janeiro, e nos demais meses o período corrente aparece como parcial.
+
+### 6d. Comandos diretos (uso avançado)
+
+O `tools.executar_pilotos` chama por baixo o `lib.indicator_extraction`, que também
+pode ser usado diretamente, sempre com um seletor de piloto:
+
+```bash
+python -m lib.indicator_extraction --data-execucao AAAA-MM-DD --pilotos --dry-run
+python -m lib.indicator_extraction --data-execucao AAAA-MM-DD --pilotos --salvar-manifesto
+python -m lib.indicator_extraction --data-execucao AAAA-MM-DD --pilotos --so I02 --salvar-manifesto
+```
+
+Executar um script `IND_OCDE_XX.1_run.py` diretamente só serve para diagnóstico
+técnico: ele consulta o **universo nacional**, grava uma saída legada em
+`artefatos_local/ocde/entregas/AAAA-MM/` (fora dos escopos) e não passa pela
+validação. Se for indispensável, informe a data, que o script lê da linha de
+comando:
+
+```bash
+python ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD
+```
 
 ---
 
@@ -362,8 +296,8 @@ o arquivo.
 
 ```
 Primeiro dia útil do mês:
-  1. Executar todos os 12 scripts (seção 6a)
-  2. Confirmar que todos os 13 CSVs foram gerados
+  1. Simular e executar o ciclo dos pilotos com --data-execucao (seções 5 e 6a)
+  2. Confirmar que o ciclo terminou sem erro em nenhum piloto
   3. Abrir os CSVs no Excel para verificação visual rápida
   4. Enviar à COCAGE/Power BI conforme protocolo vigente
 
@@ -375,9 +309,9 @@ Até o dia 5 do mês:
 
 | Quando | O que fazer |
 |--------|-------------|
-| **Primeiro dia útil do mês** | Executar todos os 12 scripts (seção 6a) |
+| **Primeiro dia útil do mês** | Executar o ciclo dos pilotos (seção 6a) |
 | **Até o dia 5 do mês** | Revisar os CSVs e enviar à COCAGE |
-| **A qualquer momento** | Executar um indicador específico após correção ou solicitação pontual |
+| **A qualquer momento** | Executar um indicador específico após correção ou solicitação pontual (seção 6b) |
 | **Antes de qualquer commit** | Executar o checklist `docs/ambiente/seguranca-publicacao.md` |
 
 ---
@@ -528,13 +462,15 @@ Write-Host "Driver copiado com sucesso."
 **Causa mais comum:** período futuro (ex: Q3-2026 ainda sem dados suficientes
 no PETRVS), ou filtro temporal sem correspondência nos dados.
 
-**Como verificar:**
+**Como verificar:** simule o indicador com a mesma data de execução e confira a
+janela de análise (`periodo_analise_inicio` e `periodo_analise_fim`) na saída:
 
-```powershell
-python ocde/indicadores/IND_OCDE_XX.1_run.py --dry-run
+```bash
+python -m tools.executar_pilotos --capacidade IXX --data-execucao AAAA-MM-DD
 ```
 
-Isso mostra o que seria executado sem conectar ao Denodo.
+A simulação não conecta ao Denodo. Não use `--dry-run` direto no script
+`IND_OCDE_XX.1_run.py`: ele não tem esse modo e executaria a extração real.
 
 ---
 

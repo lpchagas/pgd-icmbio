@@ -228,21 +228,32 @@ Guia detalhado: `docs/ambiente/jupyter.md`
 
 ### Executar um indicador
 
-```powershell
-python ocde/indicadores/IND_OCDE_02.1_run.py
+O caminho oficial é o ciclo dos pilotos, com data de execução explícita (ver
+[guia de extração mensal](../docs/indicadores/extracao-mensal.md)):
+
+```bash
+python -m tools.executar_pilotos --capacidade I02 --data-execucao AAAA-MM-DD                          # simula
+python -m tools.executar_pilotos --capacidade I02 --data-execucao AAAA-MM-DD --modo real --validar
 ```
 
-O script conecta ao Denodo, executa a consulta para cada período histórico,
-adiciona as colunas de metadado (tipo de ciclo, rótulo, datas, status, duração)
-e salva o CSV em `artefatos_local/ocde/entregas/AAAA-MM/`.
+Chamado diretamente (só para diagnóstico técnico), o script conecta ao Denodo,
+consulta o universo nacional para cada período da janela, adiciona as colunas de
+metadado (tipo de ciclo, rótulo, datas, status, duração) e salva o CSV legado em
+`artefatos_local/ocde/entregas/AAAA-MM/`. Sempre informe a data; o script não tem
+modo de simulação, e `--dry-run` ou `--help` executam a extração real:
+
+```bash
+python ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD
+```
 
 ### Especificar a pasta de destino
 
-```powershell
-python ocde/indicadores/IND_OCDE_02.1_run.py --month 2026-06
+```bash
+python ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD --month 2026-06
 ```
 
-Por padrão, o script usa o mês atual. Use `--month` para gerar em uma pasta específica.
+Por padrão, a pasta é o mês da data de execução. Use `--month` para gerar em uma
+pasta específica; a janela de análise continua definida por `--data-execucao`.
 
 ---
 

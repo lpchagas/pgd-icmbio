@@ -179,10 +179,10 @@ O `.env.example` já traz os caminhos do Linux (`JAVA_HOME`, `DENODO_JVM_DLL` e 
 
 ```bash
 .venv/bin/python -m pytest tests -q -p no:cacheprovider
-.venv/bin/python ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD
+.venv/bin/python -c "from lib.denodo_config import get_config, connect; c = connect(get_config()); print('Conectado:', c.getMetaData().getDatabaseProductVersion()); c.close()"
 ```
 
-A suíte não abre o Denodo; o segundo comando sim, e depende de o IP da máquina estar liberado pelo Dataprev. O MySQL do agente no Linux está em [banco local do agente](banco-local-agente.md).
+A suíte não abre o Denodo. O segundo comando só abre e fecha a conexão (sem consultar dados) e depende de o IP da máquina estar liberado pelo Dataprev. Para a extração, siga o [guia de extração mensal](../indicadores/extracao-mensal.md). O MySQL do agente no Linux está em [banco local do agente](banco-local-agente.md).
 
 ### 4.2 Windows
 
@@ -246,10 +246,10 @@ As dependências do agente ficam em `requirements-agente.txt`.
 #### Passo 7 — Testar a conexão
 
 ```powershell
-.venv\Scripts\python.exe ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD
+.venv\Scripts\python.exe -c "from lib.denodo_config import get_config, connect; c = connect(get_config()); print('Conectado:', c.getMetaData().getDatabaseProductVersion()); c.close()"
 ```
 
-Se retornar dados, o ambiente está configurado corretamente. O acesso depende de o IP da máquina estar liberado pelo Dataprev.
+Se mostrar `Conectado:` e a versão do servidor, o ambiente está configurado corretamente. O comando só abre e fecha a conexão, sem consultar dados. O acesso depende de o IP da máquina estar liberado pelo Dataprev.
 
 ---
 
