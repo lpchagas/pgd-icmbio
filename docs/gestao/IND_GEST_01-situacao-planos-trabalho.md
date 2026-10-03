@@ -263,7 +263,7 @@ python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade DIPLAN --incluir-subord
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP,DIPLAN --data-execucao 2026-09-13
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGOV --produto compartilhavel --data-execucao 2026-09-13   # piloto CGOV
 python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGGP --incluir-encerrados --data-execucao 2026-09-13
-python gestao/IND_GEST_01/IND_GEST_01.1_run.py --todas --dry-run --data-execucao 2026-09-13
+python gestao/IND_GEST_01/IND_GEST_01.1_run.py --unidade CGOV --dry-run --data-execucao 2026-09-13
 ```
 
 Sempre informe `--data-execucao` (regra 7): sem ela, a fotografia usa a data do dia
