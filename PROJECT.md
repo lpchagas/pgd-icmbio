@@ -140,8 +140,10 @@ docs/           público, por assunto: projeto, ambiente, dados-petrvs, indicado
 
 Privados, fora do Git: `artefatos_local/`, `cgov/`, `setup/`, `.agents/`, `.claude/`,
 `.codex/`. São links locais para a pasta privada sincronizada, de acesso restrito à
-equipe. Os links são de cada computador e não se sincronizam: recriá-los em cada
-ambiente. Detalhes: `docs/ambiente/organizacao-publico-privado.md`.
+equipe (symlinks no Linux/WSL, junções no Windows). Os links são de cada computador e
+não se sincronizam: recriá-los em cada ambiente. No WSL, a pasta sincronizada precisa
+estar disponível neste dispositivo (arquivo só na nuvem dá erro de leitura). Detalhes:
+`docs/ambiente/organizacao-publico-privado.md`.
 
 ## Validação A1–A5 e comandos
 
@@ -186,16 +188,18 @@ Novo indicador de gestão: roteiro em `gestao/README.md`.
 
 ## Ambiente e testes
 
-- Windows: `.venv\Scripts\python.exe` (Python 3.14). CI: Python 3.12
-  (`.github/workflows/quality.yml`). Dependências: `requirements-report.txt`,
+- Ambiente principal: Linux/WSL, repositório no filesystem Linux,
+  `.venv/bin/python` (Python 3.14). No Windows: `.venv\Scripts\python.exe`. CI: Python
+  3.12 (`.github/workflows/quality.yml`). Dependências: `requirements-report.txt`,
   `requirements-agente.txt`, `requirements-dev.txt`.
-- Driver JDBC: cópia `.jar` do driver baixado pelo DBeaver em
-  `%APPDATA%\DBeaverData\drivers\remote\drivers\jdbc\9\`
-  (`docs/ambiente/acesso-denodo-dbeaver.md`).
+- Denodo via JPype: a JVM é do mesmo sistema do Python. No WSL, JDK Linux e
+  `DENODO_JVM_DLL` apontando para `libjvm.so`; no Windows, `JAVA_HOME` (deriva a
+  `jvm.dll`). Driver: `.jar` JDBC da Denodo em `DENODO_DRIVER_PATH`, fora do repositório
+  (`docs/ambiente/acesso-denodo-dbeaver.md`). Nomes das variáveis: `.env.example`.
 - Suíte completa (offline; não abre Denodo nem MySQL):
-  `.venv\Scripts\python.exe -m pytest tests -q -p no:cacheprovider`. Testes MySQL só
+  `.venv/bin/python -m pytest tests -q -p no:cacheprovider`. Testes MySQL só
   com `-m mysql` e `PGD_MYSQL_TESTE=1`, na instância isolada
-  (`docs/ambiente/banco-local-agente.md`).
+  (`docs/ambiente/banco-local-agente.md`; scripts `.sh` no Linux e `.ps1` no Windows).
 - Resultado de testes e estado do projeto não ficam nestas instruções: ver
   `CHANGELOG.md` e `capacidades/CATALOGO.md`.
 
