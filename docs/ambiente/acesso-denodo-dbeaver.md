@@ -61,6 +61,8 @@ Na primeira conexão, o DBeaver detecta que o driver Denodo não está instalado
 2. O popup **Download driver files** aparece automaticamente.
 3. Clique em **Download** e aguarde.
 
+Se o teste de conexão acusar `Class not found: com.denodo.vdp.jdbc.Driver`, o download automático trouxe o pacote errado: ver "O DBeaver não encontra o driver Denodo" na seção 8 (Problemas comuns).
+
 Se o popup não aparecer, ou se você cancelar acidentalmente:
 
 - Feche a janela de configuração sem salvar.
@@ -132,7 +134,15 @@ Causa mais provável: o IP da sua máquina não está liberado no Denodo. Verifi
 
 ### O DBeaver não encontra o driver Denodo
 
-O Denodo não é um banco convencional — o DBeaver baixa o driver na primeira conexão. Se o download falhar, verifique o acesso à internet e tente novamente. O driver também pode ser baixado manualmente em [community.denodo.com/drivers/jdbc/9](https://community.denodo.com/drivers/jdbc/9/denodo-vdp-jdbcdriver).
+O Denodo não é um banco convencional — o DBeaver baixa o driver na primeira conexão. Se o download falhar, verifique o acesso à internet e tente novamente. O driver também pode ser baixado manualmente na página de drivers JDBC da Denodo, [community.denodo.com/drivers/jdbc/9](https://community.denodo.com/drivers/jdbc/9): escolha o download **JDBC** (`denodo-vdp-jdbcdriver-9.x.jar`).
+
+Atenção: o endereço direto `community.denodo.com/drivers/jdbc/9/denodo-vdp-jdbcdriver`, usado também pelo download automático do DBeaver, passou a entregar o pacote **ODBC** para Windows (`denodo-vdp-odbcdriver-...-win.zip`, dezenas de MB). Sintoma no DBeaver: `Can't create driver instance` com `Class not found: com.denodo.vdp.jdbc.Driver`. Correção:
+
+1. Baixe o `.jar` JDBC pela página acima e guarde-o numa pasta fixa (ex.: `C:\Users\<usuário>\drivers\denodo\`).
+2. Em **Database → Driver Manager → Denodo → Edit... → Libraries**, remova o item atual e use **Add File** para apontar o `.jar`.
+3. Se o DBeaver oferecer **Download driver files** de novo, cancele.
+
+Nesse caso, use o mesmo `.jar` em `DENODO_DRIVER_PATH` (seção seguinte), sem a cópia do arquivo baixado pelo DBeaver.
 
 ### Os scripts Python não encontram o driver (`.jar`)
 
