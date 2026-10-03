@@ -24,7 +24,7 @@ A separação garante que:
 Tudo aqui é **versionado e publicável**. Não contém dados pessoais, senhas nem análises internas.
 
 ```
-C:\Projetos\pgd-icmbio\
+pgd-icmbio/        (WSL: ~/projetos/pgd-icmbio; Windows: C:\Projetos\pgd-icmbio)
 ├── CLAUDE.md, AGENTS.md, PROJECT.md   Instruções dos assistentes (núcleo comum sincronizado)
 ├── docs/                         Documentação por assunto (projeto, ambiente, dados-petrvs,
 │                                 indicadores, ocde, gestao, relatorios, agente, decisoes…)
@@ -64,7 +64,7 @@ C:\Users\<SEU_USUARIO>\OneDrive - ICMBio\projetos\pgd-ocde-icmbio-privado\
 │       └── objetivos_processos/  I03 enriquecido com objetivos e cadeia de valor
 ├── setup/                        Scripts de configuração de ambiente local
 │   ├── configurar_env.ps1        Gera .env com caminhos desta máquina
-│   └── criar_links_privados.ps1  Recria as junções em outro computador
+│   └── criar_links_privados.ps1  Recria as junções em outro computador (Windows)
 └── assistentes/
     ├── .claude/                  Configurações locais do Claude Code
     ├── .codex/                   Configurações locais do Codex
@@ -100,10 +100,10 @@ GitHub, e não contém CPF, e-mail, telefone ou endereço.
 
 ## 3. Como o VS Code "enxerga" tudo junto
 
-Na pasta do projeto você verá as pastas `artefatos_local`, `cgov`, `setup`, `.claude`, `.codex` e `.agents` como se estivessem ali. Elas são **junções** (Junctions do Windows) que apontam para a pasta privada. Os arquivos `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` **não** são pontes: são arquivos regulares, versionados no Git.
+Na pasta do projeto você verá as pastas `artefatos_local`, `cgov`, `setup`, `.claude`, `.codex` e `.agents` como se estivessem ali. Elas são **links** que apontam para a pasta privada: **symlinks** no Linux/WSL e **junções** (Junctions) no Windows. Os arquivos `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` **não** são pontes: são arquivos regulares, versionados no Git.
 
 ```
-C:\Projetos\pgd-icmbio\
+pgd-icmbio/
 ├── artefatos_local  →→→ [junção] →→→ <pasta privada>\artefatos_local
 ├── cgov             →→→ [junção] →→→ <pasta privada>\cgov
 ├── setup            →→→ [junção] →→→ <pasta privada>\setup
@@ -112,31 +112,97 @@ C:\Projetos\pgd-icmbio\
 └── .agents          →→→ [junção] →→→ <pasta privada>\assistentes\.agents
 ```
 
-Do ponto de vista do VS Code e dos scripts Python, é como se tudo estivesse na mesma pasta. O Git, porém, ignora essas junções (o `.gitignore` as lista explicitamente).
+No Linux/WSL o desenho é o mesmo, com symlinks no lugar das junções e caminhos `/mnt/c/...` para a pasta privada; a exceção é `.claude`, que no WSL é uma pasta local (ver seção 4.1).
 
-**Links das skills.** Cada skill aparece para o Claude Code em `.claude\skills\<nome>`, por meio de uma junção para `.agents\skills\<nome>`. Esses links são **locais de cada computador**: o OneDrive não os sincroniza (ficam como "Sync pending"), então cada computador os recria com o instalador (Passo 4 da seção 4).
+Do ponto de vista do VS Code e dos scripts Python, é como se tudo estivesse na mesma pasta. O Git, porém, ignora esses links (o `.gitignore` os lista explicitamente). No Linux, o Git também se recusa a seguir um symlink: nenhum arquivo privado entra no índice por ele.
+
+**Links das skills.** Cada skill aparece para o Claude Code em `.claude\skills\<nome>`, por meio de uma junção para `.agents\skills\<nome>`. Esses links são **locais de cada computador**: o OneDrive não os sincroniza (ficam como "Sync pending"), então cada computador os recria com o instalador (seção 4). Um symlink criado pelo WSL dentro da pasta do OneDrive também não é legível pelo Windows.
 
 ---
 
 ## 4. Configurar outro computador da equipe
 
-Ao trabalhar em uma máquina diferente pela primeira vez, siga esta sequência:
+Ao trabalhar em uma máquina diferente pela primeira vez, siga a sequência do seu sistema: **4.1 Linux/WSL** (ambiente principal) ou **4.2 Windows**.
 
-### Passo 1 — Clonar o repositório
+### 4.1 Linux/WSL (ambiente principal)
+
+Comandos no terminal do Ubuntu (WSL / Bash). Pré-requisitos:
+
+- WSL2 com Ubuntu e systemd ativo; Git e Python 3 instalados.
+- Pasta privada sincronizada pelo OneDrive no Windows e marcada como **"Sempre manter neste dispositivo"** (clique direito na pasta, no Explorador). Arquivo que está só na nuvem não é baixado pelo WSL: a leitura falha com `Input/output error`.
+
+**Passo 1 — Clonar no filesystem Linux** (não em `/mnt/c`, que é lento e mistura permissões):
+
+```bash
+mkdir -p ~/projetos && cd ~/projetos
+git clone https://github.com/lpchagas/pgd-icmbio.git
+cd pgd-icmbio
+git config core.hooksPath .githooks
+```
+
+**Passo 2 — Criar os links para a pasta privada.** Sem `-f`: se o nome já existir, o `ln` falha em vez de sobrescrever.
+
+```bash
+PRIVADO="/mnt/c/Users/<SEU_USUARIO>/OneDrive - ICMBio/projetos/pgd-ocde-icmbio-privado"
+ln -s "$PRIVADO/artefatos_local" artefatos_local
+ln -s "$PRIVADO/cgov" cgov
+ln -s "$PRIVADO/setup" setup
+ln -s "$PRIVADO/assistentes/.agents" .agents
+ln -s "$PRIVADO/assistentes/.codex" .codex
+mkdir .claude && ln -s "$PRIVADO/assistentes/.claude/commands" .claude/commands
+```
+
+`.claude` é uma **pasta local** no WSL: o instalador das skills cria links dentro de `.claude/skills`, e, se `.claude` apontasse para a pasta privada, esses symlinks iriam parar no OneDrive, onde o Windows não os lê. Configurações locais do Claude Code (`settings.local.json`) são criadas por máquina; revise antes de copiar permissões de outro computador.
+
+**Passo 3 — Ambiente Python e skills:**
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-dev.txt
+.venv/bin/python -m tools.skills_manager install --apply
+.venv/bin/python -m tools.skills_manager validate
+```
+
+`requirements-dev.txt` já inclui `requirements-report.txt`. As dependências do agente ficam em `requirements-agente.txt`.
+
+**Passo 4 — Java, driver e `.env`:**
+
+```bash
+sudo apt install -y openjdk-21-jre-headless
+cp .env.example .env && chmod 600 .env
+nano .env
+```
+
+O `.env.example` já traz os caminhos do Linux (`JAVA_HOME`, `DENODO_JVM_DLL` e `DENODO_DRIVER_PATH`). Guarde o `.jar` JDBC da Denodo em `~/.local/share/denodo/jdbc/9/` (como obter: [acesso ao Denodo e DBeaver](acesso-denodo-dbeaver.md)) e preencha só CPF e senha.
+
+**Passo 5 — Testar:**
+
+```bash
+.venv/bin/python -m pytest tests -q -p no:cacheprovider
+.venv/bin/python ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD
+```
+
+A suíte não abre o Denodo; o segundo comando sim, e depende de o IP da máquina estar liberado pelo Dataprev. O MySQL do agente no Linux está em [banco local do agente](banco-local-agente.md).
+
+### 4.2 Windows
+
+Comandos no PowerShell.
+
+#### Passo 1 — Clonar o repositório
 
 ```powershell
 git clone https://github.com/lpchagas/pgd-icmbio "C:\Projetos\pgd-icmbio"
 cd "C:\Projetos\pgd-icmbio"
 ```
 
-### Passo 2 — Aguardar a pasta privada sincronizar
+#### Passo 2 — Aguardar a pasta privada sincronizar
 
 Verifique se a pasta `pgd-ocde-icmbio-privado` aparece em:
 `C:\Users\SEU_USUARIO\OneDrive - ICMBio\projetos\`
 
 O ícone do OneDrive na bandeja do sistema deve mostrar sincronização concluída (sem seta de refresh). Se a pasta privada estiver em outro lugar (por exemplo, numa biblioteca SharePoint sincronizada), defina a variável `PGD_PRIVADO_DIR` com o caminho dela antes do passo 3.
 
-### Passo 3 — Criar as junções
+#### Passo 3 — Criar as junções
 
 ```powershell
 .\setup\criar_links_privados.ps1
@@ -152,7 +218,7 @@ Este script cria **só junções de pastas** — `artefatos_local`, `cgov`, `set
 >
 > O script recusa pasta que não seja a raiz do repositório (sem `.git`).
 
-### Passo 4 — Criar os links das skills
+#### Passo 4 — Criar os links das skills
 
 ```powershell
 python -m tools.skills_manager install --apply
@@ -160,7 +226,7 @@ python -m tools.skills_manager install --apply
 
 Cria uma junção por skill em `.claude\skills` (no Linux ou num contêiner, um symlink). É idempotente: pode ser executado de novo sem efeito colateral.
 
-### Passo 5 — Gerar o `.env` desta máquina
+#### Passo 5 — Gerar o `.env` desta máquina
 
 ```powershell
 .\setup\configurar_env.ps1
@@ -168,7 +234,7 @@ Cria uma junção por skill em `.claude\skills` (no Linux ou num contêiner, um 
 
 O script detecta automaticamente o nome de usuário Windows e o caminho do driver Denodo instalado pelo DBeaver. Ao final, abre instruções para você preencher apenas CPF e senha.
 
-### Passo 6 — Instalar dependências Python
+#### Passo 6 — Instalar dependências Python
 
 ```powershell
 python -m venv .venv
@@ -177,7 +243,7 @@ python -m venv .venv
 
 As dependências do agente ficam em `requirements-agente.txt`.
 
-### Passo 7 — Testar a conexão
+#### Passo 7 — Testar a conexão
 
 ```powershell
 .venv\Scripts\python.exe ocde/indicadores/IND_OCDE_02.1_run.py --data-execucao AAAA-MM-DD
@@ -195,10 +261,11 @@ Os scripts Python leem **todos** os caminhos do arquivo `.env`, então não há 
 |----------|----------------------------|
 | `DENODO_USER` | Credencial individual de cada pessoa da equipe |
 | `DENODO_PASSWORD` | Credencial individual de cada pessoa da equipe |
-| `JAVA_HOME` | Geralmente igual, mas pode variar se o DBeaver foi instalado fora do caminho padrão |
+| `JAVA_HOME` | Linux/WSL: JDK da distribuição. Windows: geralmente o Java do DBeaver, que pode variar se ele foi instalado fora do caminho padrão |
+| `DENODO_JVM_DLL` | Só no Linux/WSL: `libjvm.so` do JDK Linux (o Python do WSL não carrega a `jvm.dll` do Windows) |
 | `DENODO_DRIVER_PATH` | **Muda sempre** — depende do nome de usuário Windows e do número de versão do driver (ex.: `/9/` pode virar `/10/` após atualização do DBeaver) |
 
-**O `configurar_env.ps1` resolve isso automaticamente** — ele busca o caminho correto do driver na máquina atual, independentemente do nome de usuário ou versão do driver.
+**No Windows, o `configurar_env.ps1` resolve isso automaticamente** — ele busca o caminho correto do driver na máquina atual, independentemente do nome de usuário ou versão do driver. No Linux/WSL, ajuste os caminhos à mão a partir do `.env.example` (seção 4.1).
 
 ### O que é compartilhado entre os computadores
 
@@ -213,6 +280,7 @@ Os scripts Python leem **todos** os caminhos do arquivo `.env`, então não há 
 | Diagnósticos, relatórios e aceites | Sim | Pasta privada (automático) |
 | Skills e configurações dos assistentes (`.agents/`, `.claude/`, `.codex/`) | Sim | Pasta privada (automático) |
 | Links das skills (`.claude\skills\<nome>`) | **Não** | Recriados em cada computador pelo instalador |
+| Links para a pasta privada (junções ou symlinks) | **Não** | Recriados em cada computador (seção 4) |
 | `.env` com credenciais | **Não** | Cada máquina tem o seu próprio |
 
 ---
@@ -224,7 +292,7 @@ Os scripts Python leem **todos** os caminhos do arquivo `.env`, então não há 
 ```
 1. git pull                          → código, documentação e instruções atualizados
 2. Aguardar a pasta privada sincronizar → artefatos, cgov e skills disponíveis
-3. Verificar .env presente           → se não, rodar configurar_env.ps1
+3. Verificar .env presente           → se não, seção 4.1 (WSL) ou configurar_env.ps1 (Windows)
 ```
 
 ### Ao terminar o trabalho
@@ -348,11 +416,15 @@ Se a pasta `projetos\` for deletada do OneDrive:
 
 ### "As pastas `artefatos_local`, `cgov`, `.claude` etc. aparecem vazias após clonar o repositório"
 
-Normal — elas não são versionadas no Git. Execute `criar_links_privados.ps1` para recriar as junções com a pasta privada.
+Normal — elas não são versionadas no Git. No Windows, execute `criar_links_privados.ps1` para recriar as junções com a pasta privada; no Linux/WSL, crie os symlinks do passo 2 da seção 4.1.
+
+### "No WSL, a leitura de um arquivo da pasta privada falha com `Input/output error`"
+
+O arquivo está só na nuvem (placeholder do OneDrive), e o WSL não pede o download. No Windows, clique com o botão direito na pasta `pgd-ocde-icmbio-privado` → **Sempre manter neste dispositivo** e aguarde a sincronização.
 
 ### "As skills do projeto não aparecem no assistente"
 
-Os links de `.claude\skills` são locais e podem estar ausentes ou ser links antigos do WSL, invisíveis no Windows. Rode `python -m tools.skills_manager install --apply` e abra uma nova sessão. Para conferir o pacote das skills: `python -m tools.skills_manager validate`.
+Os links de `.claude\skills` são locais e podem estar ausentes ou ser links antigos do WSL, invisíveis no Windows. Rode `python -m tools.skills_manager install --apply` (no WSL, `.venv/bin/python -m tools.skills_manager install --apply`) e abra uma nova sessão. Para conferir o pacote das skills: `python -m tools.skills_manager validate`.
 
 ### "A pasta `cgov` não foi criada pelo script de links"
 
@@ -369,7 +441,7 @@ O script exibe `IGNORADO (cgov): destino nao existe ainda` se a pasta `cgov/` ai
 
 ### "O script Python falha com erro de driver JAR"
 
-O `DENODO_DRIVER_PATH` no `.env` está errado para esta máquina. Execute `configurar_env.ps1` novamente para detectar o caminho correto.
+O `DENODO_DRIVER_PATH` no `.env` está errado para esta máquina. No Windows, execute `configurar_env.ps1` novamente para detectar o caminho correto; no Linux/WSL, confira o caminho do `.jar` e o `DENODO_JVM_DLL`. Se o erro for `Class not found: com.denodo.vdp.jdbc.Driver`, o arquivo baixado é o pacote ODBC: ver [acesso ao Denodo e DBeaver](acesso-denodo-dbeaver.md).
 
 ### "O DBeaver atualizou e os scripts pararam de funcionar"
 

@@ -6,11 +6,27 @@ responsabilidade" abaixo.
 
 ## Como rodar
 
+No Linux/WSL (ambiente principal):
+
+```bash
+cd ~/projetos/pgd-icmbio
+.venv/bin/python -m pip install -r requirements-dev.txt   # uma vez
+.venv/bin/python -m pytest tests/ -v --tb=short
+```
+
+No Windows (PowerShell):
+
 ```powershell
 cd C:\Projetos\pgd-icmbio
 .venv\Scripts\python.exe -m pip install -r requirements-dev.txt   # uma vez
 .venv\Scripts\python.exe -m pytest tests/ -v --tb=short
 ```
+
+Alguns testes só rodam num dos sistemas e aparecem como pulados no outro: os do
+`backup.ps1` exigem o PowerShell do Windows; os do `backup.sh` e do
+`mysql_isolada.sh`, o bash do Linux. No Linux, os casos de `.gitignore` com caminhos
+dentro dos links privados também são pulados, porque o Git não analisa caminhos além
+de um symlink.
 
 Ou via skill: `/verificar-consistencia`.
 
@@ -66,7 +82,7 @@ replay `erro`, nunca equivalência, assim como consulta sem fixture, fixture amb
 ou fixture que sobra, módulo carregado de fora da árvore sob teste (ponte ou alias,
 conferido pela origem física) e dois artefatos que só diferem no carimbo.
 
-```powershell
+```bash
 python -m tools.replay_producao --alvo I07 --referencia git:HEAD --candidato . --data-execucao 2026-09-13
 python -m tools.gerar_fixtures_replay --alvo todos --verificar
 ```
@@ -78,7 +94,7 @@ listados pelo `git ls-files` (o acervo privado, ignorado pelo Git, não é perco
 Hoje é **não bloqueante**; o `--bloqueante` passa a valer depois da revisão
 integral da documentação. Exceções só por arquivo e com justificativa (`--excecoes`).
 
-```powershell
+```bash
 python -m tools.verificar_links
 ```
 

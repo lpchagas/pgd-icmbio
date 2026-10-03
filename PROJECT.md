@@ -249,6 +249,7 @@ Novo indicador de gestão: roteiro em `gestao/README.md`.
 
 ## Skills desta ferramenta
 
-- Descoberta direta em `.agents/skills`. A pasta `.agents` é uma junção para o acervo
-  privado, criada pelo script privado `setup/criar_links_privados.ps1`.
+- Descoberta direta em `.agents/skills`. A pasta `.agents` é um link para o acervo
+  privado: symlink no Linux/WSL (`docs/ambiente/organizacao-publico-privado.md`) e
+  junção no Windows (script privado `setup/criar_links_privados.ps1`).
 - Invocação: menção ao nome canônico da skill.

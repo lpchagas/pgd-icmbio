@@ -49,7 +49,7 @@ Aguarde a instalação terminar. Isso precisa ser feito apenas uma vez.
 
 > **O que é o arquivo `.env`?** É um arquivo de texto simples que guarda suas credenciais de acesso ao banco Denodo. Ele fica **apenas no seu computador** — nunca vai para o GitHub ou para qualquer outro lugar. É o equivalente a guardar sua senha no cofre da sua mesa, em vez de escrevê-la no quadro branco da sala.
 
-**Passo 1** — Na pasta do projeto (`C:\Projetos\pgd-icmbio`), localize o arquivo:
+**Passo 1** — Na pasta do projeto (no WSL, `~/projetos/pgd-icmbio`; no Windows, `C:\Projetos\pgd-icmbio`), localize o arquivo:
 
 ```
 .env.example
@@ -63,17 +63,24 @@ Aguarde a instalação terminar. Isso precisa ser feito apenas uma vez.
 .env.example  →  .env
 ```
 
+No WSL (terminal do Ubuntu, na pasta do projeto), um comando faz a cópia e protege o arquivo:
+
+```bash
+cp .env.example .env && chmod 600 .env
+```
+
 No Windows Explorer: clique com botão direito no arquivo `.env.example` > **Copiar** > clique com botão direito em área vazia > **Colar** > renomeie a cópia para `.env`.
 
-**Passo 3** — Abra o arquivo `.env` com o Bloco de Notas e preencha os três campos:
+**Passo 3** — Abra o arquivo `.env` (no WSL, pelo VS Code ou com `nano .env`; no Windows, com o Bloco de Notas) e preencha os três campos:
 
 ```
-DENODO_DRIVER_PATH=C:/Users/SEU_USUARIO/AppData/...
+DENODO_DRIVER_PATH=/home/SEU_USUARIO/.local/share/denodo/jdbc/9/denodo-vdp-jdbcdriver.jar
 DENODO_USER=seu_cpf_aqui
 DENODO_PASSWORD=sua_senha_aqui
 ```
 
-- **DENODO_DRIVER_PATH**: substitua `SEU_USUARIO` pelo nome do seu usuário Windows. Para descobrir seu nome de usuário, abra o **Prompt de Comando** (Win + R → digite `cmd` → Enter) e digite `echo %USERNAME%`.
+- **DENODO_DRIVER_PATH**: caminho do `.jar` JDBC da Denodo (como obter: [acesso ao Denodo e DBeaver](acesso-denodo-dbeaver.md)). No WSL, substitua `SEU_USUARIO` pelo resultado do comando `whoami`. No Windows, use o bloco "Windows" do `.env.example`; para descobrir seu usuário, abra o **Prompt de Comando** (Win + R → digite `cmd` → Enter) e digite `echo %USERNAME%`.
+- **Java (só no WSL)**: os campos `JAVA_HOME` e `DENODO_JVM_DLL` do `.env.example` já apontam para o Java do Linux (`sudo apt install -y openjdk-21-jre-headless`). O notebook usa o `JAVA_HOME` para achar a JVM.
 - **DENODO_USER**: seu CPF sem pontos, traço ou dígito verificador (11 dígitos).
 - **DENODO_PASSWORD**: a senha que você recebeu do gestor responsável.
 
@@ -85,11 +92,10 @@ DENODO_PASSWORD=sua_senha_aqui
 
 ## Abrindo o notebook
 
-**Passo 1** — No VS Code, vá ao menu **File > Open Folder** e selecione a pasta do projeto:
+**Passo 1** — Abra a pasta do projeto no VS Code.
 
-```
-C:\Projetos\pgd-icmbio
-```
+- **WSL:** no terminal do Ubuntu, entre na pasta do projeto e digite `code .` (é preciso a extensão **WSL** da Microsoft no VS Code). O canto inferior esquerdo deve mostrar **WSL: Ubuntu**.
+- **Windows:** menu **File > Open Folder** e selecione `C:\Projetos\pgd-icmbio`.
 
 **Passo 2** — No painel lateral (Explorer), localize e clique no arquivo:
 
@@ -109,7 +115,7 @@ Quando você abrir o notebook pela primeira vez, o VS Code vai perguntar qual "k
 
 1. No canto superior direito da tela, você verá um botão escrito algo como **"Select Kernel"** ou **"Python 3"**.
 2. Clique nesse botão.
-3. Uma lista vai aparecer. Selecione a opção que contenha **Python 3.14** ou **Python 3**.
+3. Uma lista vai aparecer. Selecione o Python do ambiente do projeto: **`.venv/bin/python`** no WSL ou **`.venv\Scripts\python.exe`** no Windows (aparece como `.venv` com Python 3.14). Evite o Python do sistema: nele faltam as bibliotecas do projeto.
 
 Se aparecer uma mensagem perguntando se deseja instalar extensões adicionais, clique em **"Install"**.
 
@@ -327,7 +333,7 @@ As células executam na ordem de cima para baixo automaticamente.
 
 O notebook não localizou o arquivo `.env` ou ele está sem conteúdo. Verifique:
 
-1. O arquivo `.env` existe na pasta `C:\Projetos\pgd-icmbio`? (não `.env.example`, mas `.env`)
+1. O arquivo `.env` existe na raiz do projeto (`~/projetos/pgd-icmbio` no WSL, `C:\Projetos\pgd-icmbio` no Windows)? (não `.env.example`, mas `.env`)
 2. Os campos `DENODO_USER` e `DENODO_PASSWORD` estão preenchidos com seus dados?
 3. O VS Code foi aberto com a pasta correta do projeto (File > Open Folder)?
 
@@ -337,15 +343,17 @@ O notebook não localizou o arquivo `.env` ou ele está sem conteúdo. Verifique
 
 O caminho para o arquivo do driver está incorreto no arquivo `.env`. Verifique:
 
-1. Abra o `.env` no Bloco de Notas.
-2. Substitua `SEU_USUARIO` pelo seu nome de usuário Windows real (descubra com `echo %USERNAME%` no Prompt de Comando).
-3. Confirme que o DBeaver já fez pelo menos uma conexão Denodo (o driver é instalado automaticamente na primeira conexão).
+1. Abra o `.env` (no WSL, `nano .env`; no Windows, Bloco de Notas).
+2. Substitua `SEU_USUARIO` pelo seu usuário real (WSL: `whoami`; Windows: `echo %USERNAME%` no Prompt de Comando).
+3. Confirme que o arquivo `.jar` existe nesse caminho. Se o DBeaver acusar `Class not found: com.denodo.vdp.jdbc.Driver`, o download automático trouxe o pacote ODBC: ver [acesso ao Denodo e DBeaver](acesso-denodo-dbeaver.md).
 
 ---
 
 ### Erro: "JVM não encontrada" ou "java.exe not found"
 
-O Java embutido no DBeaver não foi localizado. Verifique se o DBeaver está instalado em `C:\Program Files\DBeaver`. Se estiver em outro local, abra o arquivo `.env` e ajuste o campo:
+**No WSL:** instale o Java do Linux (`sudo apt install -y openjdk-21-jre-headless`) e confira se `JAVA_HOME` no `.env` aponta para `/usr/lib/jvm/java-21-openjdk-amd64`. O Python do WSL não usa o Java do DBeaver do Windows.
+
+**No Windows:** o Java embutido no DBeaver não foi localizado. Verifique se o DBeaver está instalado em `C:\Program Files\DBeaver`. Se estiver em outro local, abra o arquivo `.env` e ajuste o campo:
 
 ```
 JAVA_HOME=C:/caminho/alternativo/DBeaver/jre
@@ -365,11 +373,13 @@ Significa que o banco Denodo recusou a conexão. Causas possíveis:
 
 ### Erro: "ModuleNotFoundError: No module named 'jpype'"
 
-As bibliotecas Python não foram instaladas corretamente. Abra um terminal no VS Code (**Terminal > New Terminal**) e execute:
+As bibliotecas Python não foram instaladas corretamente, ou o kernel escolhido não é o `.venv` do projeto. Abra um terminal no VS Code (**Terminal > New Terminal**), na raiz do projeto, e execute:
 
+```bash
+.venv/bin/python -m pip install jpype1 pandas ipykernel python-dotenv
 ```
-pip install jpype1 pandas ipykernel python-dotenv
-```
+
+No Windows: `.venv\Scripts\python.exe -m pip install jpype1 pandas ipykernel python-dotenv`.
 
 ---
 

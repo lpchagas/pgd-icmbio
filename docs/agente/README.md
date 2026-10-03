@@ -37,25 +37,29 @@ recuperável no histórico do Git.
 
 ## Pré-requisitos
 
-- Windows;
+- Linux/WSL (ambiente principal) ou Windows;
 - Python 3.14 e `.venv` local;
-- MySQL 8 Community na porta local configurada;
+- MySQL 8.4 na porta local configurada (pacote `mysql-server` da distribuição no Linux; Community no Windows);
 - variáveis `MYSQL_*` no `.env` ignorado;
 - rede/credenciais Denodo somente para consultas autorizadas.
 
 ## Verificação rápida
 
-```powershell
-.venv\Scripts\python agente\dados\versoes.py --teste
+```bash
+.venv/bin/python agente/dados/versoes.py --teste
 ```
+
+No Windows: `.venv\Scripts\python agente\dados\versoes.py --teste`.
 
 O teste usa rollback: cria e versiona uma entrega, confirma histórico e não deixa registro.
 
 Sincronização Denodo, quando a rede estiver disponível:
 
-```powershell
-.venv\Scripts\python agente\dados\sincronizar_ref.py
+```bash
+.venv/bin/python agente/dados/sincronizar_ref.py
 ```
+
+No Windows: `.venv\Scripts\python agente\dados\sincronizar_ref.py`.
 
 Backup manual (destino em `PGD_BACKUP_DIR`), instância isolada e banco de teste:
 ver [Banco local do agente](../ambiente/banco-local-agente.md).

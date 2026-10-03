@@ -109,52 +109,70 @@ Nas rodadas seguintes, basta executar os scripts.
 
 - [ ] **IP liberado pelo Dataprev** — sem isso, a conexão falha silenciosamente.
   Se você consegue acessar o PETRVS pelo DBeaver, o IP já está liberado.
-- [ ] **DBeaver instalado** em `C:\Program Files\DBeaver\` — o Python usa o Java
-  embutido no DBeaver.
-- [ ] **Driver Denodo disponível** em
-  `C:\Users\<seu_usuario>\AppData\Roaming\DBeaverData\drivers\remote\drivers\jdbc\9\denodo-vdp-jdbcdriver.jar`
-  (o arquivo **com extensão `.jar`** — não apenas o `denodo-vdp-jdbcdriver` sem
-  extensão). Ver seção de troubleshooting se necessário.
+- [ ] **Java do mesmo sistema do Python** — no WSL (ambiente principal), o JDK do
+  Linux (`sudo apt install -y openjdk-21-jre-headless`); no Windows, o Java embutido
+  no DBeaver (`C:\Program Files\DBeaver\`).
+- [ ] **Driver Denodo disponível** — o arquivo `.jar` JDBC da Denodo, fora do
+  repositório: no WSL, `~/.local/share/denodo/jdbc/9/denodo-vdp-jdbcdriver-9.x.jar`;
+  no Windows, numa pasta fixa ou na cópia `.jar` do driver do DBeaver. Como obter:
+  [acesso ao Denodo e DBeaver](../ambiente/acesso-denodo-dbeaver.md).
 - [ ] **Arquivo `.env` configurado** — o arquivo `.env` na raiz do projeto deve
   existir com suas credenciais. Veja a seção abaixo.
-- [ ] **Python instalado** — abra o PowerShell e execute `python --version`.
-  Deve retornar `Python 3.x.x`.
-- [ ] **jpype instalado** — execute `python -c "import jpype; print('OK')"`.
-  Se retornar erro, execute `pip install jpype1`.
+- [ ] **Ambiente Python do projeto** — no terminal, na raiz do projeto, execute
+  `.venv/bin/python --version` (WSL) ou `.venv\Scripts\python.exe --version`
+  (Windows). Deve retornar `Python 3.x.x`.
+- [ ] **jpype instalado** — execute `.venv/bin/python -c "import jpype; print('OK')"`.
+  Se retornar erro, instale as dependências: `.venv/bin/python -m pip install -r requirements-report.txt`.
 
 ### Configuração do arquivo `.env`
 
-O arquivo `.env` fica na raiz do projeto (`pgd-icmbio\.env`) e
+O arquivo `.env` fica na raiz do projeto (`pgd-icmbio/.env`) e
 contém as credenciais de acesso ao Denodo. Ele **nunca é publicado no repositório**
-(está no `.gitignore`). Copie o `.env.example` como `.env` e preencha:
+(está no `.gitignore`). Copie o `.env.example` como `.env` (no WSL:
+`cp .env.example .env && chmod 600 .env`) e preencha:
 
 ```
 DENODO_USER=<seu_cpf_sem_pontos>
 DENODO_PASSWORD=<sua_senha_denodo>
-DENODO_DRIVER_PATH=C:/Users/<seu_usuario>/AppData/Roaming/DBeaverData/drivers/remote/drivers/jdbc/9/denodo-vdp-jdbcdriver.jar
+DENODO_DRIVER_PATH=/home/<seu_usuario>/.local/share/denodo/jdbc/9/denodo-vdp-jdbcdriver.jar
 DENODO_HOST=denodo-pgd.dataprev.gov.br
 DENODO_PORT=443
 DENODO_DATABASE=petrvs_icmbio
-JAVA_HOME=C:/Program Files/DBeaver/jre
+JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+DENODO_JVM_DLL=/usr/lib/jvm/java-21-openjdk-amd64/lib/server/libjvm.so
 ```
+
+No Windows, use o bloco "Windows" do `.env.example`
+(`JAVA_HOME=C:/Program Files/DBeaver/jre` e o driver em caminho `C:/...`, sem
+`DENODO_JVM_DLL`).
 
 > **Atenção:** se sua senha do Denodo mudar, atualize `DENODO_PASSWORD`.
 > Se outro usuário for executar em outra máquina, substitua `<seu_usuario>` pelo
-> nome de usuário Windows correspondente.
+> nome de usuário correspondente (WSL: `whoami`; Windows: `echo %USERNAME%`).
 
 ---
 
 ## 5. Preparação antes de cada rodada
 
-```powershell
+No WSL (terminal do Ubuntu, na raiz do projeto):
+
+```bash
 # 1. Atualizar o repositório local
 git pull
 
-# 2. Verificar que o .env está configurado
-Get-Content .env
+# 2. Verificar que o .env existe (sem exibir as credenciais na tela)
+test -f .env && echo ".env presente"
 
-# 3. Testar a conexão sem abrir o Denodo
-python ocde/indicadores/IND_OCDE_02.1_run.py --dry-run
+# 3. Testar sem abrir o Denodo
+.venv/bin/python ocde/indicadores/IND_OCDE_02.1_run.py --dry-run
+```
+
+No Windows (PowerShell):
+
+```powershell
+git pull
+Test-Path .env
+.venv\Scripts\python.exe ocde/indicadores/IND_OCDE_02.1_run.py --dry-run
 ```
 
 O `--dry-run` mostra o instrumento (PE ou PT), o documento-fonte, a SQL adaptada
@@ -164,13 +182,39 @@ e o destino em `artefatos_local/` sem abrir conexão com o Denodo.
 
 ## 6. Execução dos scripts
 
+Nos comandos desta seção, `python` é o Python do ambiente do projeto. No WSL, use
+`.venv/bin/python` (ou ative o ambiente uma vez por terminal com
+`source .venv/bin/activate`); no Windows, `.venv\Scripts\python.exe` (ou
+`.venv\Scripts\Activate.ps1`).
+
 ### 6a. Executar todos os 12 indicadores de uma vez (recomendado)
 
-Um único bloco PowerShell gera os 13 CSVs automaticamente, reporta o status de
-cada indicador e lista os que tiveram erro ao final.
+Um único bloco gera os 13 CSVs automaticamente, reporta o status de cada
+indicador e lista os que tiveram erro ao final. Aguarde de 5 a 15 minutos
+dependendo da conexão com o Dataprev.
 
-Abra o **PowerShell** (tecla Windows → "PowerShell" → Enter), cole o bloco abaixo
-e pressione Enter. Aguarde de 5 a 15 minutos dependendo da conexão com o Dataprev:
+**WSL** — no terminal do Ubuntu, cole o bloco abaixo e pressione Enter:
+
+```bash
+cd ~/projetos/pgd-icmbio
+
+erros=()
+for n in 01 02 03 04 05 06 07 08 09 10 11 12; do
+    echo -e "\n>>> I$n"
+    .venv/bin/python "ocde/indicadores/IND_OCDE_$n.1_run.py" || erros+=("I$n")
+done
+
+echo "========================================"
+if [ ${#erros[@]} -eq 0 ]; then
+    echo "CONCLUÍDO: todos os indicadores foram gerados com sucesso!"
+else
+    echo "CONCLUÍDO COM ERROS nos seguintes indicadores: ${erros[*]}"
+fi
+echo "Arquivos salvos em: artefatos_local/ocde/entregas/$(date +%Y-%m)"
+```
+
+**Windows** — abra o **PowerShell** (tecla Windows → "PowerShell" → Enter), cole
+o bloco abaixo e pressione Enter:
 
 ```powershell
 cd "C:\Projetos\pgd-icmbio"
@@ -264,11 +308,8 @@ python ocde/indicadores/IND_OCDE_02.1_run.py --month 2026-05
 ### 6d. Executar um indicador específico
 
 Use quando precisar gerar ou re-executar apenas um indicador. Primeiro navegue
-até a raiz do projeto:
-
-```powershell
-cd "C:\Projetos\pgd-icmbio"
-```
+até a raiz do projeto (`cd ~/projetos/pgd-icmbio` no WSL;
+`cd "C:\Projetos\pgd-icmbio"` no Windows).
 
 Depois execute o indicador desejado:
 
@@ -425,23 +466,26 @@ compartilhar os resultados.
 
 **Causa:** o arquivo `.env` não existe ou ainda tem os placeholders padrão.
 
-**Solução:** abra `.env` com o Bloco de Notas e preencha as credenciais conforme
-a seção 4.
+**Solução:** abra `.env` (no WSL, `nano .env`; no Windows, Bloco de Notas) e
+preencha as credenciais conforme a seção 4.
 
 ---
 
 ### Erro: "JVM não iniciada" ou "No module named 'jpype'"
 
-**Causa:** o jpype não está instalado no ambiente Python atual.
+**Causa:** o jpype não está instalado no ambiente Python atual, ou a JVM
+configurada não é do mesmo sistema do Python.
 
 **Solução:**
 
-```powershell
-pip install jpype1
+```bash
+.venv/bin/python -m pip install jpype1
 ```
 
-Se o erro persistir, verifique se `JAVA_HOME` no `.env` aponta para o diretório
-correto do DBeaver (`C:/Program Files/DBeaver/jre`).
+Se o erro persistir: no WSL, confira se `DENODO_JVM_DLL` no `.env` aponta para o
+`libjvm.so` do Java do Linux (o Python do WSL não carrega a `jvm.dll` do Windows);
+no Windows, se `JAVA_HOME` aponta para o diretório correto do DBeaver
+(`C:/Program Files/DBeaver/jre`).
 
 ---
 
@@ -460,10 +504,16 @@ correto do DBeaver (`C:/Program Files/DBeaver/jre`).
 
 ### Erro: arquivo `.jar` não encontrado
 
-**Causa:** o DBeaver atualizou o driver Denodo e o arquivo `.jar` foi substituído.
+**Causa:** o caminho de `DENODO_DRIVER_PATH` não existe, ou (no Windows, com a
+cópia do driver do DBeaver) o DBeaver atualizou o driver e o `.jar` foi substituído.
 
-**Solução:** execute no PowerShell (substituindo `<seu_usuario>` pelo seu usuário
-Windows):
+**Solução no WSL:** confira o caminho com `ls -l "$(grep ^DENODO_DRIVER_PATH= .env | cut -d= -f2-)"`.
+Se o arquivo não existir, obtenha o `.jar` JDBC conforme o
+[guia de acesso ao Denodo](../ambiente/acesso-denodo-dbeaver.md); o download
+automático pode trazer o pacote ODBC, que não serve.
+
+**Solução no Windows:** execute no PowerShell (substituindo `<seu_usuario>` pelo
+seu usuário Windows):
 
 ```powershell
 $dir = "C:\Users\<seu_usuario>\AppData\Roaming\DBeaverData\drivers\remote\drivers\jdbc\9"
