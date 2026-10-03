@@ -2,7 +2,7 @@
 
 A reescrita para ``pgd_agente_teste`` recusa qualquer SQL que ainda cite
 ``pgd_agente``; a conferência da conexão recusa a instância principal, outro
-datadir e privilégios além do banco de teste; o ``backup.ps1`` só aceita destino
+datadir e privilégios além do banco de teste; o ``backup.ps1`` (e o ``backup.sh``) só aceita destino
 absoluto, fora da raiz do disco e fora de pasta versionada não ignorada.
 """
 from __future__ import annotations
@@ -150,3 +150,55 @@ def test_backup_recusa_destino_invalido(destino):
 def test_backup_aceita_destino_absoluto_fora_do_git(tmp_path):
     resultado = _validar(str(tmp_path / "backups"))
     assert resultado.returncode == 0 and "destino validado" in resultado.stdout
+
+
+# --- backup.sh e mysql_isolada.sh (Linux/WSL) ------------------------------------------------
+
+BASH = shutil.which("bash") if os.name != "nt" else None
+
+
+def _validar_sh(destino: str) -> subprocess.CompletedProcess:
+    return subprocess.run([BASH, str(DADOS / "backup.sh"), "--destino", destino, "--somente-validar"],
+                          capture_output=True, text=True, timeout=60)
+
+
+@pytest.mark.skipif(BASH is None, reason="bash indisponível (Linux/WSL)")
+@pytest.mark.parametrize("destino", ["relativo/backups", "/", str(RAIZ / "docs" / "backups")])
+def test_backup_sh_recusa_destino_invalido(destino):
+    assert _validar_sh(destino).returncode != 0
+
+
+@pytest.mark.skipif(BASH is None, reason="bash indisponível (Linux/WSL)")
+def test_backup_sh_aceita_destino_absoluto_fora_do_git(tmp_path):
+    resultado = _validar_sh(str(tmp_path / "backups"))
+    assert resultado.returncode == 0 and "destino validado" in resultado.stdout
+
+
+@pytest.mark.skipif(BASH is None, reason="bash indisponível (Linux/WSL)")
+def test_backup_sh_aceita_o_padrao_data_backups_ignorado():
+    resultado = _validar_sh(str(RAIZ / "data" / "backups"))
+    assert resultado.returncode == 0 and "destino validado" in resultado.stdout
+
+
+@pytest.mark.skipif(BASH is None, reason="bash indisponível (Linux/WSL)")
+def test_mysql_isolada_sh_sem_instancia_informa_parada_sem_criar_nada(tmp_path):
+    base = tmp_path / "isolada"
+    resultado = subprocess.run([BASH, str(DADOS / "mysql_isolada.sh"), "status"], capture_output=True, text=True,
+                               timeout=60, env={**os.environ, "PGD_MYSQL_ISOLADA_DIR": str(base)})
+    assert resultado.returncode == 0 and resultado.stdout.startswith("parada")
+    assert not base.exists()
+
+
+@pytest.mark.skipif(BASH is None, reason="bash indisponível (Linux/WSL)")
+def test_mysql_isolada_sh_recusa_acao_desconhecida():
+    assert subprocess.run([BASH, str(DADOS / "mysql_isolada.sh"), "apagar"], capture_output=True,
+                          timeout=60).returncode == 2
+
+
+def test_diretorio_padrao_da_instancia_coincide_com_o_script(monkeypatch, tmp_path):
+    monkeypatch.delenv("PGD_MYSQL_ISOLADA_DIR", raising=False)
+    if os.name == "nt":
+        monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
+    else:
+        monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
+    assert bt.diretorio_instancia() == tmp_path / "pgd-icmbio" / "mysql-isolada"
