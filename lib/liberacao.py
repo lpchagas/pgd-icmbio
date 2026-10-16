@@ -289,8 +289,54 @@ def ler_registro(caminho: Path | None = None) -> dict[str, Any]:
     return dados
 
 
-def referencia_arquivo(caminho: Path) -> dict[str, str]:
-    """Referência verificável a um arquivo do acervo privado (caminho relativo + hash)."""
+def texto_entrada(caminho: Path, entrada: str) -> str | None:
+    """Texto de uma entrada ``### <ID> …`` de um registro Markdown, ou None se ausente.
+
+    A entrada vai do seu título até o próximo título de nível 1 a 3 (ou o fim do
+    arquivo). Finais de linha e espaços à direita são normalizados, para que o hash só
+    mude quando o conteúdo da entrada mudar, e não quando outras entradas forem
+    acrescentadas ao registro.
+    """
+
+    linhas: list[str] | None = None
+    em_codigo = False
+    for linha in caminho.read_text(encoding="utf-8").splitlines():
+        cabecalho = linha.lstrip()
+        if cabecalho.startswith("```"):
+            em_codigo = not em_codigo
+        elif not em_codigo and cabecalho.startswith("#") and cabecalho.split(" ", 1)[0] in ("#", "##", "###"):
+            if linhas is not None:
+                break
+            partes = cabecalho.split()
+            if partes[0] == "###" and len(partes) > 1 and partes[1] == entrada:
+                linhas = []
+        if linhas is not None:
+            linhas.append(linha.rstrip())
+    if linhas is None:
+        return None
+    # Linhas em branco e separadores horizontais no fim pertencem ao layout do registro,
+    # não à entrada: novas entradas são inseridas antes deles.
+    while linhas and linhas[-1].strip() in ("", "---", "***", "___"):
+        linhas.pop()
+    return "\n".join(linhas) + "\n"
+
+
+def _sha256_texto(texto: str) -> str:
+    return hashlib.sha256(texto.encode("utf-8")).hexdigest()
+
+
+def referencia_evidencia(texto: str | Path) -> dict[str, str]:
+    """Evidência no formato ``arquivo`` ou ``arquivo#ENTRADA`` (entrada de registro único)."""
+
+    caminho, _, entrada = str(texto).partition("#")
+    return referencia_arquivo(Path(caminho), entrada=entrada or None)
+
+
+def referencia_arquivo(caminho: Path, entrada: str | None = None) -> dict[str, str]:
+    """Referência verificável a um arquivo do acervo privado (caminho relativo + hash).
+
+    Com ``entrada``, o hash cobre só o texto daquela entrada do registro Markdown.
+    """
 
     from tools.security_audit import is_private_path
 
@@ -305,17 +351,30 @@ def referencia_arquivo(caminho: Path) -> dict[str, str]:
         raise ValueError("A evidência deve estar no acervo privado do projeto.") from exc
     if not is_private_path(relativo):
         raise ValueError("A evidência deve estar em área privada (nunca versionada).")
-    return {"caminho": relativo, "sha256": _sha256(absoluto)}
+    if entrada is None:
+        return {"caminho": relativo, "sha256": _sha256(absoluto)}
+    texto = texto_entrada(absoluto, entrada)
+    if texto is None:
+        raise ValueError(f"Entrada {entrada} inexistente em {caminho.name}")
+    return {"caminho": relativo, "entrada": entrada, "sha256": _sha256_texto(texto)}
 
 
 def _problema_referencia(ref: Any, nome: str) -> str | None:
     if not isinstance(ref, dict) or not ref.get("caminho") or not ref.get("sha256"):
         return f"{nome} ausente"
     caminho = PROJECT_ROOT / ref["caminho"]
+    rotulo = ref["caminho"] + (f"#{ref['entrada']}" if ref.get("entrada") else "")
     if not caminho.is_file():
-        return f"{nome} ausente: {ref['caminho']}"
-    if _sha256(caminho) != ref["sha256"]:
-        return f"{nome} corrompida: {ref['caminho']}"
+        return f"{nome} ausente: {rotulo}"
+    if ref.get("entrada"):
+        texto = texto_entrada(caminho, ref["entrada"])
+        if texto is None:
+            return f"{nome} ausente: {rotulo}"
+        atual = _sha256_texto(texto)
+    else:
+        atual = _sha256(caminho)
+    if atual != ref["sha256"]:
+        return f"{nome} corrompida: {rotulo}"
     return None
 
 

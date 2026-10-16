@@ -29,12 +29,12 @@ def build_parser() -> argparse.ArgumentParser:
     aceite.add_argument("--capacidade", required=True)
     aceite.add_argument("--piloto", required=True, help="Sigla do cadastro: CGOV, COCAGE ou GR2.")
     aceite.add_argument("--manifesto", type=Path, required=True, help="Manifesto da execução nova do candidato.")
-    aceite.add_argument("--evidencia", type=Path, required=True, help="Ato humano no acervo privado.")
+    aceite.add_argument("--evidencia", required=True, help="Ato humano no acervo privado: arquivo ou arquivo#ENTRADA do registro único.")
     aceite.add_argument("--papel-aprovador", required=True, help="Papel institucional, não nome pessoal.")
 
     deliberacao = comandos.add_parser("deliberacao", help="Deliberação de expansão para uma capacidade.")
     deliberacao.add_argument("--capacidade", required=True)
-    deliberacao.add_argument("--evidencia", type=Path, required=True)
+    deliberacao.add_argument("--evidencia", required=True, help="Arquivo ou arquivo#ENTRADA do registro único.")
     deliberacao.add_argument("--papel-aprovador", required=True)
 
     revogar = comandos.add_parser("revogar", help="Revoga um aceite ou deliberação pelo id.")
@@ -94,7 +94,7 @@ def registrar_aceite(args: argparse.Namespace) -> dict[str, Any]:
         "piloto": piloto.sigla,
         "escopo_resolvido": escopo,
         "manifesto": liberacao.referencia_arquivo(args.manifesto),
-        "evidencia": liberacao.referencia_arquivo(args.evidencia),
+        "evidencia": liberacao.referencia_evidencia(args.evidencia),
         "papel_aprovador": args.papel_aprovador,
         "registrado_em": _agora(),
         "revogado": False,
@@ -107,7 +107,7 @@ def registrar_deliberacao(args: argparse.Namespace) -> dict[str, Any]:
     identidade = _identidade_sem_alteracoes(args.capacidade, cadastro)
     registro = {
         **{campo: identidade[campo] for campo in ("capacidade", "versao", "fingerprint", "commit", "politica", "cadastro_versao")},
-        "evidencia": liberacao.referencia_arquivo(args.evidencia),
+        "evidencia": liberacao.referencia_evidencia(args.evidencia),
         "papel_aprovador": args.papel_aprovador,
         "registrado_em": _agora(),
         "revogado": False,

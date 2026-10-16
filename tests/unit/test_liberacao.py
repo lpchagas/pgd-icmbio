@@ -203,6 +203,79 @@ def test_recusa_registro_corrompido(acervo):
         False, ["registro de aceites corrompido"])
 
 
+REGISTRO_UNICO = """# Registro de decisões
+
+## Entradas
+
+### D36 — Expansão em etapas
+
+Aprovado pelo papel coordenacao-cgov.
+
+```bash
+# comentário que não encerra a entrada
+python -m tools.registrar_aceite_piloto verificar --capacidade I02
+```
+
+#### Condicionantes
+
+- primeira etapa
+"""
+
+
+def _registro_unico(raiz: Path, conteudo: str = REGISTRO_UNICO) -> Path:
+    caminho = raiz / "artefatos_local" / "validacao" / "registro-decisoes.md"
+    caminho.parent.mkdir(parents=True, exist_ok=True)
+    caminho.write_text(conteudo, encoding="utf-8")
+    return caminho
+
+
+def test_entrada_inclui_subtitulos_e_blocos_de_codigo(acervo):
+    texto = liberacao.texto_entrada(_registro_unico(acervo), "D36")
+    assert texto.startswith("### D36 — Expansão em etapas\n")
+    assert "# comentário que não encerra a entrada" in texto
+    assert texto.endswith("- primeira etapa\n")
+
+
+def test_evidencia_por_entrada_sobrevive_a_novas_entradas(acervo):
+    caminho = _registro_unico(acervo)
+    ref = liberacao.referencia_evidencia(f"{caminho}#D36")
+    assert ref["caminho"] == "artefatos_local/validacao/registro-decisoes.md" and ref["entrada"] == "D36"
+    caminho.write_text(REGISTRO_UNICO + "\n### D37 — Outra decisão\n\nTexto novo.\n", encoding="utf-8")
+    assert liberacao._problema_referencia(ref, "evidência") is None
+
+
+def test_entrada_ignora_separador_final_ao_inserir_nova_entrada(acervo):
+    antes = REGISTRO_UNICO + "\n---\n\n## Pendências\n\n- item\n"
+    caminho = _registro_unico(acervo, antes)
+    ref = liberacao.referencia_evidencia(f"{caminho}#D36")
+    depois = REGISTRO_UNICO + "\n### D38 — Nova\n\nTexto.\n\n---\n\n## Pendências\n\n- item\n"
+    caminho.write_text(depois, encoding="utf-8")
+    assert liberacao._problema_referencia(ref, "evidência") is None
+
+
+def test_evidencia_por_entrada_editada_e_recusada(acervo):
+    caminho = _registro_unico(acervo)
+    ref = liberacao.referencia_evidencia(f"{caminho}#D36")
+    caminho.write_text(REGISTRO_UNICO.replace("primeira etapa", "segunda etapa"), encoding="utf-8")
+    assert liberacao._problema_referencia(ref, "evidência") == (
+        "evidência corrompida: artefatos_local/validacao/registro-decisoes.md#D36")
+
+
+def test_evidencia_por_entrada_removida_ou_inexistente(acervo):
+    caminho = _registro_unico(acervo)
+    with pytest.raises(ValueError, match="Entrada D99 inexistente"):
+        liberacao.referencia_evidencia(f"{caminho}#D99")
+    ref = liberacao.referencia_evidencia(f"{caminho}#D36")
+    caminho.write_text("# Registro de decisões\n", encoding="utf-8")
+    assert liberacao._problema_referencia(ref, "evidência") == (
+        "evidência ausente: artefatos_local/validacao/registro-decisoes.md#D36")
+
+
+def test_evidencia_sem_entrada_mantem_hash_do_arquivo(acervo):
+    caminho = _registro_unico(acervo)
+    assert liberacao.referencia_evidencia(caminho) == liberacao.referencia_arquivo(caminho)
+
+
 def test_evidencia_publica_e_recusada(acervo):
     publico = acervo / "docs" / "ato.md"
     publico.parent.mkdir(parents=True)

@@ -96,5 +96,12 @@ evidência aponta para o ato humano, e o registro não é assinatura):
 python -m tools.registrar_aceite_piloto verificar --capacidade I02
 ```
 
+O ato humano é a aprovação explícita do responsável, registrada como entrada de um
+registro único de decisões no acervo privado. A evidência cita a entrada no formato
+`arquivo#ID`, e o hash cobre só o texto daquela entrada. Acrescentar outras entradas
+ao registro não invalida aceites anteriores, mas editar a entrada citada invalida.
+Correções entram como entrada nova. A evidência também pode ser um arquivo inteiro,
+caso em que o hash cobre o arquivo todo.
+
 Os registros antigos do marco GR2 → nacional do relatório cumulativo ficam
 marcados como política `gr2-v1`, sem reinterpretação.
