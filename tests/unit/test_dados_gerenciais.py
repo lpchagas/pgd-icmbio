@@ -4,7 +4,12 @@ from datetime import date
 import pytest
 
 from lib.periodos import analysis_window
-from ocde.relatorios.dados_gerenciais import cumulative_summary, load_indicator, temporal_summary
+from ocde.relatorios.dados_gerenciais import (
+    cumulative_summary,
+    latest_indicator_files,
+    load_indicator,
+    temporal_summary,
+)
 from ocde.relatorios.registros_execucao import SQL_PE, SQL_PT
 
 pytestmark = pytest.mark.unit
@@ -22,6 +27,23 @@ def test_setembro_exclui_q3_e_m09(tmp_path):
     loaded = load_indicator(path, "02", analysis_window(date(2026, 9, 11)))
     assert [row["periodo"] for row in loaded.rows] == ["Q2-2026"]
     assert loaded.excluded_outside_window == 1
+
+
+def test_selecao_de_arquivo_casa_com_as_colunas_de_cada_indicador(tmp_path):
+    nomes = [
+        "IND_OCDE_01.2_v1_proporcao_mensal_20261006_1224.csv",
+        "IND_OCDE_01.2_v2_proporcao_unidade_mensal_20261006_1224.csv",
+        "IND_OCDE_05.2_v1_distribuicao_entregas_servidores_20261006_1225.csv",
+        "IND_OCDE_05.2_v2_distribuicao_estatistica_20261006_1225.csv",
+        "IND_OCDE_08.2_v1_proporcao_horas_dona_20261006_1226.csv",
+        "IND_OCDE_08.2_v2_proporcao_horas_executora_20261006_1226.csv",
+    ]
+    for nome in nomes:
+        (tmp_path / nome).write_text("periodo\n", encoding="utf-8")
+    arquivos = latest_indicator_files(tmp_path)
+    assert "_v2_" in arquivos["01"].name
+    assert "_v1_" in arquivos["05"].name
+    assert "_v1_" in arquivos["08"].name
 
 
 def test_k_menor_que_cinco_suprime_todo_painel():

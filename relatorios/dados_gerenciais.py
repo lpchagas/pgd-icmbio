@@ -46,8 +46,11 @@ def latest_indicator_files(month_dir: Path) -> dict[str, Path]:
             set(month_dir.glob(f"IND_{code}.2_*.csv"))
             | set(month_dir.glob(f"IND_OCDE_{code}.2_*.csv"))
         )
-        if code == "01":
-            scoped = [path for path in candidates if "_v2_" in path.name]
+        # A versão de cada saída precisa casar com as colunas lidas por _metric:
+        # I01 usa a v2 (por unidade); I05 e I08 usam a v1 (por servidor e unidade dona).
+        version = {"01": "_v2_", "05": "_v1_", "08": "_v1_"}.get(code)
+        if version:
+            scoped = [path for path in candidates if version in path.name]
             candidates = scoped or candidates
         if candidates:
             files[code] = candidates[-1]

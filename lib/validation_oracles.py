@@ -576,13 +576,18 @@ def oracle_ind_gest_01(records: list[Row]) -> list[Row]:
 
 
 def _g02_periods(cutoff: date) -> list[tuple[str, date, date]]:
+    # Só ciclos fechados até o corte; quadrimestres gerados para cada ano a partir de 2026.
     raw = [
         ("T3-2025", date(2025, 7, 1), date(2025, 9, 30)),
         ("T4-2025", date(2025, 10, 1), date(2025, 12, 31)),
-        ("Q1-2026", date(2026, 1, 1), date(2026, 4, 30)),
-        ("Q2-2026", date(2026, 5, 1), date(2026, 8, 31)),
     ]
-    return [(label, start, min(end, cutoff)) for label, start, end in raw if start <= cutoff]
+    for year in range(2026, cutoff.year + 1):
+        raw += [
+            (f"Q1-{year}", date(year, 1, 1), date(year, 4, 30)),
+            (f"Q2-{year}", date(year, 5, 1), date(year, 8, 31)),
+            (f"Q3-{year}", date(year, 9, 1), date(year, 12, 31)),
+        ]
+    return [(label, start, end) for label, start, end in raw if end <= cutoff]
 
 
 def _g02_reconciliation(history: bool, links: bool) -> str:

@@ -525,7 +525,7 @@ TARGETS["G02"] = ValidationTarget(
             allow_empty=True,
         ),
     ),
-    formula_version="1.0.0",
+    formula_version="1.0.1",
     temporal_lenses=("acumulada", "operacional"),
     supported_scopes=SCOPE_ALL,
     invariants=(

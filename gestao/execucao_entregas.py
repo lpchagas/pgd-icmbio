@@ -114,8 +114,9 @@ def build_g02(
         executors = sorted({clean(plan_by_id.get(str(link.get("plano_trabalho_id")), {}).get("unidade_executora_sigla"), "N.I.") for link in delivery_links})
         views = [("dona", owner, "MULTIPLAS" if len(executors) > 1 else (executors[0] if executors else "SEM_VINCULO"))]
         views += [("executora", executor, executor) for executor in executors]
-        for label, _kind, start, _scheduled, end, _status in period_list:
-            if end > history_cutoff:
+        for label, _kind, start, scheduled, end, _status in period_list:
+            # Histórico do PE só até o último ciclo fechado: ciclo parcial no corte fica fora.
+            if scheduled > history_cutoff:
                 continue
             if (_day(delivery.get("entrega_inicio")) or date.min) > end or (_day(delivery.get("entrega_fim")) or date.max) < start:
                 continue

@@ -29,6 +29,22 @@ def test_g02_producao_e_oracle_independente_concordam():
     assert main == calculate("G02", atomic())
 
 
+def test_g02_ciclo_parcial_no_corte_fica_fora_na_producao_e_no_oracle():
+    rows = atomic()
+    for row in rows:
+        row["_history_cutoff"] = "2026-09-30"
+        row["_observation_date"] = "2026-10-06"
+    grouped = {name: [row for row in rows if row["_extractor"] == name] for name in {row["_extractor"] for row in rows}}
+    main, _, _ = build_g02(
+        grouped["g02_entregas"], grouped["g02_progressos"], grouped["g02_planos"],
+        grouped["g02_vinculos"], grouped["g02_atividades"], build_periods_pe(date(2026, 9, 30)),
+        history_cutoff=date(2026, 9, 30), observation_date=date(2026, 10, 6),
+    )
+    oracle = calculate("G02", rows)
+    assert "Q3-2026" not in {row["periodo"] for row in main}
+    assert main == oracle
+
+
 def test_g02_exclui_evento_apos_corte_e_sanitiza_texto():
     _, history, _ = production_result()
     assert "2026-09-01" not in {row["data_progresso"] for row in history}
