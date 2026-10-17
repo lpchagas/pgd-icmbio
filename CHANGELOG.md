@@ -3,6 +3,17 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — aceites dos pilotos e 1ª etapa nacional (D42)
+
+- **Pilotos:** I04 2.1.0 e I09 3.0.3 homologados nos três escopos. Depois de uma
+  rodada completa sobre o código atual, foram registrados os aceites dos 14 alvos nos
+  três pilotos.
+- **Nacional (D36, 1ª etapa):** a baseline nacional de I01, I02, I10, I11 e I12 foi
+  homologada e a deliberação de expansão foi registrada. Os cinco ficam elegíveis para
+  o produto nacional; o I01 sai com nota sobre as duplicidades atômicas. I03, I04 e I09
+  validaram sem divergência no nacional e ficam para a etapa seguinte; I05–I08
+  aguardam decisão metodológica.
+
 ## 17.10.2026 — I04 2.1.0 e I09 3.0.3 (D41)
 
 - **I04 2.1.0:** sai o valor absoluto do realizado. A entrega com realizado negativo
