@@ -122,7 +122,7 @@ limit 200;
 
 ## 7. Próximo passo
 
-Com o ambiente validado, execute os indicadores OCDE/PGD seguindo [docs/06-indicadores-ocde-denodo.md](../ocde/06-indicadores-ocde-denodo.md).
+Com o ambiente validado, execute os indicadores OCDE/PGD seguindo o [índice dos indicadores OCDE](../ocde/06-indicadores-ocde-denodo.md).
 
 ---
 

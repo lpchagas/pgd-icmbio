@@ -76,10 +76,10 @@ def test_cercas_de_codigo_balanceadas():
     assert not problems, "\n".join(problems)
 
 
-def test_indice_denodo_e_ponte_historica():
+def test_indice_denodo_sem_paginas_ponte():
+    # DP-06: as páginas-ponte da reorganização (L4b) foram retiradas.
     canonical = ROOT / "docs" / "ocde" / "06-indicadores-ocde-denodo.md"
-    bridge = ROOT / "docs" / "ocde" / "06-indicadores-ocde-mysql.md"
     assert canonical.is_file()
-    text = bridge.read_text(encoding="utf-8")
-    assert len(text.splitlines()) <= 20
-    assert canonical.name in text
+    assert not (ROOT / "docs" / "ocde" / "06-indicadores-ocde-mysql.md").exists()
+    assert not (ROOT / "docs" / "templates").exists()
+    assert not [path.name for path in (ROOT / "docs").glob("[01][0-9]*-*.md")]

@@ -52,7 +52,7 @@ novo indicador está em [`gestao/README.md`](../../gestao/README.md).
 | Código | Nome | Pergunta | `formula_version` | Estado | Ficha |
 | --- | --- | --- | --- | --- | --- |
 | **G01** | Situação dos Planos de Trabalho | Em que ponto do fluxo está cada PT da equipe e com quem falar para destravá-lo? | 4.0.0 | Baseline D15; recertificação automática GR2 | [IND_GEST_01](IND_GEST_01-situacao-planos-trabalho.md) |
-| **G02** | Execução das Entregas | Como o histórico do PE se reconcilia com a fotografia dos PT nas perspectivas dona e executora? | 1.0.0 | D18 homologada; recertificação automática GR2 | [IND_GEST_02](IND_GEST_02-execucao-entregas.md) |
+| **G02** | Execução das Entregas | Como o histórico do PE se reconcilia com a fotografia dos PT nas perspectivas dona e executora? | 1.0.1 | 1.0.1 homologada na D38 (pilotos CGOV, COCAGE e GR2) | [IND_GEST_02](IND_GEST_02-execucao-entregas.md) |
 
 Na referência vigente, os dois indicadores estão certificados automaticamente na
 GR2. O G02 mantém 114 vínculos sem entrega identificável como alerta cadastral não

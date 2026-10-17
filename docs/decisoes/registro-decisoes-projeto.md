@@ -20,6 +20,7 @@ de memória de conversa.
 | DP-03 | `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` como pares sem hierarquia, com regra de sincronia | 23.09.2026 | [ADR-010](ADR-010-sincronia-instrucoes.md) |
 | DP-04 | Unidades piloto: CGOV, COCAGE e GR2 | 23.09.2026 | [ADR-011](ADR-011-unidades-piloto.md); `config/unidades-piloto.json` |
 | DP-05 | Atualizar todos os `.md`, corrigir links e excluir obsoletos | 23.09.2026 | Revisão integral e verificador de links bloqueante |
+| DP-06 | Retirar as páginas-ponte da L4b antes dos dois ciclos mensais previstos, porque nenhum link para os caminhos antigos foi compartilhado fora da equipe | 17.10.2026 | 17 pontes e `docs/mgi/README.md` retirados; correspondência entre caminhos antigos e novos no `CHANGELOG.md` |
 
 ## Decisões humanas do plano (H)
 

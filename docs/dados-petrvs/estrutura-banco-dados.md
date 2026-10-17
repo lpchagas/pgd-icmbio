@@ -996,7 +996,7 @@ tipos_avaliacoes_notas
 > deste conteúdo em 21.08.2026 — ver histórico de conversas do projeto.
 > Versão em linguagem não técnica, com glossário e explicação de código
 > linha a linha para analistas de negócio:
-> [docs/07.2-status_artefatos_pgd_icmbio.md](status-artefatos.md).
+> [status dos artefatos](status-artefatos.md).
 > Esta seção é a fonte técnica de verdade — atualize correções aqui primeiro
 > e reflita-as no 07.2 depois.
 

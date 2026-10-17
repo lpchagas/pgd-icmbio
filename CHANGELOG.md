@@ -3,6 +3,34 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — retirada das páginas-ponte (DP-06)
+
+As páginas-ponte da L4b foram retiradas antes dos dois ciclos mensais previstos:
+nenhum link para os caminhos antigos foi compartilhado fora da equipe
+([DP-06](docs/decisoes/registro-decisoes-projeto.md)). O placeholder docs/mgi/README.md
+também saiu; a pasta será recriada com a primeira ficha MGI. Quem chegar por um caminho
+antigo encontra o conteúdo em:
+
+| Caminho antigo | Caminho atual |
+| --- | --- |
+| docs/01-visao-geral.md | [`docs/projeto/visao-geral.md`](docs/projeto/visao-geral.md) |
+| docs/03-acesso-direto-denodo-dbeaver.md | [`docs/ambiente/acesso-denodo-dbeaver.md`](docs/ambiente/acesso-denodo-dbeaver.md) |
+| docs/04-configuracao-dbeaver.md | [`docs/ambiente/configuracao-dbeaver.md`](docs/ambiente/configuracao-dbeaver.md) |
+| docs/05-contexto-ocde-pgd.md | [`docs/projeto/contexto-ocde-pgd.md`](docs/projeto/contexto-ocde-pgd.md) |
+| docs/07.1-estrutura-banco-dados.md | [`docs/dados-petrvs/estrutura-banco-dados.md`](docs/dados-petrvs/estrutura-banco-dados.md) |
+| docs/07.2-status_artefatos_pgd_icmbio.md | [`docs/dados-petrvs/status-artefatos.md`](docs/dados-petrvs/status-artefatos.md) |
+| docs/08-guia-rapido-gestores.md | [`docs/indicadores/guia-rapido-gestores.md`](docs/indicadores/guia-rapido-gestores.md) |
+| docs/09-protocolo-validacao-indicadores.md | [`docs/indicadores/protocolo-validacao.md`](docs/indicadores/protocolo-validacao.md) |
+| docs/10-jupyter-guia-iniciantes.md | [`docs/ambiente/jupyter.md`](docs/ambiente/jupyter.md) |
+| docs/11-guia-extracao-mensal.md | [`docs/indicadores/extracao-mensal.md`](docs/indicadores/extracao-mensal.md) |
+| docs/12-seguranca-publicacao.md | [`docs/ambiente/seguranca-publicacao.md`](docs/ambiente/seguranca-publicacao.md) |
+| docs/13-organizacao-publico-privado.md | [`docs/ambiente/organizacao-publico-privado.md`](docs/ambiente/organizacao-publico-privado.md) |
+| docs/14-status-planos-trabalho-gestores.md | [`docs/gestao/README.md`](docs/gestao/README.md) |
+| docs/15-relatorio-gerencial-cumulativo-anonimizado.md | [`docs/relatorios/relatorio-cumulativo.md`](docs/relatorios/relatorio-cumulativo.md) |
+| docs/16-skills-e-relatorio-gerencial-v2.md | [`docs/relatorios/relatorio-v2-ciclo-gerencial.md`](docs/relatorios/relatorio-v2-ciclo-gerencial.md) |
+| docs/ocde/06-indicadores-ocde-mysql.md | [`docs/ocde/06-indicadores-ocde-denodo.md`](docs/ocde/06-indicadores-ocde-denodo.md) |
+| docs/templates/A3_checklist_validacao_cgov.md | [`docs/modelos/A3_checklist_validacao_cgov.md`](docs/modelos/A3_checklist_validacao_cgov.md) |
+
 ## 27.09.2026 — reorganização em monorepo (`pgd-icmbio`)
 
 ### Publicação (L8)
@@ -144,6 +172,6 @@ indicadores seguem registradas nas fichas e no protocolo de validação.
 | `ocde.relatorios.textos_execucao` | `relatorios.textos_execucao` | L4a | Na próxima revisão metodológica do G02 (importada pelo A1 certificado) |
 | Demais `ocde.relatorios.*` (14 módulos, incluindo as CLIs `relatorio_v2` e `relatorio_cumulativo`) | `relatorios.*` | L4a | Após dois ciclos mensais completos sem consumidor conhecido |
 | Aliases `DENODO_PASS`, `DENODO_JDBC_JAR`, `DENODO_URL` | nomes canônicos `DENODO_*` | L3 | Com evidência de que não há consumidor **e** uma execução operacional compatível |
-| Páginas-ponte `docs/01…16-*.md` e `docs/templates/` (16) | pastas temáticas `docs/projeto/`, `docs/ambiente/`, `docs/dados-petrvs/`, `docs/indicadores/`, `docs/relatorios/`, `docs/gestao/README.md` e `docs/modelos/` | L4b | Após dois ciclos mensais completos sem consumidor conhecido (links compartilhados) |
+| Páginas-ponte docs/01…16-*.md e docs/templates/ (16) | pastas temáticas `docs/projeto/`, `docs/ambiente/`, `docs/dados-petrvs/`, `docs/indicadores/`, `docs/relatorios/`, `docs/gestao/README.md` e `docs/modelos/` | L4b | **Retiradas em 17.10.2026** (DP-06), com docs/ocde/06-indicadores-ocde-mysql.md |
 
 Cada retirada deve ser registrada aqui, com a data e a evidência.

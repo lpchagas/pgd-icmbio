@@ -7,7 +7,8 @@
 
 - `indicadores/` — scripts `IND_MGI_XX.1_run.py` para cada indicador MGI
 - Módulos compartilhados: `lib/` (raiz do repositório — mesmos módulos usados pela iniciativa OCDE)
-- Documentação técnica: `docs/mgi/`
+- Documentação técnica: `docs/mgi/`, a criar junto com a primeira ficha MGI, no
+  modelo do [índice dos indicadores OCDE](../docs/ocde/06-indicadores-ocde-denodo.md)
 
 ## Namespace (decisão CGOV D01 — 13.09.2026)
 

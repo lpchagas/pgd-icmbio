@@ -24,7 +24,7 @@ consulte [05-contexto-ocde-pgd.md](../projeto/contexto-ocde-pgd.md).
 ### Opção B — Jupyter Notebook no VS Code
 
 1. Crie uma cópia local de `consultas_denodo_template.ipynb`.
-2. Siga o guia: [10-jupyter-guia-iniciantes.md](../ambiente/jupyter.md).
+2. Siga o guia: [guia do Jupyter](../ambiente/jupyter.md).
 3. Use a função `run_query(sql)` para executar qualquer consulta desta documentação
 4. O resultado já aparece como tabela e pode ser exportado para CSV com uma linha de código
 

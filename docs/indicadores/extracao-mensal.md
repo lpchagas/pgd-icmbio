@@ -70,7 +70,7 @@ Cada execução usa cumulativamente 01/07/2025 até o último dia do mês anteri
 > Nos três meses de rodada completa, o CSV dos PE substituirá a versão anterior
 > no Power BI com os dados do quadrimestre fechado. O relatório gerencial
 > cumulativo é uma rotina distinta e reextrai I01–I12 em cada edição; consulte
-> [15-relatorio-gerencial-cumulativo-anonimizado.md](../relatorios/relatorio-cumulativo.md).
+> [relatório cumulativo](../relatorios/relatorio-cumulativo.md).
 
 ---
 

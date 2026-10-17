@@ -3,7 +3,7 @@
 **Última atualização:** 21 de agosto de 2026
 **Público-alvo:** analistas de negócio, equipe CGOV, gestores — qualquer pessoa que precise interpretar
 "status" de Planos de Entregas (PE) e Planos de Trabalho (PT) sem necessariamente escrever SQL.
-**Companheiro técnico:** [docs/07.1-estrutura-banco-dados.md, Seção 12](estrutura-banco-dados.md#12-técnicas-de-inferência-de-status-por-indicador)
+**Companheiro técnico:** [estrutura do banco de dados, Seção 12](estrutura-banco-dados.md#12-técnicas-de-inferência-de-status-por-indicador)
 traz a mesma matriz de indicadores em formato de referência rápida, para quem já vai direto ao código.
 
 > **Como usar este documento:** cada seção técnica vem acompanhada de uma caixa
@@ -281,7 +281,7 @@ projeto.
 Cada um dos 12 indicadores usa uma combinação própria de fontes para chegar a
 um "status" — nunca apenas o campo `status` de uma tabela isoladamente. A
 referência técnica completa (tabelas, colunas, SQL) vive em
-[docs/07.1-estrutura-banco-dados.md, Seção 12](estrutura-banco-dados.md#12-técnicas-de-inferência-de-status-por-indicador);
+[estrutura do banco de dados, Seção 12](estrutura-banco-dados.md#12-técnicas-de-inferência-de-status-por-indicador);
 aqui, cada indicador ganha também uma tradução em linguagem de negócio.
 
 ### 7.1 Eixo 1 — Regime de Trabalho

@@ -4,12 +4,17 @@
 > independente: toda célula visível tem k≥5, nenhuma célula abaixo de k aparece, a
 > supressão complementar é conferida por unidade e os valores visíveis batem com o
 > oracle. A fórmula continua na 1.0.0.
+>
+> **Decisão CGOV D38 (17.10.2026).** Versão 1.0.1: o histórico do PE inclui só os
+> ciclos encerrados até o fim da janela (o ciclo parcial no corte fica fora) e os
+> quadrimestres são gerados para cada ano a partir de 2026. Homologada nos pilotos
+> CGOV, COCAGE e GR2.
 
 | Campo | Definição |
 | --- | --- |
 | Código/namespace | `G02` / `IND_GEST_02` |
-| Versão inicial | `1.0.0` |
-| Estado | D18 homologada; recertificação automática na GR2 |
+| Versão vigente | `1.0.1` (inicial `1.0.0`) |
+| Estado | 1.0.1 homologada na D38 (pilotos CGOV, COCAGE e GR2) |
 | Tempo | histórico PE até o último ciclo fechado + fotografia PT na data de execução |
 | Produtos | agregado por entrega, trilha histórica, relatório complementar e anexo nominal restrito |
 
