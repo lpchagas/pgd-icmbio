@@ -1,6 +1,8 @@
 # ADR-008 — Desenvolvimento individual, local-first e catálogo S01–S24 em ondas
 
-**Data:** 23.08.2026 | **Estado:** aprovada
+**Data:** 23.08.2026 | **Estado:** aprovada; item 7 revisado pela
+[ADR-014](ADR-014-llm-execucao-mcp-hibrido.md) (DP-08): o servidor MCP local é a
+interface-base e o FastAPI vira adaptador opcional
 
 ## Contexto
 

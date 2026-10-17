@@ -11,6 +11,12 @@ arquivos de conhecimento (ex.: normativos do ICMBio, exemplos de entregas), isso
 respostas — nunca é pré-requisito para o assistente funcionar.
 **Status:** documento vivo. Deve ser revisado sempre que a metodologia do PGD no ICMBio, a IN
 25/2023 (SEGES/MGI) ou as portarias internas do ICMBio forem atualizadas.
+**Enquadramento (DP-08, 17.10.2026):** vigente como base de um Gem do Google AI Pro. Pela
+[ADR-014](../decisoes/ADR-014-llm-execucao-mcp-hibrido.md), é um cliente externo: recebe só
+conteúdo público ou sintético (normativos publicados, exemplos fictícios), nunca dado do
+PETRVS, resultado de indicador não compartilhável ou conteúdo institucional. Na etapa B1, as
+seções de skills serão conferidas contra o catálogo único das capacidades, para não manter uma
+cópia divergente.
 
 ---
 

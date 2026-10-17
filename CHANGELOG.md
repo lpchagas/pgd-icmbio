@@ -3,6 +3,19 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — LLM em execução do agente (DP-08, ADR-014)
+
+- **ADR-014:** o servidor MCP local passa a ser a interface-base das ferramentas do
+  agente. Um gate de classe de dado no servidor só deixa chegar ao cliente externo dado
+  público, sintético ou agregado compartilhável (k≥5). O institucional comum vai para um
+  modelo local (Ollama), e o FastAPI vira adaptador opcional.
+- **Revisões:** a ADR-004 (API comercial direta → Azure OpenAI) fica marcada como
+  revisada, com o corpo mantido como registro histórico. O item 7 da ADR-008 e o AT-02
+  passam a apontar o MCP como base.
+- **Q9:** `docs/agente/instrucoes-assistente-externo-v1.md` segue vigente como base de um
+  Gem só com conteúdo público. `docs/governanca-projeto/validacao-modelo-comum.md` segue
+  vigente até o G1.
+
 ## 17.10.2026 — aceites dos pilotos e 2ª etapa nacional (D44, D45)
 
 - **Pilotos:** I05 3.0.2, I07 3.2.0 e I08 3.2.0 homologados nos três escopos. Depois de

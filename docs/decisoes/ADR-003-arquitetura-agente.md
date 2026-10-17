@@ -10,8 +10,9 @@
 
 > [!NOTE]
 > A separação A/B/C permanece vigente. Agno, Copilot Studio e Streamlit não são
-> dependências do protótipo v6; FastAPI local é a base e a interface institucional será
-> decidida futuramente, conforme ADR-008.
+> dependências do protótipo v6; a interface institucional será decidida futuramente,
+> conforme ADR-008. Desde a [ADR-014](ADR-014-llm-execucao-mcp-hibrido.md), a base local
+> é um servidor MCP, e o FastAPI é adaptador opcional.
 
 ## Contexto
 

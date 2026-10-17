@@ -22,6 +22,7 @@ de memória de conversa.
 | DP-05 | Atualizar todos os `.md`, corrigir links e excluir obsoletos | 23.09.2026 | Revisão integral e verificador de links bloqueante |
 | DP-06 | Retirar as páginas-ponte da L4b antes dos dois ciclos mensais previstos, porque nenhum link para os caminhos antigos foi compartilhado fora da equipe | 17.10.2026 | 17 pontes e `docs/mgi/README.md` retirados; correspondência entre caminhos antigos e novos no `CHANGELOG.md` |
 | DP-07 | Retirar o Codex: `CLAUDE.md` e `PROJECT.md` como os dois pares sem hierarquia; `AGENTS.md` recusado na raiz e `.codex` mantido como caminho proibido | 17.10.2026 | [ADR-013](ADR-013-retirada-codex.md), que revisa a ADR-010 |
+| DP-08 | LLM em execução: servidor MCP local como interface-base, gate de classe de dado no servidor (cliente externo só com público, sintético ou agregado compartilhável), Ollama para o institucional comum e FastAPI como adaptador opcional. `instrucoes-assistente-externo-v1.md` segue vigente como base de um Gem só com conteúdo público, e `validacao-modelo-comum.md` segue vigente até o G1 | 17.10.2026 | [ADR-014](ADR-014-llm-execucao-mcp-hibrido.md), que revisa a ADR-004 e o item 7 da ADR-008 |
 
 ## Decisões humanas do plano (H)
 
@@ -48,3 +49,4 @@ de memória de conversa.
 - [ADR-011 — Unidades piloto](ADR-011-unidades-piloto.md)
 - [ADR-012 — Configuração Denodo](ADR-012-configuracao-denodo.md)
 - [ADR-013 — Retirada do Codex](ADR-013-retirada-codex.md)
+- [ADR-014 — LLM em execução: MCP local e arranjo híbrido](ADR-014-llm-execucao-mcp-hibrido.md)

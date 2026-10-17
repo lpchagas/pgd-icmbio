@@ -1,9 +1,17 @@
 # ADR-004 — Modelo de linguagem substituível
 
-**Data:** registrada nas revisões iniciais | **Estado:** princípio vigente; estratégia de custo revisada pelo ADR-008
+**Data:** registrada nas revisões iniciais | **Estado:** princípio vigente; estratégia de custo revisada pelo ADR-008; revisada pela [ADR-014](ADR-014-llm-execucao-mcp-hibrido.md) (DP-08)
 **Decisor:** Coordenador do projeto (Leandro)
 **Documentos vigentes:** [Proposta v6](../agente/projeto-v6/00_proposta-projeto-v6.md),
-[AT-02](../agente/recursos-local-first.md) e ADR-008
+[AT-02](../agente/recursos-local-first.md), ADR-008 e ADR-014
+
+> [!IMPORTANT]
+> **Revisada pela [ADR-014](ADR-014-llm-execucao-mcp-hibrido.md) em 17.10.2026.** A
+> estratégia abaixo (API comercial direta nas fases 1–3 e Azure OpenAI nas fases 4–5)
+> deixa de valer. O agente usa um servidor MCP local com gate de classe de dado: cliente
+> externo só com dado público, sintético ou agregado compartilhável, e modelo local
+> (Ollama) para o institucional comum. Continua valendo o princípio do título: o modelo
+> é substituível. O texto abaixo fica como registro histórico.
 
 > **Nota de reconstrução:** este ADR formaliza uma decisão já registrada em v1/v2, sem
 > conteúdo novo. A seleção futura continua condicionada à classificação dos dados e à governança institucional.

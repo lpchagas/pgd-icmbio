@@ -1,8 +1,8 @@
 # AT-02 — Recursos disponíveis e arquitetura local-first
 
 **Versão:** 1.1  
-**Data de verificação:** 23.08.2026; ferramentas de desenvolvimento revistas em 17.10.2026 ([ADR-013](../decisoes/ADR-013-retirada-codex.md))  
-**Decisão relacionada:** [ADR-008](../decisoes/ADR-008-desenvolvimento-individual-local-first.md)  
+**Data de verificação:** 23.08.2026; ferramentas de desenvolvimento revistas em 17.10.2026 ([ADR-013](../decisoes/ADR-013-retirada-codex.md)); interface e LLM em execução revistas em 17.10.2026 ([ADR-014](../decisoes/ADR-014-llm-execucao-mcp-hibrido.md))  
+**Decisões relacionadas:** [ADR-008](../decisoes/ADR-008-desenvolvimento-individual-local-first.md) e [ADR-014](../decisoes/ADR-014-llm-execucao-mcp-hibrido.md)  
 **Situação:** análise técnica vigente para o protótipo individual
 
 ## 1. Conclusão
@@ -71,8 +71,10 @@ podem impedir acesso ou publicação e não substituem uma licença adequada do 
 [Microsoft — Copilot Studio license and publish
 errors](https://learn.microsoft.com/en-us/troubleshoot/power-platform/copilot-studio/licensing/publish-license-error).
 
-**Decisão:** FastAPI `/docs` é a interface-base; Power Apps é spike opcional; Copilot
-Studio é destino institucional futuro, condicionado a workspace/licença/administração.
+**Decisão:** o servidor MCP local é a interface-base
+([ADR-014](../decisoes/ADR-014-llm-execucao-mcp-hibrido.md)); FastAPI `/docs` é adaptador
+opcional; Power Apps é spike opcional; Copilot Studio é destino institucional futuro,
+condicionado a workspace/licença/administração.
 
 ## 7. Complementos gratuitos
 
@@ -95,8 +97,9 @@ Tunnels](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cl
 
 | Camada | Escolha-base | Custo incremental | Dados permitidos |
 | --- | --- | ---: | --- |
-| Interface | FastAPI `/docs` local | zero | conforme acesso local |
-| API/motor | Python, FastAPI e Pydantic | zero | institucional permitido |
+| Interface | servidor MCP local, com gate de classe de dado (ADR-014); FastAPI `/docs` opcional | zero | cliente externo: público, sintético ou agregado compartilhável |
+| API/motor | Python e Pydantic | zero | institucional permitido |
+| LLM local | modelo local (Ollama) como cliente MCP | zero | institucional comum; `99_restrito` nunca |
 | Banco | MySQL 8 local | zero | modelo mínimo governado |
 | RAG | indexação e modelo local | zero | público e institucional comum autorizado |
 | Indicadores | Denodo JDBC leitura | existente | consulta institucional autorizada |
