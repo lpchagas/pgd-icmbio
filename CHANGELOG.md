@@ -3,6 +3,29 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — I04 2.1.0 e I09 3.0.2 (D41)
+
+- **I04 2.1.0:** sai o valor absoluto do realizado. A entrega com realizado negativo
+  continua em `total_no_ciclo`, mas fica fora da média do score, e a unidade sem
+  entrega válida no período é omitida. A correção entrou na produção e no oracle.
+- **I09 3.0.2:** as médias saem do VQL sem arredondar e o A1 arredonda meio para cima
+  em Python (D24). A faixa de desempenho é calculada sobre a média arredondada.
+- **Identidade:** como na D39, a mudança no contrato revoga os aceites dos pilotos, que
+  são registrados de novo depois da revalidação.
+
+## 17.10.2026 — I03 3.1.0 e aceites dos pilotos (D39, D40)
+
+- **I03 3.1.0 (D39):** entrega com realizado negativo no PETRVS não tem taxa.
+  `taxa_atingimento_perc` e `taxa_meta_integral_perc` ficam vazias, o status é
+  `Dado inconsistente` e o realizado bruto continua em `meta_executada`. A correção
+  entrou na produção e no oracle, cada um com o seu código, e o relatório deixa as
+  entregas sem taxa fora das proporções.
+- **Identidade:** como `lib/validation_contracts.py` é dependência de todas as
+  capacidades, a mudança da versão do I03 revogou os aceites anteriores.
+- **Pilotos (D40):** a rodada completa (OCDE, G01, G02) foi revalidada, o I03 foi
+  homologado nos três escopos e foram registrados os aceites dos 14 alvos nos três
+  pilotos. A expansão nacional segue a D36.
+
 ## 17.10.2026 — retirada do Codex (DP-07, ADR-013)
 
 O projeto passa a usar duas ferramentas de desenvolvimento: Claude Code (principal) e

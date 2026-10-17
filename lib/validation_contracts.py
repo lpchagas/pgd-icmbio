@@ -298,6 +298,8 @@ TARGETS.update({
         ),
         ("periodo", "unidade_sigla"),
         ("total_no_ciclo", "score_atingimento_perc"),
+        # D41: sem ABS(); realizado negativo fora da média.
+        formula_version="2.1.0",
     ),
     # I05 tem duas visões desde a decisão CGOV D07: a nominal (restrita) e a
     # estatística agregada, sem identificação de servidor.
@@ -423,8 +425,8 @@ TARGETS.update({
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "total_planos_com_avaliacao", "media_nota_pt"),
         period="pt",
-        # D11: média das médias por plano de trabalho.
-        formula_version="3.0.1",
+        # D11: média das médias por plano de trabalho. D41: arredondamento em Python (D24).
+        formula_version="3.0.2",
     ),
     "I10": _indicator(
         "10", "Percentual de avaliações inadequadas", "avaliacoes_pt",

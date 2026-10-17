@@ -201,14 +201,16 @@ def oracle_i04(records: list[Row]) -> list[Row]:
     output: list[Row] = []
     unique = _unique(_active(records), "periodo", "unidade_sigla", "id_entrega")
     for (period, unit), rows in _group(unique, "periodo", "unidade_sigla").items():
+        in_cycle = [row for row in rows if _float(row.get("meta_planejada")) > 0]
+        # D41: realizado negativo é erro de registro — conta no ciclo, fora da média.
         ratios = [
-            abs(_float(row.get("meta_executada"))) / abs(_float(row.get("meta_planejada")))
-            for row in rows if _float(row.get("meta_planejada")) > 0
+            _float(row.get("meta_executada")) / _float(row.get("meta_planejada"))
+            for row in in_cycle if _float(row.get("meta_executada")) >= 0
         ]
         if not ratios:
-            continue  # D23: denominador zero, taxa indefinida — a unidade é omitida
+            continue  # D23/D41: sem entrega válida, taxa indefinida — a unidade é omitida
         output.append({
-            "periodo": period, "unidade_sigla": unit, "total_no_ciclo": len(ratios),
+            "periodo": period, "unidade_sigla": unit, "total_no_ciclo": len(in_cycle),
             "score_atingimento_perc": _arred(mean(ratios) * 100, 2) if ratios else 0.0,
         })
     return _sorted(output, ("periodo", "unidade_sigla"))

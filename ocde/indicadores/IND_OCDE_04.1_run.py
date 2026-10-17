@@ -18,6 +18,10 @@ desempenho excepcional. Verificar subestimação de metas no planejamento.
 
 Validação A3 (17.05.2026): fórmula confirmada para COGEP (dump 208,33% vs
 PETRVS 208,25% — diferença de 0,08 pp por precisão decimal).
+
+D41 (2.1.0, 17.10.2026): sem ABS(). Entrega com realizado negativo (erro de registro,
+'Dado inconsistente' no I03) continua em total_no_ciclo, mas fica fora da média do
+score. A unidade sem nenhuma entrega válida no período é omitida (como na D23).
 """
 from __future__ import annotations
 
@@ -64,8 +68,12 @@ entregas_ciclo AS (
         u.sigla                                                    AS unidade_sigla,
         u.nome                                                     AS unidade_nome,
         pee.id                                                     AS id_entrega,
-        ABS(COALESCE(pee.progresso_realizado, 0))
-            / NULLIF(ABS(pee.progresso_esperado), 0)              AS proporcao_atingimento,
+        -- D41 (2.1.0): sem valor absoluto; realizado negativo fica fora da média (AVG ignora NULL)
+        CASE
+            WHEN COALESCE(pee.progresso_realizado, 0) < 0 THEN NULL
+            ELSE COALESCE(pee.progresso_realizado, 0) * 1.0
+                 / NULLIF(pee.progresso_esperado, 0)
+        END                                                        AS proporcao_atingimento,
         CASE
             WHEN pe.status IN ('AVALIADO', 'CONCLUIDO') THEN 1 ELSE 0
         END                                                        AS plano_avaliado
@@ -112,6 +120,7 @@ SELECT
     END AS alerta_avaliacao
 FROM resumo r
 LEFT JOIN universo_bruto b ON b.unidade_sigla = r.unidade_sigla
+WHERE r.score_atingimento_perc IS NOT NULL
 ORDER BY r.score_atingimento_perc DESC, r.unidade_sigla
 """
 

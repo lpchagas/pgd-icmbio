@@ -8,8 +8,8 @@ Nenhum item é marcado como homologado sem a evidência correspondente.
 
 | Item | Estado | Evidência | Pendência |
 | --- | --- | --- | --- |
-| Indicadores OCDE I01–I12 | homologado nos pilotos CGOV, COCAGE e GR2 | Certificação automática A1–A5 por escopo, com as versões da D35; aceites registrados por piloto (evidência no acervo privado) | Expansão além dos pilotos suspensa (D16) |
-| Indicadores de gestão G01 e G02 | homologado nos pilotos CGOV, COCAGE e GR2 | Idem (D17, D18, D35) | Expansão além dos pilotos suspensa (D16) |
+| Indicadores OCDE I01–I12 | homologado nos pilotos CGOV, COCAGE e GR2 | Certificação automática A1–A5 por escopo, com as versões da D35, o I03 3.1.0 (D39), o I04 2.1.0 e o I09 3.0.2 (D41); aceites registrados por piloto (evidência no acervo privado) | Expansão nacional em etapas (D36): 1ª etapa só I01, I02, I10, I11 e I12; I03, I04 e I09 corrigidos, aguardando a validação nacional; I05–I08 aguardam decisão metodológica |
+| Indicadores de gestão G01 e G02 | homologado nos pilotos CGOV, COCAGE e GR2 | Idem (D17, D18, D35, D38, D40) | Expansão além dos pilotos suspensa (D16) |
 | Relatório Gerencial V2 e Relatório de Execução de Entregas | disponível nos pilotos | Consome os A2 certificados de cada piloto | Reemissão dos relatórios GR2 anteriores ao recorte pela hierarquia do PETRVS (D21) |
 | Relatório cumulativo anonimizado | disponível nos pilotos | Produtos cumulativos com política de privacidade; fora dos pilotos, barrado pelo gate de liberação | Expansão suspensa (D16) |
 

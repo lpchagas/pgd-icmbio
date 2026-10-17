@@ -32,6 +32,10 @@ Decisão CGOV D11 (13.09.2026) — média por Plano de Trabalho:
 
   nota_minima, nota_maxima e qtd_nota_1..5 continuam sobre o universo de eventos:
   são distribuições, não médias, e mudá-las esconderia a dispersão real.
+
+D41 (3.0.2, 17.10.2026): o VQL devolve as médias sem ROUND (ponto flutuante do Denodo)
+e o A1 arredonda meio para cima em Python (D24, lib/arredondamento.py). A faixa de
+desempenho é recalculada sobre a média já arredondada.
 """
 from __future__ import annotations
 
@@ -42,6 +46,7 @@ import sys
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / "lib" / "__init__.py").exists())
 sys.path.insert(0, str(ROOT))
 
+from lib.arredondamento import arredondar  # D24: meio para cima
 from lib.csv_utils import indicator_csv_dir, write_pipe_csv
 from lib.denodo_config import connect, get_config
 from lib.estrutura_organizacional import insert_mesogrupo_column, load_mesogrupo_lookup
@@ -94,7 +99,7 @@ media_de_planos_por_unidade AS (
     SELECT
         unidade_sigla,
         unidade_nome,
-        ROUND(AVG(media_do_plano), 2) AS media_nota_pt
+        AVG(media_do_plano) AS media_nota_pt  -- D41: arredondado em Python
     FROM media_por_plano
     GROUP BY unidade_sigla, unidade_nome
 ),
@@ -105,7 +110,7 @@ media_por_unidade AS (
         COUNT(avpt.id_avaliacao)                                 AS total_avaliacoes_pt,
         COUNT(DISTINCT avpt.plano_trabalho_id)                   AS total_planos_com_avaliacao,
         COUNT(DISTINCT avpt.id_servidor)                         AS total_servidores_avaliados,
-        ROUND(AVG(avpt.valor_nota * 1.0), 2)                     AS media_nota_pt_eventos,
+        AVG(avpt.valor_nota * 1.0)                               AS media_nota_pt_eventos,
         MIN(avpt.valor_nota)                                     AS nota_minima,
         MAX(avpt.valor_nota)                                     AS nota_maxima,
         SUM(CASE WHEN avpt.valor_nota = 1 THEN 1 ELSE 0 END)    AS qtd_nota_1,
@@ -147,6 +152,32 @@ ORDER BY mp.media_nota_pt DESC, mu.unidade_sigla
 """
 
 
+def faixa_desempenho(media: float) -> str:
+    if media >= 4.5:
+        return "Excepcional"
+    if media >= 3.5:
+        return "Alto desempenho"
+    if media >= 2.5:
+        return "Adequado"
+    if media >= 1.5:
+        return "Inadequado"
+    return "Nao executado"
+
+
+def arredondar_medias(columns: list[str], row: list[str]) -> list[str]:
+    """D41: arredonda as médias em Python (D24) e recalcula a faixa sobre o valor arredondado."""
+
+    row = list(row)
+    for nome in ("media_nota_pt", "media_nota_pt_eventos"):
+        indice = columns.index(nome)
+        if row[indice] not in ("", None):
+            row[indice] = str(arredondar(float(str(row[indice]).replace(",", ".")), 2))
+    media = row[columns.index("media_nota_pt")]
+    if media not in ("", None):
+        row[columns.index("faixa_desempenho")] = faixa_desempenho(float(media))
+    return row
+
+
 def _to_float(value: object) -> float:
     try:
         return float(str(value).replace(",", "."))
@@ -180,6 +211,7 @@ def main() -> None:
                 all_cols = meta_cols + columns
             duration = (end - start).days + 1
             for row in rows:
+                row = arredondar_medias(columns, row)
                 all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:

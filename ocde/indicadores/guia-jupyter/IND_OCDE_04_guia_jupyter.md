@@ -69,8 +69,12 @@ entregas_ciclo AS (
         u.sigla                                                    AS unidade_sigla,
         u.nome                                                     AS unidade_nome,
         pee.id                                                     AS id_entrega,
-        ABS(COALESCE(pee.progresso_realizado, 0))
-            / NULLIF(ABS(pee.progresso_esperado), 0)              AS proporcao_atingimento,
+        -- D41 (2.1.0): sem valor absoluto; realizado negativo fica fora da média (AVG ignora NULL)
+        CASE
+            WHEN COALESCE(pee.progresso_realizado, 0) < 0 THEN NULL
+            ELSE COALESCE(pee.progresso_realizado, 0) * 1.0
+                 / NULLIF(pee.progresso_esperado, 0)
+        END                                                        AS proporcao_atingimento,
         CASE
             WHEN pe.status IN ('AVALIADO', 'CONCLUIDO') THEN 1 ELSE 0
         END                                                        AS plano_avaliado
