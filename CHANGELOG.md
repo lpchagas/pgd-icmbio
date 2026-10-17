@@ -3,6 +3,29 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — retirada do Codex (DP-07, ADR-013)
+
+O projeto passa a usar duas ferramentas de desenvolvimento: Claude Code (principal) e
+Antigravity (secundária). A [ADR-013](docs/decisoes/ADR-013-retirada-codex.md) revisa a
+ADR-010.
+
+- **Instruções:** `CLAUDE.md` e `PROJECT.md` são os dois pares sem hierarquia, e o
+  `AGENTS.md` sai da raiz. O `config/instrucoes.lock.json` foi regravado pelo
+  sincronizador, com dois arquivos e o novo hash do núcleo. O hook de pre-commit
+  verifica os dois.
+- **Sincronizador:** a numeração dos estados (1–8) foi mantida, e o estado 6 não ocorre
+  com dois arquivos.
+- **Defesa:**
+  - o `.gitignore` ignora o `AGENTS.md` também na raiz;
+  - o auditor de segurança o recusa ali com o novo motivo `instrucao_retirada`, que não é
+    motivo de privacidade;
+  - `.codex` continua como caminho proibido.
+- **Skills:** o `tools/skills_manager.py` e o `tools/bootstrap_skills.py` deixam de
+  conhecer o cliente `codex`, e a homologação passa a valer nas duas ferramentas.
+- **Documentação:** foram atualizados o README, o guia de sincronia, a organização
+  público-privado (5 links privados), a segurança de publicação, o AT-02 (v1.1) e os
+  caps. 02, 06 e 07 da proposta v6.
+
 ## 17.10.2026 — retirada das páginas-ponte (DP-06)
 
 As páginas-ponte da L4b foram retiradas antes dos dois ciclos mensais previstos:

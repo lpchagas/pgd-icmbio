@@ -173,7 +173,7 @@ fonte, versão, vigência, classe de acesso e natureza. `99_restrito` é excluí
 
 | Recurso | Uso permitido no projeto | Não presumir |
 | --- | --- | --- |
-| Assistentes de programação (Codex, Claude Code) | desenvolvimento e revisão | créditos de API, publicação multiusuário ou serviço institucional |
+| Assistentes de programação (Claude Code, Antigravity) | desenvolvimento e revisão | créditos de API, publicação multiusuário ou serviço institucional |
 | Microsoft 365 E3 | produtividade e identidade disponíveis ao usuário | todos os recursos premium do tenant |
 | Power Apps Premium | experimento individual de interface | distribuição institucional automática |
 | Copilot Studio Viral Trial | prova temporária | publicação governada e duradoura |

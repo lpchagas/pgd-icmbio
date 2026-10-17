@@ -25,7 +25,7 @@ def test_reextrair_roda_os_12_a1_do_contrato_na_area_temporaria(monkeypatch, tmp
     for comando, kw in comandos:
         assert comando[2:] == ["--data-execucao", "2026-09-27", "--month", "2026-09"]
         assert kw["check"] is True and kw["env"]["PGD_INDICATOR_OUTPUT_BASE"] == str(tmp_path)
-        assert ".codex" not in comando[1] and ".agents" not in comando[1]
+        assert ".agents" not in comando[1]
 
 
 def test_reextrair_interrompe_na_primeira_falha(monkeypatch):

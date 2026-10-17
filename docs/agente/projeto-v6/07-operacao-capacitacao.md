@@ -42,7 +42,7 @@ Resultado: ambiente local isolado. Se `.venv` já existir, não o recrie sem nec
 ```powershell
 git status --short
 git pull --ff-only
-git switch -c codex/nome-da-alteracao
+git switch -c feature/nome-da-alteracao
 ```
 
 Antes de publicar: revisar status, diff, segredos e `git log origin/main..HEAD --oneline`.

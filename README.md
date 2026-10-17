@@ -128,8 +128,8 @@ A versão vigente de cada fórmula está no contrato (`lib/validation_contracts.
 | **`config/`** | ⚙️ Configuração | Cadastro das unidades piloto, conciliações, lock das instruções, ocorrências de auditoria já revisadas |
 | **`tools/`** | ⚙️ Código | Auditoria de segurança, pilotos, aceites, baseline, replay, links, sincronia das instruções e skills |
 | **`tests/`** | ✅ Testes | Suíte automatizada, que nunca acessa o Denodo nem o MySQL de produção ([tests/README.md](tests/README.md)) |
-| `CLAUDE.md`, `AGENTS.md`, `PROJECT.md` | 🤖 Instruções | Instruções para os assistentes de programação (Claude Code, Codex e Antigravity), com núcleo comum sincronizado ([como editar](docs/governanca-projeto/sincronia-instrucoes.md)) |
-| `artefatos_local/`, `cgov/`, `setup/`, `.agents/`, `.claude/`, `.codex/` | 🔒 Privado | Pastas locais ligadas à pasta privada da equipe; nunca vão para o GitHub ([organização público-privado](docs/ambiente/organizacao-publico-privado.md)) |
+| `CLAUDE.md`, `PROJECT.md` | 🤖 Instruções | Instruções para os assistentes de programação (Claude Code e Antigravity), com núcleo comum sincronizado ([como editar](docs/governanca-projeto/sincronia-instrucoes.md)) |
+| `artefatos_local/`, `cgov/`, `setup/`, `.agents/`, `.claude/` | 🔒 Privado | Pastas locais ligadas à pasta privada da equipe; nunca vão para o GitHub ([organização público-privado](docs/ambiente/organizacao-publico-privado.md)) |
 
 ### Dentro de `docs/`
 

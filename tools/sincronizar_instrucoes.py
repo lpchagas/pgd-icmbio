@@ -1,10 +1,10 @@
 """Sincronia do núcleo comum das instruções (plano de reorganização, §6; L4d).
 
-``CLAUDE.md``, ``AGENTS.md`` e ``PROJECT.md`` são pares sem hierarquia (DP-03,
-ADR-010). Cada um tem:
+``CLAUDE.md`` e ``PROJECT.md`` são pares sem hierarquia (DP-03, ADR-010; reduzidos a
+dois pela ADR-013, DP-07). Cada um tem:
 
 - o título (linha 1, ``# …``) antes do núcleo;
-- o **núcleo comum**, idêntico nos três, entre ``<!-- nucleo-comum:inicio -->`` e
+- o **núcleo comum**, idêntico nos dois, entre ``<!-- nucleo-comum:inicio -->`` e
   ``<!-- nucleo-comum:fim -->``;
 - o **bloco da ferramenta**, depois do marcador final, com até 40 linhas e só com os
   títulos permitidos (``TITULOS_PERMITIDOS``).
@@ -12,19 +12,19 @@ ADR-010). Cada um tem:
 O hash do núcleo é calculado sobre o texto normalizado (UTF-8 sem BOM, LF, sem espaço
 no fim da linha, uma quebra final) e guardado em ``config/instrucoes.lock.json``.
 
-Estados (base = hash do lock; A, B, C = núcleos normalizados):
+Estados (base = hash do lock; A, B = núcleos normalizados):
 
 == ===================================================== ============ ===========================
 #  Situação                                              ``verificar`` ``sincronizar``
 == ===================================================== ============ ===========================
-1  A=B=C=base                                            ok           nada
-2  A=B=C≠base                                            falha        atualiza o lock
-3  lock ausente e A=B=C                                  falha        cria o lock
+1  A=B=base                                              ok           nada
+2  A=B≠base                                              falha        atualiza o lock
+3  lock ausente e A=B                                    falha        cria o lock
 4  lock ausente e divergentes                            conflito     não escreve; relatório
-5  um ≠ base, dois = base                                falha        propaga o divergente
-6  dois iguais ≠ base, um = base                         falha        só com diário interrompido;
-                                                                      sem diário, conflito
-7  dois ou três ≠ base e diferentes entre si             conflito     não escreve; relatório
+5  um ≠ base, o outro = base                             falha        propaga o divergente
+6  não ocorre com dois arquivos (era: dois iguais ≠ base -            -
+   e um = base, com três pares; numeração mantida)
+7  os dois ≠ base e diferentes entre si                  conflito     não escreve; relatório
 8  marcadores, título ou bloco fora da estrutura         erro         não escreve
 == ===================================================== ============ ===========================
 
@@ -43,8 +43,7 @@ Uso:
   python -m tools.sincronizar_instrucoes recuperar [--desfazer]
   python -m tools.sincronizar_instrucoes importar --de <pasta>  # só lista seções
 
-Saídas: 0 ok; 1 falha sincronizável (estados 2, 3, 5 e 6); 2 conflito (4, 7 e 6 sem
-diário); 3 erro estrutural ou recusa de link (8); 4 operação em andamento (lock).
+Saídas: 0 ok; 1 falha sincronizável (estados 2, 3 e 5); 2 conflito (4 e 7); 3 erro estrutural ou recusa de link (8); 4 operação em andamento (lock).
 """
 from __future__ import annotations
 
@@ -65,7 +64,7 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
-ARQUIVOS = ("CLAUDE.md", "AGENTS.md", "PROJECT.md")
+ARQUIVOS = ("CLAUDE.md", "PROJECT.md")
 LOCK_REL = "config/instrucoes.lock.json"
 DIARIO_REL = "artefatos_local/sincronia"
 DIARIO_NOME = "operacao.json"
@@ -297,17 +296,17 @@ def classificar(leitura: Leitura) -> Diagnostico:
     if base is None:
         if len(distintos) == 1:
             alvo = distintos.pop()
-            return Diagnostico(3, "lock ausente; os três núcleos são iguais", alvo, ARQUIVOS)
+            return Diagnostico(3, "lock ausente; os núcleos são iguais", alvo, ARQUIVOS)
         return Diagnostico(4, "lock ausente e núcleos divergentes")
     diferentes = [nome for nome, h in hashes.items() if h != base]
     if not diferentes:
         return Diagnostico(1, "núcleos iguais ao lock", base, ARQUIVOS)
     if len(diferentes) == len(ARQUIVOS) and len(distintos) == 1:
-        return Diagnostico(2, "lock desatualizado: os três núcleos são iguais entre si e diferentes do lock",
+        return Diagnostico(2, "lock desatualizado: os núcleos são iguais entre si e diferentes do lock",
                            distintos.pop(), ARQUIVOS)
     if len(diferentes) == 1:
         nome = diferentes[0]
-        return Diagnostico(5, f"{nome} alterado; os outros dois iguais ao lock", hashes[nome], (nome,))
+        return Diagnostico(5, f"{nome} alterado; o outro igual ao lock", hashes[nome], (nome,))
     if len(diferentes) == 2 and hashes[diferentes[0]] == hashes[diferentes[1]]:
         return Diagnostico(6, f"{' e '.join(diferentes)} iguais entre si e diferentes do lock",
                            hashes[diferentes[0]], tuple(diferentes))
@@ -516,7 +515,7 @@ def verificar(raiz: Path = PROJECT_ROOT, staged: bool = False) -> tuple[int, str
     except SincroniaErro as exc:
         return exc.codigo, str(exc)
     if diag.estado == 1:
-        return OK, "ok: núcleo idêntico nos três arquivos e igual ao lock (estado 1)"
+        return OK, "ok: núcleo idêntico nos dois arquivos e igual ao lock (estado 1)"
     if diag.estado in (4, 7):
         return CONFLITO, f"conflito (estado {diag.estado}): {diag.mensagem}. Resolva à mão e rode 'sincronizar'"
     return FALHA, (f"estado {diag.estado}: {diag.mensagem}. Rode "
@@ -665,11 +664,11 @@ def importar(raiz: Path, de: Path) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Sincronia do núcleo comum de CLAUDE.md, AGENTS.md e PROJECT.md")
+    parser = argparse.ArgumentParser(description="Sincronia do núcleo comum de CLAUDE.md e PROJECT.md")
     parser.add_argument("--raiz", type=Path, default=PROJECT_ROOT, help=argparse.SUPPRESS)
     parser.add_argument("--diario-dir", type=Path, default=None, help=argparse.SUPPRESS)
     modos = parser.add_subparsers(dest="modo", required=True)
-    p_verificar = modos.add_parser("verificar", help="confere os três núcleos e o lock (não escreve)")
+    p_verificar = modos.add_parser("verificar", help="confere os dois núcleos e o lock (não escreve)")
     p_verificar.add_argument("--staged", action="store_true", help="lê o índice do Git (hook pre-commit)")
     modos.add_parser("sincronizar", help="propaga o núcleo alterado e atualiza o lock")
     p_recuperar = modos.add_parser("recuperar", help="lock abandonado ou operação interrompida")

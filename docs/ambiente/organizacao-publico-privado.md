@@ -9,11 +9,11 @@
 Este projeto lida com dados do PETRVS que incluem informações funcionais de servidores públicos. Ao mesmo tempo, a metodologia dos indicadores é um bem público que beneficia todos os órgãos da APF que usam o sistema.
 
 A separação garante que:
-- **A metodologia, os scripts e as instruções dos assistentes de IA** (`CLAUDE.md`, `AGENTS.md`, `PROJECT.md`) sejam compartilháveis — ficam no GitHub, sem credenciais nem dados pessoais
+- **A metodologia, os scripts e as instruções dos assistentes de IA** (`CLAUDE.md`, `PROJECT.md`) sejam compartilháveis — ficam no GitHub, sem credenciais nem dados pessoais
 - **Suas credenciais de acesso** (CPF e senha do Denodo) jamais apareçam online
 - **Os dados extraídos** (CSVs com nomes de unidades e servidores) fiquem fora do repositório
 - **As análises internas da CGOV** (ad-hoc, contexto institucional específico) fiquem restritas à pasta privada
-- **As skills, as configurações e as memórias locais dos assistentes** (`.agents/`, `.claude/`, `.codex/`) fiquem na pasta privada
+- **As skills, as configurações e as memórias locais dos assistentes** (`.agents/`, `.claude/`) fiquem na pasta privada
 
 ---
 
@@ -25,7 +25,7 @@ Tudo aqui é **versionado e publicável**. Não contém dados pessoais, senhas n
 
 ```
 pgd-icmbio/        (WSL: ~/projetos/pgd-icmbio; Windows: C:\Projetos\pgd-icmbio)
-├── CLAUDE.md, AGENTS.md, PROJECT.md   Instruções dos assistentes (núcleo comum sincronizado)
+├── CLAUDE.md, PROJECT.md   Instruções dos assistentes (núcleo comum sincronizado)
 ├── docs/                         Documentação por assunto (projeto, ambiente, dados-petrvs,
 │                                 indicadores, ocde, gestao, relatorios, agente, decisoes…)
 ├── lib/                          Núcleo compartilhado (Denodo, períodos, escopos, validação)
@@ -67,7 +67,6 @@ C:\Users\<SEU_USUARIO>\OneDrive - ICMBio\projetos\pgd-ocde-icmbio-privado\
 │   └── criar_links_privados.ps1  Recria as junções em outro computador (Windows)
 └── assistentes/
     ├── .claude/                  Configurações locais do Claude Code
-    ├── .codex/                   Configurações locais do Codex
     └── .agents/                  Skills (fonte canônica) e manifesto das skills
 ```
 
@@ -100,7 +99,7 @@ GitHub, e não contém CPF, e-mail, telefone ou endereço.
 
 ## 3. Como o VS Code "enxerga" tudo junto
 
-Na pasta do projeto você verá as pastas `artefatos_local`, `cgov`, `setup`, `.claude`, `.codex` e `.agents` como se estivessem ali. Elas são **links** que apontam para a pasta privada: **symlinks** no Linux/WSL e **junções** (Junctions) no Windows. Os arquivos `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` **não** são pontes: são arquivos regulares, versionados no Git.
+Na pasta do projeto você verá as pastas `artefatos_local`, `cgov`, `setup`, `.claude` e `.agents` como se estivessem ali. Elas são **links** que apontam para a pasta privada: **symlinks** no Linux/WSL e **junções** (Junctions) no Windows. Os arquivos `CLAUDE.md` e `PROJECT.md` **não** são pontes: são arquivos regulares, versionados no Git.
 
 ```
 pgd-icmbio/
@@ -108,7 +107,6 @@ pgd-icmbio/
 ├── cgov             →→→ [junção] →→→ <pasta privada>\cgov
 ├── setup            →→→ [junção] →→→ <pasta privada>\setup
 ├── .claude          →→→ [junção] →→→ <pasta privada>\assistentes\.claude
-├── .codex           →→→ [junção] →→→ <pasta privada>\assistentes\.codex
 └── .agents          →→→ [junção] →→→ <pasta privada>\assistentes\.agents
 ```
 
@@ -148,7 +146,6 @@ ln -s "$PRIVADO/artefatos_local" artefatos_local
 ln -s "$PRIVADO/cgov" cgov
 ln -s "$PRIVADO/setup" setup
 ln -s "$PRIVADO/assistentes/.agents" .agents
-ln -s "$PRIVADO/assistentes/.codex" .codex
 mkdir .claude && ln -s "$PRIVADO/assistentes/.claude/commands" .claude/commands
 ```
 
@@ -208,7 +205,7 @@ O ícone do OneDrive na bandeja do sistema deve mostrar sincronização concluí
 .\setup\criar_links_privados.ps1
 ```
 
-Este script cria **só junções de pastas** — `artefatos_local`, `cgov`, `setup`, `.claude`, `.codex` e `.agents` — e confere que `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` são arquivos regulares. Se encontrar um link antigo (por exemplo, criado pelo WSL, que o Windows não enxerga), pergunta antes de substituí-lo; a substituição remove só o link, nunca o conteúdo.
+Este script cria **só junções de pastas** — `artefatos_local`, `cgov`, `setup`, `.claude` e `.agents` — e confere que `CLAUDE.md` e `PROJECT.md` são arquivos regulares. Se encontrar um link antigo (por exemplo, criado pelo WSL, que o Windows não enxerga), pergunta antes de substituí-lo; a substituição remove só o link, nunca o conteúdo.
 
 > Como a pasta `setup` também é uma junção, na primeira instalação ela ainda não existe no projeto. Execute o script a partir da pasta privada, informando o projeto:
 >
@@ -273,12 +270,12 @@ Os scripts Python leem **todos** os caminhos do arquivo `.env`, então não há 
 |------|----------------|------|
 | Scripts e módulos (`ocde/`, `gestao/`, `lib/`, `relatorios/`, `tools/`) | Sim | Git (`git pull`) |
 | Documentação (`docs/`) | Sim | Git (`git pull`) |
-| Instruções dos assistentes (`CLAUDE.md`, `AGENTS.md`, `PROJECT.md`) | Sim | Git (`git pull`) |
+| Instruções dos assistentes (`CLAUDE.md`, `PROJECT.md`) | Sim | Git (`git pull`) |
 | Análises CGOV (`cgov/`) | Sim | Pasta privada (automático) |
 | Scripts de setup (`setup/`) | Sim | Pasta privada (automático) |
 | CSVs mensais (`artefatos_local/ocde/entregas/`) | Sim | Pasta privada (automático) |
 | Diagnósticos, relatórios e aceites | Sim | Pasta privada (automático) |
-| Skills e configurações dos assistentes (`.agents/`, `.claude/`, `.codex/`) | Sim | Pasta privada (automático) |
+| Skills e configurações dos assistentes (`.agents/`, `.claude/`) | Sim | Pasta privada (automático) |
 | Links das skills (`.claude\skills\<nome>`) | **Não** | Recriados em cada computador pelo instalador |
 | Links para a pasta privada (junções ou symlinks) | **Não** | Recriados em cada computador (seção 4) |
 | `.env` com credenciais | **Não** | Cada máquina tem o seu próprio |
@@ -298,7 +295,7 @@ Os scripts Python leem **todos** os caminhos do arquivo `.env`, então não há 
 ### Ao terminar o trabalho
 
 ```
-1. Se editou CLAUDE.md, AGENTS.md ou PROJECT.md:
+1. Se editou CLAUDE.md ou PROJECT.md:
    python -m tools.sincronizar_instrucoes sincronizar
 2. git add / git commit / git push   → apenas arquivos públicos
    [o .gitignore bloqueia tudo que for sensível]
@@ -309,7 +306,7 @@ Os scripts Python leem **todos** os caminhos do arquivo `.env`, então não há 
 
 - `git add .env` — bloqueado pelo .gitignore, mas nunca forçar
 - `git add cgov/` — análises CGOV são privadas; ficam na pasta privada
-- Criar instruções de assistente em subpastas (ex.: `agente/AGENTS.md`, que fica fora do Git) — só as da raiz são permitidas
+- Criar instruções de assistente em subpastas (ex.: `agente/CLAUDE.md`, que fica fora do Git) — só `CLAUDE.md` e `PROJECT.md` da raiz são permitidos; `AGENTS.md` foi retirado (ADR-013)
 - Copiar credenciais nos comentários de commit ou nos nomes de arquivo
 - Mover CSVs para dentro de `docs/` ou `ocde/` — essas pastas são públicas
 - Colocar o `.env` na pasta privada — senha em texto puro na nuvem é risco desnecessário
@@ -346,7 +343,7 @@ Esses dados são **funcionais e institucionais**, não nominais. Ainda assim:
 
 ### Por que isso importa
 
-A pasta `OneDrive - ICMBio\projetos\` contém a pasta privada à qual as junções do projeto apontam. Se ela for apagada ou movida acidentalmente, todas as 6 junções do projeto ficam quebradas e as pastas `artefatos_local`, `cgov`, `setup`, `.claude`, `.codex` e `.agents` aparecem vazias.
+A pasta `OneDrive - ICMBio\projetos\` contém a pasta privada à qual as junções do projeto apontam. Se ela for apagada ou movida acidentalmente, todas as 5 junções do projeto ficam quebradas e as pastas `artefatos_local`, `cgov`, `setup`, `.claude` e `.agents` aparecem vazias.
 
 O OneDrive recupera arquivos deletados da lixeira da nuvem (por até 93 dias), mas a resincronização pode levar horas. Para minimizar o risco, duas medidas preventivas estão em vigor:
 
@@ -368,7 +365,7 @@ O script `setup\backup_privado.ps1` copia incrementalmente as partes não regene
 
 | Pasta | Conteúdo | Por que incluir |
 | --- | --- | --- |
-| `assistentes\` | `.agents\` (skills e manifesto), `.claude\`, `.codex\` | Não versionado no Git |
+| `assistentes\` | `.agents\` (skills e manifesto), `.claude\` | Não versionado no Git |
 | `cgov\` | Análises internas CGOV | Privadas e únicas |
 | `setup\` | configurar_env.ps1, criar_links_privados.ps1 | Scripts de recuperação do ambiente |
 | `artefatos_local\validacao\` | A3–A5, baselines, aceites e documentos deliberativos da CGOV | Caderno metodológico e decisões são registro institucional — não regeneráveis |

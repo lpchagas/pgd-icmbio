@@ -74,7 +74,7 @@ alteração parcial é modelada por versões/vigências próprias.
 
 | Serviço | Uso | Limite de governança |
 | --- | --- | --- |
-| Assistentes de programação (Codex, Claude Code) | desenvolvimento e revisão | plano individual não é API nem licença institucional; uso multiusuário é separado |
+| Assistentes de programação (Claude Code, Antigravity) | desenvolvimento e revisão | plano individual não é API nem licença institucional; uso multiusuário é separado |
 | Gemini free tier | público/sintético, se vigente | não usar conteúdo institucional |
 | Microsoft 365 E3 | produtividade do usuário | conferir recurso e política do tenant |
 | Power Apps Premium | protótipo individual | distribuição exige licenças adequadas |

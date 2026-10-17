@@ -37,9 +37,9 @@ def test_rejects_noncanonical_name_and_missing_tests(tmp_path):
 
 
 def test_windows_executable_path_is_supported_and_redacted():
-    expected = "C:\\Tools\\codex.exe" if os.name == "nt" else "/mnt/c/Tools/codex.exe"
-    assert _windows_to_local("C:\\Tools\\codex.exe") == expected
-    assert _redact_path("C:\\Users\\pessoa\\codex.exe") == "%USERPROFILE%\\codex.exe"
+    expected = "C:\\Tools\\claude.exe" if os.name == "nt" else "/mnt/c/Tools/claude.exe"
+    assert _windows_to_local("C:\\Tools\\claude.exe") == expected
+    assert _redact_path("C:\\Users\\pessoa\\claude.exe") == "%USERPROFILE%\\claude.exe"
 
 
 def test_install_is_idempotent_for_correct_symlink(tmp_path, monkeypatch):
@@ -55,7 +55,6 @@ def test_install_is_idempotent_for_correct_symlink(tmp_path, monkeypatch):
         pytest.skip(f"ambiente sem privilégio para criar symlink: {exc}")
     monkeypatch.setattr(manager, "CANONICAL", canonical)
     monkeypatch.setattr(manager, "CLAUDE", claude)
-    monkeypatch.setattr(manager, "CODEX_LEGACY", tmp_path / ".codex" / "skills")
     assert install(apply=False)["acoes"] == []
 
 
@@ -71,7 +70,6 @@ def skills(tmp_path, monkeypatch):
     claude = tmp_path / ".claude" / "skills"
     monkeypatch.setattr(manager, "CANONICAL", canonical)
     monkeypatch.setattr(manager, "CLAUDE", claude)
-    monkeypatch.setattr(manager, "CODEX_LEGACY", tmp_path / ".codex" / "skills")
     return canonical, claude
 
 

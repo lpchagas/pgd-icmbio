@@ -14,20 +14,21 @@
 .secrets.baseline
 
 # -----------------------------------------------------------------------------
-# Instruções dos assistentes (H1, L4d): CLAUDE.md, AGENTS.md e PROJECT.md da RAIZ
+# Instruções dos assistentes (H1, L4d, ADR-013): CLAUDE.md e PROJECT.md da RAIZ
 # são versionados (núcleo comum público; tools/sincronizar_instrucoes.py). Os
-# aninhados (ex.: agente/AGENTS.md) continuam fora do Git.
+# aninhados (ex.: agente/CLAUDE.md) continuam fora do Git. AGENTS.md foi retirado
+# (ADR-013) e fica ignorado também na raiz.
 # -----------------------------------------------------------------------------
 **/CLAUDE.md
 **/AGENTS.md
 **/PROJECT.md
 !/CLAUDE.md
-!/AGENTS.md
 !/PROJECT.md
 
 # -----------------------------------------------------------------------------
-# Memória, skills e configuração locais dos assistentes (Claude Code, Codex,
-# Antigravity): links para a pasta privada, nunca versionados
+# Memória, skills e configuração locais dos assistentes (Claude Code e
+# Antigravity): links para a pasta privada, nunca versionados. .codex segue
+# recusado por defesa, depois da retirada do Codex (ADR-013).
 # -----------------------------------------------------------------------------
 .claude
 .claude/

@@ -1,7 +1,7 @@
 # AT-02 — Recursos disponíveis e arquitetura local-first
 
-**Versão:** 1.0  
-**Data de verificação:** 23.08.2026  
+**Versão:** 1.1  
+**Data de verificação:** 23.08.2026; ferramentas de desenvolvimento revistas em 17.10.2026 ([ADR-013](../decisoes/ADR-013-retirada-codex.md))  
 **Decisão relacionada:** [ADR-008](../decisoes/ADR-008-desenvolvimento-individual-local-first.md)  
 **Situação:** análise técnica vigente para o protótipo individual
 
@@ -23,25 +23,19 @@ GPTs](https://help.openai.com/en/articles/8554397-creating-a-gpt).
 
 | Recurso | Situação observada | Uso recomendado | Limitação determinante |
 | --- | --- | --- | --- |
-| Assistentes de programação com IA (Codex, Claude Code e similares) | planos individuais do desenvolvedor, sem custo institucional | escrever, revisar e testar código; pesquisa e documentação | planos individuais não incluem API nem licença institucional |
+| Assistentes de programação com IA (Claude Code, principal; Antigravity, pelo plano Google AI Pro, secundário) | planos individuais do desenvolvedor, sem custo institucional | escrever, revisar e testar código; pesquisa e documentação | planos individuais não incluem API nem licença institucional |
 | Microsoft 365 | licença institucional | Office, identidade e colaboração | não equivale a capacidade Copilot Studio |
 | Power Apps, Copilot Studio, Fabric e Power Automate | licenças individuais, gratuitas ou de avaliação | experimento de interface e exploração | não autorizam publicação institucional nem servem de base duradoura |
 
 ## 3. OpenAI
 
-O Codex está incluído nos planos ChatGPT, com limites variáveis por plano, e é adequado
-para escrever, revisar e testar código. O conteúdo processado em planos individuais segue os
-controles da conta do usuário; conversas podem ser usadas para melhoria se o usuário não
-desativar o treinamento. Conteúdo institucional deve, portanto, respeitar a classificação
-e preferir o fluxo local. [OpenAI — Using Codex with your ChatGPT
-plan](https://help.openai.com/en/articles/11369540-using-codex-with-your-chatgpt-plan).
-
-ChatGPT e API usam sistemas de cobrança separados. A proposta não deve considerar a
-assinatura do ChatGPT como crédito de API. [OpenAI — ChatGPT versus API
+O Codex foi usado no desenvolvimento até outubro de 2026 e saiu do projeto pela
+[ADR-013](../decisoes/ADR-013-retirada-codex.md). ChatGPT e API usam sistemas de cobrança
+separados: assinatura individual não é crédito de API. [OpenAI — ChatGPT versus API
 billing](https://help.openai.com/en/articles/9039756-billing-settings-in-chatgpt-vs-platform).
 
-**Decisão:** usar o Codex como ferramenta de desenvolvimento; não usar GPT
-personalizado ou OpenAI API como dependência do protótipo.
+**Decisão:** não usar Codex, GPT personalizado ou OpenAI API como dependência do
+desenvolvimento nem do protótipo.
 
 ## 4. Anthropic
 
@@ -49,7 +43,9 @@ Planos individuais do Claude podem apoiar revisão e o Claude Code no limite do 
 consumo de API é separado. Fontes: [planos individuais do Claude](https://support.claude.com/en/articles/8325606-what-is-the-pro-plan)
 e [Claude Code com Pro/Max](https://support.claude.com/en/articles/11145838-use-claude-code-with-your-pro-or-max-plan).
 
-**Decisão:** usar para desenvolvimento e verificação cruzada; não tratar como backend.
+**Decisão:** o Claude Code é a ferramenta principal de desenvolvimento, com instruções
+em `CLAUDE.md`. Não tratar o plano individual como backend nem como crédito de API.
+Conteúdo institucional respeita a classificação e prefere o fluxo local.
 
 ## 5. Google
 
@@ -57,8 +53,12 @@ A Gemini Developer API oferece combinações de nível gratuito e pago que varia
 limite e uso de dados. As condições devem ser verificadas antes de cada ativação.
 [Google — Gemini API pricing](https://ai.google.dev/gemini-api/docs/pricing).
 
-**Decisão:** nível gratuito é opcional e recebe somente dados públicos ou sintéticos. O
-protótipo deve continuar operável sem ele.
+O Antigravity, usado pelo plano individual Google AI Pro, é a ferramenta secundária de
+desenvolvimento, com instruções em `PROJECT.md`. Ele reduz a dependência de um único
+fornecedor e segue as mesmas regras de classificação.
+
+**Decisão:** o nível gratuito da Gemini API é opcional e recebe somente dados públicos ou
+sintéticos. O protótipo deve continuar operável sem ele.
 
 ## 6. Microsoft
 
@@ -100,7 +100,7 @@ Tunnels](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cl
 | Banco | MySQL 8 local | zero | modelo mínimo governado |
 | RAG | indexação e modelo local | zero | público e institucional comum autorizado |
 | Indicadores | Denodo JDBC leitura | existente | consulta institucional autorizada |
-| Desenvolvimento | assistentes de programação (Codex, Claude Code) | zero institucional | código e documentação; dados só públicos ou sintéticos |
+| Desenvolvimento | assistentes de programação (Claude Code; Antigravity) | zero institucional | código e documentação; dados só públicos ou sintéticos |
 | IA externa opcional | Gemini free tier | zero condicionado | público/sintético |
 | Demonstração externa | Quick Tunnel | zero condicionado | exclusivamente sintético |
 

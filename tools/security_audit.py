@@ -85,7 +85,11 @@ PLACEHOLDER_PATTERN = re.compile(
 # tools/verificar_links.py consultam forbidden_reason com PRIVACY_REASONS.
 # Instruções (H1, L4d): versionadas só como arquivos regulares da raiz comum; aninhadas
 # (inclusive na raiz de agente/), como pasta ou por link continuam recusadas.
+# ADR-013: AGENTS.md (Codex) foi retirado e fica recusado também na raiz; o nome
+# continua em INSTRUCTIONS para que link e aninhamento sigam recusados, e .codex
+# continua privado por defesa.
 INSTRUCTIONS = {"agents.md", "claude.md", "project.md"}
+INSTRUCTIONS_RAIZ = {"claude.md", "project.md"}
 PRIVATE_ANY_DEPTH = {".agents", ".claude", ".codex", "artefatos_local"}
 # Privados na raiz de cada componente do repositório (ver PERFIS).
 PRIVATE_COMPONENT_DIRS = {"cgov", "setup", "data", "testes_cgov"}
@@ -269,6 +273,8 @@ def forbidden_reason(path: str, perfil: str = DEFAULT_PERFIL) -> str | None:
     # RL1v2-06 e L4d: nome de instrução só é versionável como arquivo da raiz comum.
     if set(parts) & INSTRUCTIONS and not (len(parts) == 1 and name in INSTRUCTIONS):
         return "instrucao_aninhada"
+    if len(parts) == 1 and name in INSTRUCTIONS - INSTRUCTIONS_RAIZ:
+        return "instrucao_retirada"
     if name.startswith(".env") and name != ".env.example":
         return "credencial_env"
     if suffix == ".cnf":

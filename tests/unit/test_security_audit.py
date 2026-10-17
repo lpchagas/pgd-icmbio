@@ -227,12 +227,12 @@ def test_tree_ref_snapshot_is_scanned_without_commits(tmp_path):
     (repo / "agente" / "AGENTS.md").write_text(f"chave {AWS_KEY}\n", encoding="utf-8")
     _git(repo, "add", "-f", "agente/AGENTS.md")
     tree = _git(repo, "write-tree")
-    _git(repo, "update-ref", "refs/codex/checkpoint", tree)
+    _git(repo, "update-ref", "refs/backup/checkpoint", tree)
     _git(repo, "rm", "-q", "--cached", "agente/AGENTS.md")
     report = security_audit.audit(repo, ("historico", "proibidos"), env_paths=[_env(tmp_path)],
-                                  refs=["refs/codex/checkpoint"])
+                                  refs=["refs/backup/checkpoint"])
     history = report["alvos"]["historico"]
-    assert history["refs"]["refs/codex/checkpoint"]["tipo"] == "tree"
+    assert history["refs"]["refs/backup/checkpoint"]["tipo"] == "tree"
     assert (history["commits_examinados"], history["instantaneos_examinados"]) == (0, 1)
     assert _rules(report, "historico") == [("agente/AGENTS.md", "detect-secrets:AWS Access Key")]
     assert ("agente/AGENTS.md", "instrucao_aninhada") in _rules(report, "proibidos")
@@ -303,7 +303,8 @@ def test_rl1_01_parent_directory_link_is_not_followed(tmp_path, monkeypatch):
 @pytest.mark.parametrize(("link", "target", "reason"), [
     ("docs/atalho", "../cgov/x", "symlink_para_caminho_proibido:area_privada"),
     ("docs/atalho", "../.env", "symlink_para_caminho_proibido:credencial_env"),
-    ("docs/atalho", "../AGENTS.md", "symlink_para_instrucao"),                 # instrução da raiz só como arquivo
+    ("docs/atalho", "../CLAUDE.md", "symlink_para_instrucao"),                 # instrução da raiz só como arquivo
+    ("docs/atalho", "../AGENTS.md", "symlink_para_caminho_proibido:instrucao_retirada"),  # ADR-013
     ("docs/atalho", "sub/CLAUDE.md", "symlink_para_caminho_proibido:instrucao_aninhada"),
     ("CLAUDE.md", "docs/instrucoes.md", "instrucao_como_link"),
     ("agente/AGENTS.md", "../AGENTS.md", "instrucao_como_link"),
@@ -555,7 +556,9 @@ def test_rl1_05_binary_is_recorded_and_not_counted_as_scanned(tmp_path):
     (".env.example", "pre-merge", None),
     ("docs/.env.example", "pre-merge", None),
     ("config/pgd_agente_root.cnf", "pre-merge", "credencial_cnf"),
-    ("AGENTS.md", "pre-merge", None),                                   # H1/L4d: raiz comum versionada
+    ("AGENTS.md", "pre-merge", "instrucao_retirada"),                   # ADR-013: Codex retirado
+    ("AGENTS.md", "monorepo", "instrucao_retirada"),
+    ("CLAUDE.md", "pre-merge", None),                                   # H1/L4d: raiz comum versionada
     ("CLAUDE.md", "monorepo", None),
     ("PROJECT.md", "monorepo", None),
     ("docs/agente/AGENTS.md", "pre-merge", "instrucao_aninhada"),
@@ -732,7 +735,7 @@ def test_rl1v2_03_link_through_intermediate_link_escaping_root_is_reported():
     ({"docs/c": "d", "docs/d": "c"}, "docs/c", "symlink_ciclo"),
     ({"docs/bridge": "/etc", "docs/link": "bridge/x"}, "docs/link", "symlink_absoluto"),
     ({"a/b": "../c", "c/d": "../a/b/../z"}, "c/d", None),
-    ({"docs/a": "../AGENTS.md"}, "docs/a", "symlink_para_instrucao"),
+    ({"docs/a": "../PROJECT.md"}, "docs/a", "symlink_para_instrucao"),
     ({"docs/bridge": "..", "docs/link": "bridge/PROJECT.md"}, "docs/link", "symlink_para_instrucao"),
     ({"CLAUDE.md": "docs/x.md"}, "CLAUDE.md", "instrucao_como_link"),
 ])

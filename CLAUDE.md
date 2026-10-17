@@ -45,8 +45,8 @@ Responda e documente sempre em **português do Brasil**.
    para o acervo.
 6. Precedência entre **fontes**: decisão CGOV > contratos executáveis
    (`lib/validation_contracts.py`) > scripts > fichas em `docs/` > artefatos A3–A5.
-   Entre estes três arquivos de instruções **não há hierarquia**: o núcleo é idêntico
-   nos três (ver "Estas instruções").
+   Entre os dois arquivos de instruções **não há hierarquia**: o núcleo é idêntico
+   nos dois (ver "Estas instruções").
 
 **Tempo**
 
@@ -138,8 +138,8 @@ docs/           público, por assunto: projeto, ambiente, dados-petrvs, indicado
                 ocde, gestao, relatorios, agente, decisoes, governanca-projeto
 ```
 
-Privados, fora do Git: `artefatos_local/`, `cgov/`, `setup/`, `.agents/`, `.claude/`,
-`.codex/`. São links locais para a pasta privada sincronizada, de acesso restrito à
+Privados, fora do Git: `artefatos_local/`, `cgov/`, `setup/`, `.agents/`, `.claude/`.
+São links locais para a pasta privada sincronizada, de acesso restrito à
 equipe (symlinks no Linux/WSL, junções no Windows). Os links são de cada computador e
 não se sincronizam: recriá-los em cada ambiente. No WSL, a pasta sincronizada precisa
 estar disponível neste dispositivo (arquivo só na nuvem dá erro de leitura). Detalhes:
@@ -230,14 +230,15 @@ Novo indicador de gestão: roteiro em `gestao/README.md`.
   validar com `python -m tools.skills_manager validate`.
 - Skills não incorporam SQL, fórmulas, drivers ou credenciais; roteiam para `lib/`,
   `ocde/`, `gestao/` e `relatorios/`. Principal: `ciclo-gerencial-mensal`.
-- Homologação de skill exige descoberta única e equivalência funcional nas três
+- Homologação de skill exige descoberta única e equivalência funcional nas duas
   ferramentas. Como cada ferramenta descobre as skills: bloco da ferramenta, abaixo.
 
 ## Estas instruções
 
-- `CLAUDE.md`, `AGENTS.md` e `PROJECT.md` são pares sem hierarquia (DP-03, ADR-010).
-  Este núcleo é idêntico nos três; o bloco após o marcador final é da ferramenta.
-- Edite o núcleo em qualquer um dos três e rode
+- `CLAUDE.md` (Claude Code) e `PROJECT.md` (Antigravity) são pares sem hierarquia
+  (DP-03, DP-07; ADR-010, ADR-013). Este núcleo é idêntico nos dois; o bloco após o
+  marcador final é da ferramenta. `AGENTS.md` foi retirado e não volta à raiz.
+- Edite o núcleo em qualquer um dos dois e rode
   `python -m tools.sincronizar_instrucoes sincronizar`. O hook e o CI rodam `verificar`.
 - Sem segredos, sem dados pessoais e sem números voláteis (contagens, datas de execução,
   resultados de teste). Mudança do núcleo passa por revisão de conteúdo.

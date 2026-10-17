@@ -20,7 +20,7 @@ Nunca publicar:
 Podem ser publicadas, após revisão:
 
 ```text
-README.md, CHANGELOG.md, CLAUDE.md, AGENTS.md, PROJECT.md
+README.md, CHANGELOG.md, CLAUDE.md, PROJECT.md
 .env.example
 docs/ capacidades/ config/
 lib/ ocde/ gestao/ mgi/ relatorios/ agente/ tools/ tests/
@@ -33,8 +33,9 @@ lib/ ocde/ gestao/ mgi/ relatorios/ agente/ tools/ tests/
 *.cnf
 .agents/
 .claude/
-.codex/
-instruções de assistente fora da raiz (ex.: agente/AGENTS.md)
+.codex/ (Codex retirado; mantido como proibido por defesa)
+AGENTS.md em qualquer nível, inclusive na raiz (retirado pela ADR-013)
+instruções de assistente fora da raiz (ex.: agente/CLAUDE.md)
 artefatos_local/
 cgov/
 setup/
@@ -43,7 +44,7 @@ setup/
 *.ipynb (exceto consultas_denodo_template.ipynb)
 ```
 
-`CLAUDE.md`, `AGENTS.md` e `PROJECT.md` **da raiz** são públicos desde a
+`CLAUDE.md` e `PROJECT.md` **da raiz** são públicos desde a
 reorganização: têm um núcleo comum sem segredos, dados pessoais ou estado volátil,
 mantido por `tools/sincronizar_instrucoes.py`
 ([sincronia das instruções](../governanca-projeto/sincronia-instrucoes.md)). Precisam
@@ -99,7 +100,7 @@ Se aparecer qualquer arquivo em `artefatos_local/`, `cgov/`, `setup/`, `.env`,
 `.agents/`, `.claude/`, `.codex/`, `*.cnf`, `*.csv`, `*.pdf` ou `*.ipynb`, ou
 instrução de assistente fora da raiz, não publique.
 
-Se `CLAUDE.md`, `AGENTS.md` ou `PROJECT.md` estiverem na lista, confira a sincronia:
+Se `CLAUDE.md` ou `PROJECT.md` estiverem na lista, confira a sincronia:
 `python -m tools.sincronizar_instrucoes verificar` precisa terminar em estado 1.
 
 ## 5. Regras para scripts públicos

@@ -2,7 +2,7 @@
 
 As skills apenas encaminham para este módulo. A regra temporal, os destinos e
 o manifesto permanecem no código do projeto para evitar implementações
-divergentes entre Codex, Claude Code e Antigravity.
+divergentes entre Claude Code e Antigravity.
 """
 from __future__ import annotations
 

@@ -1,17 +1,18 @@
 # Sincronia das instruções dos assistentes
 
-> **Para quem é:** quem edita `CLAUDE.md`, `AGENTS.md` ou `PROJECT.md`. A decisão e as
-> alternativas estão na [ADR-010](../decisoes/ADR-010-sincronia-instrucoes.md).
+> **Para quem é:** quem edita `CLAUDE.md` ou `PROJECT.md`. A decisão e as alternativas
+> estão na [ADR-010](../decisoes/ADR-010-sincronia-instrucoes.md), revisada pela
+> [ADR-013](../decisoes/ADR-013-retirada-codex.md), que retirou o `AGENTS.md`.
 
 ## 1. Como os arquivos são organizados
 
-Os três arquivos da raiz têm a mesma estrutura:
+Os dois arquivos da raiz têm a mesma estrutura:
 
 ```text
 # Instruções do projeto — <ferramenta>        ← título (única linha antes do núcleo)
 
 <!-- nucleo-comum:inicio -->
-... núcleo comum, idêntico nos três ...
+... núcleo comum, idêntico nos dois ...
 <!-- nucleo-comum:fim -->
 
 ## Mecânica da ferramenta                      ← bloco da ferramenta (até 40 linhas)
@@ -23,15 +24,16 @@ Os três arquivos da raiz têm a mesma estrutura:
   (contagens, datas de execução, resultados de teste).
 - **Bloco da ferramenta:** só o que é próprio de cada assistente, com no máximo 40 linhas
   e apenas os três títulos acima.
-- Os três são **arquivos regulares** versionados no Git. Link, junção ou hardlink é
+- Os dois são **arquivos regulares** versionados no Git. Link, junção ou hardlink é
   recusado.
-- Instruções em subpastas (por exemplo, `agente/AGENTS.md`) são proibidas e ficam fora do Git:
-  o `.gitignore` e o auditor de segurança as recusam.
+- Instruções em subpastas (por exemplo, `agente/CLAUDE.md`) são proibidas e ficam fora do Git:
+  o `.gitignore` e o auditor de segurança as recusam. O `AGENTS.md` é recusado também na
+  raiz (ADR-013).
 
 ## 2. Editar o núcleo
 
-1. Edite o núcleo em **qualquer um** dos três arquivos.
-2. Propague para os outros dois e atualize o lock:
+1. Edite o núcleo em **qualquer um** dos dois arquivos.
+2. Propague para o outro e atualize o lock:
 
    ```text
    python -m tools.sincronizar_instrucoes sincronizar
@@ -41,11 +43,11 @@ Os três arquivos da raiz têm a mesma estrutura:
 
    ```text
    python -m tools.sincronizar_instrucoes verificar
-   git add CLAUDE.md AGENTS.md PROJECT.md config/instrucoes.lock.json
+   git add CLAUDE.md PROJECT.md config/instrucoes.lock.json
    ```
 
 A mudança do núcleo passa por revisão de conteúdo na PR: a sincronia só garante que os
-três textos são iguais, não que o conteúdo está correto.
+dois textos são iguais, não que o conteúdo está correto.
 
 ## 3. Estados
 
@@ -54,24 +56,24 @@ O hash do núcleo normalizado (UTF-8 sem BOM, LF, sem espaço no fim da linha) f
 
 | # | Situação | `verificar` | `sincronizar` |
 | --- | --- | --- | --- |
-| 1 | Os três iguais ao lock | ok (saída 0) | nada a fazer |
-| 2 | Os três iguais entre si e diferentes do lock | falha (1) | atualiza o lock |
-| 3 | Lock ausente e os três iguais | falha (1) | cria o lock |
+| 1 | Os dois iguais ao lock | ok (saída 0) | nada a fazer |
+| 2 | Os dois iguais entre si e diferentes do lock | falha (1) | atualiza o lock |
+| 3 | Lock ausente e os dois iguais | falha (1) | cria o lock |
 | 4 | Lock ausente e núcleos diferentes | conflito (2) | não escreve; grava relatório de diferenças |
-| 5 | Um alterado, dois iguais ao lock | falha (1) | propaga o alterado |
-| 6 | Dois iguais entre si e diferentes do lock, um igual ao lock | falha (1) | só retoma operação interrompida registrada no diário; sem diário, conflito (2) |
-| 7 | Dois ou três alterados de formas diferentes | conflito (2) | não escreve; grava relatório de diferenças |
+| 5 | Um alterado, o outro igual ao lock | falha (1) | propaga o alterado |
+| 6 | Não ocorre com dois arquivos (numeração mantida da época dos três pares; ADR-013) | — | — |
+| 7 | Os dois alterados de formas diferentes | conflito (2) | não escreve; grava relatório de diferenças |
 | 8 | Marcador ausente ou duplicado, texto antes do núcleo, título não permitido ou bloco com mais de 40 linhas | erro (3) | não escreve |
 
 A saída 4 indica outra operação em andamento (lock de exclusão presente).
 
-**Conflito:** resolva à mão, deixando o núcleo desejado em um arquivo e os outros dois
-iguais ao lock, e rode `sincronizar`. O relatório de diferenças
+**Conflito:** resolva à mão, deixando o núcleo desejado em um arquivo e o outro igual
+ao lock, e rode `sincronizar`. O relatório de diferenças
 (`conflito-<data>.md`) fica na pasta de sincronia da área privada, fora do Git.
 
 ## 4. Interrupção e recuperação
 
-Cada arquivo é gravado de forma atômica, mas não há transação sobre os três. Se a
+Cada arquivo é gravado de forma atômica, mas não há transação sobre o conjunto. Se a
 operação for interrompida no meio:
 
 ```text

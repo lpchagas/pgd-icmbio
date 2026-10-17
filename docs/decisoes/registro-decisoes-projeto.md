@@ -21,6 +21,7 @@ de memória de conversa.
 | DP-04 | Unidades piloto: CGOV, COCAGE e GR2 | 23.09.2026 | [ADR-011](ADR-011-unidades-piloto.md); `config/unidades-piloto.json` |
 | DP-05 | Atualizar todos os `.md`, corrigir links e excluir obsoletos | 23.09.2026 | Revisão integral e verificador de links bloqueante |
 | DP-06 | Retirar as páginas-ponte da L4b antes dos dois ciclos mensais previstos, porque nenhum link para os caminhos antigos foi compartilhado fora da equipe | 17.10.2026 | 17 pontes e `docs/mgi/README.md` retirados; correspondência entre caminhos antigos e novos no `CHANGELOG.md` |
+| DP-07 | Retirar o Codex: `CLAUDE.md` e `PROJECT.md` como os dois pares sem hierarquia; `AGENTS.md` recusado na raiz e `.codex` mantido como caminho proibido | 17.10.2026 | [ADR-013](ADR-013-retirada-codex.md), que revisa a ADR-010 |
 
 ## Decisões humanas do plano (H)
 
@@ -46,3 +47,4 @@ de memória de conversa.
 - [ADR-010 — Sincronia das instruções](ADR-010-sincronia-instrucoes.md)
 - [ADR-011 — Unidades piloto](ADR-011-unidades-piloto.md)
 - [ADR-012 — Configuração Denodo](ADR-012-configuracao-denodo.md)
+- [ADR-013 — Retirada do Codex](ADR-013-retirada-codex.md)

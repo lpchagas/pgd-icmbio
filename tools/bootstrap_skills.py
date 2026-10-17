@@ -42,7 +42,7 @@ CATALOG: dict[str, dict[str, str]] = {
     "verificar-consistencia": {"class": "qualidade", "status": "gate", "purpose": "Executar testes unitários, diferenciais, metamórficos, drift, privacidade, retomada e rastreabilidade.", "entrypoint": "python -m lib.validation_runner --modo fixture; python -m pytest", "permission": "read-private"},
     "auditar-seguranca": {"class": "qualidade", "status": "gate", "purpose": "Detectar credenciais, PII, caminhos pessoais e artefatos indevidos.", "entrypoint": "python tools/security_audit.py e relatorios.privacidade", "permission": "read-private"},
     "validar-periodicidade": {"class": "qualidade", "status": "gate", "purpose": "Confirmar janela cumulativa, ciclos e separação das lentes temporais.", "entrypoint": "lib.periodos e testes temporais", "permission": "read-local"},
-    "validar-skills": {"class": "qualidade", "status": "active", "purpose": "Validar pacotes, instalar links e certificar as três ferramentas.", "entrypoint": "python tools/skills_manager.py", "permission": "read-write-private"},
+    "validar-skills": {"class": "qualidade", "status": "active", "purpose": "Validar pacotes, instalar links e certificar as duas ferramentas.", "entrypoint": "python tools/skills_manager.py", "permission": "read-write-private"},
     "atualizar-docs": {"class": "governanca", "status": "active", "purpose": "Atualizar fichas, metodologia V2 e documentação das análises de gestão.", "entrypoint": "docs e CLAUDE.md", "permission": "write-docs"},
     "reconciliar-docs": {"class": "governanca", "status": "active", "purpose": "Comparar documentação, código, A5, manifestos e catálogo de skills.", "entrypoint": "docs, código e manifestos", "permission": "read-private"},
     "petrvs-reports": {"class": "inteligencia-v2", "status": "deprecated", "purpose": "Preservar referência histórica ao antigo gerador de relatórios PETRVS.", "entrypoint": "relatorio-gerencial", "permission": "route-only", "successor": "relatorio-gerencial"},
@@ -146,7 +146,6 @@ def main(argv: list[str] | None = None) -> int:
         "schema_version": 1,
         "canonical_root": ".agents/skills",
         "supported_tools": {
-            "codex": {"channel": "pinned-and-latest-stable"},
             "claude-code": {"channel": "pinned-and-latest-stable"},
             "antigravity": {"channel": "pinned-and-latest-stable"},
         },
@@ -163,7 +162,7 @@ def main(argv: list[str] | None = None) -> int:
             "analisar-indicadores": "graficos-gerenciais",
             "run-pgd-ocde-icmbio": "verificar-ambiente|consultar-denodo",
         },
-        "skills": {name: {**spec, "version": "2.0.0", "tools": ["codex", "claude-code", "antigravity"]} for name, spec in CATALOG.items()},
+        "skills": {name: {**spec, "version": "2.0.0", "tools": ["claude-code", "antigravity"]} for name, spec in CATALOG.items()},
     }
     _gravar(MANIFEST, json.dumps(manifest, ensure_ascii=False, indent=2), args.forcar, preservados)
     print(f"{len(CATALOG)} skills materializadas em {SKILLS}")

@@ -18,12 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 CANONICAL = ROOT / ".agents" / "skills"
 MANIFEST = ROOT / ".agents" / "skills-manifest.json"
 CLAUDE = ROOT / ".claude" / "skills"
-CODEX_LEGACY = ROOT / ".codex" / "skills"
 CHECKPOINT = ROOT / ".agents" / "certification" / "functional-checkpoint.json"
 NAME = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 FRONTMATTER = re.compile(r"^---\s*\n(?P<body>.*?)\n---\s*\n", re.S)
 CLIENT_COMMANDS = {
-    "codex": ("codex.exe", "codex"),
     "claude-code": ("claude.exe", "claude"),
     "antigravity": ("agy.exe", "agy", "antigravity.exe", "antigravity"),
 }
@@ -228,11 +226,6 @@ def install(apply: bool = False) -> dict:
             backup.mkdir(parents=True, exist_ok=True)
             shutil.move(str(target), str(backup / f"claude-{name}"))
         _create_link(source, target)
-    if CODEX_LEGACY.exists():
-        plan.append({"action": "archive", "source": str(CODEX_LEGACY), "target": str(backup / "codex-skills")})
-        if apply:
-            backup.mkdir(parents=True, exist_ok=True)
-            shutil.move(str(CODEX_LEGACY), str(backup / "codex-skills"))
     return {"aplicado": apply, "backup": str(backup) if apply else None, "acoes": plan}
 
 
@@ -258,8 +251,6 @@ def _probe_prompt(request: str) -> str:
 
 
 def _command(client: str, executable: str, prompt: str) -> list[str]:
-    if client == "codex":
-        return [executable, "exec", "--json", "--sandbox", "read-only", "--ephemeral", "-C", str(ROOT), prompt]
     if client == "claude-code":
         return [executable, "-p", "--output-format", "json", "--permission-mode", "plan", "--tools", "", "--no-session-persistence", prompt]
     return [executable, "-p", "--output-format", "json", "--mode", "plan", "--sandbox", "--print-timeout", "5m", prompt]
@@ -336,7 +327,6 @@ def certify(
     selected = clients or tuple(CLIENT_COMMANDS)
     tools = {name: _tool_version(name, platform) for name in selected}
     discovery = {
-        "codex": inventory(CANONICAL),
         "antigravity": inventory(CANONICAL),
         "claude-code": inventory(CLAUDE),
     }
@@ -377,14 +367,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--platform", choices=("auto", "windows", "wsl", "linux"), default="auto")
     parser.add_argument("--mode", choices=("structural", "smoke", "full"), default="smoke")
-    parser.add_argument("--clients", default="codex,claude-code,antigravity")
+    parser.add_argument("--clients", default="claude-code,antigravity")
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--allow-denodo-smoke", action="store_true")
     parser.add_argument("--execute-prompts", action="store_true")
     parser.add_argument("--out", type=Path)
     args = parser.parse_args(argv)
     if args.command == "inventory":
-        result = {"agents": inventory(CANONICAL), "claude": inventory(CLAUDE), "codex_legacy": inventory(CODEX_LEGACY)}
+        result = {"agents": inventory(CANONICAL), "claude": inventory(CLAUDE)}
     elif args.command == "validate":
         result = validate_all()
     elif args.command == "install":

@@ -29,7 +29,6 @@ def _ignorado(caminho: str) -> bool:
     ".env.example",
     "requirements-agente.txt",
     "CLAUDE.md",                                     # H1/L4d: instruções da raiz são versionadas
-    "AGENTS.md",
     "PROJECT.md",
     "config/instrucoes.lock.json",
 ])
@@ -50,6 +49,7 @@ def test_versionaveis(caminho):
     "agente/testes_cgov/s01.md",
     ".env",
     "agente/.env",
+    "AGENTS.md",                                     # ADR-013: retirado também da raiz
     "agente/AGENTS.md",                              # instruções aninhadas continuam fora
     "agente/CLAUDE.md",
     "docs/sub/PROJECT.md",

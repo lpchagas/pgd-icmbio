@@ -1,6 +1,8 @@
 # ADR-010 — Instruções dos assistentes: pares sincronizados, sem hierarquia
 
-**Data:** 27.09.2026 | **Estado:** aprovada (DP-03; conteúdo aprovado na H1)
+**Data:** 27.09.2026 | **Estado:** aprovada (DP-03; conteúdo aprovado na H1); revisada pela
+[ADR-013](ADR-013-retirada-codex.md) (DP-07), que retira o Codex e reduz os pares a dois
+(`CLAUDE.md` e `PROJECT.md`)
 
 ## Contexto
 
