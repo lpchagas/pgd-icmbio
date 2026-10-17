@@ -3,6 +3,21 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — aceites dos pilotos e 2ª etapa nacional (D44, D45)
+
+- **Pilotos:** I05 3.0.2, I07 3.2.0 e I08 3.2.0 homologados nos três escopos. Depois de
+  uma rodada completa sobre o código atual, foram registrados os aceites dos 14 alvos
+  nos três pilotos.
+- **Nacional (D36, 2ª etapa):** a baseline nacional de I03–I09 foi homologada e a
+  deliberação de expansão foi registrada. Com a 1ª etapa, os 12 indicadores OCDE ficam
+  elegíveis para o produto nacional, com nota ao painel sobre as duplicidades atômicas
+  (I01, I05–I08) e sobre os vínculos com força de trabalho fora de 0–100 (fora do
+  cálculo de I07 e I08). O I05 vai ao painel só na visão estatística (v2).
+- **G01 nacional (D44, D45):** expansão deliberada. No compartilhável, a supressão k≥5
+  esconderia a maior parte das unidades, por isso o G01 vai à COCAGE no produto
+  restrito (sem supressão; nominal, sem CPF, e-mail, telefone ou endereço), com acesso
+  restrito no painel. A regra k≥5 do produto compartilhável não muda.
+
 ## 17.10.2026 — I05 3.0.2, I07 3.2.0 e I08 3.2.0 (D43)
 
 - **I05 3.0.2:** o VQL devolve só a contagem de entregas por servidor. O A1 calcula a
