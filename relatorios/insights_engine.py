@@ -204,10 +204,11 @@ def insights_eixo2(
         )
         enc3 = _enc(df03)
         if not enc3.empty and "taxa_atingimento_perc" in enc3.columns:
-            ult3_df = enc3[enc3["periodo"] == ult3.periodo]
-            pct_acima = (ult3_df["taxa_atingimento_perc"] >= 100).mean() * 100
+            # D39: entrega com realizado negativo não tem taxa e fica fora das proporções
+            taxas3 = enc3.loc[enc3["periodo"] == ult3.periodo, "taxa_atingimento_perc"].dropna()
+            pct_acima = (taxas3 >= 100).mean() * 100 if len(taxas3) else 0.0
             ins.append(f"{pct_acima:.1f}% das entregas atingiram 100% ou mais da meta.")
-            pct_baixo = (ult3_df["taxa_atingimento_perc"] < 80).mean() * 100
+            pct_baixo = (taxas3 < 80).mean() * 100 if len(taxas3) else 0.0
             if pct_baixo > 20:
                 ins.append(
                     f"⚠️ {pct_baixo:.1f}% das entregas abaixo de 80% — revisar planejamento "

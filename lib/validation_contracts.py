@@ -287,7 +287,7 @@ TARGETS.update({
         ),
         ("periodo", "unidade_sigla", "id_entrega"),
         ("meta_planejada", "meta_executada", "taxa_atingimento_perc"),
-        formula_version="3.0.0",
+        formula_version="3.1.0",
     ),
     "I04": _indicator(
         "04", "Score médio de atingimento de metas", "pe_entregas",

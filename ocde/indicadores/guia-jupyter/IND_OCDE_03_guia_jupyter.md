@@ -93,7 +93,11 @@ entregas_com_taxa AS (
         END AS anomalia_escala,
         meta_planejada,
         meta_executada,
-        ROUND(meta_executada / NULLIF(meta_planejada, 0) * 100, 2) AS taxa_atingimento_perc,
+        -- D39 (3.1.0): realizado negativo é erro de registro e não tem taxa
+        CASE
+            WHEN meta_executada < 0 THEN NULL
+            ELSE ROUND(meta_executada * 100.0 / NULLIF(meta_planejada, 0), 2)
+        END AS taxa_atingimento_perc,
         meta_json,
         realizado_json
     FROM entregas_base
@@ -110,7 +114,7 @@ SELECT
     meta_executada,
     taxa_atingimento_perc,
     CASE
-        WHEN taxa_atingimento_perc <    0 THEN 'Dado inconsistente'
+        WHEN meta_executada        <    0 THEN 'Dado inconsistente'
         WHEN taxa_atingimento_perc >  100 THEN 'Superexecutada'
         WHEN taxa_atingimento_perc =  100 THEN 'Concluida'
         WHEN taxa_atingimento_perc >= 70  THEN 'Parcialmente cumprida'
@@ -156,6 +160,8 @@ print(f"Exportado: {output_path}")
 - Correção de dado inconsistente (19.06.2026): `taxa_atingimento_perc < 0`
   (de `progresso_realizado` negativo) é classificada como `'Dado inconsistente'`,
   não como "Não executada".
+- D39 (3.1.0, 17.10.2026): com realizado negativo, `taxa_atingimento_perc` e
+  `taxa_meta_integral_perc` ficam vazias; o status segue `'Dado inconsistente'`.
 - Scores > 100% são legítimos (superexecução) — não são erro.
 - Validação A3 (17.05.2026): fórmula confirmada; dupla abordagem (ciclo vs.
   meta integral) aprovada.

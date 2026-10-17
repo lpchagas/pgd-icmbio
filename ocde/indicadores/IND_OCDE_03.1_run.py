@@ -28,6 +28,10 @@ Correção de dado inconsistente (19.06.2026): valores negativos de progresso_re
 geram taxa_atingimento_perc < 0, que é semanticamente diferente de "Nao executada".
 O CASE no SQL agora classifica esses casos como 'Dado inconsistente' para facilitar
 auditoria de qualidade de dados no PETRVS.
+
+D39 (3.1.0, 17.10.2026): realizado negativo não gera taxa. taxa_atingimento_perc e
+taxa_meta_integral_perc ficam vazias, o status segue 'Dado inconsistente' e o realizado
+bruto é preservado em meta_executada para a correção no PETRVS.
 """
 from __future__ import annotations
 
@@ -104,7 +108,11 @@ entregas_com_taxa AS (
         END AS anomalia_escala,
         meta_planejada,
         meta_executada,
-        ROUND(meta_executada / NULLIF(meta_planejada, 0) * 100, 2) AS taxa_atingimento_perc,
+        -- D39 (3.1.0): realizado negativo é erro de registro e não tem taxa
+        CASE
+            WHEN meta_executada < 0 THEN NULL
+            ELSE ROUND(meta_executada * 100.0 / NULLIF(meta_planejada, 0), 2)
+        END AS taxa_atingimento_perc,
         meta_json,
         realizado_json
     FROM entregas_base
@@ -121,7 +129,7 @@ SELECT
     meta_executada,
     taxa_atingimento_perc,
     CASE
-        WHEN taxa_atingimento_perc <    0 THEN 'Dado inconsistente'
+        WHEN meta_executada        <    0 THEN 'Dado inconsistente'
         WHEN taxa_atingimento_perc >  100 THEN 'Superexecutada'
         WHEN taxa_atingimento_perc =  100 THEN 'Concluida'
         WHEN taxa_atingimento_perc >= 70  THEN 'Parcialmente cumprida'
@@ -192,6 +200,8 @@ def parse_meta_integral(
             return "", "N.D.", "N.D."
         if meta_val <= 0:
             return "", "N.D.", tipo
+        if real_val < 0:
+            return "", "Dado inconsistente", tipo  # D39: sem taxa para realizado negativo
         taxa = arredondar(real_val / meta_val * 100, 2)
         return str(taxa), classify_status(taxa), tipo
     except (ValueError, TypeError, KeyError, json.JSONDecodeError):

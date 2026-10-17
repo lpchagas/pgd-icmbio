@@ -1031,7 +1031,7 @@ Todos os indicadores recebem a mesma `analysis_end`, derivada de `analysis_windo
 | Item | Detalhe |
 | --- | --- |
 | Tabelas/colunas | `planos_entregas_entregas` (`progresso_esperado`, `progresso_realizado`, `meta` JSON, `realizado` JSON) · `planos_entregas` (`data_inicio`, `data_fim`, `deleted_at`) · `unidades` |
-| Status inferido | `status_entrega` em 6 categorias via `CASE` sobre `taxa_atingimento_perc`: `<0` → **Dado inconsistente**; `>100` → **Superexecutada**; `=100` → **Concluída**; `≥70` → **Parcialmente cumprida**; `>0` → **Em andamento**; `=0` → **Não executada**. Uma segunda leitura independente (`parse_meta_integral()`, em Python) recalcula a mesma classificação a partir do JSON `meta`/`realizado`. |
+| Status inferido | `status_entrega` em 6 categorias via `CASE`: realizado `<0` → **Dado inconsistente**, com `taxa_atingimento_perc` vazia (D39); pela taxa, `>100` → **Superexecutada**; `=100` → **Concluída**; `≥70` → **Parcialmente cumprida**; `>0` → **Em andamento**; `=0` → **Não executada**. Uma segunda leitura independente (`parse_meta_integral()`, em Python) recalcula a mesma classificação a partir do JSON `meta`/`realizado`. |
 | Técnica | Classificação por faixas + dupla abordagem (SQL + JSON pós-processado) |
 | Nota | `anomalia_escala='S'` detecta metas gravadas em escala 0–1 em vez de 0–100. Filtro temporal por vencimento individual da entrega. |
 

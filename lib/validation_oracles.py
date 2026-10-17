@@ -181,12 +181,18 @@ def oracle_i03(records: list[Row]) -> list[Row]:
         if planned <= 0:
             continue
         actual = _float(row.get("meta_executada"))
-        rate = _arred(100 * actual / planned, 2)
+        if actual < 0:
+            # D39: realizado negativo não tem taxa; a célula fica vazia, como no CSV A2.
+            rate: float | str = ""
+            status = "Dado inconsistente"
+        else:
+            rate = _arred(100 * actual / planned, 2)
+            status = _delivery_status(rate)
         output.append({
             "periodo": row.get("periodo"), "unidade_sigla": row.get("unidade_sigla", "N.I."),
             "id_entrega": row.get("id_entrega"), "meta_planejada": planned,
             "meta_executada": actual, "taxa_atingimento_perc": rate,
-            "status_entrega": _delivery_status(rate),
+            "status_entrega": status,
         })
     return _sorted(output, ("periodo", "unidade_sigla", "id_entrega"))
 
