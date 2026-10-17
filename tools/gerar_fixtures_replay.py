@@ -225,7 +225,25 @@ def gerar(alvo: str, data_execucao: str = DATA_EXECUCAO) -> dict:
             # D22 (3.0.0): consulta de contagem do alerta no mesmo período; o marcador
             # separa as duas consultas (a referência anterior só emite a principal).
             principal["nao_contem"] = ["AS qtd"]
+        if alvo == "I09":
+            # D41 (3.0.3): soma e contagem das notas por plano, no mesmo período.
+            principal["nao_contem"] = ["AS soma_notas_plano"]
         consultas.append(principal)
+        if alvo == "I09":
+            planos = []
+            for n, linha in enumerate(linhas):
+                for plano in range(1 + n % 2):
+                    quantidade = rng.randint(1, 3)
+                    planos.append([linha["unidade_sigla"], linha["unidade_nome"], f"sint-pt-{n}-{plano}",
+                                   str(rng.randint(quantidade, 5 * quantidade)), str(quantidade)])
+            consultas.append({
+                "periodo": rotulo, "nome": "planos_d41",
+                "inicio": inicio.isoformat(), "fim": fim.isoformat(),
+                "contem": ["AS soma_notas_plano"],
+                "colunas": ["unidade_sigla", "unidade_nome", "plano_trabalho_id",
+                            "soma_notas_plano", "qtd_avaliacoes_plano"],
+                "linhas": planos,
+            })
         if alvo == "I03":
             consultas.append({
                 "periodo": rotulo, "nome": "alerta_d22", "opcional": True,

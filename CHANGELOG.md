@@ -3,13 +3,16 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
-## 17.10.2026 — I04 2.1.0 e I09 3.0.2 (D41)
+## 17.10.2026 — I04 2.1.0 e I09 3.0.3 (D41)
 
 - **I04 2.1.0:** sai o valor absoluto do realizado. A entrega com realizado negativo
   continua em `total_no_ciclo`, mas fica fora da média do score, e a unidade sem
   entrega válida no período é omitida. A correção entrou na produção e no oracle.
-- **I09 3.0.2:** as médias saem do VQL sem arredondar e o A1 arredonda meio para cima
-  em Python (D24). A faixa de desempenho é calculada sobre a média arredondada.
+- **I09 3.0.3:** o VQL devolve só contagens inteiras (por unidade e, numa segunda
+  consulta, por plano). O A1 calcula as duas médias com aritmética exata e arredonda
+  meio para cima (D24); a faixa de desempenho usa a média arredondada. A 3.0.2, que só
+  tirava o `ROUND` do VQL, ainda divergia em 0,01 por causa do ponto flutuante do
+  Denodo. O gerador de fixtures do replay passa a emitir a consulta por plano.
 - **Identidade:** como na D39, a mudança no contrato revoga os aceites dos pilotos, que
   são registrados de novo depois da revalidação.
 

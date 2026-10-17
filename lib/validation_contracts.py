@@ -425,8 +425,8 @@ TARGETS.update({
         ("periodo", "unidade_sigla"),
         ("total_avaliacoes_pt", "total_planos_com_avaliacao", "media_nota_pt"),
         period="pt",
-        # D11: média das médias por plano de trabalho. D41: arredondamento em Python (D24).
-        formula_version="3.0.2",
+        # D11: média das médias por plano de trabalho. D41: média exata e D24 em Python.
+        formula_version="3.0.3",
     ),
     "I10": _indicator(
         "10", "Percentual de avaliações inadequadas", "avaliacoes_pt",
