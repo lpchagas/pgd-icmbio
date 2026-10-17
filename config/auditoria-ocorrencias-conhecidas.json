@@ -1,7 +1,7 @@
 {
   "versao": 1,
   "descricao": "Ocorrências da auditoria de segurança já revisadas (falsos positivos, fixtures sintéticas e caminhos que existem só no histórico mantido). Valor exato, CPF válido e dump nunca entram aqui. Acrescentar um item exige revisão na PR.",
-  "revisado_em": "2026-09-27",
+  "revisado_em": "2026-10-17",
   "ocorrencias": [
     {
       "alvo": "historico",
@@ -489,6 +489,15 @@
       ],
       "regra": "sql_fora_da_excecao",
       "justificativa": "Schema do agente antes da mudança para agente/dados (L3); só no histórico"
+    },
+    {
+      "alvo": "proibidos",
+      "arquivo": "AGENTS.md",
+      "origem": [
+        "historico"
+      ],
+      "regra": "instrucao_retirada",
+      "justificativa": "Instruções do Codex, versionadas legitimamente até a ADR-013 (DP-07), que retirou o arquivo; só no histórico mantido (H9). Na árvore ou no índice, continua recusado"
     }
   ]
 }
