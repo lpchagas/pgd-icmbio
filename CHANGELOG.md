@@ -3,6 +3,24 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — I05 3.0.2, I07 3.2.0 e I08 3.2.0 (D43)
+
+- **I05 3.0.2:** o VQL devolve só a contagem de entregas por servidor. O A1 calcula a
+  média da unidade da visão nominal com aritmética exata e arredonda meio para cima
+  (D24), como no I09 3.0.3. A posição relativa compara com a média arredondada, e as
+  colunas do CSV não mudam.
+- **I07 3.2.0 e I08 3.2.0:** o vínculo com força de trabalho fora de 0–100 fica fora do
+  cálculo e é contado num alerta de qualidade, na produção e no oracle. No I07 ele
+  também não conta em `num_planos_trabalho_alocados`.
+- **Oracle do I07 e do I08:** o plano sem carga horária não conta como plano alocado,
+  como já acontecia na produção. Era a causa das divergências de ±1 no nacional.
+- **Validação:** em I05–I08, a força de trabalho fora de 0–100 passa a ser alerta, não
+  bloqueio.
+- **Regra 9:** as junções de unidade (I05, I07, I08) e de usuário (I05) passam a filtrar
+  `deleted_at`. A fixture de replay do I05 foi regerada.
+- **Identidade:** a mudança no contrato revoga os aceites dos pilotos, que serão
+  registrados de novo depois da revalidação.
+
 ## 17.10.2026 — aceites dos pilotos e 1ª etapa nacional (D42)
 
 - **Pilotos:** I04 2.1.0 e I09 3.0.3 homologados nos três escopos. Depois de uma

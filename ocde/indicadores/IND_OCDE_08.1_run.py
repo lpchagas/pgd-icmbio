@@ -42,8 +42,11 @@ Correções anteriores preservadas (14.06.2026):
   2. Filtro temporal do PE elimina entregas de ciclos anteriores.
   3. Prefixos petrvs_icmbio_ em todas as tabelas físicas (compatibilidade JDBC).
 
-Nota: a proporção pode superar 100% quando algum vínculo tem forca_trabalho
-acima de 100% — dado inválido no PETRVS, sinalizado pelo aviso de qualidade.
+D43 (3.2.0, 17.10.2026): vínculo com forca_trabalho fora de 0–100 é erro de
+registro. Fica fora das horas nas duas visões e é contado como alerta de
+qualidade. Antes, um vínculo acima de 100% inflava as horas e podia levar a
+proporção acima de 100%. Os JOINs das unidades dona e executora passam a filtrar
+deleted_at (regra 9).
 """
 from __future__ import annotations
 
@@ -105,8 +108,10 @@ LEFT JOIN petrvs_icmbio_planos_entregas pe
    AND pe.deleted_at IS NULL
 LEFT JOIN petrvs_icmbio_unidades dono
     ON dono.id = COALESCE(pe.unidade_id, pt.unidade_id)
+   AND dono.deleted_at IS NULL
 LEFT JOIN petrvs_icmbio_unidades exec
     ON exec.id = pt.unidade_id
+   AND exec.deleted_at IS NULL
 CROSS JOIN parametros p
 WHERE (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
   AND pt.carga_horaria IS NOT NULL
@@ -203,6 +208,12 @@ def horas_alocadas(registro: dict) -> float:
     return horas_proporcionais(registro) * _para_float(registro.get("forca_trabalho")) / 100.0
 
 
+def forca_trabalho_valida(registro: dict) -> bool:
+    """D43: força de trabalho fora de 0–100 é erro de registro e não entra no cálculo."""
+
+    return 0.0 <= _para_float(registro.get("forca_trabalho")) <= 100.0
+
+
 def capacidades(columns: list[str], rows: list[list]) -> dict[str, float]:
     """Capacidade total por unidade — cada plano de trabalho conta uma vez."""
 
@@ -230,11 +241,14 @@ def _agregar_visao(
 
     D25: o vínculo plano de trabalho × entrega conta uma vez; vínculos repetidos no
     PETRVS são ignorados no cálculo e contados como alerta de qualidade.
+    D43: vínculo com força de trabalho fora de 0–100 fica fora das horas e também é
+    contado como alerta de qualidade.
     """
 
     acumulado: dict[tuple[str, str, str, str], float] = {}
     vistos: set[tuple] = set()
     duplicados = 0
+    invalidos = 0
     for row in rows:
         registro = dict(zip(columns, row))
         chave = (
@@ -248,9 +262,14 @@ def _agregar_visao(
             duplicados += 1
             continue
         vistos.add(vinculo)
+        if not forca_trabalho_valida(registro):
+            invalidos += 1
+            continue
         acumulado[chave] = acumulado.get(chave, 0.0) + horas_alocadas(registro)
     if duplicados:
         print(f"  ALERTA_QUALIDADE (D25): {duplicados} vínculo(s) plano de trabalho × entrega repetido(s) ignorado(s) na visão {sigla_col}.")
+    if invalidos:
+        print(f"  ALERTA_QUALIDADE (D43): {invalidos} vínculo(s) com força de trabalho fora de 0–100 fora do cálculo na visão {sigla_col}.")
 
     agregadas = []
     for (sigla, nome, id_entrega, nome_entrega), horas in acumulado.items():

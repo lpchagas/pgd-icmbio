@@ -35,6 +35,12 @@ Correções aplicadas em 14.06.2026 (documentadas no CLAUDE.md):
      Corrigido com CROSS JOIN parametros + WHERE pe.data_inicio/fim.
 
 Resultado do run corrigido (14.06.2026): 18.461 linhas, zero duplicatas.
+
+D43 (3.2.0, 17.10.2026): vínculo com forca_trabalho fora de 0–100 é erro de
+registro. Fica fora do cálculo, sem horas e sem contar em
+num_planos_trabalho_alocados, e é contado como alerta de qualidade. A entrega sem
+vínculo válido no período sai do resultado. O JOIN de unidade passa a filtrar
+deleted_at (regra 9).
 """
 from __future__ import annotations
 
@@ -97,6 +103,7 @@ LEFT JOIN petrvs_icmbio_planos_entregas pe
    AND pe.deleted_at IS NULL
 LEFT JOIN petrvs_icmbio_unidades un
     ON un.id = COALESCE(pe.unidade_id, pt.unidade_id)
+   AND un.deleted_at IS NULL
 CROSS JOIN parametros p
 WHERE (p.incluir_excluidos = 1 OR pt.deleted_at IS NULL)
   AND pt.carga_horaria IS NOT NULL
@@ -163,16 +170,25 @@ def horas_alocadas(registro: dict) -> float:
     return proporcional * _para_float(registro.get("forca_trabalho")) / 100.0
 
 
+def forca_trabalho_valida(registro: dict) -> bool:
+    """D43: força de trabalho fora de 0–100 é erro de registro e não entra no cálculo."""
+
+    return 0.0 <= _para_float(registro.get("forca_trabalho")) <= 100.0
+
+
 def agregar(columns: list[str], rows: list[list]) -> list[list]:
     """Agrega as linhas atômicas por entrega, somando horas e contando planos.
 
     D25: o vínculo plano de trabalho × entrega conta uma vez; vínculos repetidos no
     PETRVS são ignorados no cálculo e contados como alerta de qualidade.
+    D43: vínculo com força de trabalho fora de 0–100 fica fora das horas e da
+    contagem de planos, e também é contado como alerta de qualidade.
     """
 
     acumulado: dict[tuple, dict] = {}
     vistos: set[tuple] = set()
     duplicados = 0
+    invalidos = 0
     for row in rows:
         registro = dict(zip(columns, row))
         chave = tuple(str(registro.get(nome, "")) for nome in CHAVE)
@@ -181,6 +197,9 @@ def agregar(columns: list[str], rows: list[list]) -> list[list]:
             duplicados += 1
             continue
         vistos.add(vinculo)
+        if not forca_trabalho_valida(registro):
+            invalidos += 1
+            continue
         item = acumulado.setdefault(chave, {"horas": 0.0, "planos": set()})
         item["horas"] += horas_alocadas(registro)
         item["planos"].add(str(registro.get("plano_trabalho_id")))
@@ -192,6 +211,8 @@ def agregar(columns: list[str], rows: list[list]) -> list[list]:
     agregadas.sort(key=lambda linha: (linha[0], -linha[7]))
     if duplicados:
         print(f"  ALERTA_QUALIDADE (D25): {duplicados} vínculo(s) plano de trabalho × entrega repetido(s) ignorado(s).")
+    if invalidos:
+        print(f"  ALERTA_QUALIDADE (D43): {invalidos} vínculo(s) com força de trabalho fora de 0–100 fora do cálculo.")
     return agregadas
 
 

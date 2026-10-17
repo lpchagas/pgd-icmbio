@@ -375,11 +375,24 @@ def _allocated_hours(row: Row) -> tuple[float, float]:
     return proportional, allocated
 
 
+def _allocatable(rows: Iterable[Row]) -> list[Row]:
+    """Vínculos que entram no cálculo de horas de I07 e I08 (decisão CGOV D43).
+
+    Plano sem carga horária (nula ou ≤ 0) não aloca horas e não conta como plano
+    alocado (Q4); força de trabalho fora de 0–100 é erro de registro e fica fora (Q1).
+    """
+
+    return [
+        row for row in rows
+        if _float(row.get("carga_horaria")) > 0 and 0 <= _float(row.get("forca_trabalho")) <= 100
+    ]
+
+
 def oracle_i07(records: list[Row]) -> list[Row]:
     output: list[Row] = []
+    unique = _unique(_active(records), "periodo", "unidade_sigla", "id_entrega", "plano_trabalho_id", "id_servidor")
     for (period, unit, delivery), rows in _group(
-        _unique(_active(records), "periodo", "unidade_sigla", "id_entrega", "plano_trabalho_id", "id_servidor"),
-        "periodo", "unidade_sigla", "id_entrega"
+        _allocatable(unique), "periodo", "unidade_sigla", "id_entrega"
     ).items():
         hours = sum(_allocated_hours(row)[1] for row in rows)
         plans = {str(row.get("plano_trabalho_id")) for row in rows}
@@ -405,10 +418,10 @@ def oracle_i08(records: list[Row]) -> list[Row]:
 
     output: list[Row] = []
     source_rows = _active(records)
-    active = _unique(
+    active = _allocatable(_unique(
         (row for row in source_rows if row.get("_extractor") != "pt_capacidade_unidade"),
         "periodo", "unidade_sigla", "id_entrega", "plano_trabalho_id", "id_servidor"
-    )
+    ))
     capacity: dict[tuple[Any, Any], float] = defaultdict(float)
     seen_plans: set[tuple[Any, Any, Any]] = set()
     capacity_rows = [

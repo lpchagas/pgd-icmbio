@@ -338,8 +338,8 @@ TARGETS.update({
                 view="estatistica",
             ),
         ),
-        # D07: pacote de estatísticas descritivas por unidade.
-        formula_version="3.0.1",
+        # D07: pacote de estatísticas descritivas por unidade; D43: média exata em Python.
+        formula_version="3.0.2",
         temporal_lenses=("pt",),
         supported_scopes=SCOPE_ALL,
         invariants=(
@@ -366,8 +366,9 @@ TARGETS.update({
         ),
         ("periodo", "unidade_sigla", "id_entrega"),
         ("total_horas_planejadas_entrega", "num_planos_trabalho_alocados"),
-        # D09: rateio por dias úteis institucionais e renomeação do contador.
-        formula_version="3.1.0",
+        # D09: rateio por dias úteis institucionais e renomeação do contador;
+        # D43: vínculo com força de trabalho fora de 0–100 fora do cálculo.
+        formula_version="3.2.0",
     ),
     # I08 tem duas visões desde a decisão CGOV D10 e, por isso, não usa o
     # atalho _indicator (que declara um único contrato de saída).
@@ -404,8 +405,8 @@ TARGETS.update({
                 view="executora",
             ),
         ),
-        # D09 (dias úteis) + D10 (dupla perspectiva).
-        formula_version="3.1.0",
+        # D09 (dias úteis) + D10 (dupla perspectiva) + D43 (força de trabalho fora de 0–100).
+        formula_version="3.2.0",
         temporal_lenses=("pe",),
         supported_scopes=SCOPE_ALL,
         invariants=(

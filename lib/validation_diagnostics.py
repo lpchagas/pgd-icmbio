@@ -103,7 +103,12 @@ def diagnose_atomic(code: str, rows: list[Row]) -> list[dict[str, str]]:
         for row in rows
     )
     if invalid_workforce:
-        findings.append(_finding("ANOMALIA_DE_DADOS", f"força de trabalho fora de 0–100: {invalid_workforce}"))
+        # D43: I07 e I08 tiram o vínculo do cálculo (produção e oracle) e I05 e I06 não
+        # usam o campo; nesses alvos o achado é alerta de qualidade.
+        findings.append(_finding(
+            "ANOMALIA_DE_DADOS", f"força de trabalho fora de 0–100: {invalid_workforce}",
+            "alerta" if code in {"I05", "I06", "I07", "I08"} else "bloqueante",
+        ))
 
     invalid_json = 0
     for row in rows:

@@ -15,10 +15,19 @@ não sobre datas de conclusão de cada entrega.
 Correção (24.05.2026): adicionado filtro pte.deleted_at IS NULL, ausente na
 versão original. Sem esse filtro, registros excluídos logicamente em
 planos_trabalhos_entregas inflavam a quantidade de entregas por servidor.
+
+D43 (3.0.2, 17.10.2026): o VQL devolve só a contagem inteira de entregas por
+servidor; a média da unidade (media_entregas_por_servidor_unidade) é calculada em
+Python com aritmética exata (Fraction) e arredondada meio para cima (D24), e a
+posição relativa compara com a média já arredondada. O ROUND(AVG(...)) em ponto
+flutuante do Denodo gerava divergência de 0,01, como no I09 (D41). Os JOINs de
+unidade e de usuário passam a filtrar deleted_at (regra 9).
 """
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
+from fractions import Fraction
 from pathlib import Path
 import sys
 
@@ -51,8 +60,10 @@ vinculos_entregas AS (
         ON pte.plano_trabalho_id = pt.id
     LEFT JOIN petrvs_icmbio_unidades un
         ON un.id = pt.unidade_id
+       AND un.deleted_at IS NULL
     LEFT JOIN petrvs_icmbio_usuarios us
         ON us.id = pt.usuario_id
+       AND us.deleted_at IS NULL
     CROSS JOIN parametros p
     WHERE CAST(pt.data_inicio AS DATE) <= p.data_fim
       AND CAST(pt.data_fim   AS DATE) >= p.data_inicio
@@ -70,31 +81,23 @@ entregas_por_servidor AS (
         COUNT(DISTINCT id_entrega)     AS qtd_entregas_por_servidor
     FROM vinculos_entregas
     GROUP BY unidade_sigla, id_servidor
-),
-media_por_unidade AS (
-    SELECT
-        unidade_sigla,
-        ROUND(AVG(qtd_entregas_por_servidor) * 1.0, 2)
-            AS media_entregas_por_servidor_unidade
-    FROM entregas_por_servidor
-    GROUP BY unidade_sigla
 )
 SELECT
     e.unidade_sigla,
     e.unidade_nome,
     e.id_servidor,
     e.nome_servidor,
-    e.qtd_entregas_por_servidor,
-    m.media_entregas_por_servidor_unidade,
-    CASE
-        WHEN e.qtd_entregas_por_servidor > m.media_entregas_por_servidor_unidade THEN 'Acima da media'
-        WHEN e.qtd_entregas_por_servidor < m.media_entregas_por_servidor_unidade THEN 'Abaixo da media'
-        ELSE 'Na media'
-    END AS posicao_relativa_media
+    e.qtd_entregas_por_servidor
 FROM entregas_por_servidor e
-JOIN media_por_unidade m ON m.unidade_sigla = e.unidade_sigla
 ORDER BY e.unidade_sigla, e.qtd_entregas_por_servidor DESC, e.nome_servidor
 """
+
+# Colunas da v1, na ordem histórica do CSV: as duas últimas são calculadas em Python (D43).
+COLUNAS_V1 = [
+    "unidade_sigla", "unidade_nome", "id_servidor", "nome_servidor",
+    "qtd_entregas_por_servidor", "media_entregas_por_servidor_unidade",
+    "posicao_relativa_media",
+]
 
 
 COLUNAS_V2 = [
@@ -103,6 +106,48 @@ COLUNAS_V2 = [
     "p25_entregas_por_servidor", "p75_entregas_por_servidor",
     "pct_servidores_sem_entrega",
 ]
+
+
+def _inteiro(valor: object) -> int:
+    texto = str(valor).replace(",", ".").strip()
+    return int(float(texto)) if texto else 0
+
+
+def _arredondar_fracao(valor: Fraction) -> str:
+    """D24 sobre o valor exato: a fração vira decimal com folga de precisão antes do meio para cima."""
+
+    exato = Decimal(valor.numerator) / Decimal(valor.denominator)
+    return str(arredondar(float(exato.quantize(Decimal("1e-12"))), 2))
+
+
+def montar_v1(columns: list[str], rows: list[list[str]]) -> list[list[str]]:
+    """D43 (3.0.2): média da unidade exata em Python, a partir das contagens inteiras.
+
+    Mantém a ordem do VQL e devolve as linhas na ordem de COLUNAS_V1. A posição
+    relativa compara a contagem do servidor com a média já arredondada.
+    """
+
+    sigla, qtd = columns.index("unidade_sigla"), columns.index("qtd_entregas_por_servidor")
+    contagens: dict[str, list[int]] = {}
+    for row in rows:
+        contagens.setdefault(row[sigla], []).append(_inteiro(row[qtd]))
+    medias = {
+        unidade: _arredondar_fracao(Fraction(sum(valores), len(valores)))
+        for unidade, valores in contagens.items()
+    }
+
+    saida: list[list[str]] = []
+    for row in rows:
+        valor = dict(zip(columns, row))
+        media = medias[valor["unidade_sigla"]]
+        contagem = _inteiro(valor["qtd_entregas_por_servidor"])
+        valor["media_entregas_por_servidor_unidade"] = media
+        valor["posicao_relativa_media"] = (
+            "Acima da media" if contagem > float(media)
+            else "Abaixo da media" if contagem < float(media) else "Na media"
+        )
+        saida.append([valor[coluna] for coluna in COLUNAS_V1])
+    return saida
 
 
 def _quantil(ordenados: list[float], fracao: float) -> float:
@@ -187,9 +232,9 @@ def main() -> None:
                 # D33: falha em qualquer período interrompe o A1 sem gravar A2 parcial.
                 raise SystemExit(f"ERRO: I05 {label}: {exc}") from exc
             if all_cols is None:
-                all_cols = meta_cols + columns
+                all_cols = meta_cols + COLUNAS_V1
             duration = (end - start).days + 1
-            for row in rows:
+            for row in montar_v1(columns, rows):
                 all_rows.append([kind, label, str(start), str(scheduled_end), str(end), status, duration] + row)
             print(f"  {len(rows)} linhas retornadas.")
     finally:

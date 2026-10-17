@@ -10,9 +10,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -20,36 +18,28 @@
           "Coordenação-Geral Sintética",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "0",
-          "32.51",
-          "Acima da media"
+          "0"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "16",
-          "",
-          "Abaixo da media"
+          "2"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "13",
-          "",
-          "Acima da media"
+          "19"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "13",
-          "86.68",
-          "Na media"
+          "0"
         ]
       ]
     },
@@ -62,9 +52,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -72,36 +60,28 @@
           "Núcleo Gestor Sintético",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "12",
-          "60.40",
-          "Abaixo da media"
+          "16"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "15",
-          "138.91",
-          "Na media"
+          "9"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "16",
-          "87.09",
-          "Abaixo da media"
+          "3"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "20",
-          "147.93",
-          "Na media"
+          "16"
         ]
       ]
     },
@@ -114,9 +94,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -124,36 +102,28 @@
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "17",
-          "126.21",
-          "Na media"
+          "16"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "8",
-          "17.68",
-          "Abaixo da media"
+          "12"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "0",
-          "71.87",
-          "Acima da media"
+          "23"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "12",
-          "58.37",
-          "Abaixo da media"
+          "19"
         ]
       ]
     },
@@ -166,9 +136,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -176,36 +144,28 @@
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "0",
-          "55.12",
-          "Na media"
+          "5"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "6",
-          "139.97",
-          "Na media"
+          "3"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "14",
-          "143.49",
-          "Acima da media"
+          "20"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "1",
-          "52.41",
-          "Acima da media"
+          "10"
         ]
       ]
     },
@@ -218,9 +178,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -228,36 +186,28 @@
           "Coordenação-Geral Sintética",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "1",
-          "70.73",
-          "Abaixo da media"
+          "20"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "17",
-          "",
-          "Na media"
+          "16"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "14",
-          "95.36",
-          "Abaixo da media"
+          "17"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "1",
-          "59.97",
-          "Na media"
+          "19"
         ]
       ]
     },
@@ -270,9 +220,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -280,36 +228,28 @@
           "Núcleo Gestor Sintético",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "25",
-          "102.22",
-          "Abaixo da media"
+          "8"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "25",
-          "9.38",
-          "Acima da media"
+          "3"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "24",
-          "13.34",
-          "Acima da media"
+          "19"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "20",
-          "100.56",
-          "Na media"
+          "22"
         ]
       ]
     },
@@ -322,9 +262,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -332,36 +270,28 @@
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "2",
-          "98.97",
-          "Abaixo da media"
+          "11"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "0",
-          "59.57",
-          "Abaixo da media"
+          "0"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "12",
-          "134.35",
-          "Abaixo da media"
+          "12"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "0",
-          "115.56",
-          "Abaixo da media"
+          "7"
         ]
       ]
     },
@@ -374,9 +304,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -384,36 +312,28 @@
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "18",
-          "63.58",
-          "Na media"
+          "11"
         ],
         [
           "CGSIN",
           "Coordenação-Geral Sintética",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "1",
-          "112.22",
-          "Abaixo da media"
+          "24"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "11",
-          "120.92",
-          "Acima da media"
+          "6"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "25",
-          "36.48",
-          "Abaixo da media"
+          "7"
         ]
       ]
     },
@@ -426,9 +346,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": [
         [
@@ -436,36 +354,28 @@
           "Coordenação-Geral Sintética",
           "sint-id_servidor-0",
           "Servidor Sintético 00",
-          "1",
-          "49.98",
-          "Na media"
+          "10"
         ],
         [
           "NGI-SINT",
           "Núcleo Gestor Sintético",
           "sint-id_servidor-1",
           "Servidor Sintético 01",
-          "13",
-          "13.80",
-          "Na media"
+          "13"
         ],
         [
           "UNID-NOME",
           "Unidade Mapeada Pelo Nome",
           "sint-id_servidor-2",
           "Servidor Sintético 02",
-          "16",
-          "87.26",
-          "Acima da media"
+          "2"
         ],
         [
           "SEM-MAPA",
           "Unidade | sem mapa\nquebrada",
           "sint-id_servidor-3",
           "Servidor Sintético 03",
-          "19",
-          "142.33",
-          "Abaixo da media"
+          "4"
         ]
       ]
     },
@@ -478,9 +388,7 @@
         "unidade_nome",
         "id_servidor",
         "nome_servidor",
-        "qtd_entregas_por_servidor",
-        "media_entregas_por_servidor_unidade",
-        "posicao_relativa_media"
+        "qtd_entregas_por_servidor"
       ],
       "linhas": []
     }

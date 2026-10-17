@@ -299,7 +299,10 @@ def test_i08_serve_capacidade_e_vinculos_pelos_marcadores(tmp_path):
 
     rp._validar_execucao("referencia", execucao, rp.FIXTURES_DIR / "I08")
     assert [c["nome"] for c in execucao["registro"]["consultas"]] == ["capacidade", "vinculos"] * 4
-    assert "AVISO: 1 entrega(s) com proporcao > 100%" in execucao["stdout"]
+    # D43: o vínculo com força de trabalho acima de 100 sai do cálculo e vira alerta,
+    # em vez de levar a proporção acima de 100%.
+    assert "ALERTA_QUALIDADE (D43): 1 vínculo(s) com força de trabalho fora de 0–100" in execucao["stdout"]
+    assert "proporcao > 100%" not in execucao["stdout"]
 
 
 def _fixture_alterada(tmp_path, alvo, alterar) -> Path:
