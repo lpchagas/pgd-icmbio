@@ -4,7 +4,9 @@
 
 Este é o mapa funcional e técnico do núcleo do produto. Uma skill é uma capacidade
 executável com objetivo, entradas, regras, saídas, limites e testes. O catálogo não
-substitui as [fichas individuais](../../../capacidades/especificacoes/README.md).
+substitui as [fichas individuais](../../../capacidades/fichas/README.md). As tabelas das seções 3, 4, 5 e 7
+são geradas de [`capacidades/catalogo.yaml`](../../../capacidades/catalogo.yaml) (DP-09); edite o YAML,
+não as tabelas.
 
 ## 2. Cadeia de valor
 
@@ -17,90 +19,96 @@ fontes → regras → competências → catálogo → metas → portfólio
 
 ## 3. Catálogo funcional
 
+<!-- catalogo-capacidades:funcional:inicio -->
 | ID | Nome | Finalidade | Usuário principal | Entrada | Saída | Decisão humana |
 | --- | --- | --- | --- | --- | --- | --- |
-| S01 | Configurador Institucional do PGD | cadastrar contexto, fontes e parâmetros vigentes | administrador negocial | documentos e configurações | perfil institucional versionado | aprovar fonte e parâmetro |
-| S02 | Verificador Normativo e de Conformidade | testar plano/regra contra fontes vigentes | analista/chefia | objeto e regras S01 | achados, conflitos e perguntas | decidir conflito/exceção |
-| S03 | Extrator de Competências e Responsabilidades em Entregas | transformar competências em entregas candidatas | chefia/analista | regimento, cadeia de valor | competências e candidatas rastreáveis | confirmar interpretação |
-| S04 | Administrador do Catálogo de Entregas | criar, versionar e reutilizar entregas | chefia/analista | candidatas S03 | catálogo de entregas | aprovar inclusão/versão |
-| S05 | Designer de Metas, Indicadores e Critérios de Aceite | tornar entrega mensurável e verificável | chefia/equipe | entrega, período, contexto | meta, indicador e aceite | pactuar critério/meta |
-| S06 | Auditor de Portfólio de Entregas | detectar lacunas, duplicidades e incoerências | chefia/analista | catálogo e competências | achados priorizados | aceitar ajuste/exceção |
-| S07 | Planejador de Capacidade da Unidade | calcular CHD e demanda | chefia | pessoas, período, indisponibilidades | capacidade e cenários | escolher cenário |
-| S08 | Matriz de Cobertura das Entregas pela Equipe | verificar cobertura e concentração | chefia/equipe | capacidade e entregas | matriz de cobertura | definir alocação |
-| S09 | Designer e Auditor de Encadeamento OKR-D | vincular objetivos, resultados e entregas | chefia/estratégia | objetivos e entregas | vínculos justificados | confirmar alinhamento |
-| S10 | Analisador de Riscos, Dependências e Restrições | estruturar riscos e respostas | chefia/equipe | entregas, capacidade, contexto | registro de riscos | aceitar resposta/risco |
-| S11 | Assistente de Pactuação do Plano de Entregas | compor o PE pactuável | chefia | portfólio, metas, capacidade, riscos | minuta de PE | pactuar/aprovar PE |
-| S12 | Assistente de Pactuação do Plano de Trabalho | decompor contribuições individuais | chefia/participante | PE, pessoa, capacidade | minuta de PT | pactuar PT |
-| S13 | Check-in de Execução e Monitoramento | registrar acompanhamento leve | chefia/participante | PE/PT, fatos e evidências | status, alertas e pendências | confirmar registro |
-| S14 | Gestor de Alterações e Replanejamento | propor nova versão de plano | chefia/participante | mudança, impacto, plano atual | proposta de versão | aprovar alteração |
-| S15 | Gestor de Contribuições Interunidades | organizar contribuições entre unidades | chefias | demanda, unidade, participante | vínculo e responsabilidades | pactuar contribuição |
-| S16 | Avaliador de Entregas | apoiar análise intermediária de entrega | chefia | entrega, critérios e evidências | análise fundamentada | decidir avaliação; subordinada a S22 |
-| S17 | Organizador de Evidências | classificar e vincular evidências | participante/chefia | arquivos, links e registros | evidência catalogada | confirmar pertinência |
-| S18 | Gerador de Relatório Gerencial do PGD | consolidar resultados sem ranking individual | governança/chefia | planos, execução e avaliações | relatório agregado | aprovar divulgação |
-| S19 | Analisador de Aprendizado entre Ciclos | identificar padrões e melhorias | governança/chefia | histórico suficiente | hipóteses e recomendações | validar interpretação |
-| S20 | Importador, Exportador e Integrador de Planos | trocar dados com formatos controlados | administrador/desenvolvedor | arquivo ou contrato externo | importação/relatório de divergência | confirmar conflito/mapeamento |
-| S21 | Registro de Execução do Plano de Entregas da Unidade | registrar progresso e intercorrências do PE | chefia da unidade | PE, metas, execução | versão de execução do PE | confirmar fatos e ajustes |
-| S22 | Avaliação do Plano de Entregas da Unidade | apoiar avaliação pela chefia superior | chefia superior | PE executado, critérios, evidências | parecer e conceito proposto | decidir conceito |
-| S23 | Registro de Execução do Plano de Trabalho do Participante | registrar contribuição, CH e ocorrências | participante | PT e execução | versão de execução do PT | confirmar registro |
-| S24 | Avaliação do Plano de Trabalho do Participante | apoiar avaliação, notificação e recurso | chefia da unidade | PT executado, critérios, evidências | parecer e fluxo de avaliação | decidir conceito/recurso |
+| [S01](../../../capacidades/fichas/S01.md) | Configurador Institucional do PGD | cadastrar contexto, fontes e parâmetros vigentes | administrador negocial | documentos e configurações | perfil institucional versionado | aprovar fonte e parâmetro |
+| [S02](../../../capacidades/fichas/S02.md) | Verificador Normativo e de Conformidade | testar plano/regra contra fontes vigentes | analista/chefia | objeto e regras S01 | achados, conflitos e perguntas | decidir conflito/exceção |
+| [S03](../../../capacidades/fichas/S03.md) | Extrator de Competências e Responsabilidades em Entregas | transformar competências em entregas candidatas | chefia/analista | regimento, cadeia de valor | competências e candidatas rastreáveis | confirmar interpretação |
+| [S04](../../../capacidades/fichas/S04.md) | Administrador do Catálogo de Entregas | criar, versionar e reutilizar entregas | chefia/analista | candidatas S03 | catálogo de entregas | aprovar inclusão/versão |
+| [S05](../../../capacidades/fichas/S05.md) | Designer de Metas, Indicadores e Critérios de Aceite | tornar entrega mensurável e verificável | chefia/equipe | entrega, período, contexto | meta, indicador e aceite | pactuar critério/meta |
+| [S06](../../../capacidades/fichas/S06.md) | Auditor de Portfólio de Entregas | detectar lacunas, duplicidades e incoerências | chefia/analista | catálogo e competências | achados priorizados | aceitar ajuste/exceção |
+| [S07](../../../capacidades/fichas/S07.md) | Planejador de Capacidade da Unidade | calcular CHD e demanda | chefia | pessoas, período, indisponibilidades | capacidade e cenários | escolher cenário |
+| [S08](../../../capacidades/fichas/S08.md) | Matriz de Cobertura das Entregas pela Equipe | verificar cobertura e concentração | chefia/equipe | capacidade e entregas | matriz de cobertura | definir alocação |
+| [S09](../../../capacidades/fichas/S09.md) | Designer e Auditor de Encadeamento OKR-D | vincular objetivos, resultados e entregas | chefia/estratégia | objetivos e entregas | vínculos justificados | confirmar alinhamento |
+| [S10](../../../capacidades/fichas/S10.md) | Analisador de Riscos, Dependências e Restrições | estruturar riscos e respostas | chefia/equipe | entregas, capacidade, contexto | registro de riscos | aceitar resposta/risco |
+| [S11](../../../capacidades/fichas/S11.md) | Assistente de Pactuação do Plano de Entregas | compor o PE pactuável | chefia | portfólio, metas, capacidade, riscos | minuta de PE | pactuar/aprovar PE |
+| [S12](../../../capacidades/fichas/S12.md) | Assistente de Pactuação do Plano de Trabalho | decompor contribuições individuais | chefia/participante | PE, pessoa, capacidade | minuta de PT | pactuar PT |
+| [S13](../../../capacidades/fichas/S13.md) | Check-in de Execução e Monitoramento | registrar acompanhamento leve | chefia/participante | PE/PT, fatos e evidências | status, alertas e pendências | confirmar registro |
+| [S14](../../../capacidades/fichas/S14.md) | Gestor de Alterações e Replanejamento | propor nova versão de plano | chefia/participante | mudança, impacto, plano atual | proposta de versão | aprovar alteração |
+| [S15](../../../capacidades/fichas/S15.md) | Gestor de Contribuições Interunidades | organizar contribuições entre unidades | chefias | demanda, unidade, participante | vínculo e responsabilidades | pactuar contribuição |
+| [S16](../../../capacidades/fichas/S16.md) | Avaliador de Entregas | apoiar análise intermediária de entrega | chefia | entrega, critérios e evidências | análise fundamentada | decidir avaliação; subordinada a S22 |
+| [S17](../../../capacidades/fichas/S17.md) | Organizador de Evidências | classificar e vincular evidências | participante/chefia | arquivos, links e registros | evidência catalogada | confirmar pertinência |
+| [S18](../../../capacidades/fichas/S18.md) | Gerador de Relatório Gerencial do PGD | consolidar resultados sem ranking individual | governança/chefia | planos, execução e avaliações | relatório agregado | aprovar divulgação |
+| [S19](../../../capacidades/fichas/S19.md) | Analisador de Aprendizado entre Ciclos | identificar padrões e melhorias | governança/chefia | histórico suficiente | hipóteses e recomendações | validar interpretação |
+| [S20](../../../capacidades/fichas/S20.md) | Importador, Exportador e Integrador de Planos | trocar dados com formatos controlados | administrador/desenvolvedor | arquivo ou contrato externo | importação/relatório de divergência | confirmar conflito/mapeamento |
+| [S21](../../../capacidades/fichas/S21.md) | Registro de Execução do Plano de Entregas da Unidade | registrar progresso e intercorrências do PE | chefia da unidade | PE, metas, execução | versão de execução do PE | confirmar fatos e ajustes |
+| [S22](../../../capacidades/fichas/S22.md) | Avaliação do Plano de Entregas da Unidade | apoiar avaliação pela chefia superior | chefia superior | PE executado, critérios, evidências | parecer e conceito proposto | decidir conceito |
+| [S23](../../../capacidades/fichas/S23.md) | Registro de Execução do Plano de Trabalho do Participante | registrar contribuição, CH e ocorrências | participante | PT e execução | versão de execução do PT | confirmar registro |
+| [S24](../../../capacidades/fichas/S24.md) | Avaliação do Plano de Trabalho do Participante | apoiar avaliação, notificação e recurso | chefia da unidade | PT executado, critérios, evidências | parecer e fluxo de avaliação | decidir conceito/recurso |
+<!-- catalogo-capacidades:funcional:fim -->
 
 ## 4. Classificação técnica
 
+<!-- catalogo-capacidades:tecnica:inicio -->
 | ID | Determinístico | Uso semântico permitido | Persistência principal | Integrações |
 | --- | --- | --- | --- | --- |
-| S01 | vigência, completude e hash | classificação de trechos | fontes/regras/versões | corpus/RAG |
-| S02 | checklist e precedência conhecida | localizar regra aplicável | conflitos/perguntas/execução | S01/RAG |
-| S03 | estrutura e vínculos | extrair competência/entrega | candidatas/fontes | S01 |
-| S04 | ID, versão e validação estrutural | sugerir título/descrição | entregas/versões | S03 |
-| S05 | fórmulas, faixa e unidade | propor redação de critérios | versões de entrega | S04 |
-| S06 | duplicidade estrutural e cobertura | similaridade semântica | execuções/decisões | S02/S04/S05 |
-| S07 | CHD, soma, período e cenário | explicar restrições | capacidade/participantes/alocações | ref_usuarios |
-| S08 | matriz, totais e concentração | sugerir redistribuição | alocações/decisões | S07 |
-| S09 | integridade dos vínculos | justificar alinhamento | OKR-D/vínculos | S01/S04 |
-| S10 | matriz P×I e completude | sugerir risco/resposta | registros de risco | S05/S07 |
-| S11 | completude, período e totais | redigir minuta | PE e versões futuras | S02/S06/S07/S10 |
-| S12 | CHD e compatibilidade | redigir contribuição | PT e versões futuras | S07/S08/S11 |
-| S13 | datas, progresso e pendências | classificar relato | acompanhamento/execução | S10/S11/S12/S17 |
-| S14 | comparação de versões | resumir justificativa | nova versão/decisão | S02/S11/S13 |
-| S15 | carga e vínculos | explicar contribuição | contribuições | S08/S12/S14 |
-| S16 | faixa e critério | fundamentar análise | avaliação intermediária | S05/S13/S14/S17 |
-| S17 | hash, tipo, tamanho e vínculo | classificar evidência | evidências | armazenamento local |
-| S18 | agregações | síntese narrativa | relatório/execução | S06–S17 |
-| S19 | estatística e suficiência | hipóteses de aprendizagem | análise/decisão | histórico/S18 |
-| S20 | schema, tipos e reconciliação | sugerir mapeamento | execução/divergência | arquivos/PETRVS |
-| S21 | progresso × meta e bloqueios | classificar ocorrência | execução PE/versões | S04/S05/S07/S08/S14/S17 |
-| S22 | prazo, competência e faixa | fundamentar parecer | avaliação PE/decisão | S10/S16/S17/S21 |
-| S23 | CH, soma, prazo e bloqueios | classificar ocorrência | execução PT/versões | S12/S14/S17/S21 |
-| S24 | prazo, faixa e rito | fundamentar parecer | avaliação PT/recurso | S10/S12/S17/S21/S23 |
+| [S01](../../../capacidades/fichas/S01.md) | vigência, completude e hash | classificação de trechos | fontes/regras/versões | corpus/RAG |
+| [S02](../../../capacidades/fichas/S02.md) | checklist e precedência conhecida | localizar regra aplicável | conflitos/perguntas/execução | S01/RAG |
+| [S03](../../../capacidades/fichas/S03.md) | estrutura e vínculos | extrair competência/entrega | candidatas/fontes | S01 |
+| [S04](../../../capacidades/fichas/S04.md) | ID, versão e validação estrutural | sugerir título/descrição | entregas/versões | S03 |
+| [S05](../../../capacidades/fichas/S05.md) | fórmulas, faixa e unidade | propor redação de critérios | versões de entrega | S04 |
+| [S06](../../../capacidades/fichas/S06.md) | duplicidade estrutural e cobertura | similaridade semântica | execuções/decisões | S02/S04/S05 |
+| [S07](../../../capacidades/fichas/S07.md) | CHD, soma, período e cenário | explicar restrições | capacidade/participantes/alocações | ref_usuarios |
+| [S08](../../../capacidades/fichas/S08.md) | matriz, totais e concentração | sugerir redistribuição | alocações/decisões | S07 |
+| [S09](../../../capacidades/fichas/S09.md) | integridade dos vínculos | justificar alinhamento | OKR-D/vínculos | S01/S04 |
+| [S10](../../../capacidades/fichas/S10.md) | matriz P×I e completude | sugerir risco/resposta | registros de risco | S05/S07 |
+| [S11](../../../capacidades/fichas/S11.md) | completude, período e totais | redigir minuta | PE e versões futuras | S02/S06/S07/S10 |
+| [S12](../../../capacidades/fichas/S12.md) | CHD e compatibilidade | redigir contribuição | PT e versões futuras | S07/S08/S11 |
+| [S13](../../../capacidades/fichas/S13.md) | datas, progresso e pendências | classificar relato | acompanhamento/execução | S10/S11/S12/S17 |
+| [S14](../../../capacidades/fichas/S14.md) | comparação de versões | resumir justificativa | nova versão/decisão | S02/S11/S13 |
+| [S15](../../../capacidades/fichas/S15.md) | carga e vínculos | explicar contribuição | contribuições | S08/S12/S14 |
+| [S16](../../../capacidades/fichas/S16.md) | faixa e critério | fundamentar análise | avaliação intermediária | S05/S13/S14/S17 |
+| [S17](../../../capacidades/fichas/S17.md) | hash, tipo, tamanho e vínculo | classificar evidência | evidências | armazenamento local |
+| [S18](../../../capacidades/fichas/S18.md) | agregações | síntese narrativa | relatório/execução | S06–S17 |
+| [S19](../../../capacidades/fichas/S19.md) | estatística e suficiência | hipóteses de aprendizagem | análise/decisão | histórico/S18 |
+| [S20](../../../capacidades/fichas/S20.md) | schema, tipos e reconciliação | sugerir mapeamento | execução/divergência | arquivos/PETRVS |
+| [S21](../../../capacidades/fichas/S21.md) | progresso × meta e bloqueios | classificar ocorrência | execução PE/versões | S04/S05/S07/S08/S14/S17 |
+| [S22](../../../capacidades/fichas/S22.md) | prazo, competência e faixa | fundamentar parecer | avaliação PE/decisão | S10/S16/S17/S21 |
+| [S23](../../../capacidades/fichas/S23.md) | CH, soma, prazo e bloqueios | classificar ocorrência | execução PT/versões | S12/S14/S17/S21 |
+| [S24](../../../capacidades/fichas/S24.md) | prazo, faixa e rito | fundamentar parecer | avaliação PT/recurso | S10/S12/S17/S21/S23 |
+<!-- catalogo-capacidades:tecnica:fim -->
 
 ## 5. Dependências
 
+<!-- catalogo-capacidades:dependencias:inicio -->
 | ID | Pré-requisitos funcionais | Consumidores principais | Gate |
 | --- | --- | --- | --- |
-| S01 | B01 e fontes candidatas | S02–S05, S09, S17, S20 | G1 |
-| S02 | S01, base metodológica | S06, S11, S14 | G1 |
-| S03 | S01 | S04 | G1 |
-| S04 | S01, S03 | S06, S09, S11, S21 | G2 |
-| S05 | S01 e metodologia | S06, S10, S16, S21, S22, S24 | G1/G2 |
-| S06 | S02, S04, S05 | S11, S18 | G2 |
-| S07 | S05, referências e calendário | S08, S10, S11, S12, S21 | G2 |
-| S08 | S07 | S12, S15, S21 | G2 |
-| S09 | S01 e objetivos | relatórios e auditoria | G1 |
-| S10 | S05, S07 | S11, S13, S18, S22, S24 | G2 |
-| S11 | S02, S06, S07, S10 | S12–S14 | G3 |
-| S12 | S07, S08, S11 | S13, S15, S23, S24 | G3 |
-| S13 | S10, S11, S12, S17 | S14, S16, S18 | G3 |
-| S14 | S02, S11, S13 | S15, S16, S19, S21, S23 | G3 |
-| S15 | S08, S12, S14 | S18 | G4 |
-| S16 | S05, S13, S14, S17 | S18, S19, S22 | G4 |
-| S17 | S01, S05 | S13, S16, S21–S24 | G1 |
-| S18 | S06–S08, S10, S13, S15, S16 | S19 | G4 |
-| S19 | S14, S16, S18 e histórico suficiente | melhoria do catálogo | G4 |
-| S20 | S01, S02 e modelo comum | carga/conciliação | G2 |
-| S21 | S04, S05, S07, S08, S14, S17 | S22–S24 | G5 |
-| S22 | S10, S16, S17, S21 | relatório/decisão | G5 |
-| S23 | S12, S14, S17, S21 | S24 | G5 |
-| S24 | S10, S12, S17, S21, S23 | relatório/decisão | G5 |
+| [S01](../../../capacidades/fichas/S01.md) | B01 e fontes candidatas | S02–S05, S09, S17, S20 | G1 |
+| [S02](../../../capacidades/fichas/S02.md) | S01, base metodológica | S06, S11, S14 | G1 |
+| [S03](../../../capacidades/fichas/S03.md) | S01 | S04 | G1 |
+| [S04](../../../capacidades/fichas/S04.md) | S01, S03 | S06, S09, S11, S21 | G2 |
+| [S05](../../../capacidades/fichas/S05.md) | S01 e metodologia | S06, S10, S16, S21, S22, S24 | G1/G2 |
+| [S06](../../../capacidades/fichas/S06.md) | S02, S04, S05 | S11, S18 | G2 |
+| [S07](../../../capacidades/fichas/S07.md) | S05, referências e calendário | S08, S10, S11, S12, S21 | G2 |
+| [S08](../../../capacidades/fichas/S08.md) | S07 | S12, S15, S21 | G2 |
+| [S09](../../../capacidades/fichas/S09.md) | S01 e objetivos | relatórios e auditoria | G1 |
+| [S10](../../../capacidades/fichas/S10.md) | S05, S07 | S11, S13, S18, S22, S24 | G2 |
+| [S11](../../../capacidades/fichas/S11.md) | S02, S06, S07, S10 | S12–S14 | G3 |
+| [S12](../../../capacidades/fichas/S12.md) | S07, S08, S11 | S13, S15, S23, S24 | G3 |
+| [S13](../../../capacidades/fichas/S13.md) | S10, S11, S12, S17 | S14, S16, S18 | G3 |
+| [S14](../../../capacidades/fichas/S14.md) | S02, S11, S13 | S15, S16, S19, S21, S23 | G3 |
+| [S15](../../../capacidades/fichas/S15.md) | S08, S12, S14 | S18 | G4 |
+| [S16](../../../capacidades/fichas/S16.md) | S05, S13, S14, S17 | S18, S19, S22 | G4 |
+| [S17](../../../capacidades/fichas/S17.md) | S01, S05 | S13, S16, S21–S24 | G1 |
+| [S18](../../../capacidades/fichas/S18.md) | S06–S08, S10, S13, S15, S16 | S19 | G4 |
+| [S19](../../../capacidades/fichas/S19.md) | S14, S16, S18 e histórico suficiente | melhoria do catálogo | G4 |
+| [S20](../../../capacidades/fichas/S20.md) | S01, S02 e modelo comum | carga/conciliação | G2 |
+| [S21](../../../capacidades/fichas/S21.md) | S04, S05, S07, S08, S14, S17 | S22–S24 | G5 |
+| [S22](../../../capacidades/fichas/S22.md) | S10, S16, S17, S21 | relatório/decisão | G5 |
+| [S23](../../../capacidades/fichas/S23.md) | S12, S14, S17, S21 | S24 | G5 |
+| [S24](../../../capacidades/fichas/S24.md) | S10, S12, S17, S21, S23 | relatório/decisão | G5 |
+<!-- catalogo-capacidades:dependencias:fim -->
 
 ## 6. Grafo
 
@@ -135,32 +143,34 @@ consolidam qualidade e aprendizagem; S21–S24 executam e avaliam.
 
 ## 7. Planejamento
 
+<!-- catalogo-capacidades:planejamento:inicio -->
 | ID | Onda | Prioridade | Esforço relativo | Estado inicial | Marco |
 | --- | ---: | --- | --- | --- | --- |
-| S01 | 1 | P0 | alto | especificação a consolidar | M2 |
-| S02 | 1 | P0 | alto | especificação a consolidar | M2 |
-| S03 | 1 | P0 | médio | matriz existente | M2 |
-| S05 | 1 | P0 | alto | especificação existente | M2 |
-| S09 | 1 | P1 | médio | base OKR-D existente | M2 |
-| S17 | 1 | P0 transversal | médio | conceito existente | M2 |
-| S04 | 2 | P0 | médio | especificação existente | M3 |
-| S06 | 2 | P0 | alto | especificação existente | M3 |
-| S07 | 2 | P0 | alto | especificação existente | M3 |
-| S08 | 2 | P0 | alto | especificação existente | M3 |
-| S10 | 2 | P1 | médio | especificação existente | M3 |
-| S20 | 2 | P1 | alto | matriz existente | M3 |
-| S11 | 3 | P1 | alto | matriz existente | M4 |
-| S12 | 3 | P1 | alto | matriz existente | M4 |
-| S13 | 3 | P1 | médio | reposicionada | M4 |
-| S14 | 3 | P1 | alto | matriz existente | M4 |
-| S15 | 4 | P2 | médio | matriz existente | M5 |
-| S16 | 4 | P1 | alto | subordinada a S22 | M5 |
-| S18 | 4 | P2 | alto | matriz existente | M5 |
-| S19 | 4 | P2 | alto | depende de histórico | M5 |
-| S21 | 5 | P1 | alto | ficha funcional existente | M6 |
-| S22 | 5 | P1 | alto | ficha funcional existente | M6 |
-| S23 | 5 | P1 | alto | ficha funcional existente | M6 |
-| S24 | 5 | P1 | alto | ficha funcional existente | M6 |
+| [S01](../../../capacidades/fichas/S01.md) | 1 | P0 | alto | especificação a consolidar | M2 |
+| [S02](../../../capacidades/fichas/S02.md) | 1 | P0 | alto | especificação a consolidar | M2 |
+| [S03](../../../capacidades/fichas/S03.md) | 1 | P0 | médio | matriz existente | M2 |
+| [S05](../../../capacidades/fichas/S05.md) | 1 | P0 | alto | especificação existente | M2 |
+| [S09](../../../capacidades/fichas/S09.md) | 1 | P1 | médio | base OKR-D existente | M2 |
+| [S17](../../../capacidades/fichas/S17.md) | 1 | P0 transversal | médio | conceito existente | M2 |
+| [S04](../../../capacidades/fichas/S04.md) | 2 | P0 | médio | especificação existente | M3 |
+| [S06](../../../capacidades/fichas/S06.md) | 2 | P0 | alto | especificação existente | M3 |
+| [S07](../../../capacidades/fichas/S07.md) | 2 | P0 | alto | especificação existente | M3 |
+| [S08](../../../capacidades/fichas/S08.md) | 2 | P0 | alto | especificação existente | M3 |
+| [S10](../../../capacidades/fichas/S10.md) | 2 | P1 | médio | especificação existente | M3 |
+| [S20](../../../capacidades/fichas/S20.md) | 2 | P1 | alto | matriz existente | M3 |
+| [S11](../../../capacidades/fichas/S11.md) | 3 | P1 | alto | matriz existente | M4 |
+| [S12](../../../capacidades/fichas/S12.md) | 3 | P1 | alto | matriz existente | M4 |
+| [S13](../../../capacidades/fichas/S13.md) | 3 | P1 | médio | reposicionada | M4 |
+| [S14](../../../capacidades/fichas/S14.md) | 3 | P1 | alto | matriz existente | M4 |
+| [S15](../../../capacidades/fichas/S15.md) | 4 | P2 | médio | matriz existente | M5 |
+| [S16](../../../capacidades/fichas/S16.md) | 4 | P1 | alto | subordinada a S22 | M5 |
+| [S18](../../../capacidades/fichas/S18.md) | 4 | P2 | alto | matriz existente | M5 |
+| [S19](../../../capacidades/fichas/S19.md) | 4 | P2 | alto | depende de histórico | M5 |
+| [S21](../../../capacidades/fichas/S21.md) | 5 | P1 | alto | ficha funcional existente | M6 |
+| [S22](../../../capacidades/fichas/S22.md) | 5 | P1 | alto | ficha funcional existente | M6 |
+| [S23](../../../capacidades/fichas/S23.md) | 5 | P1 | alto | ficha funcional existente | M6 |
+| [S24](../../../capacidades/fichas/S24.md) | 5 | P1 | alto | ficha funcional existente | M6 |
+<!-- catalogo-capacidades:planejamento:fim -->
 
 ## 8. Regras transversais
 
@@ -184,7 +194,8 @@ sem retroceder evidências técnicas já concluídas.
 
 ## 10. Fonte operacional
 
-Consulte [`capacidades/especificacoes/README.md`](../../../capacidades/especificacoes/README.md). Os documentos
+Consulte [`capacidades/fichas/README.md`](../../../capacidades/fichas/README.md) e a fonte única
+[`capacidades/catalogo.yaml`](../../../capacidades/catalogo.yaml). Os documentos
 `skills/01` a `skills/05` continuam como insumos metodológicos e históricos, mas não
 prevalecem sobre este catálogo e as fichas v6.
 

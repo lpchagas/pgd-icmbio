@@ -10,7 +10,7 @@ Nove documentos de trabalho, vindos do repositório do agente, ficaram numa past
 intermediária (`agente/`) durante a reorganização. Seu conteúdo **vigente** foi consolidado
 na [proposta v6](../agente/projeto-v6/00_proposta-projeto-v6.md), no
 [catálogo S01–S24](../agente/projeto-v6/03-catalogo-skills-s01-s24.md) e nas
-[fichas das capacidades](../../capacidades/especificacoes/README.md). Por isso, eles saíram
+[fichas das capacidades](../../capacidades/fichas/README.md). Por isso, eles saíram
 da árvore ativa.
 
 **Nada se perdeu:** o histórico do agente foi preservado no repositório. Cada documento

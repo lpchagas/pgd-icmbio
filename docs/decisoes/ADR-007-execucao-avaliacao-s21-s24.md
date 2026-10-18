@@ -30,7 +30,7 @@ estado-alvo de dados para evidências, avaliações e recursos.
 
 - [Catálogo S01–S24](../agente/projeto-v6/03-catalogo-skills-s01-s24.md)
 - [Qualidade e aceite](../agente/projeto-v6/05-qualidade-testes-aceite.md)
-- Fichas [S21](../../capacidades/especificacoes/SKILL_S21.md), [S22](../../capacidades/especificacoes/SKILL_S22.md), [S23](../../capacidades/especificacoes/SKILL_S23.md) e [S24](../../capacidades/especificacoes/SKILL_S24.md)
+- Fichas [S21](../../capacidades/fichas/S21.md), [S22](../../capacidades/fichas/S22.md), [S23](../../capacidades/fichas/S23.md) e [S24](../../capacidades/fichas/S24.md)
 
 ## Limite
 

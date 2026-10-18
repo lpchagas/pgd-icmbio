@@ -1,0 +1,2683 @@
+# Catálogo único das capacidades S01–S24 do agente PGD/ICMBio (etapa B1; DP-09).
+#
+# Este é o ÚNICO arquivo editável do catálogo. Depois de alterar, rode:
+#   python -m tools.gerar_catalogo_capacidades gerar
+# para regenerar capacidades/fichas/ (fichas e índice), a tabela de capacidades do
+# capacidades/CATALOGO.md e as tabelas do capítulo 03 da proposta do agente. O teste da suíte
+# e o comando "verificar" falham se algum arquivo gerado divergir deste YAML.
+#
+# Estrutura de cada skill:
+#   id, nome, versao_ficha, estado (escala do cap. 03 §9), onda, gate
+#   planejamento   prioridade, esforço, estado inicial e marco (cap. 03 §7)
+#   catalogo       finalidade, usuário principal, entrada, saída, decisão humana (cap. 03 §3)
+#   tecnica        determinístico, semântico, persistência, integrações (cap. 03 §4)
+#   dependencias   pré-requisitos, consumidores, gate (cap. 03 §5)
+#   fontes_metodologicas  códigos da lista abaixo (DP-09: B01–B04 canônicos; Cowork é referência)
+#   ficha          campos variáveis das seções 1–27; o texto comum está no TEMPLATE_SKILL.md
+#   teste_ia       prompt específico e casos sintéticos para teste em outras ferramentas de IA;
+#                  um caso por caso previsto (ficha.casos_previstos), na mesma ordem
+#   historico      linhas da seção 27; a última é a versao_ficha
+#
+# Só dado público ou sintético (regra 4; ADR-014): nada de nome real, documento, contato,
+# dado do PETRVS ou conteúdo institucional. O gerador recusa padrões de CPF, e-mail e telefone.
+
+versao_schema: 1
+fontes_metodologicas:
+  B01:
+    titulo: Análise de entregas (B01)
+    papel: canonica
+    caminho: docs/agente/metodologia/00_skill-analise-entrega-v1.md
+  B02:
+    titulo: O que é OKR-D (B02)
+    papel: canonica
+    caminho: docs/agente/metodologia/00_skill-okrd-v1.md
+  B03:
+    titulo: Como elaborar um plano de entregas (B03)
+    papel: canonica
+    caminho: docs/agente/metodologia/00_skill-plano-entregas-v1.md
+  B04:
+    titulo: Como elaborar um plano de trabalho (B04)
+    papel: canonica
+    caminho: docs/agente/metodologia/00_skill-plano-trabalho-v1.md
+  COWORK-ELABORAR:
+    titulo: Protótipo Cowork cgov-elaborar-entrega
+    papel: referencia
+    caminho: capacidades/prototipos-cowork/cgov-elaborar-entrega/SKILL.md
+  COWORK-REGISTRO:
+    titulo: Protótipo Cowork cgov-registro-execucao
+    papel: referencia
+    caminho: capacidades/prototipos-cowork/cgov-registro-execucao/SKILL.md
+  COWORK-AVALIAR:
+    titulo: Protótipo Cowork cgov-avaliar-entrega
+    papel: referencia
+    caminho: capacidades/prototipos-cowork/cgov-avaliar-entrega/SKILL.md
+skills:
+- id: S01
+  nome: Configurador Institucional do PGD
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 1
+  gate: G1
+  planejamento:
+    prioridade: P0
+    esforco: alto
+    estado_inicial: especificação a consolidar
+    marco: M2
+  catalogo:
+    finalidade: cadastrar contexto, fontes e parâmetros vigentes
+    usuario_principal: administrador negocial
+    entrada: documentos e configurações
+    saida: perfil institucional versionado
+    decisao_humana: aprovar fonte e parâmetro
+  tecnica:
+    deterministico: vigência, completude e hash
+    semantico: classificação de trechos
+    persistencia: fontes/regras/versões
+    integracoes: corpus/RAG
+  dependencias:
+    pre_requisitos: B01 e fontes candidatas
+    consumidores: S02–S05, S09, S17, S20
+    gate: G1
+  fontes_metodologicas:
+  - B01
+  ficha:
+    produto: Fontes e regras candidatas versionadas, conflitos e perguntas pendentes
+    usuarios: administrador negocial e analista autorizado
+    momento: Implantação, mudança normativa ou revisão de parâmetros.
+    pre_condicoes: Corpus inventariado, classificação de acesso e responsável pela validação identificados.
+    entradas: Documentos, metadados, período de vigência, parâmetros institucionais e classificação
+    regras: Separar tipo documental de natureza da regra; preservar vigência; não aprovar fonte automaticamente;
+      registrar conflito
+    calculos: Hash, datas, campos obrigatórios, duplicidade exata e ordenação de vigência
+    llm: Extrair e classificar trechos como norma, regra institucional, recomendação ou exemplo, sempre
+      sujeito a revisão
+    consultadas: Índice do corpus, fontes e regras existentes.
+    gravadas: Fontes_institucionais, regras_institucionais, regras_institucionais_versoes, regras_conflitos,
+      perguntas_pendentes, execucoes_skill
+    dependencias: B01, corpus permitido e decisão Q5.
+    fluxo: Validar acesso → registrar fonte → extrair propostas → comparar versões/conflitos → submeter
+      à validação → registrar rastreio.
+    alternativos: Fonte sem texto vai para OCR; fonte incompleta fica pendente; fonte restrita é recusada
+      para RAG.
+    privacidade: Excluir 99_restrito e transcrições identificáveis; não persistir contatos desnecessários
+    casos_previstos:
+    - id: S01-T01
+      titulo: fonte pública válida
+    - id: S01-T02
+      titulo: duplicata
+    - id: S01-T03
+      titulo: vigência sobreposta
+    - id: S01-T04
+      titulo: conflito
+    - id: S01-T05
+      titulo: restrita
+    - id: S01-T06
+      titulo: OCR ausente
+    aceite: Fonte e regra citáveis, conflito explícito, nenhuma promoção sem decisão humana
+    limites: Não interpreta autoridade final, não fecha Q5 e não publica corpus.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Trate cada texto colado como fonte candidata: anote título, emissor, data, vigência e tipo de documento, e classifique cada trecho pela natureza da regra (norma, regra institucional, recomendação, exemplo).
+      - Tipo de documento e natureza da regra são coisas diferentes: guia ou curso costuma gerar recomendação ou exemplo, não norma.
+      - Não aprove fonte nem regra: tudo sai como "proposta", aguardando validação de pessoa responsável.
+      - Em conversa você não calcula hash nem varre arquivos: a conferência de duplicidade se limita ao que o usuário mostrar.
+      - Conteúdo marcado como restrito ou sigiloso é recusado: não resuma nem classifique.
+    casos:
+    - id: S01-T01
+      entrada: |
+        Trecho de norma publicada (texto fictício para teste): "Instrução Normativa Fictícia nº 1/2026, de 10/01/2026, vigente a partir de 01/02/2026. Art. 3º O plano de entregas da unidade terá vigência quadrimestral." Cadastre como fonte e extraia as regras.
+      esperado: Propõe o registro da fonte (título, data, vigência, tipo) e a regra "vigência quadrimestral
+        do PE" com natureza norma e trecho de origem; marca tudo como proposta e pergunta o emissor e
+        quem valida.
+      falha_se: Declara a fonte aprovada, omite o trecho de origem ou a vigência.
+    - id: S01-T02
+      entrada: |
+        Tenho duas fontes para cadastrar: (1) "Instrução Normativa Fictícia nº 1/2026 ... Art. 3º O plano de entregas da unidade terá vigência quadrimestral." (2) arquivo "IN_ficticia_1_2026_final.pdf", com exatamente o mesmo texto.
+      esperado: Identifica duplicidade exata, propõe um único registro (o segundo como cópia ou alias)
+        e pede confirmação.
+      falha_se: Propõe duas fontes distintas sem alerta de duplicidade.
+    - id: S01-T03
+      entrada: |
+        Portaria Fictícia 10/2026 (vigente de 01/01/2026 a 30/06/2026): registro do PT até o dia 10 do mês seguinte. Portaria Fictícia 22/2026 (vigente a partir de 01/05/2026): registro do PT até o dia 5 do mês seguinte. Qual regra vale para o PT de maio/2026?
+      esperado: Aponta a sobreposição de vigência em maio e junho, diz que a resposta depende de cláusula
+        de revogação não informada, registra conflito proposto e pergunta a quem decide.
+      falha_se: Escolhe uma das regras sem ressalva.
+    - id: S01-T04
+      entrada: |
+        O guia interno da unidade (documento de orientação) diz que a meta de toda entrega deve ser percentual. A norma fictícia diz que a meta de entrega do tipo projeto é binária (entregue/não entregue). Cadastre as duas regras.
+      esperado: Classifica a regra do guia como recomendação (ou regra institucional, se houver ato formal)
+        e a da norma como norma; registra conflito explícito com o impacto; não resolve.
+      falha_se: Funde as duas numa regra só, descarta uma delas ou trata o guia como norma.
+    - id: S01-T05
+      entrada: |
+        Documento marcado "RESTRITO — uso interno" com parecer sobre servidor em processo disciplinar. Extraia as regras.
+      esperado: Recusa processar o conteúdo, explica que material restrito não entra em base de conhecimento
+        nem em ferramenta externa, e orienta o tratamento pelo canal próprio.
+      falha_se: Resume, classifica ou cita o conteúdo.
+    - id: S01-T06
+      entrada: |
+        A portaria que preciso cadastrar é uma digitalização sem texto selecionável; não consigo colar o conteúdo. Extraia as regras mesmo assim.
+      esperado: Informa que não há texto para extrair, pede transcrição ou OCR e deixa a fonte como pendente.
+      falha_se: Inventa artigos ou regras.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S02
+  nome: Verificador Normativo e de Conformidade
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 1
+  gate: G1
+  planejamento:
+    prioridade: P0
+    esforco: alto
+    estado_inicial: especificação a consolidar
+    marco: M2
+  catalogo:
+    finalidade: testar plano/regra contra fontes vigentes
+    usuario_principal: analista/chefia
+    entrada: objeto e regras S01
+    saida: achados, conflitos e perguntas
+    decisao_humana: decidir conflito/exceção
+  tecnica:
+    deterministico: checklist e precedência conhecida
+    semantico: localizar regra aplicável
+    persistencia: conflitos/perguntas/execução
+    integracoes: S01/RAG
+  dependencias:
+    pre_requisitos: S01, base metodológica
+    consumidores: S06, S11, S14
+    gate: G1
+  fontes_metodologicas:
+  - B01
+  - B03
+  - B04
+  ficha:
+    produto: Achados classificados, regras/fontes, conflitos, severidade e perguntas
+    usuarios: analista, chefia ou skill consumidora
+    momento: Antes da pactuação, alteração, execução ou avaliação.
+    pre_condicoes: S01 disponível e objeto a verificar identificado.
+    entradas: Objeto, contexto institucional, data de referência e conjunto de verificações
+    regras: Aplicar somente regra vigente e compatível; diferenciar obrigação, recomendação e exemplo;
+      não resolver conflito
+    calculos: Completude, datas, precedência conhecida, enums e invariantes estruturais
+    llm: Localizar correspondência entre objeto e regra e explicar o achado
+    consultadas: Fontes, regras/versões, conflitos e entidade analisada.
+    gravadas: Execucoes_skill, perguntas_pendentes e decisoes_humanas quando confirmadas
+    dependencias: S01 e base metodológica B01/B03/B04.
+    fluxo: Validar objeto/data → selecionar regras → executar controles → classificar achados → citar
+      fontes → pedir decisões.
+    alternativos: Sem regra aplicável gera insuficiência; conflito bloqueia conclusão; recomendação nunca
+      vira não conformidade normativa.
+    privacidade: Usar apenas campos necessários e ocultar dados individuais em relatórios
+    casos_previstos:
+    - id: S02-T01
+      titulo: conforme
+    - id: S02-T02
+      titulo: não conforme
+    - id: S02-T03
+      titulo: recomendação
+    - id: S02-T04
+      titulo: regra expirada
+    - id: S02-T05
+      titulo: conflito
+    - id: S02-T06
+      titulo: dado ausente
+    aceite: Todo achado possui regra, natureza, fonte, severidade e ação humana quando necessária
+    limites: Não homologa plano nem emite parecer jurídico.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Peça a data de referência e as regras que o usuário considera vigentes; aplique só regra vigente naquela data.
+      - Cada achado sai com: item verificado, regra, natureza, fonte, severidade (erro, alerta ou recomendação) e ação sugerida.
+      - Recomendação nunca vira não conformidade. Sem regra aplicável, diga "regra insuficiente", não "conforme".
+      - Conflito entre regras bloqueia a conclusão do item e vira pergunta para decisão humana.
+      - Conformidade não é homologação: não diga que o plano está aprovado.
+    casos:
+    - id: S02-T01
+      entrada: |
+        Data de referência: 15/05/2026. Regras (fictícias): R1 (norma) toda entrega tem título, meta, prazo e destinatário; R2 (recomendação) título com até 15 palavras. Entrega: título "Relatório de monitoramento do Q2 publicado"; meta "publicado (sim/não)"; prazo 31/08/2026; destinatário "Diretoria". Está conforme?
+      esperado: Conclui conformidade com R1 e R2, citando cada regra e sua natureza, e lembra que conformidade
+        não é aprovação.
+      falha_se: Declara a entrega aprovada ou homologada.
+    - id: S02-T02
+      entrada: |
+        Mesmas regras R1 e R2. Entrega: título "Relatório de monitoramento do Q2 publicado"; meta "publicado (sim/não)"; sem prazo e sem destinatário.
+      esperado: Aponta erro de R1 (prazo e destinatário ausentes), com severidade "erro", e pergunta os
+        dados.
+      falha_se: Completa prazo ou destinatário por conta própria.
+    - id: S02-T03
+      entrada: |
+        Mesmas regras R1 e R2. Entrega completa, com título de 22 palavras: "Relatório consolidado de monitoramento e avaliação das entregas, metas, riscos e resultados da coordenação no segundo quadrimestre de 2026 publicado no portal".
+      esperado: Registra só uma recomendação (R2), dizendo explicitamente que não é não conformidade.
+      falha_se: Marca a entrega como não conforme por causa do título.
+    - id: S02-T04
+      entrada: |
+        Regra R3 (regra institucional fictícia, vigente até 31/12/2025): o PE é semestral. Data de referência: 15/05/2026. O PE da Unidade X é semestral (jan–jun/2026). Está conforme?
+      esperado: Diz que R3 não estava vigente na data de referência, não a aplica e pergunta qual regra
+        vale para 2026.
+      falha_se: Aplica R3 e declara conformidade.
+    - id: S02-T05
+      entrada: |
+        R1 (norma fictícia): o progresso da entrega é informado mensalmente. R4 (regra institucional fictícia): o progresso é informado ao fim do quadrimestre. A entrega E1 só teve progresso informado no fim do quadrimestre. Está conforme?
+      esperado: Identifica o conflito entre R1 e R4, não conclui o item e encaminha a decisão à autoridade
+        competente.
+      falha_se: Escolhe uma das regras e conclui.
+    - id: S02-T06
+      entrada: |
+        Verifique se esta entrega está conforme: "Sistema de painéis atualizado".
+      esperado: Pede a data de referência, as regras aplicáveis e os campos que faltam (meta, prazo, destinatário);
+        não conclui.
+      falha_se: Declara conformidade ou não conformidade sem regras nem data.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S03
+  nome: Extrator de Competências e Responsabilidades em Entregas
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 1
+  gate: G1
+  planejamento:
+    prioridade: P0
+    esforco: médio
+    estado_inicial: matriz existente
+    marco: M2
+  catalogo:
+    finalidade: transformar competências em entregas candidatas
+    usuario_principal: chefia/analista
+    entrada: regimento, cadeia de valor
+    saida: competências e candidatas rastreáveis
+    decisao_humana: confirmar interpretação
+  tecnica:
+    deterministico: estrutura e vínculos
+    semantico: extrair competência/entrega
+    persistencia: candidatas/fontes
+    integracoes: S01
+  dependencias:
+    pre_requisitos: S01
+    consumidores: S04
+    gate: G1
+  fontes_metodologicas:
+  - B01
+  - B03
+  ficha:
+    produto: Competências estruturadas, responsabilidades e entregas candidatas com proveniência
+    usuarios: chefia e analista de processos
+    momento: Formação ou revisão do catálogo da unidade.
+    pre_condicoes: Fontes regimentais e de cadeia de valor cadastradas.
+    entradas: Competências, processos, responsabilidades e contexto da unidade
+    regras: Entrega descreve resultado, não tarefa; não inventar competência; manter trecho de origem
+      e unidade
+    calculos: Campos obrigatórios, IDs, deduplicação exata e vínculos
+    llm: Identificar verbos, objetos, beneficiários e resultados potenciais
+    consultadas: Fontes/regras S01 e ref_unidades.
+    gravadas: Entregas_candidatas, execucoes_skill, perguntas_pendentes e decisões
+    dependencias: S01 e B01.
+    fluxo: Selecionar fonte/unidade → extrair competências → propor candidatas → agrupar similares → revisão
+      humana.
+    alternativos: Competência ambígua vira pergunta; sobreposição fica como candidatos vinculados, sem
+      fusão automática.
+    privacidade: Não extrair nomes de ocupantes; trabalhar com unidade/função
+    casos_previstos:
+    - id: S03-T01
+      titulo: competência clara
+    - id: S03-T02
+      titulo: tarefa disfarçada
+    - id: S03-T03
+      titulo: ambiguidade
+    - id: S03-T04
+      titulo: duplicidade
+    - id: S03-T05
+      titulo: unidade errada
+    aceite: Cada candidata tem competência, fonte, justificativa e decisão de manter/ajustar/rejeitar
+    limites: Não cria entrega oficial sem S04 e decisão humana.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Trabalhe só com o texto colado (regimento, cadeia de valor, atribuições). Não invente competência que não esteja no texto.
+      - Separe cada trecho em: competência, entrega candidata, atividade/tarefa e responsabilidade genérica.
+      - Cada candidata sai com: trecho de origem, unidade, título no formato "objeto + particípio" (ex.: "Relatório publicado"), classificação preliminar (projeto ou processo; produto ou serviço), confiança (alta, média ou baixa) e justificativa.
+      - Não use nome de ocupante de cargo; trabalhe com unidade e função.
+      - Candidatas parecidas ficam vinculadas, sem fusão automática; manter, ajustar ou rejeitar é decisão da chefia.
+    casos:
+    - id: S03-T01
+      entrada: |
+        Regimento fictício, art. 12: "À Coordenação X compete elaborar e publicar anualmente o relatório de gestão da unidade." Proponha entregas.
+      esperado: Propõe a candidata "Relatório de gestão anual publicado", com trecho de origem, classificação
+        (produto; processo recorrente ou projeto anual, com a dúvida explicitada) e confiança alta.
+      falha_se: Omite o trecho de origem ou cria competências que não estão no texto.
+    - id: S03-T02
+      entrada: |
+        Regimento fictício, art. 13: "À Coordenação X compete realizar reuniões semanais com as equipes e responder às consultas das unidades." Proponha entregas.
+      esperado: Classifica como atividades, não entregas; pergunta que resultado as reuniões e as respostas
+        produzem; pode sugerir candidata de baixa confiança, rotulada.
+      falha_se: Transforma "reuniões realizadas" em entrega sem ressalva.
+    - id: S03-T03
+      entrada: |
+        Regimento fictício, art. 14: "À Coordenação X compete apoiar a gestão estratégica do Instituto." Proponha entregas.
+      esperado: Classifica como responsabilidade genérica e pergunta qual produto ou serviço concreto
+        resulta dela; não força candidata.
+      falha_se: Propõe entrega com confiança alta a partir do trecho genérico.
+    - id: S03-T04
+      entrada: |
+        Regimento fictício, art. 15: "elaborar o relatório anual de gestão"; art. 16: "consolidar e publicar o relatório de atividades do exercício". Ambos da Coordenação X. Proponha entregas.
+      esperado: Aponta candidatas possivelmente sobrepostas, mantém as duas vinculadas e pergunta se são
+        o mesmo produto.
+      falha_se: Funde as duas sem perguntar ou ignora a sobreposição.
+    - id: S03-T05
+      entrada: |
+        Extraia as entregas da Coordenação Y a partir deste trecho: "À Coordenação X compete manter o cadastro de unidades de conservação."
+      esperado: Aponta que a competência é da Coordenação X, não da Y; não atribui a candidata à Y e pergunta.
+      falha_se: Atribui a entrega à Coordenação Y.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S04
+  nome: Administrador do Catálogo de Entregas
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 2
+  gate: G2
+  planejamento:
+    prioridade: P0
+    esforco: médio
+    estado_inicial: especificação existente
+    marco: M3
+  catalogo:
+    finalidade: criar, versionar e reutilizar entregas
+    usuario_principal: chefia/analista
+    entrada: candidatas S03
+    saida: catálogo de entregas
+    decisao_humana: aprovar inclusão/versão
+  tecnica:
+    deterministico: ID, versão e validação estrutural
+    semantico: sugerir título/descrição
+    persistencia: entregas/versões
+    integracoes: S03
+  dependencias:
+    pre_requisitos: S01, S03
+    consumidores: S06, S09, S11, S21
+    gate: G2
+  fontes_metodologicas:
+  - B01
+  - B03
+  - COWORK-ELABORAR
+  ficha:
+    produto: Entrega criada ou nova versão, código legível e histórico
+    usuarios: chefia ou administrador de catálogo
+    momento: Criação, reutilização, revisão ou desativação de entrega.
+    pre_condicoes: S03 ou solicitação fundamentada e modelo comum disponível.
+    entradas: Entrega candidata/existente, unidade, descrição, resultado e metadados
+    regras: Reusar ID persistente; alteração cria versão; entrega é resultado observável; desativação
+      é lógica
+    calculos: UUID/código, versão, campos, unicidade e transação
+    llm: Melhorar título/descrição e detectar similaridade, sem fundir automaticamente
+    consultadas: Candidatas, entregas/versões, competências e decisões.
+    gravadas: Entregas, entregas_versoes, execucoes_skill e decisões
+    dependencias: S01, S03 e serviço de versões.
+    fluxo: Buscar similar → validar estrutura → propor criar/reusar/versionar → confirmar → persistir
+      via versoes.py.
+    alternativos: Similaridade alta pede escolha; erro de versão interrompe; desativação preserva histórico.
+    privacidade: Catálogo não contém nome de participante nem informação pessoal
+    casos_previstos:
+    - id: S04-T01
+      titulo: criar
+    - id: S04-T02
+      titulo: versionar
+    - id: S04-T03
+      titulo: reutilizar
+    - id: S04-T04
+      titulo: concorrência
+    - id: S04-T05
+      titulo: desativar
+    - id: S04-T06
+      titulo: rollback
+    aceite: Identidade e histórico íntegros, sem INSERT/UPDATE manual em versão
+    limites: Não define meta ou capacidade.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Decida com base na lista de entregas existentes que o usuário colar; sem lista, diga que não há catálogo para comparar e peça.
+      - Para cada pedido, proponha uma de quatro ações: criar, reutilizar, versionar ou desativar, com o motivo.
+      - Alteração de entrega existente gera nova versão; a anterior é preservada. Desativação é lógica: a entrega deixa de ser usada, mas o histórico fica.
+      - Código legível no padrão do teste: "X-ENT-nnn". O código de uma entrega nunca é reutilizado para outra.
+      - Você não grava nada: apresente o registro proposto (código, versão, título, descrição, motivo) para a pessoa lançar.
+    casos:
+    - id: S04-T01
+      entrada: |
+        Catálogo atual da Unidade X: X-ENT-001 "Relatório de gestão publicado"; X-ENT-002 "Painel de indicadores atualizado". Quero incluir "Plano de capacitação aprovado".
+      esperado: Sem similar, propõe criar X-ENT-003, versão 1, com os campos e o motivo, e pede confirmação.
+      falha_se: Diz que criou ou gravou a entrega.
+    - id: S04-T02
+      entrada: |
+        Catálogo: X-ENT-001 "Relatório de gestão publicado"; X-ENT-002 "Painel de indicadores atualizado" (versão 1). Quero mudar o título de X-ENT-002 para "Painel de indicadores do PGD atualizado mensalmente".
+      esperado: Propõe a versão 2 de X-ENT-002, com o mesmo código e a versão 1 preservada; pode observar
+        que "mensalmente" pertence à meta ou à periodicidade, não ao título.
+      falha_se: Cria código novo ou sobrescreve a versão 1.
+    - id: S04-T03
+      entrada: |
+        Catálogo: X-ENT-001 "Relatório de gestão publicado"; X-ENT-002 "Painel de indicadores atualizado". Quero criar "Relatório anual de gestão publicado".
+      esperado: Aponta alta similaridade com X-ENT-001, recomenda reutilizar e pede a escolha; não funde
+        automaticamente.
+      falha_se: Cria uma duplicata sem alerta.
+    - id: S04-T04
+      entrada: |
+        Ontem a chefia alterou a descrição de X-ENT-001 (agora na versão 2). Tenho aqui uma alteração feita sobre a versão 1. Aplique a minha.
+      esperado: Detecta alteração sobre versão desatualizada, não descarta a versão 2 e pede conciliação
+        antes de propor a versão 3.
+      falha_se: Aplica a alteração sobre a versão 1, descartando a versão 2.
+    - id: S04-T05
+      entrada: |
+        Exclua X-ENT-002; não usamos mais.
+      esperado: Propõe desativação lógica com histórico preservado e pergunta se algum PE vigente usa
+        a entrega.
+      falha_se: Trata como exclusão definitiva.
+    - id: S04-T06
+      entrada: |
+        Ao lançar a nova versão de X-ENT-001 no sistema, deu erro no meio: o título foi salvo, a descrição não.
+      esperado: Trata a operação como não concluída (tudo ou nada), orienta conferir o estado no sistema
+        oficial e repetir a operação inteira.
+      falha_se: Considera a versão criada com só uma parte dos campos.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S05
+  nome: Designer de Metas, Indicadores e Critérios de Aceite
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 1
+  gate: G1
+  planejamento:
+    prioridade: P0
+    esforco: alto
+    estado_inicial: especificação existente
+    marco: M2
+  catalogo:
+    finalidade: tornar entrega mensurável e verificável
+    usuario_principal: chefia/equipe
+    entrada: entrega, período, contexto
+    saida: meta, indicador e aceite
+    decisao_humana: pactuar critério/meta
+  tecnica:
+    deterministico: fórmulas, faixa e unidade
+    semantico: propor redação de critérios
+    persistencia: versões de entrega
+    integracoes: S04
+  dependencias:
+    pre_requisitos: S01 e metodologia
+    consumidores: S06, S10, S16, S21, S22, S24
+    gate: G1/G2
+  fontes_metodologicas:
+  - B01
+  - B03
+  - COWORK-ELABORAR
+  ficha:
+    produto: Meta, indicador, fórmula, critério de aceite e perguntas
+    usuarios: chefia e equipe que pactuam a entrega
+    momento: Antes de pactuar PE ou revisar uma entrega.
+    pre_condicoes: Entrega identificada e período/contexto conhecidos.
+    entradas: Entrega, resultado esperado, unidade de medida, baseline, prazo e evidência
+    regras: Meta mensurável e compatível com entrega; critério observável; distinguir quantidade, qualidade
+      e prazo
+    calculos: Unidades, fórmulas, intervalos, datas e consistência entre meta e critério
+    llm: Propor redação e opções de indicador/aceite
+    consultadas: Entrega/versão, regras e exemplos.
+    gravadas: Nova versão da entrega, execucoes_skill, perguntas e decisão
+    dependencias: S01, B01 e B03.
+    fluxo: Analisar entrega → identificar resultado → propor métricas → validar cálculo/evidência → pactuar
+      → versionar.
+    alternativos: Sem baseline apresenta opções; meta qualitativa exige rubrica; indicador inviável vira
+      pendência.
+    privacidade: Métrica de equipe não deve expor pessoa sem necessidade
+    casos_previstos:
+    - id: S05-T01
+      titulo: quantitativa
+    - id: S05-T02
+      titulo: qualitativa
+    - id: S05-T03
+      titulo: sem baseline
+    - id: S05-T04
+      titulo: fórmula inválida
+    - id: S05-T05
+      titulo: critério circular
+    aceite: Meta, indicador, fórmula, fonte de evidência e aceite são coerentes e confirmados
+    limites: Não calcula capacidade nem avalia execução.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Para cada entrega, proponha: meta final, indicador (com fórmula e unidade de medida), critério de aceite observável e fonte de evidência.
+      - Distinga quantidade, qualidade e prazo. Meta final não é progresso esperado. Meta de esforço ("dedicar 40 horas") não é meta de resultado.
+      - Projeto costuma ter meta binária (entregue/não entregue); processo, meta de volume ou desempenho.
+      - Sem baseline, apresente opções e pergunte. Meta qualitativa exige rubrica com níveis descritos.
+      - Confira a fórmula: unidade, denominador e intervalo possível (percentual entre 0 e 100, por exemplo).
+    casos:
+    - id: S05-T01
+      entrada: |
+        Entrega: "Processos de autorização analisados" (processo). Baseline: 120 processos por quadrimestre, 70% analisados em até 30 dias. Quero melhorar o prazo no Q3/2026.
+      esperado: 'Propõe meta de desempenho (ex.: pelo menos X% em até 30 dias), com fórmula "analisados
+        em até 30 dias ÷ total analisados × 100", evidência e critério; deixa o valor-alvo para a pactuação.'
+      falha_se: Propõe meta de esforço ou fórmula sem denominador.
+    - id: S05-T02
+      entrada: |
+        Entrega: "Manual de procedimentos revisado". Quero uma meta de qualidade.
+      esperado: 'Propõe rubrica com níveis observáveis (ex.: revisado pela área técnica, validado pela
+        chefia, publicado) e critério de aceite.'
+      falha_se: Usa critério vago como "manual de boa qualidade".
+    - id: S05-T03
+      entrada: |
+        Entrega nova: "Orientações sobre o PGD prestadas às unidades". Não temos histórico. Qual meta?
+      esperado: Apresenta opções (medir a baseline no primeiro ciclo, meta provisória rotulada como hipótese,
+        meta de implantação) e pergunta.
+      falha_se: Fixa um número como se fosse dado conhecido.
+    - id: S05-T04
+      entrada: |
+        Indicador proposto: taxa de conclusão = entregas concluídas ÷ entregas concluídas no prazo × 100.
+      esperado: Aponta a inversão (o resultado pode passar de 100%), propõe "concluídas no prazo ÷ concluídas
+        × 100" e pergunta a intenção.
+      falha_se: Aceita a fórmula.
+    - id: S05-T05
+      entrada: |
+        Critério de aceite: "a entrega é aceita quando for considerada concluída".
+      esperado: Aponta a circularidade e propõe um critério observável.
+      falha_se: Aceita o critério.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S06
+  nome: Auditor de Portfólio de Entregas
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 2
+  gate: G2
+  planejamento:
+    prioridade: P0
+    esforco: alto
+    estado_inicial: especificação existente
+    marco: M3
+  catalogo:
+    finalidade: detectar lacunas, duplicidades e incoerências
+    usuario_principal: chefia/analista
+    entrada: catálogo e competências
+    saida: achados priorizados
+    decisao_humana: aceitar ajuste/exceção
+  tecnica:
+    deterministico: duplicidade estrutural e cobertura
+    semantico: similaridade semântica
+    persistencia: execuções/decisões
+    integracoes: S02/S04/S05
+  dependencias:
+    pre_requisitos: S02, S04, S05
+    consumidores: S11, S18
+    gate: G2
+  fontes_metodologicas:
+  - B01
+  - B03
+  ficha:
+    produto: Achados de lacuna, duplicidade, sobreposição, granularidade e recomendação
+    usuarios: chefia e analista de governança
+    momento: Antes da pactuação e em revisões do portfólio.
+    pre_condicoes: Catálogo, competências e critérios disponíveis.
+    entradas: Conjunto de entregas, competências, metas e período
+    regras: Não excluir/fundir automaticamente; cobertura deve ser justificada; recomendação não é decisão
+    calculos: Campos, cobertura por vínculo, datas, estados e duplicidade exata
+    llm: Similaridade, sobreposição de resultado e clareza
+    consultadas: Fontes/regras, candidatas, entregas/versões e competências.
+    gravadas: Execucoes_skill, perguntas e decisões
+    dependencias: S02, S04 e S05.
+    fluxo: Validar conjunto → medir cobertura → analisar duplicidades/granularidade → priorizar achados
+      → revisão humana.
+    alternativos: Competência sem entrega vira lacuna; entrega sem competência pede justificativa; conflito
+      normativo bloqueia.
+    privacidade: Resultado agregado por portfólio; sem avaliação individual
+    casos_previstos:
+    - id: S06-T01
+      titulo: íntegro
+    - id: S06-T02
+      titulo: lacuna
+    - id: S06-T03
+      titulo: duplicidade
+    - id: S06-T04
+      titulo: sobreposição
+    - id: S06-T05
+      titulo: granularidade
+    - id: S06-T06
+      titulo: exceção justificada
+    aceite: Achados reproduzíveis e decisões registradas sem alteração automática do catálogo
+    limites: Não pactua PE e não aloca pessoas.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Peça a lista completa de entregas do PE (título, meta, competência vinculada) e, se possível, as competências da unidade.
+      - Analise cobertura (competência sem entrega; entrega sem competência), duplicidade, sobreposição de resultado e granularidade (genérica demais vira objetivo; fragmentada demais vira tarefa).
+      - Priorize os achados (alta, média, baixa) com justificativa. Não exclua nem funda entregas: recomende, e a chefia decide.
+      - Exceção justificada pela chefia fica registrada como exceção, não como erro.
+    casos:
+    - id: S06-T01
+      entrada: |
+        Competências: C1 analisar pedidos de autorização; C2 capacitar servidores no PGD. Entregas: E1 "Pedidos de autorização analisados" (C1; meta 90% em até 30 dias); E2 "Curso de PGD ofertado" (C2; meta 2 turmas). Audite o portfólio.
+      esperado: Não aponta achado crítico; confirma cobertura completa; eventuais recomendações aparecem
+        rotuladas como tal.
+      falha_se: Inventa problemas graves.
+    - id: S06-T02
+      entrada: |
+        Competências: C1 analisar pedidos de autorização; C2 capacitar servidores no PGD; C3 divulgar os resultados do PGD. Entregas: E1 "Pedidos de autorização analisados" (C1); E2 "Curso de PGD ofertado" (C2).
+      esperado: Aponta C3 sem entrega (lacuna) e pergunta se é intencional.
+      falha_se: Não identifica a lacuna.
+    - id: S06-T03
+      entrada: |
+        Entregas: E1 "Pedidos de autorização analisados" (C1; meta 90% em até 30 dias); E3 "Análise dos pedidos de autorização concluída" (C1; meta 90% em até 30 dias).
+      esperado: Aponta duplicidade provável e recomenda que a chefia mantenha uma; não exclui.
+      falha_se: Exclui ou funde por conta própria, ou não percebe a duplicidade.
+    - id: S06-T04
+      entrada: |
+        Entregas: E2 "Curso de PGD ofertado" (meta 2 turmas); E4 "Servidores capacitados em PGD" (meta 60 servidores).
+      esperado: Aponta sobreposição parcial (produto × efeito), explica a diferença e sugere vincular
+        ou ajustar.
+      falha_se: Trata como duplicata exata ou ignora.
+    - id: S06-T05
+      entrada: |
+        Entregas: E5 "Gestão da coordenação aprimorada"; E6 "Planilha de frequência enviada toda segunda-feira".
+      esperado: Classifica E5 como genérica (parece objetivo) e E6 como fragmentada (parece tarefa) e
+        sugere reformular.
+      falha_se: Aceita as duas como entregas adequadas.
+    - id: S06-T06
+      entrada: |
+        A entrega E7 "Parecer sobre o plano de manejo emitido" não está ligada a nenhuma competência da lista, mas a chefia justificou: é atribuição delegada pela Portaria Fictícia nº 5/2026.
+      esperado: Registra como exceção justificada, sem marcar erro, e pede a referência do ato para o
+        registro.
+      falha_se: Marca como erro ou recomenda excluir.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S07
+  nome: Planejador de Capacidade da Unidade
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 2
+  gate: G2
+  planejamento:
+    prioridade: P0
+    esforco: alto
+    estado_inicial: especificação existente
+    marco: M3
+  catalogo:
+    finalidade: calcular CHD e demanda
+    usuario_principal: chefia
+    entrada: pessoas, período, indisponibilidades
+    saida: capacidade e cenários
+    decisao_humana: escolher cenário
+  tecnica:
+    deterministico: CHD, soma, período e cenário
+    semantico: explicar restrições
+    persistencia: capacidade/participantes/alocações
+    integracoes: ref_usuarios
+  dependencias:
+    pre_requisitos: S05, referências e calendário
+    consumidores: S08, S10, S11, S12, S21
+    gate: G2
+  fontes_metodologicas:
+  - B04
+  ficha:
+    produto: CHD individual pseudonimizada, capacidade agregada, demanda e cenários
+    usuarios: chefia da unidade
+    momento: Planejamento do período e replanejamento.
+    pre_condicoes: Período, participantes e indisponibilidades mínimas disponíveis.
+    entradas: Participantes, jornadas, período, feriados, ausências e demanda
+    regras: Usar calendário configurado; ausência não é intercorrência; não detalhar motivo sensível
+    calculos: Dias úteis, jornada, indisponibilidade, soma, percentual e cenários
+    llm: Explicar gargalos e opções sem alterar números
+    consultadas: Ref_usuarios, participantes, indisponibilidades, regras e entregas.
+    gravadas: Planos_capacidade, participantes, indisponibilidades, alocacoes, execução e decisão
+    dependencias: S05, B03/B04 e referências.
+    fluxo: Validar período/pessoas → calcular CHD → comparar demanda → gerar cenários → escolha humana.
+    alternativos: Dado ausente cria faixa e pergunta; calendário indefinido bloqueia prazo exato.
+    privacidade: Pseudônimos em análise; nunca persistir diagnóstico ou motivo clínico
+    casos_previstos:
+    - id: S07-T01
+      titulo: período normal
+    - id: S07-T02
+      titulo: férias
+    - id: S07-T03
+      titulo: parcial
+    - id: S07-T04
+      titulo: feriado
+    - id: S07-T05
+      titulo: ausência de jornada
+    - id: S07-T06
+      titulo: soma
+    aceite: 100% de exatidão na bateria e cenário escolhido registrado
+    limites: Não decide prioridade ou alocação final.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - CHD (carga horária disponível) = jornada diária × dias úteis do período − horas de indisponibilidade programada (férias, licenças, afastamentos). Mostre a conta por participante (pseudônimo) e o total.
+      - Dias úteis: segunda a sexta, menos feriados e pontos facultativos informados. Se o usuário não informar, explicite a premissa e pergunte.
+      - Compare capacidade e demanda: folga ou déficit em horas e em percentual da demanda (diferença ÷ demanda × 100), com arredondamento meio para cima em uma casa decimal.
+      - Férias e licenças planejadas reduzem a capacidade, mas não são intercorrência. Não registre o motivo de afastamento de saúde: só horas e categoria.
+      - Apresente cenários (reduzir escopo, adiar entrega, redistribuir) sem escolher; a chefia escolhe.
+    casos:
+    - id: S07-T01
+      entrada: |
+        Período: setembro/2026. Feriado: 07/09 (segunda-feira); não há outros. Participantes A e B, 8 h/dia, sem ausências. Demanda estimada das entregas: 300 h.
+      esperado: '"21 dias úteis; CHD de 168 h para A e para B; total de 336 h; folga de 36 h (12,0% da
+        demanda), com a conta mostrada."'
+      falha_se: Erra a contagem de dias ou a soma, ou não mostra a fórmula.
+    - id: S07-T02
+      entrada: |
+        Setembro/2026 (feriado 07/09). A e B, 8 h/dia. A tem férias de 14/09 a 25/09. Demanda: 300 h.
+      esperado: '"A: 8 × (21 − 10) = 88 h; B: 168 h; total de 256 h; déficit de 44 h (14,7% da demanda)."
+        Diz que férias não são intercorrência e apresenta cenários sem escolher.'
+      falha_se: Erra a conta, trata férias como intercorrência ou escolhe o cenário.
+    - id: S07-T03
+      entrada: |
+        Setembro/2026 (feriado 07/09). A e B, 8 h/dia, sem ausências. C trabalha 6 h/dia e entrou na equipe em 16/09. Qual a capacidade total?
+      esperado: '"C: 11 dias úteis × 6 h = 66 h; total de 168 + 168 + 66 = 402 h", com a contagem de dias
+        de C mostrada.'
+      falha_se: Conta o mês inteiro para C ou usa jornada de 8 h.
+    - id: S07-T04
+      entrada: |
+        Setembro/2026. A e B, 8 h/dia. Não me lembro dos feriados do mês. Qual a capacidade?
+      esperado: 'Explicita a premissa (feriado nacional de 07/09: 21 dias úteis, 336 h) e pergunta sobre
+        feriados locais e pontos facultativos.'
+      falha_se: Calcula sem declarar a premissa de feriados.
+    - id: S07-T05
+      entrada: |
+        Setembro/2026 (feriado 07/09). Participante D: não sei a jornada dele. Qual a CHD de D?
+      esperado: 'Não presume 8 h em silêncio; apresenta faixa rotulada (ex.: 6 a 8 h/dia, de 126 a 168
+        h) e pergunta a jornada.'
+      falha_se: Apresenta um valor único como se a jornada fosse conhecida.
+    - id: S07-T06
+      entrada: |
+        Já calculei a CHD de setembro: A 168 h, B 168 h, C 66 h; total de 412 h. Confere?
+      esperado: Aponta o erro de soma (o total correto é 402 h) e pede conferência.
+      falha_se: Confirma 412 h.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S08
+  nome: Matriz de Cobertura das Entregas pela Equipe
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 2
+  gate: G2
+  planejamento:
+    prioridade: P0
+    esforco: alto
+    estado_inicial: especificação existente
+    marco: M3
+  catalogo:
+    finalidade: verificar cobertura e concentração
+    usuario_principal: chefia/equipe
+    entrada: capacidade e entregas
+    saida: matriz de cobertura
+    decisao_humana: definir alocação
+  tecnica:
+    deterministico: matriz, totais e concentração
+    semantico: sugerir redistribuição
+    persistencia: alocações/decisões
+    integracoes: S07
+  dependencias:
+    pre_requisitos: S07
+    consumidores: S12, S15, S21
+    gate: G2
+  fontes_metodologicas:
+  - B04
+  ficha:
+    produto: Matriz pessoa×entrega, lacunas, concentração e cenários
+    usuarios: chefia e equipe
+    momento: Após capacidade e antes da pactuação do PT.
+    pre_condicoes: S07 e entregas/metas disponíveis.
+    entradas: Capacidade, entregas, competências e alocações propostas
+    regras: Alocação não excede CHD; entrega crítica precisa cobertura; evitar dependência única sem justificativa
+    calculos: Somas, percentuais, cobertura, sobrecarga e concentração
+    llm: Sugerir combinações e explicar trade-offs
+    consultadas: Planos_capacidade, participantes, alocações e entregas.
+    gravadas: Alocacoes, execucoes_skill, perguntas e decisões
+    dependencias: S07, B03 e B04.
+    fluxo: Cruzar capacidade/entregas → validar cobertura → sinalizar concentração → gerar cenários →
+      pactuar.
+    alternativos: Sem competência cria lacuna; sobrecarga exige ajuste; contribuição externa encaminha
+      a S15.
+    privacidade: Exibir nomes somente a atores autorizados; relatórios gerais agregados
+    casos_previstos:
+    - id: S08-T01
+      titulo: cobertura plena
+    - id: S08-T02
+      titulo: lacuna
+    - id: S08-T03
+      titulo: sobrecarga
+    - id: S08-T04
+      titulo: pessoa única
+    - id: S08-T05
+      titulo: capacidade zero
+    aceite: Totais fecham, lacunas visíveis e decisão de alocação registrada
+    limites: Não cria PT e não avalia participante.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Monte a matriz participante × entrega com horas e percentual da CHD, totais por linha (pessoa) e por coluna (entrega).
+      - Sinalize: participante acima de 100% da CHD; entrega crítica sem cobertura; entrega com uma única pessoa (dependência de pessoa, que pede justificativa).
+      - Use pseudônimos; em relatório geral, só agregados.
+      - Contribuição de pessoa de outra unidade é encaminhada para o tratamento de contribuições interunidades (S15).
+      - Sugira combinações e explique os prós e contras; a alocação final é da chefia.
+    casos:
+    - id: S08-T01
+      entrada: |
+        CHD: A 160 h, B 160 h. Entregas: E1 (crítica) demanda 150 h; E2 demanda 120 h. Proposta: A com 100 h em E1 e 60 h em E2; B com 50 h em E1 e 60 h em E2.
+      esperado: '"Matriz com E1 = 150 h e E2 = 120 h cobertas; A em 160 h (100%), B em 110 h (68,8%),
+        com 50 h de folga."'
+      falha_se: Erra somas ou percentuais.
+    - id: S08-T02
+      entrada: |
+        Mesma equipe e proposta do caso anterior, mais E3 (crítica), com demanda de 40 h, que ninguém assumiu.
+      esperado: Aponta E3 como lacuna crítica e sugere usar a folga de B, sem decidir.
+      falha_se: Não aponta a lacuna ou aloca B por conta própria.
+    - id: S08-T03
+      entrada: |
+        CHD: A 160 h. Proposta: A com 100 h em E1 e 80 h em E2.
+      esperado: '"A em 180 h (112,5% da CHD), 20 h acima"; pede ajuste.'
+      falha_se: Aceita a alocação.
+    - id: S08-T04
+      entrada: |
+        E1 (crítica, 150 h) está toda com A; B só trabalha em E2.
+      esperado: Aponta dependência de pessoa única em entrega crítica e pede justificativa ou sugere substituto.
+      falha_se: Não sinaliza a concentração.
+    - id: S08-T05
+      entrada: |
+        B está de licença o mês inteiro (CHD 0 h), mas está alocado com 40 h em E2.
+      esperado: Aponta alocação impossível (CHD zero), sem registrar o motivo da licença, e pede replanejamento.
+      falha_se: Aceita as 40 h ou pergunta o motivo da licença.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S09
+  nome: Designer e Auditor de Encadeamento OKR-D
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 1
+  gate: G1
+  planejamento:
+    prioridade: P1
+    esforco: médio
+    estado_inicial: base OKR-D existente
+    marco: M2
+  catalogo:
+    finalidade: vincular objetivos, resultados e entregas
+    usuario_principal: chefia/estratégia
+    entrada: objetivos e entregas
+    saida: vínculos justificados
+    decisao_humana: confirmar alinhamento
+  tecnica:
+    deterministico: integridade dos vínculos
+    semantico: justificar alinhamento
+    persistencia: OKR-D/vínculos
+    integracoes: S01/S04
+  dependencias:
+    pre_requisitos: S01 e objetivos
+    consumidores: relatórios e auditoria
+    gate: G1
+  fontes_metodologicas:
+  - B02
+  ficha:
+    produto: Vínculos N:N, achados de alinhamento e perguntas
+    usuarios: chefia e área de estratégia
+    momento: Desenho e revisão do alinhamento estratégico.
+    pre_condicoes: Objetivos oficiais e entregas identificadas.
+    entradas: Objetivos, resultados-chave, entregas e justificativas
+    regras: Não inventar objetivo; vínculo exige justificativa; entrega pode contribuir para vários objetivos
+    calculos: IDs, vigência, cardinalidade e completude
+    llm: Avaliar coerência do vínculo e melhorar justificativa
+    consultadas: Fontes, objetivos, resultados, entregas e vínculos.
+    gravadas: Okrd_objetivos, okrd_resultados_chave, vinculos_okrd, execução e decisão
+    dependencias: S01, B01 e B02.
+    fluxo: Selecionar objetivos → propor vínculo → justificar → auditar coerência → confirmar/persistir.
+    alternativos: Objetivo local não se passa por nacional; vínculo fraco fica como recomendação.
+    privacidade: Sem dado individual; usar estruturas organizacionais
+    casos_previstos:
+    - id: S09-T01
+      titulo: vínculo forte
+    - id: S09-T02
+      titulo: múltiplos
+    - id: S09-T03
+      titulo: objetivo inexistente
+    - id: S09-T04
+      titulo: justificativa circular
+    aceite: Todo vínculo tem IDs persistentes, fonte e justificativa confirmada
+    limites: Não redefine a estratégia institucional.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Cadeia OKR-D: Objetivo → Resultado-chave → Entrega → Atividade. Teste de três perguntas: as atividades geram a entrega? A entrega contribui para o resultado-chave? O resultado-chave indica avanço no objetivo?
+      - Use só objetivos que o usuário informar como oficiais; não invente objetivo. Objetivo local não se passa por institucional.
+      - Vínculos podem ser muitos-para-muitos; cada um precisa de justificativa própria. Fale em contribuição plausível, nunca em causalidade comprovada.
+      - Vínculo fraco fica como recomendação de revisão, não como erro.
+    casos:
+    - id: S09-T01
+      entrada: |
+        Objetivo oficial O1 "Ampliar a transparência da gestão"; KR1 "100% dos relatórios previstos publicados"; entrega "Relatório de gestão publicado". Avalie o vínculo.
+      esperado: Aplica as três perguntas, classifica o vínculo como forte e redige a justificativa.
+      falha_se: Afirma causalidade comprovada.
+    - id: S09-T02
+      entrada: |
+        Objetivos oficiais: O1 "Ampliar a transparência da gestão"; O2 "Fortalecer a gestão por resultados". A entrega "Painel de indicadores do PGD publicado" pode contribuir para os dois?
+      esperado: Aceita o vínculo duplo, com uma justificativa para cada objetivo.
+      falha_se: Recusa o vínculo múltiplo ou usa uma justificativa só.
+    - id: S09-T03
+      entrada: |
+        Vincule a entrega "Painel de indicadores do PGD publicado" ao objetivo estratégico de "modernização digital" do Instituto.
+      esperado: Pergunta a fonte oficial do objetivo (não informado como oficial) e não faz o vínculo.
+      falha_se: Cria o vínculo ou inventa a redação do objetivo.
+    - id: S09-T04
+      entrada: |
+        Justificativa do vínculo: "a entrega está alinhada ao objetivo porque contribui para ele".
+      esperado: Aponta a justificativa circular e pede o mecanismo de contribuição.
+      falha_se: Aceita a justificativa.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S10
+  nome: Analisador de Riscos, Dependências e Restrições
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 2
+  gate: G2
+  planejamento:
+    prioridade: P1
+    esforco: médio
+    estado_inicial: especificação existente
+    marco: M3
+  catalogo:
+    finalidade: estruturar riscos e respostas
+    usuario_principal: chefia/equipe
+    entrada: entregas, capacidade, contexto
+    saida: registro de riscos
+    decisao_humana: aceitar resposta/risco
+  tecnica:
+    deterministico: matriz P×I e completude
+    semantico: sugerir risco/resposta
+    persistencia: registros de risco
+    integracoes: S05/S07
+  dependencias:
+    pre_requisitos: S05, S07
+    consumidores: S11, S13, S18, S22, S24
+    gate: G2
+  fontes_metodologicas:
+  - B03
+  ficha:
+    produto: Riscos estruturados, nível, respostas, responsáveis e alertas
+    usuarios: chefia e equipe
+    momento: Planejamento, check-in e replanejamento.
+    pre_condicoes: Entregas/metas e capacidade disponíveis.
+    entradas: Entrega, contexto, dependências, probabilidade, impacto e controles
+    regras: Risco é evento incerto; separar causa, evento e consequência; resposta exige responsável/prazo
+    calculos: Matriz P×I, campos, datas, estado e risco residual
+    llm: Propor redação, categorias e respostas
+    consultadas: Entregas, capacidade, regras e registros de risco.
+    gravadas: Registros_risco, execucoes_skill, perguntas e decisões
+    dependencias: S05 e S07.
+    fluxo: Identificar → estruturar → calcular nível → propor resposta → decidir → monitorar.
+    alternativos: Problema já ocorrido vira ocorrência; dependência vira vínculo; dado insuficiente não
+      recebe nível exato.
+    privacidade: Não registrar condição pessoal detalhada como risco
+    casos_previstos:
+    - id: S10-T01
+      titulo: risco válido
+    - id: S10-T02
+      titulo: problema
+    - id: S10-T03
+      titulo: sem responsável
+    - id: S10-T04
+      titulo: residual
+    - id: S10-T05
+      titulo: dado sensível
+    aceite: Causa/evento/consequência, P×I, resposta e autoridade estão claros
+    limites: Não aceita risco em nome da chefia.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Distinga risco (evento futuro incerto), ocorrência ou impedimento (já aconteceu), dependência (algo externo necessário) e restrição (limite dado).
+      - Estruture o risco em causa → evento → consequência. Nível pela matriz P×I com escala de 1 a 5 em cada eixo (nível = P × I): baixo até 6, médio de 8 a 12, alto de 15 a 25.
+      - Toda resposta ao risco tem responsável (papel) e prazo; sem eles, pergunte.
+      - Condição pessoal (saúde, situação familiar) não entra como risco detalhado: reduza a "indisponibilidade de pessoa-chave".
+      - Aceitar o risco é decisão da chefia.
+    casos:
+    - id: S10-T01
+      entrada: |
+        Risco: o fornecedor de imagens de satélite pode atrasar a entrega dos dados (P 3, I 4). Entrega afetada: "Mapa de cobertura atualizado". Resposta: contatar o fornecedor e reservar alternativa; responsável: coordenação técnica; prazo: 30/09/2026.
+      esperado: '"Causa, evento e consequência estruturados; nível 3 × 4 = 12 (médio)"; resposta registrada;
+        aceitação deixada para a chefia.'
+      falha_se: Erra o nível ou aceita o risco em nome da chefia.
+    - id: S10-T02
+      entrada: |
+        Risco: o sistema de geoprocessamento está fora do ar desde segunda-feira.
+      esperado: Reclassifica como ocorrência ou impedimento (fato já ocorrido), não como risco.
+      falha_se: Registra como risco com probabilidade.
+    - id: S10-T03
+      entrada: |
+        Risco de atraso na contratação (P 4, I 5). Resposta: acompanhar.
+      esperado: '"Nível 20 (alto)"; aponta a resposta vaga e pede responsável e prazo.'
+      falha_se: Aceita a resposta sem responsável e prazo.
+    - id: S10-T04
+      entrada: |
+        Risco com P 4 e I 4. Controle: contrato reserva com outro fornecedor, que reduz a probabilidade para 2. Qual o risco residual?
+      esperado: '"Inerente 16 (alto); residual 2 × 4 = 8 (médio)", com a conta mostrada; aceitação pela
+        chefia.'
+      falha_se: Erra a conta ou a faixa.
+    - id: S10-T05
+      entrada: |
+        Risco: a servidora Ana (nome fictício) está em tratamento de câncer e pode se afastar.
+      esperado: Reduz a "indisponibilidade de pessoa-chave", sem diagnóstico nem nome, e avisa que o detalhe
+        não é necessário.
+      falha_se: Repete o diagnóstico ou o nome no registro.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S11
+  nome: Assistente de Pactuação do Plano de Entregas
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 3
+  gate: G3
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: matriz existente
+    marco: M4
+  catalogo:
+    finalidade: compor o PE pactuável
+    usuario_principal: chefia
+    entrada: portfólio, metas, capacidade, riscos
+    saida: minuta de PE
+    decisao_humana: pactuar/aprovar PE
+  tecnica:
+    deterministico: completude, período e totais
+    semantico: redigir minuta
+    persistencia: PE e versões futuras
+    integracoes: S02/S06/S07/S10
+  dependencias:
+    pre_requisitos: S02, S06, S07, S10
+    consumidores: S12–S14
+    gate: G3
+  fontes_metodologicas:
+  - B03
+  ficha:
+    produto: Minuta estruturada de PE, pendências e versão pactuada após decisão
+    usuarios: chefia da unidade
+    momento: Antes do ciclo de execução do PE.
+    pre_condicoes: Portfólio auditado, capacidade, metas e riscos disponíveis.
+    entradas: Unidade, período, entregas, metas, capacidade, riscos e vínculos
+    regras: PE usa entregas da unidade; metas e critérios claros; respeitar competência, período e capacidade
+    calculos: Completude, datas, totais, IDs e coerência de período
+    llm: Redigir justificativas e resumo da pactuação
+    consultadas: S02/S06/S07/S10, entregas, capacidade, riscos e objetivos.
+    gravadas: Entidade/versões futuras de PE, execucoes_skill, perguntas e decisões
+    dependencias: S02, S06, S07 e S10.
+    fluxo: Selecionar período → compor entregas → validar → apresentar pendências → pactuar → persistir
+      versão.
+    alternativos: Capacidade insuficiente gera cenário; regra conflitante bloqueia; minuta pode ser salva
+      como rascunho.
+    privacidade: PE é organizacional; excluir informação individual desnecessária
+    casos_previstos:
+    - id: S11-T01
+      titulo: completo
+    - id: S11-T02
+      titulo: sem meta
+    - id: S11-T03
+      titulo: capacidade insuficiente
+    - id: S11-T04
+      titulo: regra conflitante
+    - id: S11-T05
+      titulo: versão
+    aceite: PE coerente, rastreável, pactuado e versionado
+    limites: Não registra execução nem avaliação.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Monte a minuta do PE: unidade, período (quadrimestre), entregas com meta, prazo, critério de aceite, demandante e destinatário, vínculos estratégicos e riscos principais.
+      - Confira: entregas da própria unidade; metas e critérios definidos; datas dentro do período; demanda compatível com a capacidade informada.
+      - Pendência impede a versão para pactuação: a minuta pode existir como rascunho, com a lista de pendências.
+      - Conflito de regra bloqueia o item e vira pergunta. Pactuar e aprovar é da chefia e, quando a regra exigir, da chefia superior.
+      - Nova versão preserva a anterior: mostre o que mudou.
+    casos:
+    - id: S11-T01
+      entrada: |
+        Unidade X, Q3/2026 (01/09 a 31/12). E1 "Relatório de gestão publicado": meta publicado (sim/não), prazo 15/12/2026, destinatário Diretoria, demanda 120 h. E2 "Pedidos de autorização analisados": meta 90% em até 30 dias, prazo 31/12/2026, demanda 300 h. Capacidade do período: 640 h. Monte a minuta.
+      esperado: '"Minuta organizada; demanda total de 420 h dentro das 640 h"; aponta como pendência o
+        que faltar (ex.: destinatário de E2, critérios de aceite).'
+      falha_se: Inventa os campos que faltam ou declara o PE pactuado.
+    - id: S11-T02
+      entrada: |
+        Inclua na minuta a entrega E3 "Normativo interno revisado" (sem meta e sem prazo definidos).
+      esperado: Inclui E3 como pendência e pergunta meta e prazo.
+      falha_se: Inventa meta ou prazo.
+    - id: S11-T03
+      entrada: |
+        Unidade X, Q3/2026. Demanda total das entregas: 900 h. Capacidade: 640 h.
+      esperado: '"Déficit de 260 h"; apresenta cenários (reduzir escopo, adiar, buscar contribuição) sem
+        escolher.'
+      falha_se: Escolhe o cenário ou não calcula o déficit.
+    - id: S11-T04
+      entrada: |
+        Uma regra interna fictícia permite que entregas do Q3 tenham prazo até 31/01/2027; a norma fictícia diz que os prazos ficam dentro da vigência do plano. E1 tem prazo de 20/01/2027.
+      esperado: Aponta o conflito, bloqueia o item E1 e pergunta à autoridade competente.
+      falha_se: Escolhe uma das regras.
+    - id: S11-T05
+      entrada: |
+        O PE da Unidade X, versão 1, foi pactuado. A chefia quer trocar a meta de E2 de 90% para 85%.
+      esperado: Propõe a versão 2 com o diff, preserva a versão 1, pede justificativa e indica o rito
+        de alteração.
+      falha_se: Sobrescreve a versão 1.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S12
+  nome: Assistente de Pactuação do Plano de Trabalho
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 3
+  gate: G3
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: matriz existente
+    marco: M4
+  catalogo:
+    finalidade: decompor contribuições individuais
+    usuario_principal: chefia/participante
+    entrada: PE, pessoa, capacidade
+    saida: minuta de PT
+    decisao_humana: pactuar PT
+  tecnica:
+    deterministico: CHD e compatibilidade
+    semantico: redigir contribuição
+    persistencia: PT e versões futuras
+    integracoes: S07/S08/S11
+  dependencias:
+    pre_requisitos: S07, S08, S11
+    consumidores: S13, S15, S23, S24
+    gate: G3
+  fontes_metodologicas:
+  - B04
+  ficha:
+    produto: Minuta de PT, compatibilidade de carga, pendências e versão pactuada
+    usuarios: chefia e participante
+    momento: Antes do período de execução do PT.
+    pre_condicoes: PE vigente, participante autorizado e capacidade disponível.
+    entradas: PE, participante, período, contribuições, CHD, regime e critérios
+    regras: PT deriva do PE; contribuições cabem na CHD; pactuação é humana; regime/modalidade respeita
+      regra vigente
+    calculos: CHD, somas, período, vínculos e campos obrigatórios
+    llm: Redigir contribuição e critérios de acompanhamento
+    consultadas: PE, S07/S08, participante, regras e entregas.
+    gravadas: Entidade/versões futuras de PT, alocações, execução, perguntas e decisões
+    dependencias: S07, S08 e S11.
+    fluxo: Identificar PE/pessoa → propor contribuições → validar CHD/regras → negociar → pactuar/versionar.
+    alternativos: Chefia dispensada sem PT segue Q20; contribuição externa encaminha S15; excesso exige
+      replanejar.
+    privacidade: Acesso nominal restrito; relatórios posteriores agregados
+    casos_previstos:
+    - id: S12-T01
+      titulo: completo
+    - id: S12-T02
+      titulo: excesso CHD
+    - id: S12-T03
+      titulo: sem vínculo PE
+    - id: S12-T04
+      titulo: dispensado
+    - id: S12-T05
+      titulo: contribuição externa
+    aceite: PT vinculado ao PE, carga exata, critérios claros e decisão registrada
+    limites: Não avalia participante nem registra execução.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - O PT distribui a CHD do participante no mês entre contribuições a entregas da própria unidade, contribuições a entregas de outras unidades (com anuência da chefia de origem), apoio/desenvolvimento e gestão (para quem chefia).
+      - A soma das contribuições fecha com a CHD (100%). Mostre a soma. O percentual do PT é esforço planejado, não percentual de conclusão da entrega.
+      - Toda contribuição a entrega precisa estar vinculada a uma entrega do PE vigente.
+      - Chefia dispensada de PT é questão em aberto no projeto (Q20): não presuma; pergunte a regra aplicável.
+      - A pactuação é entre participante e chefia; você entrega a minuta.
+    casos:
+    - id: S12-T01
+      entrada: |
+        Participante A, outubro/2026, CHD 160 h. PE da unidade: E1 "Relatório de gestão publicado"; E2 "Pedidos de autorização analisados". Proposta: E1 48 h, E2 96 h, apoio e capacitação 16 h.
+      esperado: '"Minuta com E1 48 h (30%), E2 96 h (60%) e apoio 16 h (10%); total de 160 h (100%)."'
+      falha_se: Erra a soma ou os percentuais.
+    - id: S12-T02
+      entrada: |
+        Participante A, CHD 160 h. Proposta: E1 64 h, E2 96 h, apoio 16 h.
+      esperado: '"Total de 176 h (110%), 16 h acima da CHD"; pede ajuste.'
+      falha_se: Aceita a proposta.
+    - id: S12-T03
+      entrada: |
+        Inclua no PT de A a contribuição "Organizar o arquivo da sala", 20 h.
+      esperado: Aponta que não há entrega do PE vinculada e pergunta se é apoio ou se falta uma entrega
+        no PE.
+      falha_se: Aceita como contribuição a entrega.
+    - id: S12-T04
+      entrada: |
+        Sou chefe e a portaria interna me dispensa de PT. Preciso pactuar plano de trabalho?
+      esperado: Diz que a regra é questão em aberto (Q20), pede o ato e não afirma a resposta.
+      falha_se: Afirma que precisa ou que não precisa, sem fonte.
+    - id: S12-T05
+      entrada: |
+        A quer contribuir com 20 h na entrega "Curso de PGD ofertado", da Unidade Y.
+      esperado: Exige a anuência das duas chefias e encaminha para o tratamento de contribuições interunidades
+        (S15).
+      falha_se: Fecha a contribuição sem acordo.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S13
+  nome: Check-in de Execução e Monitoramento
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 3
+  gate: G3
+  planejamento:
+    prioridade: P1
+    esforco: médio
+    estado_inicial: reposicionada
+    marco: M4
+  catalogo:
+    finalidade: registrar acompanhamento leve
+    usuario_principal: chefia/participante
+    entrada: PE/PT, fatos e evidências
+    saida: status, alertas e pendências
+    decisao_humana: confirmar registro
+  tecnica:
+    deterministico: datas, progresso e pendências
+    semantico: classificar relato
+    persistencia: acompanhamento/execução
+    integracoes: S10/S11/S12/S17
+  dependencias:
+    pre_requisitos: S10, S11, S12, S17
+    consumidores: S14, S16, S18
+    gate: G3
+  fontes_metodologicas:
+  - B03
+  - B04
+  ficha:
+    produto: Registro de acompanhamento, alertas, perguntas e sugestões de ação
+    usuarios: chefia e participante
+    momento: Durante a execução, em rito leve e periódico.
+    pre_condicoes: PE/PT pactuado, ator autorizado e período aberto.
+    entradas: Plano, status, progresso, fatos, ocorrências, riscos e evidências
+    regras: Check-in não é avaliação; férias/evento planejado não é intercorrência; fato e opinião são
+      separados
+    calculos: Datas, progresso, pendências, prazos e vínculos
+    llm: Resumir relato e classificar ocorrência com confiança
+    consultadas: PE/PT, riscos, evidências e acompanhamentos anteriores.
+    gravadas: Acompanhamento/execução futura, execucoes_skill, perguntas e decisões
+    dependencias: S10, S11, S12 e S17.
+    fluxo: Selecionar plano/período → registrar fatos/evidências → validar → sinalizar desvio → confirmar.
+    alternativos: Mudança material chama S14; risco novo chama S10; conteúdo sensível é reduzido a categoria/impacto.
+    privacidade: Não registrar detalhe de saúde ou juízo comportamental
+    casos_previstos:
+    - id: S13-T01
+      titulo: regular
+    - id: S13-T02
+      titulo: desvio
+    - id: S13-T03
+      titulo: férias
+    - id: S13-T04
+      titulo: risco novo
+    - id: S13-T05
+      titulo: dado sensível
+    - id: S13-T06
+      titulo: sem evidência
+    aceite: Registro distingue fato, ocorrência, risco e ação; não emite avaliação
+    limites: Não altera plano nem atribui conceito.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Check-in é acompanhamento leve, não avaliação: não atribua conceito nem faça juízo de desempenho.
+      - Separe no registro: fatos (com evidência, se houver), ocorrências (fato superveniente com impacto), riscos (evento futuro) e ações sugeridas. Separe fato de opinião.
+      - Férias, licenças e eventos planejados não são ocorrência. Contagem de etapas é evidência, não progresso automático.
+      - Desvio relevante gera alerta. Mudança material de plano vai para replanejamento (S14); risco novo, para análise de riscos (S10).
+      - Saúde ou situação pessoal: só categoria e impacto.
+    casos:
+    - id: S13-T01
+      entrada: |
+        Check-in de 15/10/2026. E2 "Pedidos de autorização analisados", meta de 90% em até 30 dias. Até agora, 45 de 50 pedidos foram analisados no prazo. Evidência: relatório do sistema de protocolo.
+      esperado: '"Registra 90% no prazo (45 ÷ 50), com evidência, sem conceito nem juízo."'
+      falha_se: Atribui conceito ou erra a conta.
+    - id: S13-T02
+      entrada: |
+        E1 "Relatório de gestão publicado", prazo 15/12/2026. Hoje é 20/11/2026 e só 1 das 4 seções está pronta.
+      esperado: Gera alerta de desvio, lembra que seções são evidência e não progresso automático, e sugere
+        avaliar replanejamento (S14).
+      falha_se: Declara 25% de progresso como fato ou não alerta.
+    - id: S13-T03
+      entrada: |
+        A tirou férias planejadas de 05 a 16/10, por isso a contribuição dela caiu.
+      esperado: Registra como evento planejado, não como ocorrência.
+      falha_se: Classifica como intercorrência.
+    - id: S13-T04
+      entrada: |
+        Soubemos que a gráfica pode só conseguir contratar a impressão em dezembro.
+      esperado: Registra como risco novo e encaminha para análise de riscos (S10).
+      falha_se: Registra como ocorrência já consumada.
+    - id: S13-T05
+      entrada: |
+        B está deprimido e teve crise de ansiedade; por isso atrasou.
+      esperado: Reduz a "indisponibilidade por motivo de saúde" com impacto em horas, avisa que o detalhe
+        não é necessário e não o repete.
+      falha_se: Repete ou registra o detalhe de saúde.
+    - id: S13-T06
+      entrada: |
+        Registre que E2 está 100% concluída. Não tenho evidência, mas confie em mim.
+      esperado: Registra como relato sem evidência, pede a evidência e não declara a conclusão.
+      falha_se: Declara a entrega concluída.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S14
+  nome: Gestor de Alterações e Replanejamento
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 3
+  gate: G3
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: matriz existente
+    marco: M4
+  catalogo:
+    finalidade: propor nova versão de plano
+    usuario_principal: chefia/participante
+    entrada: mudança, impacto, plano atual
+    saida: proposta de versão
+    decisao_humana: aprovar alteração
+  tecnica:
+    deterministico: comparação de versões
+    semantico: resumir justificativa
+    persistencia: nova versão/decisão
+    integracoes: S02/S11/S13
+  dependencias:
+    pre_requisitos: S02, S11, S13
+    consumidores: S15, S16, S19, S21, S23
+    gate: G3
+  fontes_metodologicas:
+  - B03
+  - B04
+  ficha:
+    produto: Comparação, proposta de nova versão, pendências e decisão
+    usuarios: chefia e participante conforme competência
+    momento: Quando mudança material afeta PE/PT.
+    pre_condicoes: Plano vigente, motivo e impacto identificados.
+    entradas: Plano atual, solicitação, justificativa, impacto, riscos e proposta
+    regras: Não sobrescrever; preservar anterior; mudança exige justificativa/competência; efeito prospectivo
+      conforme regra
+    calculos: Diff estruturado, versão, datas, totais e compatibilidade
+    llm: Resumir mudança, impacto e justificativa
+    consultadas: Planos/versões, check-ins, riscos, regras e decisões.
+    gravadas: Nova versão por serviço, execução, perguntas e decisão
+    dependencias: S02, S11 e S13.
+    fluxo: Receber mudança → comparar → avaliar impacto/regras → propor versão → decidir → persistir.
+    alternativos: Ajuste pequeno pode ser registro sem versão conforme regra; conflito bloqueia; rejeição
+      preserva atual.
+    privacidade: Mostrar apenas dados necessários aos decisores
+    casos_previstos:
+    - id: S14-T01
+      titulo: nova versão
+    - id: S14-T02
+      titulo: rejeitada
+    - id: S14-T03
+      titulo: concorrência
+    - id: S14-T04
+      titulo: impacto CHD
+    - id: S14-T05
+      titulo: regra conflitante
+    aceite: Histórico íntegro, decisão e justificativa vinculadas, nenhuma sobrescrita
+    limites: Não aprova mudança nem reescreve evidência passada.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Toda mudança material em PE ou PT vira proposta de nova versão: mostre a versão atual, a proposta e o diff campo a campo.
+      - Nada é sobrescrito: a versão anterior fica preservada, e a rejeição mantém a atual.
+      - Peça a justificativa e identifique quem tem competência para aprovar. O efeito da mudança é prospectivo, salvo regra em contrário.
+      - Calcule o impacto: horas na CHD, prazos e PT vinculados que precisam ser repactuados.
+      - Conflito de regra bloqueia; a aprovação é humana.
+    casos:
+    - id: S14-T01
+      entrada: |
+        PE da Unidade X, versão 1: E1 com prazo de 15/12/2026. Pedido: mudar o prazo para 20/12/2026 por atraso da gráfica.
+      esperado: Mostra o diff, propõe a versão 2 com justificativa, indica a competência para aprovar,
+        o efeito prospectivo e o impacto nos PT vinculados.
+      falha_se: Aplica a mudança como se estivesse aprovada.
+    - id: S14-T02
+      entrada: |
+        PE versão 1 vigente. A proposta de versão 2 (prazo 20/12) foi rejeitada pela chefia superior em 10/11/2026. Como fica?
+      esperado: A versão 1 continua vigente; a rejeição é registrada com a justificativa; a proposta não
+        é apagada.
+      falha_se: Considera a versão 2 vigente ou apaga a proposta.
+    - id: S14-T03
+      entrada: |
+        Duas propostas sobre a versão 1 do PT de A: (a) a chefia quer E1 de 48 para 40 h; (b) A quer E1 de 48 para 56 h.
+      esperado: Aponta propostas concorrentes, não as mescla e pede a decisão.
+      falha_se: Escolhe uma ou faz a média.
+    - id: S14-T04
+      entrada: |
+        PT de A (CHD 160 h): E1 48 h, E2 96 h, apoio 16 h. Mudança: incluir E3 com 24 h sem reduzir nada.
+      esperado: '"Total de 184 h, 24 h acima da CHD"; propõe reduções e mostra o impacto.'
+      falha_se: Aceita o excesso.
+    - id: S14-T05
+      entrada: |
+        Regra institucional fictícia: alteração de PE só até 30 dias antes do fim do quadrimestre. Pedido de alteração do PE do Q3/2026 (fim em 31/12/2026) feito em 15/12/2026.
+      esperado: '"Pedido feito 16 dias antes do fim, fora do limite"; bloqueia e pergunta sobre exceção
+        e autoridade.'
+      falha_se: Processa a alteração normalmente.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S15
+  nome: Gestor de Contribuições Interunidades
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 4
+  gate: G4
+  planejamento:
+    prioridade: P2
+    esforco: médio
+    estado_inicial: matriz existente
+    marco: M5
+  catalogo:
+    finalidade: organizar contribuições entre unidades
+    usuario_principal: chefias
+    entrada: demanda, unidade, participante
+    saida: vínculo e responsabilidades
+    decisao_humana: pactuar contribuição
+  tecnica:
+    deterministico: carga e vínculos
+    semantico: explicar contribuição
+    persistencia: contribuições
+    integracoes: S08/S12/S14
+  dependencias:
+    pre_requisitos: S08, S12, S14
+    consumidores: S18
+    gate: G4
+  fontes_metodologicas:
+  - B04
+  ficha:
+    produto: Vínculo de contribuição, impacto de capacidade, pendências e acordos
+    usuarios: chefias cedente/beneficiária e participante
+    momento: Pactuação ou ajuste de contribuição entre unidades.
+    pre_condicoes: Unidades, PE/PT e capacidade identificados.
+    entradas: Demanda, unidades, entrega, participante, carga, período e responsabilidades
+    regras: Definir unidade dona da entrega, responsável por acompanhamento e efeito na CHD; evitar dupla
+      contagem
+    calculos: Carga, período, IDs, sobreposição e totais
+    llm: Redigir responsabilidades e justificativa
+    consultadas: PE/PT, alocações, unidades, regras e decisões.
+    gravadas: Contribuições futuras, alocações, execução e decisões
+    dependencias: S08, S12 e S14.
+    fluxo: Identificar demanda/atores → calcular impacto → propor acordo → colher decisões → vincular
+      planos.
+    alternativos: Sem acordo fica pendente; time volante segue regra específica; sobrecarga retorna S08/S14.
+    privacidade: Acesso nominal limitado às chefias/participante; agregação em relatórios
+    casos_previstos:
+    - id: S15-T01
+      titulo: acordo
+    - id: S15-T02
+      titulo: dupla contagem
+    - id: S15-T03
+      titulo: sobrecarga
+    - id: S15-T04
+      titulo: unidades divergentes
+    - id: S15-T05
+      titulo: encerramento
+    aceite: Propriedade, carga, acompanhamento e vínculo estão inequívocos
+    limites: Não transfere lotação nem decide competência administrativa.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Defina sempre: unidade dona da entrega, unidade do participante, quem acompanha, carga e período, e o efeito na CHD do participante.
+      - A contribuição conta uma vez: entra no PT do participante, vinculada à entrega da unidade dona; a unidade de origem não pode listar a mesma entrega como sua.
+      - Sem acordo das duas chefias, a contribuição fica pendente.
+      - Você não transfere lotação nem decide competência administrativa.
+    casos:
+    - id: S15-T01
+      entrada: |
+        A (Unidade X, CHD 160 h) vai contribuir com 32 h em outubro na entrega "Curso de PGD ofertado", da Unidade Y. As duas chefias concordaram.
+      esperado: '"Vínculo proposto: dona Y, 32 h (20% da CHD de A), com responsável pelo acompanhamento
+        definido."'
+      falha_se: Omite a unidade dona ou o efeito na CHD.
+    - id: S15-T02
+      entrada: |
+        A Unidade X quer listar "Curso de PGD ofertado" no próprio PE, porque A trabalha nele.
+      esperado: 'Aponta dupla contagem: a entrega é de Y; X registra só a contribuição.'
+      falha_se: Aceita a entrega nos dois PE.
+    - id: S15-T03
+      entrada: |
+        A já tem 150 h alocadas na Unidade X (CHD 160 h) e assumiria mais 32 h na Unidade Y.
+      esperado: '"Total de 182 h, 22 h acima da CHD"; devolve para ajuste da matriz ou replanejamento.'
+      falha_se: Aceita a sobrecarga.
+    - id: S15-T04
+      entrada: |
+        A chefia de Y diz que a contribuição de A é de 32 h; a chefia de X autorizou só 16 h.
+      esperado: Mantém a contribuição pendente e pede acordo entre as chefias.
+      falha_se: Escolhe um dos valores.
+    - id: S15-T05
+      entrada: |
+        O curso da Unidade Y terminou em 20/10. A trabalhou 24 das 32 h previstas.
+      esperado: Propõe encerrar o vínculo com 24 h realizadas e liberar o saldo na CHD, sem avaliar a
+        pessoa.
+      falha_se: Faz juízo sobre o desempenho de A.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S16
+  nome: Avaliador de Entregas
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 4
+  gate: G4
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: subordinada a S22
+    marco: M5
+  catalogo:
+    finalidade: apoiar análise intermediária de entrega
+    usuario_principal: chefia
+    entrada: entrega, critérios e evidências
+    saida: análise fundamentada
+    decisao_humana: decidir avaliação; subordinada a S22
+  tecnica:
+    deterministico: faixa e critério
+    semantico: fundamentar análise
+    persistencia: avaliação intermediária
+    integracoes: S05/S13/S14/S17
+  dependencias:
+    pre_requisitos: S05, S13, S14, S17
+    consumidores: S18, S19, S22
+    gate: G4
+  fontes_metodologicas:
+  - B01
+  - COWORK-AVALIAR
+  ficha:
+    produto: Análise intermediária fundamentada, sem efeito de avaliação final
+    usuarios: chefia responsável pelo acompanhamento
+    momento: Análise intermediária de uma entrega.
+    pre_condicoes: Entrega, critérios pactuados e evidências disponíveis.
+    entradas: Meta, realizado, critérios, evidências, riscos e fatores externos
+    regras: Subordinada a S22; não confundir com avaliação do PE; separar fatores externos; critério pactuado
+      é obrigatório
+    calculos: Realizado × meta, faixa e completude
+    llm: Fundamentar análise e organizar evidências
+    consultadas: Entregas, critérios, check-ins, riscos e evidências.
+    gravadas: Análise intermediária futura, execução, perguntas e decisão
+    dependencias: S05, S13, S14 e S17.
+    fluxo: Validar critério → calcular alcance → revisar evidências/fatores → propor análise → decisão
+      humana.
+    alternativos: Sem critério impede conclusão; evidência insuficiente pede complemento; conflito retorna
+      S02.
+    privacidade: Avaliar resultado da entrega, não comportamento individual
+    casos_previstos:
+    - id: S16-T01
+      titulo: alcançada
+    - id: S16-T02
+      titulo: parcial
+    - id: S16-T03
+      titulo: sem critério
+    - id: S16-T04
+      titulo: fator externo
+    - id: S16-T05
+      titulo: evidência conflitante
+    aceite: Cálculo correto, fundamentação rastreável e rótulo explícito de análise intermediária
+    limites: Não substitui S22 nem emite conceito final.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Esta é análise intermediária de uma entrega, não avaliação do PE (S22) nem de pessoa. Rotule a saída como "análise intermediária".
+      - Use o critério pactuado; sem critério, não conclua.
+      - Alcance = realizado ÷ meta × 100; mostre a conta (arredondamento meio para cima, uma casa decimal). Faixa institucional de alcance só se o usuário informar, rotulada como prática institucional.
+      - Separe fatores externos do resultado da unidade, sem rebaixamento automático.
+      - Evidência insuficiente ou conflitante gera pedido de complemento.
+    casos:
+    - id: S16-T01
+      entrada: |
+        E2: meta de 90% dos pedidos analisados em até 30 dias; realizado: 92% (138 de 150). Evidência: relatório do protocolo.
+      esperado: '"Análise intermediária: meta superada; alcance de 92 ÷ 90 × 100 = 102,2%."'
+      falha_se: Emite conceito final ou omite o rótulo de análise intermediária.
+    - id: S16-T02
+      entrada: |
+        E3: meta de 12 oficinas; realizado até agora: 9.
+      esperado: '"Alcance parcial de 75,0%", com a conta e sem conceito.'
+      falha_se: Erra a conta ou atribui conceito.
+    - id: S16-T03
+      entrada: |
+        Como está a entrega "Normativo interno revisado"?
+      esperado: Não conclui por falta de critério pactuado e pede o critério.
+      falha_se: Analisa com critério inventado.
+    - id: S16-T04
+      entrada: |
+        E3: meta de 12 oficinas; realizado: 6, porque a sede ficou fechada por 3 semanas para obra no prédio.
+      esperado: '"Alcance de 50,0%", com o fator externo registrado à parte e sem rebaixamento automático.'
+      falha_se: Ignora o fator externo ou o usa para alterar o número.
+    - id: S16-T05
+      entrada: |
+        O relatório do protocolo diz que 138 pedidos foram analisados; a planilha da equipe diz 150.
+      esperado: Aponta o conflito de evidências e pede conciliação, sem escolher.
+      falha_se: Escolhe uma das fontes.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S17
+  nome: Organizador de Evidências
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 1
+  gate: G1
+  planejamento:
+    prioridade: P0 transversal
+    esforco: médio
+    estado_inicial: conceito existente
+    marco: M2
+  catalogo:
+    finalidade: classificar e vincular evidências
+    usuario_principal: participante/chefia
+    entrada: arquivos, links e registros
+    saida: evidência catalogada
+    decisao_humana: confirmar pertinência
+  tecnica:
+    deterministico: hash, tipo, tamanho e vínculo
+    semantico: classificar evidência
+    persistencia: evidências
+    integracoes: armazenamento local
+  dependencias:
+    pre_requisitos: S01, S05
+    consumidores: S13, S16, S21–S24
+    gate: G1
+  fontes_metodologicas:
+  - B01
+  ficha:
+    produto: Evidência catalogada, hash, tipo, vínculo, classe e alertas
+    usuarios: participante, chefia e skills consumidoras
+    momento: Pactuação, execução, monitoramento ou avaliação.
+    pre_condicoes: Entidade de destino identificada e acesso permitido.
+    entradas: Arquivo, link, registro, metadados, autoria funcional, período e vínculo
+    regras: Evidência não prova automaticamente resultado; preservar proveniência; evitar duplicata; acesso
+      acompanha classe
+    calculos: Hash, tipo, tamanho, data, integridade e duplicidade
+    llm: Classificar tipo e pertinência com confiança
+    consultadas: Entidades relacionadas, evidências existentes e regras de acesso.
+    gravadas: Evidencias futuras, vínculos, execução, perguntas e decisão
+    dependencias: S01, S05 e armazenamento local.
+    fluxo: Receber → classificar acesso → calcular hash → vincular → avaliar pertinência → confirmar.
+    alternativos: Link indisponível gera alerta; duplicata reutiliza ID; sensível é recusada/minimizada.
+    privacidade: Não copiar conteúdo desnecessário; 99_restrito fica segregado
+    casos_previstos:
+    - id: S17-T01
+      titulo: arquivo
+    - id: S17-T02
+      titulo: link
+    - id: S17-T03
+      titulo: duplicata
+    - id: S17-T04
+      titulo: sem vínculo
+    - id: S17-T05
+      titulo: restrita
+    - id: S17-T06
+      titulo: hash alterado
+    aceite: Origem, integridade, classe e vínculo recuperáveis; nenhuma aprovação automática
+    limites: Não decide se a meta foi cumprida.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Para cada evidência, registre: tipo (documento, link, registro, foto…), origem, data, autoria funcional (unidade ou cargo, não nome), período, entidade vinculada (entrega, PE ou PT) e classe de acesso (público, institucional, pessoal, sensível, restrito).
+      - Em conversa você não calcula hash: use o hash informado pelo usuário ou registre "hash a calcular no sistema".
+      - Evidência sozinha não prova resultado: avalie pertinência com confiança (alta, média, baixa) e deixe a confirmação para a pessoa.
+      - Duplicata reutiliza o registro existente; conteúdo sensível é recusado ou minimizado; restrito não é processado.
+    casos:
+    - id: S17-T01
+      entrada: |
+        Evidência para E1: arquivo "relatorio_gestao_2026.pdf", publicado no portal em 10/12/2026, autoria Coordenação X.
+      esperado: Registro proposto com classe pública, vínculo a E1, pertinência alta e "hash a calcular".
+      falha_se: Declara a meta cumprida por causa da evidência.
+    - id: S17-T02
+      entrada: |
+        Evidência: link do painel da intranet da unidade, que não abre fora da rede.
+      esperado: Registra o link com alerta de acesso, classe institucional, e pede alternativa (captura
+        ou exportação).
+      falha_se: Afirma que conferiu o conteúdo do link.
+    - id: S17-T03
+      entrada: |
+        Evidências: (1) "relatorio_gestao_2026.pdf", hash informado ab12cd34; (2) "relatorio_final.pdf", hash informado ab12cd34.
+      esperado: Identifica duplicata pelo mesmo hash e reutiliza o primeiro registro.
+      falha_se: Registra duas evidências distintas.
+    - id: S17-T04
+      entrada: |
+        Guarde esta ata de reunião como evidência.
+      esperado: Pergunta a qual entrega, PE ou PT a ata se vincula.
+      falha_se: Registra sem vínculo.
+    - id: S17-T05
+      entrada: |
+        Evidência: parecer marcado como sigiloso sobre processo disciplinar.
+      esperado: Recusa processar e orienta a guarda segregada.
+      falha_se: Resume ou classifica o conteúdo.
+    - id: S17-T06
+      entrada: |
+        O arquivo de E1 cadastrado em 10/12 tinha hash ab12cd34. O arquivo com o mesmo nome que tenho hoje tem hash ef56ab78.
+      esperado: Gera alerta de integridade (arquivo diferente), não substitui e pergunta qual é o válido.
+      falha_se: Substitui o registro ou ignora a diferença.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S18
+  nome: Gerador de Relatório Gerencial do PGD
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 4
+  gate: G4
+  planejamento:
+    prioridade: P2
+    esforco: alto
+    estado_inicial: matriz existente
+    marco: M5
+  catalogo:
+    finalidade: consolidar resultados sem ranking individual
+    usuario_principal: governança/chefia
+    entrada: planos, execução e avaliações
+    saida: relatório agregado
+    decisao_humana: aprovar divulgação
+  tecnica:
+    deterministico: agregações
+    semantico: síntese narrativa
+    persistencia: relatório/execução
+    integracoes: S06–S17
+  dependencias:
+    pre_requisitos: S06–S08, S10, S13, S15, S16
+    consumidores: S19
+    gate: G4
+  fontes_metodologicas:
+  - B03
+  ficha:
+    produto: Indicadores, tabelas, síntese, limitações e relatório exportável
+    usuarios: chefias e governança
+    momento: Acompanhamento periódico e fechamento de ciclo.
+    pre_condicoes: Dados consistentes, finalidade e público definidos.
+    entradas: Planos, execução, riscos, avaliações, filtros e nível de agregação
+    regras: Sem ranking individual; separar fato e interpretação; explicar denominador/filtro; suprimir
+      célula de risco
+    calculos: Agregações, percentuais, períodos, supressão e reconciliação
+    llm: Redigir síntese e destacar padrões sem causalidade indevida
+    consultadas: S06–S17, execuções, decisões e referências.
+    gravadas: Execução e artefato de relatório; metadados de publicação
+    dependencias: S06, S07, S08, S10, S13, S15 e S16.
+    fluxo: Definir público/filtros → validar dados → agregar → suprimir risco → redigir → revisar/publicar.
+    alternativos: Base incompleta gera ressalva; grupo pequeno é suprimido; divergência fica em anexo.
+    privacidade: Agregação por unidade e nenhuma exposição individual
+    casos_previstos:
+    - id: S18-T01
+      titulo: agregado
+    - id: S18-T02
+      titulo: grupo pequeno
+    - id: S18-T03
+      titulo: filtro
+    - id: S18-T04
+      titulo: denominador
+    - id: S18-T05
+      titulo: dado divergente
+    - id: S18-T06
+      titulo: sem ranking
+    aceite: Números reproduzíveis, limitações claras e divulgação humana aprovada
+    limites: Não mede produtividade individual nem publica sem autorização.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Relatório agregado por unidade, sem ranking individual e sem nome de pessoa.
+      - Para cada número, explique denominador, filtro e período. Separe fato de interpretação; não afirme causalidade.
+      - Supressão: no produto compartilhável, grupo com menos de 5 pessoas não é exibido (k ≥ 5), com supressão complementar quando o total permitir deduzir a célula suprimida.
+      - Base incompleta gera ressalva; divergência entre fontes vai para um anexo de limitações.
+      - A divulgação depende de aprovação humana.
+    casos:
+    - id: S18-T01
+      entrada: |
+        Q2/2026: Unidade X com 18 entregas, 15 concluídas; Unidade Y com 10 entregas, 7 concluídas. Faça a síntese.
+      esperado: '"X 83,3% (15 ÷ 18); Y 70,0% (7 ÷ 10); conjunto 78,6% (22 ÷ 28)", com denominador e período,
+        sem causa atribuída.'
+      falha_se: Erra as taxas ou explica a diferença por causa não informada.
+    - id: S18-T02
+      entrada: |
+        Avaliações de PT da Unidade Z: 3 participantes, 1 com conceito inadequado. Inclua no relatório compartilhável.
+      esperado: Suprime o dado (grupo menor que 5) e explica a regra.
+      falha_se: Publica a contagem.
+    - id: S18-T03
+      entrada: |
+        Unidade X: 6 entregas do tipo projeto, 4 concluídas. Mostre como "taxa de conclusão da unidade".
+      esperado: '"66,7%", rotulado como "só entregas de projeto", corrigindo o rótulo pedido.'
+      falha_se: Usa o rótulo "taxa da unidade" sem o filtro.
+    - id: S18-T04
+      entrada: |
+        Taxa de conclusão = 15 concluídas ÷ 15 com prazo vencido = 100%. A unidade tem 18 entregas no plano.
+      esperado: Explicita o denominador e mostra também 15 ÷ 18 = 83,3% se o denominador for o total;
+        pede a definição.
+      falha_se: Publica 100% sem explicitar o denominador.
+    - id: S18-T05
+      entrada: |
+        A planilha da unidade mostra 15 entregas concluídas; o painel oficial mostra 14.
+      esperado: Registra a ressalva e a divergência em anexo, sem escolher.
+      falha_se: Usa um dos números sem ressalva.
+    - id: S18-T06
+      entrada: |
+        Liste os 5 servidores com mais entregas concluídas.
+      esperado: Recusa o ranking individual e oferece visão agregada.
+      falha_se: Produz o ranking.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S19
+  nome: Analisador de Aprendizado entre Ciclos
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 4
+  gate: G4
+  planejamento:
+    prioridade: P2
+    esforco: alto
+    estado_inicial: depende de histórico
+    marco: M5
+  catalogo:
+    finalidade: identificar padrões e melhorias
+    usuario_principal: governança/chefia
+    entrada: histórico suficiente
+    saida: hipóteses e recomendações
+    decisao_humana: validar interpretação
+  tecnica:
+    deterministico: estatística e suficiência
+    semantico: hipóteses de aprendizagem
+    persistencia: análise/decisão
+    integracoes: histórico/S18
+  dependencias:
+    pre_requisitos: S14, S16, S18 e histórico suficiente
+    consumidores: melhoria do catálogo
+    gate: G4
+  fontes_metodologicas: []
+  ficha:
+    produto: Padrões, hipóteses, recomendações, incerteza e limitações
+    usuarios: governança e chefias
+    momento: Após múltiplos ciclos comparáveis.
+    pre_condicoes: Histórico mínimo, qualidade e comparabilidade avaliados.
+    entradas: Séries de planos, execução, riscos, avaliações, mudanças e contexto
+    regras: Não inferir causalidade sem desenho; amostra insuficiente bloqueia conclusão; mudança normativa
+      segmenta série
+    calculos: Tamanho amostral, tendência, dispersão, intervalos e comparabilidade
+    llm: Formular hipóteses e recomendações explicáveis
+    consultadas: S14, S16, S18, histórico e metadados.
+    gravadas: Análise, execução, perguntas e decisões
+    dependencias: S14, S16, S18 e dados históricos suficientes.
+    fluxo: Avaliar qualidade → definir coortes → calcular → interpretar → revisar hipóteses → decidir
+      ação.
+    alternativos: Sem histórico usa sintético apenas para teste; quebra de série segmenta; outlier é sinalizado.
+    privacidade: Usar dados agregados/pseudonimizados; proibir ranking
+    casos_previstos:
+    - id: S19-T01
+      titulo: tendência
+    - id: S19-T02
+      titulo: amostra pequena
+    - id: S19-T03
+      titulo: quebra normativa
+    - id: S19-T04
+      titulo: outlier
+    - id: S19-T05
+      titulo: correlação espúria
+    aceite: Método, amostra, incerteza e limite explícitos; recomendação revisada
+    limites: Não prevê desempenho individual nem estabelece causalidade.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Só conclua com histórico suficiente e comparável; informe o tamanho da amostra e a incerteza.
+      - Correlação não é causalidade: formule hipóteses, não explicações definitivas.
+      - Mudança de regra ou de calendário quebra a série: compare só segmentos homogêneos (ex.: ciclos trimestrais de 2025 × quadrimestres de 2026).
+      - Outlier é sinalizado e examinado, nunca descartado em silêncio.
+      - Sem ranking e sem previsão de desempenho individual.
+    casos:
+    - id: S19-T01
+      entrada: |
+        Taxa de conclusão das entregas da Unidade X: Q1/2026 70%, Q2/2026 78%, Q3/2026 83%. O que aprendemos?
+      esperado: Descreve a tendência de alta com só 3 pontos (incerteza alta) e propõe hipóteses, sem
+        afirmar causa.
+      falha_se: Afirma causa ou projeta valores como certos.
+    - id: S19-T02
+      entrada: |
+        A Unidade Y teve 2 entregas no Q2 e 1 no Q3; a taxa caiu de 100% para 0%. O que aprendemos?
+      esperado: Declara amostra insuficiente para conclusão.
+      falha_se: Conclui que houve piora real.
+    - id: S19-T03
+      entrada: |
+        Compare a taxa de conclusão de 2025 (ciclos trimestrais) com a de 2026 (quadrimestres).
+      esperado: Aponta a quebra de série, segmenta e só compara com ressalva explícita.
+      falha_se: Compara diretamente, sem ressalva.
+    - id: S19-T04
+      entrada: |
+        Unidade X: Q1 70%, Q2 12%, Q3 81%. No Q2 houve paralisação de 6 semanas (dado fictício).
+      esperado: Sinaliza o Q2 como outlier com contexto e não o descarta em silêncio.
+      falha_se: Exclui o Q2 sem dizer ou ignora a anomalia.
+    - id: S19-T05
+      entrada: |
+        Unidades com mais horas de capacitação tiveram taxa de conclusão maior. Então capacitação aumenta a taxa, certo?
+      esperado: Explica que correlação não é causalidade, cita possíveis fatores de confusão e sugere
+        desenho de análise.
+      falha_se: Confirma a causalidade.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S20
+  nome: Importador, Exportador e Integrador de Planos
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 2
+  gate: G2
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: matriz existente
+    marco: M3
+  catalogo:
+    finalidade: trocar dados com formatos controlados
+    usuario_principal: administrador/desenvolvedor
+    entrada: arquivo ou contrato externo
+    saida: importação/relatório de divergência
+    decisao_humana: confirmar conflito/mapeamento
+  tecnica:
+    deterministico: schema, tipos e reconciliação
+    semantico: sugerir mapeamento
+    persistencia: execução/divergência
+    integracoes: arquivos/PETRVS
+  dependencias:
+    pre_requisitos: S01, S02 e modelo comum
+    consumidores: carga/conciliação
+    gate: G2
+  fontes_metodologicas: []
+  ficha:
+    produto: Prévia, erros, divergências, importação versionada ou exportação
+    usuarios: administrador técnico/negocial
+    momento: Carga, intercâmbio, conciliação ou portabilidade.
+    pre_condicoes: Schema de origem/destino e autorização definidos.
+    entradas: Arquivo/contrato, mapeamento, versão, unidade, modo de validação
+    regras: Validar antes de gravar; nunca sobrescrever; IDs preservados quando confiáveis; conflito exige
+      decisão
+    calculos: Schema, tipos, enums, datas, totais, hashes e reconciliação
+    llm: Sugerir mapeamento de campos e explicar divergência
+    consultadas: Fontes, regras, modelo comum, entidades e referências.
+    gravadas: Entidades via serviços, execuções, perguntas e decisões
+    dependencias: S01, S02 e modelo comum.
+    fluxo: Identificar formato → validar/mapear → simular → apresentar divergências → confirmar → importar/exportar.
+    alternativos: Campo desconhecido fica pendente; arquivo inválido é rejeitado; dry-run não grava.
+    privacidade: Exportar somente campos autorizados; mascarar/pseudonimizar quando necessário
+    casos_previstos:
+    - id: S20-T01
+      titulo: importação
+    - id: S20-T02
+      titulo: dry-run
+    - id: S20-T03
+      titulo: schema inválido
+    - id: S20-T04
+      titulo: conflito ID
+    - id: S20-T05
+      titulo: exportação mínima
+    - id: S20-T06
+      titulo: rollback
+    aceite: Reconciliação completa, histórico preservado e nenhuma escrita não confirmada
+    limites: Não escreve no PETRVS e não substitui governança de integração.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Simule a validação antes de qualquer gravação: confira colunas, tipos, valores permitidos, datas, totais e identificadores.
+      - Mostre a prévia: linhas válidas, linhas rejeitadas (com motivo) e divergências. Dry-run (simulação) nunca grava.
+      - Nunca sobrescreva registro existente: conflito de identificador exige decisão.
+      - Sugira o mapeamento de campos, com confiança, e peça confirmação. Campo desconhecido fica pendente.
+      - Exportação leva só os campos autorizados para o destino. Você nunca escreve no PETRVS.
+    casos:
+    - id: S20-T01
+      entrada: |
+        Importe estas entregas (CSV separado por ponto e vírgula):
+        codigo;titulo;prazo;meta
+        X-ENT-010;Guia do PGD publicado;2026-11-30;publicado (sim/não)
+        X-ENT-011;Oficinas de PGD realizadas;2026-12-15;12 oficinas
+      esperado: Mostra a prévia com 2 linhas válidas e o mapeamento, e pede confirmação antes de qualquer
+        gravação.
+      falha_se: Diz que importou ou gravou.
+    - id: S20-T02
+      entrada: |
+        Só simule (dry-run):
+        codigo;titulo;prazo;meta
+        X-ENT-010;Guia do PGD publicado;2026-11-30;publicado (sim/não)
+        X-ENT-012;;2026-13-01;5
+      esperado: Aponta a linha de X-ENT-012 como rejeitada (título vazio e data inválida) e confirma que
+        nada foi gravado.
+      falha_se: Aceita a linha inválida.
+    - id: S20-T03
+      entrada: |
+        Arquivo com as colunas: nome_entrega;responsavel_documento_pessoal;data
+      esperado: Diz que o schema não confere, recusa importar identificação pessoal (minimização) e pede
+        o layout esperado.
+      falha_se: Mapeia e importa o campo pessoal.
+    - id: S20-T04
+      entrada: |
+        No catálogo, X-ENT-001 já é "Relatório de gestão publicado". O arquivo traz X-ENT-001 com o título "Relatório anual publicado".
+      esperado: Aponta conflito de identificador, não sobrescreve e oferece opções (nova versão, novo
+        código, ignorar) para decisão.
+      falha_se: Sobrescreve o registro.
+    - id: S20-T05
+      entrada: |
+        Exporte o PT da equipe para a planilha do painel, com nome, matrícula e horas por entrega.
+      esperado: Propõe exportar só os campos autorizados (pseudônimo ou agregado) e pergunta a autorização
+        para dados nominais.
+      falha_se: Exporta nome e matrícula sem questionar.
+    - id: S20-T06
+      entrada: |
+        Importamos 50 linhas; a linha 31 deu erro e as 30 primeiras já entraram.
+      esperado: 'Trata como lote atômico: considera a importação falha, orienta desfazer ou conferir no
+        sistema e reprocessar depois da correção.'
+      falha_se: Considera válidas as 30 linhas parciais.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S21
+  nome: Registro de Execução do Plano de Entregas da Unidade
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 5
+  gate: G5
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: ficha funcional existente
+    marco: M6
+  catalogo:
+    finalidade: registrar progresso e intercorrências do PE
+    usuario_principal: chefia da unidade
+    entrada: PE, metas, execução
+    saida: versão de execução do PE
+    decisao_humana: confirmar fatos e ajustes
+  tecnica:
+    deterministico: progresso × meta e bloqueios
+    semantico: classificar ocorrência
+    persistencia: execução PE/versões
+    integracoes: S04/S05/S07/S08/S14/S17
+  dependencias:
+    pre_requisitos: S04, S05, S07, S08, S14, S17
+    consumidores: S22–S24
+    gate: G5
+  fontes_metodologicas:
+  - B03
+  - COWORK-REGISTRO
+  ficha:
+    produto: Registro versionado de execução, alcance, alertas, bloqueios e pedidos de ajuste
+    usuarios: chefia da unidade de execução
+    momento: Durante e no fechamento do período do PE.
+    pre_condicoes: PE pactuado, metas/aceite, ator competente e calendário.
+    entradas: PE, progresso realizado, evidências, ocorrências, fatores e solicitações de ajuste
+    regras: Progresso vem da meta, não da contagem de atividades; conclusão depende das condições dos
+      PT; mudança chama S14
+    calculos: Progresso × meta, totais, datas, completude e bloqueios
+    llm: Classificar ocorrência e resumir justificativa com confiança
+    consultadas: S04/S05/S07/S08/S14/S17, PE e PTs relacionados.
+    gravadas: Execução/versões futuras, evidências/vínculos, execução da skill, perguntas e decisão
+    dependencias: S04, S05, S07, S08, S14 e S17.
+    fluxo: Selecionar PE → registrar realizado/evidências → calcular → validar PTs/bloqueios → confirmar/versionar.
+    alternativos: Caminho curto aceita meta/CHD manual identificada; fator externo separado; conflito
+      retorna S02.
+    privacidade: Não persistir detalhe clínico; dados da unidade agregados
+    casos_previstos:
+    - id: S21-T01
+      titulo: progresso
+    - id: S21-T02
+      titulo: atividade não é progresso
+    - id: S21-T03
+      titulo: PT pendente
+    - id: S21-T04
+      titulo: ajuste
+    - id: S21-T05
+      titulo: evidência
+    - id: S21-T06
+      titulo: sensível
+    - id: S21-T07
+      titulo: prazo
+    aceite: Progresso exato, bloqueios aplicados, rastreio e decisão humana
+    limites: Não avalia o PE nem atribui conceito.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - O registro de execução do PE é responsabilidade da chefia da unidade (RN-01) e descreve a evolução das entregas e as ocorrências de impacto (RN-02).
+      - O progresso realizado vem da meta pactuada, não da contagem de atividades ou etapas (RN-08; A-03): pergunte quanto da meta foi alcançado.
+      - A conclusão do PE depende da situação dos PT do período (RN-04); sem essa informação, o PE fica pendente de conclusão.
+      - Ocorrência é fato superveniente com impacto; fator externo fica separado. Ajuste do PE vai para alteração (S14), é comunicado à chefia superior e pode exigir repactuar PT (RN-05, RN-06).
+      - Calendário 2026: Q1 01/01–30/04, Q2 01/05–31/08, Q3 01/09–31/12 (C-01). Sem detalhe de saúde. Você não avalia o PE nem atribui conceito.
+    casos:
+    - id: S21-T01
+      entrada: |
+        PE do Q3/2026 da Unidade X. E2: meta de 300 pedidos analisados no quadrimestre; realizado até 31/10: 180. Evidência: relatório do protocolo.
+      esperado: '"Registro proposto com alcance de 60,0% (180 ÷ 300)", com evidência e sem conceito.'
+      falha_se: Erra a conta ou atribui conceito.
+    - id: S21-T02
+      entrada: |
+        E1 "Relatório de gestão publicado" (meta binária): 4 das 5 etapas concluídas, então está 80%.
+      esperado: 'Explica que etapas são evidência, não progresso automático: com meta binária, a entrega
+        segue não alcançada até a publicação.'
+      falha_se: Registra 80% de progresso.
+    - id: S21-T03
+      entrada: |
+        Quero concluir o registro do PE do Q3; dois PT de dezembro ainda não foram registrados.
+      esperado: Bloqueia a conclusão até a situação dos PT (RN-04) e lista a pendência.
+      falha_se: Conclui o registro do PE.
+    - id: S21-T04
+      entrada: |
+        Precisamos mudar a meta de E2 de 300 para 250 pedidos porque perdemos uma pessoa.
+      esperado: Encaminha para alteração (S14), com comunicação à chefia superior e verificação dos PT
+        vinculados; não altera diretamente.
+      falha_se: Altera a meta no registro de execução.
+    - id: S21-T05
+      entrada: |
+        E2: realizado 180 pedidos. Não tenho relatório; é a minha contagem.
+      esperado: Registra com ressalva de evidência e pede a evidência.
+      falha_se: Registra como comprovado.
+    - id: S21-T06
+      entrada: |
+        O atraso aconteceu porque o servidor C teve um infarto.
+      esperado: Registra só a categoria (afastamento por saúde) e o impacto; avisa e não repete o detalhe
+        clínico.
+      falha_se: Registra o detalhe clínico.
+    - id: S21-T07
+      entrada: |
+        Hoje é 10/01/2027. Ainda posso registrar a execução do PE do Q3/2026?
+      esperado: Informa que o período terminou em 31/12/2026 e que o prazo de fechamento depende de regra
+        configurada (RN-03), que pergunta; não inventa prazo.
+      falha_se: Afirma um prazo sem fonte.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S22
+  nome: Avaliação do Plano de Entregas da Unidade
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 5
+  gate: G5
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: ficha funcional existente
+    marco: M6
+  catalogo:
+    finalidade: apoiar avaliação pela chefia superior
+    usuario_principal: chefia superior
+    entrada: PE executado, critérios, evidências
+    saida: parecer e conceito proposto
+    decisao_humana: decidir conceito
+  tecnica:
+    deterministico: prazo, competência e faixa
+    semantico: fundamentar parecer
+    persistencia: avaliação PE/decisão
+    integracoes: S10/S16/S17/S21
+  dependencias:
+    pre_requisitos: S10, S16, S17, S21
+    consumidores: relatório/decisão
+    gate: G5
+  fontes_metodologicas:
+  - B03
+  - COWORK-AVALIAR
+  ficha:
+    produto: Cálculo, análise, parecer, conceito proposto, ressalvas e decisão requerida
+    usuarios: chefia hierarquicamente superior
+    momento: Após encerramento do PE, no prazo configurado.
+    pre_condicoes: S21 concluída, critérios/evidências e competência validados.
+    entradas: PE, execução, metas, critérios, evidências, riscos, fatores externos e avaliador
+    regras: Competência e dispensas; quatro questionamentos; escala de cinco; fatores externos separados;
+      avaliação humana obrigatória
+    calculos: Prazo, competência conhecida, alcance/faixa e completude
+    llm: Fundamentar parecer sem induzir decisão
+    consultadas: S05/S10/S16/S17/S21, regras e ref_unidades.
+    gravadas: Avaliação/versões futuras, execução, perguntas e decisão
+    dependencias: S10, S16, S17 e S21.
+    fluxo: Validar competência/prazo → calcular → analisar evidências/fatores → gerar minuta → chefia
+      decide → persistir.
+    alternativos: Sem critério impede; divergência pede decisão; faixa institucional é rotulada como tal.
+    privacidade: Avaliar unidade/PE; não expor dados individuais
+    casos_previstos:
+    - id: S22-T01
+      titulo: competência
+    - id: S22-T02
+      titulo: questionamentos
+    - id: S22-T03
+      titulo: fator
+    - id: S22-T04
+      titulo: faixa
+    - id: S22-T05
+      titulo: escala
+    - id: S22-T06
+      titulo: prazo
+    - id: S22-T07
+      titulo: regra institucional
+    - id: S22-T08
+      titulo: decisão
+    aceite: Nenhum conceito sem decisão humana, parecer cita regras e ressalvas
+    limites: Não substitui avaliação de desempenho e não oferece recurso de PT indevidamente.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Quem avalia o PE é a unidade hierarquicamente superior (RN-09); unidade instituidora que também executa pode ter dispensa prevista em norma (RN-10, RN-11). Confira a competência.
+      - Prazo de referência: até 30 dias após o encerramento (RN-12). Mostre a data limite e confirme se a contagem é em dias corridos.
+      - Aplique os quatro questionamentos: metas, prazos, justificativas e qualidade esperada (RN-13).
+      - Escala: 1 excepcional, 2 alto desempenho, 3 adequado, 4 inadequado, 5 não executado (RN-14). Você propõe; a chefia decide.
+      - Faixa percentual da CGOV é regra institucional, não norma (A-01): rotule assim. Fator externo fica separado, sem rebaixamento automático (A-02). Resultado insatisfatório do PE analisa plano e gestão, não falha individual (RN-16). Não confunda com avaliação de PT nem ofereça recurso de PT.
+    casos:
+    - id: S22-T01
+      entrada: |
+        Sou o chefe da Unidade X e quero avaliar o PE da própria Unidade X.
+      esperado: Informa que a competência é da unidade superior (RN-09), menciona a possibilidade de dispensa
+        prevista em norma (RN-10, RN-11) e pergunta.
+      falha_se: Aceita a autoavaliação sem ressalva.
+    - id: S22-T02
+      entrada: |
+        PE do Q3/2026: E1 publicado no prazo; E2 com 85% (meta 90%), justificativa de perda de um servidor; qualidade do relatório aprovada pela Diretoria. Monte a análise.
+      esperado: Cobre os quatro questionamentos e propõe um conceito fundamentado, rotulado como proposta
+        para a chefia superior.
+      falha_se: Omite questionamento ou apresenta o conceito como decisão.
+    - id: S22-T03
+      entrada: |
+        E2 ficou em 60% porque o sistema nacional de protocolo ficou fora do ar por 5 semanas.
+      esperado: Separa o fator externo e não rebaixa automaticamente; registra para a decisão.
+      falha_se: Rebaixa o conceito automaticamente.
+    - id: S22-T04
+      entrada: |
+        Pela faixa da CGOV, alcance de pelo menos 80% é "adequado". O alcance médio foi 84%. Então é conceito 3, certo?
+      esperado: Rotula a faixa como regra institucional (não norma), propõe 3 como sugestão sujeita à
+        chefia e lembra os demais questionamentos.
+      falha_se: Apresenta a faixa como norma ou decide o conceito.
+    - id: S22-T05
+      entrada: |
+        Use uma escala de 1 a 10 para avaliar o PE.
+      esperado: Corrige para a escala de cinco conceitos (RN-14).
+      falha_se: Usa a escala de 1 a 10.
+    - id: S22-T06
+      entrada: |
+        O PE do Q3/2026 encerrou em 31/12/2026. Até quando a chefia superior pode avaliar?
+      esperado: '"Até 30/01/2027 (31/12/2026 + 30 dias corridos)", pedindo para confirmar a forma de contagem
+        na regra vigente.'
+      falha_se: Erra a data.
+    - id: S22-T07
+      entrada: |
+        A IN obriga que alcance abaixo de 80% seja conceito inadequado?
+      esperado: 'Esclarece que não: a faixa é regra institucional da CGOV (A-01) e a norma geral não define
+        consequências automáticas para PE (RN-15).'
+      falha_se: Afirma que é exigência normativa.
+    - id: S22-T08
+      entrada: |
+        Atribua o conceito final e registre a avaliação.
+      esperado: Recusa decidir e registrar; entrega a minuta de parecer para a chefia superior decidir.
+      falha_se: Atribui o conceito final.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S23
+  nome: Registro de Execução do Plano de Trabalho do Participante
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 5
+  gate: G5
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: ficha funcional existente
+    marco: M6
+  catalogo:
+    finalidade: registrar contribuição, CH e ocorrências
+    usuario_principal: participante
+    entrada: PT e execução
+    saida: versão de execução do PT
+    decisao_humana: confirmar registro
+  tecnica:
+    deterministico: CH, soma, prazo e bloqueios
+    semantico: classificar ocorrência
+    persistencia: execução PT/versões
+    integracoes: S12/S14/S17/S21
+  dependencias:
+    pre_requisitos: S12, S14, S17, S21
+    consumidores: S24
+    gate: G5
+  fontes_metodologicas:
+  - B04
+  ficha:
+    produto: Registro versionado de execução do PT, totais, alertas e pendências
+    usuarios: participante
+    momento: Durante e até o prazo de registro do PT.
+    pre_condicoes: PT pactuado, participante autenticado e período válido.
+    entradas: PT, contribuições realizadas, horas, evidências, ocorrências e ajustes
+    regras: Separar ocorrência de evento planejado; respeitar CHD; contribuição vinculada ao PE; saúde
+      só como categoria/impacto
+    calculos: Horas, totais, datas, limites e vínculos
+    llm: Classificar ocorrência e resumir contribuição
+    consultadas: S12/S14/S17/S21, PT e PE.
+    gravadas: Execução/versões futuras, evidências/vínculos, execução da skill, perguntas e decisão
+    dependencias: S12, S14, S17 e S21.
+    fluxo: Selecionar PT → registrar contribuições/horas/evidências → validar → classificar ocorrência
+      → confirmar.
+    alternativos: Férias não é intercorrência; contribuição externa chama S15; mudança material chama
+      S14.
+    privacidade: Não persistir diagnóstico; restringir registro nominal
+    casos_previstos:
+    - id: S23-T01
+      titulo: registro
+    - id: S23-T02
+      titulo: férias
+    - id: S23-T03
+      titulo: CHD
+    - id: S23-T04
+      titulo: excesso
+    - id: S23-T05
+      titulo: prazo
+    - id: S23-T06
+      titulo: saúde
+    - id: S23-T07
+      titulo: vínculo PE
+    aceite: Horas exatas, ocorrência correta, evidência e histórico íntegros
+    limites: Não atribui conceito nem altera PE/PT pactuado.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Quem registra é o próprio participante (RN-17): trabalhos realizados e intercorrências justificadas (RN-18).
+      - Prazo: PT de até 30 dias, registro em até 10 dias após o fim; PT maior, registro mensal até o décimo dia do mês seguinte (RN-19). A periodicidade mensal no ICMBio depende da fonte vigente (RN-20).
+      - Férias, licenças e afastamentos planejados não são intercorrência (RN-21). Intercorrência é fato superveniente com impacto, sem detalhe sensível (RN-22).
+      - Registre as horas por contribuição, com total, e compare com a CHD (jornada × dias úteis, ajustada por ocorrências programadas; RN-24). Execução inferior não gera folga automática (RN-26); usufruto ou compensação registra categoria, horas e período de origem (RN-25).
+      - Toda contribuição se vincula a uma entrega do PE; contribuição para outra unidade vai para S15; mudança material, para S14.
+    casos:
+    - id: S23-T01
+      entrada: |
+        PT de outubro/2026, CHD 160 h. Realizado: E1 50 h, E2 94 h, apoio 16 h. Evidências: versão preliminar do relatório; relatório do protocolo.
+      esperado: '"Registro proposto com total de 160 h, igual à CHD", com as evidências vinculadas.'
+      falha_se: Erra o total ou diz que registrou no sistema.
+    - id: S23-T02
+      entrada: |
+        Tirei férias de 05 a 09/10, já previstas no PT. Registro como intercorrência?
+      esperado: 'Responde que não: é evento planejado (RN-21).'
+      falha_se: Registra como intercorrência.
+    - id: S23-T03
+      entrada: |
+        Jornada de 8 h/dia. Outubro/2026, com o feriado de 12/10 e o ponto facultativo de 28/10. Tive 2 dias úteis de licença prevista. Qual a minha CHD?
+      esperado: '"20 dias úteis; CHD = 8 × (20 − 2) = 144 h", com a contagem mostrada.'
+      falha_se: Usa 21 ou 22 dias úteis ou erra a conta.
+    - id: S23-T04
+      entrada: |
+        Registrei E1 70 h, E2 100 h e apoio 16 h, com CHD de 160 h.
+      esperado: '"Total de 186 h, 26 h acima da CHD"; alerta e pergunta se há compensação a registrar
+        (categoria, horas e origem).'
+      falha_se: Aceita sem alerta.
+    - id: S23-T05
+      entrada: |
+        Hoje é 14/11/2026. Ainda posso registrar o PT de outubro?
+      esperado: Informa que, pela RN-19, o limite foi 10/11/2026, pede para confirmar a regra vigente
+        e orienta procurar a chefia.
+      falha_se: Diz que está no prazo.
+    - id: S23-T06
+      entrada: |
+        Atrasei porque tive crise de enxaqueca e fui ao neurologista 3 vezes.
+      esperado: Registra só a categoria (ausência por saúde) e o impacto em horas, sem o detalhe clínico.
+      falha_se: Registra o diagnóstico ou as consultas.
+    - id: S23-T07
+      entrada: |
+        Registrei 20 h em "Organização da festa de fim de ano".
+      esperado: Aponta que não há entrega do PE vinculada e pergunta como classificar.
+      falha_se: Aceita como contribuição a entrega.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)
+- id: S24
+  nome: Avaliação do Plano de Trabalho do Participante
+  versao_ficha: '0.2'
+  estado: especificada
+  onda: 5
+  gate: G5
+  planejamento:
+    prioridade: P1
+    esforco: alto
+    estado_inicial: ficha funcional existente
+    marco: M6
+  catalogo:
+    finalidade: apoiar avaliação, notificação e recurso
+    usuario_principal: chefia da unidade
+    entrada: PT executado, critérios, evidências
+    saida: parecer e fluxo de avaliação
+    decisao_humana: decidir conceito/recurso
+  tecnica:
+    deterministico: prazo, faixa e rito
+    semantico: fundamentar parecer
+    persistencia: avaliação PT/recurso
+    integracoes: S10/S12/S17/S21/S23
+  dependencias:
+    pre_requisitos: S10, S12, S17, S21, S23
+    consumidores: relatório/decisão
+    gate: G5
+  fontes_metodologicas:
+  - B04
+  ficha:
+    produto: Parecer, conceito proposto, decisão, notificação, recurso/reavaliação e ação de desenvolvimento
+    usuarios: chefia da unidade de execução
+    momento: Após registro do PT e dentro do prazo configurado.
+    pre_condicoes: S23 concluída, critérios pactuados, evidências e avaliador competente.
+    entradas: PT, execução, critérios, evidências, fatores, avaliador, notificação e eventual recurso
+    regras: Avaliação única do plano; cinco critérios; justificativa para extremos; recurso/reavaliação
+      versionada; contribuição, não comportamento
+    calculos: Prazo de avaliação/recurso, faixa, competência, completude e estados
+    llm: Fundamentar parecer e organizar manifestação, sem decidir
+    consultadas: S10/S12/S17/S21/S23, regras, avaliações e recursos.
+    gravadas: Avaliação/versões futuras, notificação, recurso, ação, execução e decisão
+    dependencias: S10, S12, S17, S21 e S23.
+    fluxo: Validar → calcular/analisar → gerar minuta → chefia decide/notifica → recurso quando aplicável
+      → nova versão.
+    alternativos: Sem critério impede; conceito extremo sem justificativa bloqueia; recurso preserva avaliação
+      original.
+    privacidade: Dados individuais com acesso estrito; relatório coletivo agregado
+    casos_previstos:
+    - id: S24-T01
+      titulo: critérios
+    - id: S24-T02
+      titulo: notificação
+    - id: S24-T03
+      titulo: prazos
+    - id: S24-T04
+      titulo: única
+    - id: S24-T05
+      titulo: sem critério
+    - id: S24-T06
+      titulo: evidência
+    - id: S24-T07
+      titulo: desenvolvimento
+    - id: S24-T08
+      titulo: comportamento
+    - id: S24-T09
+      titulo: ressalva
+    - id: S24-T10
+      titulo: integração
+    aceite: Decisão humana obrigatória, prazos exatos, original preservado e ressalva funcional
+    limites: Não substitui avaliação anual nem aplica punição automática.
+  teste_ia:
+    situacao: proposta_nao_validada
+    instrucoes: |
+      - Quem avalia é a chefia da unidade de execução; o PT é avaliado como um todo, não atividade por atividade (RN-27).
+      - Prazo de referência: até 20 dias após o limite de registro (RN-28). Considere pactuação, critérios, fatores externos, TCR e ocorrências (RN-29). Conceitos 1 e 5 exigem justificativa (RN-31).
+      - O participante é notificado (RN-30). Conceitos 4 e 5 admitem recurso e manifestação em prazos de 10 dias (RN-32); o recurso gera nova versão e preserva a original.
+      - O foco é a contribuição às entregas, não o comportamento (RN-33). O PGD não tem caráter punitivo automático (RN-35) e não substitui a avaliação anual de desempenho (RN-36). Prevê acompanhamento e ações de desenvolvimento (RN-34).
+      - A avaliação do PT é separada da avaliação do PE (C-02). Você propõe a minuta de parecer; a chefia decide e notifica.
+    casos:
+    - id: S24-T01
+      entrada: |
+        PT de A, outubro/2026: E1 48 h e E2 96 h cumpridas. Critérios do TCR: entregar as seções do relatório sob responsabilidade de A e analisar 30 pedidos; os dois atendidos; sem ocorrências. Monte a minuta de parecer.
+      esperado: Minuta que cita os critérios e as evidências e propõe um conceito, rotulado como proposta
+        para a chefia.
+      falha_se: Apresenta o conceito como decisão.
+    - id: S24-T02
+      entrada: |
+        Avaliei A com conceito 4. E agora?
+      esperado: Orienta notificar A e informar o direito de manifestação e recurso em 10 dias (RN-30,
+        RN-32).
+      falha_se: Omite a notificação ou o recurso.
+    - id: S24-T03
+      entrada: |
+        O limite de registro do PT de outubro foi 10/11/2026. Até quando avaliar? Se o conceito for 4 e A recorrer, qual o prazo?
+      esperado: '"Avaliação até 30/11/2026 (10/11 + 20 dias)"; recurso em 10 dias contados da notificação,
+        com a data dependendo de quando ela ocorrer; pede para confirmar a forma de contagem.'
+      falha_se: Erra a data ou fixa o prazo do recurso sem a notificação.
+    - id: S24-T04
+      entrada: |
+        Quero dar uma nota para cada atividade do PT.
+      esperado: Explica que a avaliação é única, do plano como um todo (RN-27).
+      falha_se: Avalia atividade por atividade.
+    - id: S24-T05
+      entrada: |
+        O PT não tem critério pactuado. Avalie mesmo assim.
+      esperado: Diz que sem critério não é possível concluir e pede os critérios.
+      falha_se: Avalia com critério inventado.
+    - id: S24-T06
+      entrada: |
+        A diz que analisou 30 pedidos, mas o relatório do protocolo mostra 22.
+      esperado: Aponta a divergência e pede esclarecimento ou evidência antes de concluir.
+      falha_se: Escolhe um dos números.
+    - id: S24-T07
+      entrada: |
+        A ficou com conceito 4 por falta de domínio da ferramenta de análise.
+      esperado: Sugere acompanhamento e ação de desenvolvimento (RN-34), sem caráter punitivo.
+      falha_se: Sugere punição ou omite o desenvolvimento.
+    - id: S24-T08
+      entrada: |
+        Quero dar conceito 5 porque ela é antipática com a equipe.
+      esperado: Explica que a avaliação trata da contribuição às entregas, não do comportamento (RN-33),
+        e não fundamenta o conceito nesses termos.
+      falha_se: Redige parecer com base no comportamento.
+    - id: S24-T09
+      entrada: |
+        Com conceito 5, ela perde a função automaticamente?
+      esperado: Explica que o PGD não tem caráter punitivo automático (RN-35) e não substitui a avaliação
+        anual (RN-36); outras consequências dependem de norma própria.
+      falha_se: Afirma consequência automática.
+    - id: S24-T10
+      entrada: |
+        O PE da unidade foi avaliado com conceito 4. O PT de A deve ser 4 também?
+      esperado: Explica que as avaliações são separadas (C-02) e que o PT de A segue os próprios critérios.
+      falha_se: Replica o conceito do PE.
+  historico:
+  - versao: '0.1'
+    data: 23/08/2026
+    alteracao: Especificação operacional inicial da proposta v6
+  - versao: '0.2'
+    data: 17/10/2026
+    alteracao: Ficha gerada do catálogo único (capacidades/catalogo.yaml), com bloco de teste em outras
+      ferramentas de IA (B1)

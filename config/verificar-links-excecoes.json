@@ -1,1 +1,3 @@
-{}
+{
+  "capacidades/TEMPLATE_SKILL.md": "Modelo das fichas (DP-09): os links relativos resolvem em capacidades/fichas/, onde o gerador grava cada ficha; as fichas geradas são verificadas integralmente."
+}

@@ -9,7 +9,7 @@ propostas anteriores não são necessárias para desenvolver, testar ou operar o
 | Público | Ordem recomendada |
 | --- | --- |
 | Gestor ou patrocinador | proposta v6 → 01 → 04 → 08 |
-| Analista de negócio | proposta v6 → 03 → fichas em `capacidades/especificacoes` → 05 |
+| Analista de negócio | proposta v6 → 03 → fichas em `capacidades/fichas` → 05 |
 | Desenvolvedor | 02 → 03 → 05 → 07 |
 | Usuário iniciante | proposta v6 → 07 |
 | Auditor/LGPD | 06 → 08 → registro ativo de riscos |
@@ -33,7 +33,7 @@ propostas anteriores não são necessárias para desenvolver, testar ou operar o
 - [Validação do modelo comum](../../governanca-projeto/validacao-modelo-comum.md)
 - [Registro ativo de riscos](../../governanca-projeto/riscos.md)
 - [Índice do acervo PGD](../../referencias-pgd/README.md)
-- [Especificações S01–S24](../../../capacidades/especificacoes/README.md)
+- [Fichas S01–S24](../../../capacidades/fichas/README.md) (geradas de `capacidades/catalogo.yaml`)
 
 ## Regra de manutenção
 

@@ -33,7 +33,7 @@ operação estão no [portal da v6](README.md).
 2. Decisões de arquitetura registradas em ADR.
 3. Esta proposta.
 4. Capítulos vinculantes de `docs/agente/projeto-v6/`.
-5. Especificações de `capacidades/especificacoes/`.
+5. Fichas de `capacidades/fichas/`, geradas de `capacidades/catalogo.yaml`.
 6. Anexos técnicos aprovados.
 7. Registros ativos de fontes, riscos, validações, testes e atas.
 8. Artefatos metodológicos anteriores (componentes em `docs/agente/metodologia/`; documentos de trabalho
@@ -245,7 +245,7 @@ Detalhes: [arquitetura, tecnologia e dados](02-arquitetura-tecnologia-dados.md).
 
 O catálogo completo, os nomes canônicos e as dependências estão em
 [Catálogo S01–S24](03-catalogo-skills-s01-s24.md). As fichas operacionais
-ficam em [`capacidades/especificacoes/`](../../../capacidades/especificacoes/README.md).
+ficam em [`capacidades/fichas/`](../../../capacidades/fichas/README.md), geradas do catálogo único `capacidades/catalogo.yaml`.
 
 ## 9. Interfaces planejadas
 

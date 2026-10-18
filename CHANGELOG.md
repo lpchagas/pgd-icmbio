@@ -3,6 +3,29 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — catálogo único das capacidades e fichas de teste em outras IAs (B1, DP-09)
+
+- **Catálogo único:** `capacidades/catalogo.yaml` passa a ser a única fonte editável das
+  capacidades S01–S24. `tools/gerar_catalogo_capacidades.py` (`gerar` | `verificar`) produz as
+  fichas em `capacidades/fichas/`, a tabela S01–S24 do `capacidades/CATALOGO.md` e as tabelas
+  §3, §4, §5 e §7 do capítulo 03 da proposta do agente. O teste da suíte falha se algum
+  arquivo gerado divergir do YAML.
+- **Fichas:** as 24 fichas de `capacidades/especificacoes/` (SKILL_S01.md a SKILL_S24.md)
+  foram substituídas pelas de `capacidades/fichas/` (S01.md a S24.md, versão 0.2). As seções 1–27 foram regeneradas sem perda de
+  conteúdo (comparação byte a byte com as originais; só a linha em branco final foi
+  normalizada). O texto comum fica em `capacidades/TEMPLATE_SKILL.md`.
+- **Teste em outras ferramentas de IA:** cada ficha ganhou um prompt de sistema copiável,
+  casos sintéticos alinhados aos casos previstos da §23, três casos transversais (dado
+  sensível, pedido de decisão, consulta a sistema) e uma rubrica. O roteiro para Gemini,
+  ChatGPT, Claude e DeepSeek fica em `capacidades/fichas/COMO_TESTAR.md`. Os casos são
+  proposta, ainda não validada pela CGOV.
+- **Fonte canônica (DP-09):** `docs/agente/metodologia/` (B01–B04) é a base metodológica
+  canônica; `capacidades/prototipos-cowork/` é referência operacional, não canônica.
+- **Q9:** as seções de skills de `docs/agente/instrucoes-assistente-externo-v1.md` foram
+  conferidas com o catálogo e marcadas como resumo para Gem genérico, com apontamento para as
+  fichas.
+- **Dependência:** `PyYAML>=6` em `requirements-dev.txt`.
+
 ## 17.10.2026 — LLM em execução do agente (DP-08, ADR-014)
 
 - **ADR-014:** o servidor MCP local passa a ser a interface-base das ferramentas do

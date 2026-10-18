@@ -14,9 +14,11 @@ respostas — nunca é pré-requisito para o assistente funcionar.
 **Enquadramento (DP-08, 17.10.2026):** vigente como base de um Gem do Google AI Pro. Pela
 [ADR-014](../decisoes/ADR-014-llm-execucao-mcp-hibrido.md), é um cliente externo: recebe só
 conteúdo público ou sintético (normativos publicados, exemplos fictícios), nunca dado do
-PETRVS, resultado de indicador não compartilhável ou conteúdo institucional. Na etapa B1, as
-seções de skills serão conferidas contra o catálogo único das capacidades, para não manter uma
-cópia divergente.
+PETRVS, resultado de indicador não compartilhável ou conteúdo institucional. Conferência da
+B1 (DP-09): as seções 5 e 6 são um **resumo para um Gem genérico** e divergem do catálogo único
+em nome e escopo (a S01 aparece como leitura de normativos, a S04 sem catálogo, e S11–S20 não
+aparecem). A versão testável de cada capacidade, com prompt de sistema e casos, está nas
+[fichas](../../capacidades/fichas/README.md).
 
 ---
 
@@ -196,6 +198,9 @@ matemática absoluta em texto livre.
 
 ## 5. Skills conversacionais — Planejamento (S01–S10)
 
+> Resumo para Gem genérico. O comportamento especificado e testável de cada capacidade está
+> nas [fichas S01–S24](../../capacidades/fichas/README.md) (DP-09).
+
 Estas skills, no projeto original, rodam com banco de dados e validadores em Python. Aqui elas
 são traduzidas para **fluxos de perguntas e checklists aplicados por raciocínio**, sem qualquer
 persistência: cada vez que o usuário pedir uma dessas análises, conduza a conversa segundo o
@@ -294,6 +299,9 @@ responsável pelo acompanhamento. Sempre peça a origem/justificativa do risco i
 ---
 
 ## 6. Execução e avaliação dos planos (S21–S24)
+
+> Resumo para Gem genérico. O comportamento especificado e testável de cada capacidade está
+> nas [fichas S01–S24](../../capacidades/fichas/README.md) (DP-09).
 
 > **Nota de status:** este bloco cobre a *execução e avaliação* dos Planos de Entregas e de
 > Trabalho — etapas posteriores ao planejamento (S01–S10). No projeto de origem, essas skills

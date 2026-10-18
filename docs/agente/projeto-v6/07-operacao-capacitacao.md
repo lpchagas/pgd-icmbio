@@ -130,14 +130,16 @@ banco atual; testar preferencialmente em banco separado; validar migrações e c
 
 ## 13. T11 — criar ou revisar skill
 
-1. Copiar `capacidades/especificacoes/TEMPLATE_SKILL.md`.
+1. Acrescentar ou editar a entrada da skill em `capacidades/catalogo.yaml` (o texto comum
+   está em `capacidades/TEMPLATE_SKILL.md`).
 2. Usar ID não reutilizado.
 3. Preencher objetivo, entradas, saídas, regras e limites.
-4. Vincular fontes e dependências.
-5. Criar exemplos e testes antes do código.
+4. Vincular fontes metodológicas e dependências.
+5. Criar exemplos e testes antes do código, inclusive os casos de teste em outras
+   ferramentas de IA (`teste_ia`).
 6. Separar cálculo de inferência.
 7. Revisar privacidade.
-8. Atualizar catálogo e cronograma.
+8. Rodar `python -m tools.gerar_catalogo_capacidades gerar` e atualizar o cronograma.
 
 ## 14. T12 — segurança antes de publicar
 

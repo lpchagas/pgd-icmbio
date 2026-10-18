@@ -9,7 +9,7 @@ planejamento, pactuação, execução, avaliação e aprendizagem.
 - [Proposta de projeto v6](projeto-v6/00_proposta-projeto-v6.md) — visão completa e normativa.
 - [Portal da v6](projeto-v6/README.md) — capítulos por público e assunto.
 - [Catálogo S01–S24](projeto-v6/03-catalogo-skills-s01-s24.md).
-- [Especificações das skills](../../capacidades/especificacoes/README.md).
+- [Fichas das skills S01–S24](../../capacidades/fichas/README.md), geradas do [catálogo único](../../capacidades/catalogo.yaml).
 - [Protótipos Cowork da CGOV, versionados](../../capacidades/prototipos-cowork/README.md).
 - [AT-01 — PETRVS/MySQL](../dados-petrvs/esquema-mysql-agente.md).
 - [AT-02 — recursos e local-first](recursos-local-first.md).

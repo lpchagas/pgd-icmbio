@@ -25,6 +25,10 @@ máquina.
 Estas cópias são **referência versionada**, não a instalação ativa. Para
 atualizar o comportamento no Cowork, ressincronize a partir daqui.
 
+**Precedência (DP-09):** os protótipos não são fonte canônica. A base metodológica é
+`docs/agente/metodologia/` (B01–B04), e o comportamento especificado das capacidades está no
+[catálogo único](../catalogo.yaml). Em conflito, prevalecem a metodologia e as RN.
+
 ## Correção aplicada em 14.09.2026
 
 As três cópias trazem uma nota de correção ao final. Em resumo: `Q1/Q2/Q3`

@@ -10,7 +10,7 @@ ainda não estar aprovada. Regras de negócio são aceitas por pessoas competent
 
 | Passo | Responsabilidade | Artefato | Critério de saída |
 | ---: | --- | --- | --- |
-| 1. Especificar | produto/analista | ficha `SKILL_Sxx.md` | objetivo, entradas, saídas e limites claros |
+| 1. Especificar | produto/analista | entrada em `capacidades/catalogo.yaml` (ficha gerada) | objetivo, entradas, saídas e limites claros |
 | 2. Formalizar regras | analista | RN, fonte e vigência | conflito e autoridade identificados |
 | 3. Anotar exemplos | analista/usuário | conjunto de exemplos | cobertura de situações típicas e críticas |
 | 4. Desenhar testes | analista+desenvolvedor | casos identificados | esperado verificável |
