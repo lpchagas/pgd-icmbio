@@ -150,11 +150,6 @@ desktop.ini
 $RECYCLE.BIN/
 
 # -----------------------------------------------------------------------------
-# Documentos de planejamento interno (arquitetura, roadmap, decisões técnicas)
-# -----------------------------------------------------------------------------
-plano_estrutura_projeto.md
-
-# -----------------------------------------------------------------------------
 # Análises e iniciativas internas CGOV (privadas — OneDrive, nunca GitHub)
 # O diretório cgov/ é acessado via Junction apontando para o OneDrive.
 # docs/cgov/ permanece público (apenas README placeholder sem análises).
