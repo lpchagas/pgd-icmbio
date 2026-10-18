@@ -1,17 +1,18 @@
-# Portal documental da proposta v6
+# Portal documental da proposta v7
 
 Este diretório reúne os capítulos vinculantes da
 [`00_proposta-projeto-v7.md`](00_proposta-projeto-v7.md). O conjunto é autocontido: as
-propostas anteriores não são necessárias para desenvolver, testar ou operar o projeto.
+propostas anteriores não são necessárias para desenvolver, testar ou operar o agente. O
+que mudou da v6 para a v7 está no [capítulo 09](09-memoria-evolucao.md#8-da-v6-para-a-v7).
 
 ## Trilha rápida por público
 
 | Público | Ordem recomendada |
 | --- | --- |
-| Gestor ou patrocinador | proposta v6 → 01 → 04 → 08 |
-| Analista de negócio | proposta v6 → 03 → fichas em `capacidades/fichas` → 05 |
+| Gestor ou patrocinador | proposta v7 → 01 → 04 → 08 |
+| Analista de negócio | proposta v7 → 03 → fichas em `capacidades/fichas` → 05 |
 | Desenvolvedor | 02 → 03 → 05 → 07 |
-| Usuário iniciante | proposta v6 → 07 |
+| Usuário iniciante | proposta v7 → 07 |
 | Auditor/LGPD | 06 → 08 → registro ativo de riscos |
 
 ## Capítulos
@@ -29,9 +30,12 @@ propostas anteriores não são necessárias para desenvolver, testar ou operar o
 ## Fontes complementares vigentes
 
 - [AT-01 — análise PETRVS e esquema MySQL](../../dados-petrvs/esquema-mysql-agente.md)
+- [AT-02 — recursos e arquitetura local-first](../recursos-local-first.md)
+- [ADR-014 — servidor MCP local e arranjo híbrido](../../decisoes/ADR-014-llm-execucao-mcp-hibrido.md)
 - [Fontes institucionais e Q5](../../governanca-projeto/fontes-institucionais.md)
 - [Validação do modelo comum](../../governanca-projeto/validacao-modelo-comum.md)
 - [Registro ativo de riscos](../../governanca-projeto/riscos.md)
+- [Banco local do agente](../../ambiente/banco-local-agente.md)
 - [Índice do acervo PGD](../../referencias-pgd/README.md)
 - [Fichas S01–S24](../../../capacidades/fichas/README.md) (geradas de `capacidades/catalogo.yaml`)
 
@@ -39,7 +43,10 @@ propostas anteriores não são necessárias para desenvolver, testar ou operar o
 
 - Atualize a fonte principal do assunto; nos demais documentos, use links e resumos.
 - Não transforme questão aberta em decisão.
-- Não descreva estado-alvo como estado atual.
-- Ao mudar uma skill, atualize sua ficha, o catálogo e o cronograma quando afetado.
-- Ao mudar arquitetura, registre ou revise um ADR.
+- Não descreva estado-alvo como estado atual; date o estado atual.
+- Ao mudar uma skill, edite `capacidades/catalogo.yaml`, rode o gerador e atualize o
+  cronograma quando afetado. As tabelas geradas do capítulo 03 não se editam à mão.
+- Ao mudar arquitetura, registre ou revise uma ADR.
 - Ao mudar regra institucional, registre fonte, vigência e validação humana.
+- Uma nova versão da proposta muda a pasta por `git mv` e registra a evolução no
+  capítulo 09, sem páginas-ponte.

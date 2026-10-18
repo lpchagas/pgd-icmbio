@@ -2,7 +2,7 @@
 
 **Data:** registrada na proposta v2, reafirmada em v3 e v4 | **Estado:** aprovada, vigente
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos vigentes:** [Proposta v6](../agente/projeto-v7/00_proposta-projeto-v7.md) e
+**Documentos vigentes:** [Proposta v7](../agente/projeto-v7/00_proposta-projeto-v7.md) e
 [arquitetura](../agente/projeto-v7/02-arquitetura-tecnologia-dados.md)
 
 > **Nota de reconstrução:** este ADR formaliza uma restrição de governança já registrada

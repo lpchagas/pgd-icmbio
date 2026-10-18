@@ -177,8 +177,9 @@ consolidam qualidade e aprendizagem; S21–S24 executam e avaliam.
 - Uma skill referencia objetos persistentes; não recria cópias.
 - Cálculos, prazos e totalizações têm 100% de exatidão nos casos definidos.
 - Classificação semântica expõe confiança e permite revisão.
-- Saída cita regra e fonte.
+- Saída cita regra e fonte e leva a classe do dado, para o gate do servidor MCP.
 - Decisão humana não é preenchida pelo modelo.
+- Indicador vem do A2 certificado do piloto; a skill não o recalcula nem soma pilotos.
 - Dado ausente produz pergunta pendente.
 - Dados de saúde não são persistidos em texto livre.
 - Relatórios não criam ranking individual.
@@ -195,9 +196,15 @@ sem retroceder evidências técnicas já concluídas.
 ## 10. Fonte operacional
 
 Consulte [`capacidades/fichas/README.md`](../../../capacidades/fichas/README.md) e a fonte única
-[`capacidades/catalogo.yaml`](../../../capacidades/catalogo.yaml). Os documentos
-`skills/01` a `skills/05` continuam como insumos metodológicos e históricos, mas não
-prevalecem sobre este catálogo e as fichas v6.
+[`capacidades/catalogo.yaml`](../../../capacidades/catalogo.yaml). Cada ficha traz, além das
+características (seções 1–27), um prompt de sistema e casos sintéticos para teste em outras
+ferramentas de IA, ainda não validados pela CGOV
+([roteiro](../../../capacidades/fichas/COMO_TESTAR.md)).
+
+A base metodológica canônica é `docs/agente/metodologia/` (B01–B04); os protótipos de
+`capacidades/prototipos-cowork/` são referência operacional, não canônica (DP-09). Os
+documentos de trabalho antigos (`01_` a `05_`) foram retirados da árvore e não prevalecem
+sobre este catálogo e as fichas.
 
 ## 11. Regras RN-01–RN-36 de execução e avaliação
 

@@ -3,6 +3,26 @@
 Mudanças de estrutura e de uso do repositório. As mudanças metodológicas dos
 indicadores seguem registradas nas fichas e no protocolo de validação.
 
+## 17.10.2026 — proposta do agente v7 (B1)
+
+- **Pasta:** em `docs/agente/`, `projeto-v6/` passa a `projeto-v7/` por `git mv`, e
+  `00_proposta-projeto-v6.md` passa a `00_proposta-projeto-v7.md`; o histórico de cada
+  capítulo segue com `git log --follow`. Sem páginas-ponte: os links do repositório
+  apontam para a v7.
+- **Texto (revisão integral):** Claude Code e Antigravity como ferramentas de
+  desenvolvimento (ADR-013); servidor MCP local como interface-base, gate de classe de
+  dado e Ollama para o institucional comum (ADR-014); indicadores lidos dos A2
+  certificados, sem recálculo; cronograma C01–C52 deslocado nove semanas
+  (02/11/2026–29/10/2028), com reservas de fim de ano em C05 e C31; estado atual datado
+  de 17/10/2026 (monorepo, WSL, timer de backup, instância isolada, indicadores
+  homologados, catálogo único). O capítulo 07 foi reescrito para o WSL.
+- **Capítulo 09:** nova seção "Da v6 para a v7" com as mudanças por tema.
+- **Riscos:** RP34–RP36 (fornecedor único no desenvolvimento, vazamento pelo cliente
+  externo, hardware do modelo local); RP01 encerrado, porque o Azure saiu do planejamento
+  (ADR-014).
+- **Gerador do catálogo:** sem alteração; o padrão `projeto-v*/` já encontra o capítulo 03
+  da v7. Só o caminho fixo do teste foi atualizado.
+
 ## 17.10.2026 — catálogo único das capacidades e fichas de teste em outras IAs (B1, DP-09)
 
 - **Catálogo único:** `capacidades/catalogo.yaml` passa a ser a única fonte editável das

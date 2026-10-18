@@ -8,7 +8,7 @@
 
 Nove documentos de trabalho, vindos do repositório do agente, ficaram numa pasta
 intermediária (`agente/`) durante a reorganização. Seu conteúdo **vigente** foi consolidado
-na [proposta v6](../agente/projeto-v7/00_proposta-projeto-v7.md), no
+na proposta v6, hoje [v7](../agente/projeto-v7/00_proposta-projeto-v7.md), no
 [catálogo S01–S24](../agente/projeto-v7/03-catalogo-skills-s01-s24.md) e nas
 [fichas das capacidades](../../capacidades/fichas/README.md). Por isso, eles saíram
 da árvore ativa.
@@ -20,7 +20,7 @@ continua recuperável, exatamente como estava, na versão `78e496b`:
 git show 78e496b:agente/skills/05_plano-skills-execucao-avaliacao_v1.md
 ```
 
-Recuperar um documento não o torna vigente: em caso de divergência, prevalecem a proposta v6
+Recuperar um documento não o torna vigente: em caso de divergência, prevalecem a proposta v7
 e as fichas.
 
 ## 2. Regras RN-01 a RN-36 — destino
@@ -30,7 +30,7 @@ Todas as 36 regras de execução e avaliação estão na
 associadas à capacidade que as aplica. A coluna **Fonte** preserva a origem normativa
 registrada no plano de execução e avaliação (siglas na §3).
 
-| RN | Regra (texto vigente na v6) | Capacidade | Fonte | Bloco de origem |
+| RN | Regra (texto vigente na v7) | Capacidade | Fonte | Bloco de origem |
 | --- | --- | --- | --- | --- |
 | RN-01 | A chefia da unidade registra a execução do PE | S21 | D1 §1.2 | Execução do Plano de Entregas (S21) |
 | RN-02 | O registro descreve evolução das entregas e ocorrências de impacto | S21 | D1 §1.2 | Execução do Plano de Entregas (S21) |
@@ -112,5 +112,5 @@ o conteúdo deve ser revisto e levado à ficha correspondente.
 | --- | --- |
 | `78e496b:agente/docs/README.md` (portal do repositório do agente) | [Portal do agente](../agente/README.md) e [README do projeto](../../README.md) |
 | `78e496b:agente/docs/tecnologia/referencia-pgd-ocde-icmbio.md` (resumo do projeto analítico para o agente) | Desnecessário no monorepo: fichas em [docs/ocde](../ocde/06-indicadores-ocde-denodo.md), regras de VQL nas instruções comuns (`CLAUDE.md`) e na [estrutura do banco](../dados-petrvs/estrutura-banco-dados.md) |
-| `78e496b:agente/docs/gestao/historico-evolucao-projeto.md` (página de compatibilidade) | [Memória e evolução v1→v6](../agente/projeto-v7/09-memoria-evolucao.md) e [marcos do projeto](../projeto/visao-geral.md#8-marcos) |
+| `78e496b:agente/docs/gestao/historico-evolucao-projeto.md` (página de compatibilidade) | [Memória e evolução v1→v7](../agente/projeto-v7/09-memoria-evolucao.md) e [marcos do projeto](../projeto/visao-geral.md#8-marcos) |
 | `78e496b:agente/docs/gestao/historico/prompt-planejamento-inicial-v1.md` (prompt que originou o projeto do agente) | Histórico; superado pela v6 |

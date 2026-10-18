@@ -3,7 +3,7 @@
 **Última revisão:** 23.08.2026
 **Origem histórica:** glossário da segunda revisão, extraído em 23.08.2026 para ficar em arquivo próprio,
 ao lado do glossário institucional, e ser mais fácil de encontrar.
-**Vínculo v6:** [Portal documental](../agente/projeto-v7/README.md)
+**Vínculo v7:** [Portal documental](../agente/projeto-v7/README.md)
 
 > [!NOTE]
 > **Distinto do glossário institucional** em

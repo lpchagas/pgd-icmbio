@@ -1,6 +1,6 @@
 # Matriz de riscos — pgd-agente-icmbio
 
-**Última revisão de status:** 23.08.2026
+**Última revisão de status:** 17.10.2026 (RP01 e RP34–RP36, com a proposta v7)
 
 > Este é o registro ativo vinculado à [`00_proposta-projeto-v7.md`](../agente/projeto-v7/00_proposta-projeto-v7.md).
 > A v6 consolidou RP01–RP24 e acrescentou os riscos do desenvolvimento individual,
@@ -10,7 +10,7 @@
 
 | ID | Risco | Probabilidade | Impacto | Mitigação | Responsável | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| RP01 | Provisionamento Azure/Connector atrasar e travar I7 | Alta | Alto | Processo com TI iniciado em I6; Streamlit como plano B | Coordenador | Aberto |
+| RP01 | Provisionamento Azure/Connector atrasar e travar I7 | Alta | Alto | Processo com TI iniciado em I6; Streamlit como plano B | Coordenador | Encerrado em 17.10.2026: Azure saiu do planejamento ([ADR-014](../decisoes/ADR-014-llm-execucao-mcp-hibrido.md)); adoção institucional segue no RP32 |
 | RP02 | Agente alucinar números ou regras | Média | Alto | Indicadores só via tool calling; toda regra com fonte/localização; RAG em camadas; allowlist aprovada na Q5; OCR normativo revisado; confiança explícita; validação humana em baixa confiança | Coordenador | Mitigado parcial (arquitetura e classificação documentadas; corpus e Q5 pendentes) |
 | RP03 | Confusão entre norma e recomendação (PA3) | Alta | Alto | Natureza da regra é campo obrigatório (`ENUM` no banco); precedência e matriz fonte a fonte em `fontes-institucionais.md`; teste S01-T04 | Analistas | Mitigado parcial (schema e proposta; aprovação Q5 pendente) |
 | RP04 | Meta confundir esforço com resultado; meta × progresso (PA1) | Alta | Alto | Campos distintos `meta`/`meta_final` no esquema + validador; teste S05-T04 | Analistas | Mitigado (schema) |
@@ -61,3 +61,11 @@ a fundação.
 | RP31 | Conteúdo institucional ser enviado a API gratuita | Média | Alto | externo somente público/sintético; processamento institucional local; teste SEC | Coordenador | Aberto |
 | RP32 | Protótipo pessoal ser publicado sem controles institucionais | Baixa | Alto | separar estágios; exigir autorização, identidade, suporte, licença e segurança | Autoridade/TI | Aberto |
 | RP33 | Mudança normativa durante os 24 meses invalidar regras | Alta | Alto | revisão trimestral/por evento, vigência e reexecução de testes | Analistas | Aberto |
+
+## Riscos incorporados na v7 — arranjo híbrido com MCP local (17.10.2026)
+
+| ID | Risco | Probabilidade | Impacto | Mitigação | Responsável | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| RP34 | Dependência de um só fornecedor (Claude Code) no desenvolvimento | Média | Médio | Antigravity como segunda ferramenta, com instruções sincronizadas (ADR-013); contratos e servidor MCP independentes do fornecedor (ADR-004, ADR-014) | Coordenador | Mitigado no planejamento |
+| RP35 | Dado institucional chegar ao cliente externo pelo servidor MCP | Média | Alto | Gate de classe no servidor, `classe_dado` em toda resposta, teste negativo SEC no G0 e em cada gate, log sem conteúdo (ADR-014) | Coordenador | Aberto (planejado — C03) |
+| RP36 | Hardware local insuficiente para o modelo local (Ollama) | Média | Médio | Spike no C04; fallback: o institucional fica só nas ferramentas determinísticas, sem redação por LLM | Coordenador | Aberto (spike no C04) |
