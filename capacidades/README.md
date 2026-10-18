@@ -5,7 +5,7 @@
 O catálogo das capacidades S01–S24 tem uma **única fonte editável**:
 [`catalogo.yaml`](catalogo.yaml) (DP-09). Dela, `tools/gerar_catalogo_capacidades.py` gera as
 [fichas](fichas/README.md), a tabela de capacidades do [`CATALOGO.md`](CATALOGO.md) e as tabelas
-do [capítulo 03 da proposta](../docs/agente/projeto-v6/03-catalogo-skills-s01-s24.md). Os
+do [capítulo 03 da proposta](../docs/agente/projeto-v7/03-catalogo-skills-s01-s24.md). Os
 protótipos que hoje operam no Cowork da CGOV, e que S21–S24 pretendem substituir, estão
 versionados em [`prototipos-cowork/`](prototipos-cowork/README.md).
 

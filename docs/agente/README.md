@@ -6,9 +6,9 @@ planejamento, pactuação, execução, avaliação e aprendizagem.
 
 ## Documentação vigente
 
-- [Proposta de projeto v6](projeto-v6/00_proposta-projeto-v6.md) — visão completa e normativa.
-- [Portal da v6](projeto-v6/README.md) — capítulos por público e assunto.
-- [Catálogo S01–S24](projeto-v6/03-catalogo-skills-s01-s24.md).
+- [Proposta de projeto v6](projeto-v7/00_proposta-projeto-v7.md) — visão completa e normativa.
+- [Portal da v6](projeto-v7/README.md) — capítulos por público e assunto.
+- [Catálogo S01–S24](projeto-v7/03-catalogo-skills-s01-s24.md).
 - [Fichas das skills S01–S24](../../capacidades/fichas/README.md), geradas do [catálogo único](../../capacidades/catalogo.yaml).
 - [Protótipos Cowork da CGOV, versionados](../../capacidades/prototipos-cowork/README.md).
 - [AT-01 — PETRVS/MySQL](../dados-petrvs/esquema-mysql-agente.md).
@@ -16,7 +16,7 @@ planejamento, pactuação, execução, avaliação e aprendizagem.
 - [ADRs](../decisoes/) e [riscos](../governanca-projeto/riscos.md).
 
 As propostas anteriores foram consolidadas na v6 e removidas da árvore ativa. A evolução
-está resumida em [Memória e evolução](projeto-v6/09-memoria-evolucao.md) e permanece
+está resumida em [Memória e evolução](projeto-v7/09-memoria-evolucao.md) e permanece
 recuperável no histórico do Git.
 
 ## Estado atual
@@ -67,7 +67,7 @@ ver [Banco local do agente](../ambiente/banco-local-agente.md).
 ## Estrutura
 
 ```text
-docs/projeto-v6/             Proposta v6 (00_, normativa) e nove capítulos vinculantes
+docs/projeto-v7/             Proposta v6 (00_, normativa) e nove capítulos vinculantes
 docs/gestao/                 Fontes, glossários, riscos, decisões e validações
 docs/tecnologia/             AT-01, AT-02 e referências técnicas
 docs/referencias-pgd/        Acervo local; somente README é versionado
@@ -89,4 +89,4 @@ data/                        Artefatos locais ignorados
 - Não criar commit ou push sem revisão do estado e dos commits de saída.
 
 Para instalação, Git, API, Denodo, RAG, backup e diagnóstico, consulte
-[Operação e capacitação](projeto-v6/07-operacao-capacitacao.md).
+[Operação e capacitação](projeto-v7/07-operacao-capacitacao.md).

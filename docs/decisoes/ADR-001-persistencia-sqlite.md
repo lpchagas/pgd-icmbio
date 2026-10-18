@@ -2,7 +2,7 @@
 
 **Data:** registrada na proposta v3 | **Estado:** **substituída** por [ADR-006](ADR-006-persistencia-mysql.md) em 26.07.2026
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos vigentes:** [Memória de evolução](../agente/projeto-v6/09-memoria-evolucao.md) e ADR-006
+**Documentos vigentes:** [Memória de evolução](../agente/projeto-v7/09-memoria-evolucao.md) e ADR-006
 
 > **Nota de reconstrução:** este ADR foi formalizado a partir do texto já registrado na
 > proposta v3 (não é uma decisão nova). O ADR-006 já citava "ADR-001" como a decisão

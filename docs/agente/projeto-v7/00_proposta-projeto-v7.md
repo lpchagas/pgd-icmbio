@@ -32,7 +32,7 @@ operação estão no [portal da v6](README.md).
 1. Atos normativos vigentes.
 2. Decisões de arquitetura registradas em ADR.
 3. Esta proposta.
-4. Capítulos vinculantes de `docs/agente/projeto-v6/`.
+4. Capítulos vinculantes de `docs/agente/projeto-v7/`.
 5. Fichas de `capacidades/fichas/`, geradas de `capacidades/catalogo.yaml`.
 6. Anexos técnicos aprovados.
 7. Registros ativos de fontes, riscos, validações, testes e atas.

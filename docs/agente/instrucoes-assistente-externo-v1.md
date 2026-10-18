@@ -420,7 +420,7 @@ mensagem:
 Documento gerado a partir do projeto `pgd-agente-icmbio` (ICMBio), com base em: `skills/00_*.md`
 (B01–B04), os documentos de trabalho 02 a 05 do agente e o resumo do projeto analítico (retirados
 da árvore no L4f; ver [cobertura dos requisitos](../governanca-projeto/cobertura-requisitos.md)),
-`docs/agente/projeto-v6/00_proposta-projeto-v6.md` e
+`docs/agente/projeto-v7/00_proposta-projeto-v7.md` e
 `docs/decisoes/ADR-002-denodo-somente-leitura.md` e `docs/decisoes/ADR-006-persistencia-mysql.md`.
 
 Para atualizar: revisar esta versão sempre que a metodologia do PGD, a IN nº 24/2023 ou os

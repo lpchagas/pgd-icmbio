@@ -43,5 +43,5 @@ institucional.
 ## Referências
 
 - [AT-02](../agente/recursos-local-first.md)
-- [Cronograma](../agente/projeto-v6/04-cronograma-capacidade-marcos.md)
-- [Segurança e fontes](../agente/projeto-v6/06-seguranca-privacidade-fontes.md)
+- [Cronograma](../agente/projeto-v7/04-cronograma-capacidade-marcos.md)
+- [Segurança e fontes](../agente/projeto-v7/06-seguranca-privacidade-fontes.md)

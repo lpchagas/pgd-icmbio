@@ -2,7 +2,7 @@
 
 **Data:** registrada nas revisões iniciais | **Estado:** princípio vigente; estratégia de custo revisada pelo ADR-008; revisada pela [ADR-014](ADR-014-llm-execucao-mcp-hibrido.md) (DP-08)
 **Decisor:** Coordenador do projeto (Leandro)
-**Documentos vigentes:** [Proposta v6](../agente/projeto-v6/00_proposta-projeto-v6.md),
+**Documentos vigentes:** [Proposta v6](../agente/projeto-v7/00_proposta-projeto-v7.md),
 [AT-02](../agente/recursos-local-first.md), ADR-008 e ADR-014
 
 > [!IMPORTANT]

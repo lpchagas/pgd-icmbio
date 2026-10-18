@@ -8,8 +8,8 @@
 
 Nove documentos de trabalho, vindos do repositório do agente, ficaram numa pasta
 intermediária (`agente/`) durante a reorganização. Seu conteúdo **vigente** foi consolidado
-na [proposta v6](../agente/projeto-v6/00_proposta-projeto-v6.md), no
-[catálogo S01–S24](../agente/projeto-v6/03-catalogo-skills-s01-s24.md) e nas
+na [proposta v6](../agente/projeto-v7/00_proposta-projeto-v7.md), no
+[catálogo S01–S24](../agente/projeto-v7/03-catalogo-skills-s01-s24.md) e nas
 [fichas das capacidades](../../capacidades/fichas/README.md). Por isso, eles saíram
 da árvore ativa.
 
@@ -26,7 +26,7 @@ e as fichas.
 ## 2. Regras RN-01 a RN-36 — destino
 
 Todas as 36 regras de execução e avaliação estão na
-[§11 do catálogo S01–S24](../agente/projeto-v6/03-catalogo-skills-s01-s24.md#11-regras-rn-01rn-36-de-execução-e-avaliação),
+[§11 do catálogo S01–S24](../agente/projeto-v7/03-catalogo-skills-s01-s24.md#11-regras-rn-01rn-36-de-execução-e-avaliação),
 associadas à capacidade que as aplica. A coluna **Fonte** preserva a origem normativa
 registrada no plano de execução e avaliação (siglas na §3).
 
@@ -112,5 +112,5 @@ o conteúdo deve ser revisto e levado à ficha correspondente.
 | --- | --- |
 | `78e496b:agente/docs/README.md` (portal do repositório do agente) | [Portal do agente](../agente/README.md) e [README do projeto](../../README.md) |
 | `78e496b:agente/docs/tecnologia/referencia-pgd-ocde-icmbio.md` (resumo do projeto analítico para o agente) | Desnecessário no monorepo: fichas em [docs/ocde](../ocde/06-indicadores-ocde-denodo.md), regras de VQL nas instruções comuns (`CLAUDE.md`) e na [estrutura do banco](../dados-petrvs/estrutura-banco-dados.md) |
-| `78e496b:agente/docs/gestao/historico-evolucao-projeto.md` (página de compatibilidade) | [Memória e evolução v1→v6](../agente/projeto-v6/09-memoria-evolucao.md) e [marcos do projeto](../projeto/visao-geral.md#8-marcos) |
+| `78e496b:agente/docs/gestao/historico-evolucao-projeto.md` (página de compatibilidade) | [Memória e evolução v1→v6](../agente/projeto-v7/09-memoria-evolucao.md) e [marcos do projeto](../projeto/visao-geral.md#8-marcos) |
 | `78e496b:agente/docs/gestao/historico/prompt-planejamento-inicial-v1.md` (prompt que originou o projeto do agente) | Histórico; superado pela v6 |

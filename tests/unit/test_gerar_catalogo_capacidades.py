@@ -14,7 +14,7 @@ from tools import gerar_catalogo_capacidades as g
 pytestmark = pytest.mark.unit
 
 RAIZ = g.PROJECT_ROOT
-CAP03 = "docs/agente/projeto-v6/03-catalogo-skills-s01-s24.md"
+CAP03 = "docs/agente/projeto-v7/03-catalogo-skills-s01-s24.md"
 
 
 @pytest.fixture
